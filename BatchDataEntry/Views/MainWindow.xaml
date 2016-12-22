@@ -3,14 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:BatchDataEntry.ViewModels"
+        xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
         xmlns:local="clr-namespace:BatchDataEntry"
         mc:Ignorable="d"
-        Title="Batch" Height="350" Width="525">
+        Title="Batch" 
+        Height="465" 
+        Width="566.15"
+        MinWidth="560"
+        MaxWidth="560"
+        DataContext="{DynamicResource ViewModelMain }">
+    <Window.Resources>
+        <vm:ViewModelMain x:Key="ViewModelMain"/>
+    </Window.Resources>
 
     <Grid HorizontalAlignment="Left">
-        <ListBox x:Name="listBox" HorizontalAlignment="Left" Height="299" Margin="10,10,0,0" VerticalAlignment="Top" Width="286"/>
-        <Button x:Name="button" Content="Nuovo Batch" Height="21" Margin="308,11,133,287" Width="76"/>
-        <Button x:Name="button_Copy" Content="Continua" Height="21" Margin="308,53,133,245" Width="76"/>
-        <Button x:Name="button_Copy1" Content="Elimina" Height="21" Margin="308,95,133,203" Width="76"/>
+        <DockPanel LastChildFill="True">
+            <ListBox x:Name="listBoxBatches" Margin="10,10,0,8" Width="286" DockPanel.Dock="Left" ItemsSource="{Binding Batches}" SelectedItem="{Binding SelectedBatch, Mode=TwoWay}" DisplayMemberPath="Nome"/>
+            <StackPanel DockPanel.Dock="Right" Width="230" Margin="20,10,0,10" HorizontalAlignment="Right">
+                <Button x:Name="buttonNewBatch" Click="buttonNewBatch_Click" Content="Nuovo Batch" Height="21" Margin="0,20,0,0" Width="76"/>
+                <Button x:Name="buttonResumeBatch" Click="buttonResumeBatch_Click"  Content="Continua" Height="21" Margin="0,20,0,0" Width="76"/>
+                <Button x:Name="buttonDeleteBatch" Click="buttonDeleteBatch_Click"  Content="Elimina" Height="21" Margin="0,20,0,0" Width="76"/>
+            </StackPanel>
+        </DockPanel>
     </Grid>
 </Window>
