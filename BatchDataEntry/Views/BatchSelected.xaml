@@ -1,0 +1,36 @@
+﻿<Window x:Class="BatchDataEntry.Views.BatchSelected"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BatchDataEntry.Views"
+        mc:Ignorable="d"
+        Title="Batch Selected" Height="314.775" Width="350.107">
+    <Grid>
+        <DockPanel LastChildFill="True" VerticalAlignment="Top">
+            <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+                <StackPanel Height="255" Width="173" DockPanel.Dock="Left">
+                    <DataGrid x:Name="dataGridRecords" VerticalAlignment="Top" Height="220" Margin="0,5,0,0"/>
+                    <WrapPanel Height="19" VerticalAlignment="Bottom" Margin="5,0,0,0" HorizontalAlignment="Right">
+                        <Button x:Name="buttonModificaGridRecords" Content="Modifica" Width="50" FontSize="8" Margin="0,5,10,0"/>
+                        <Button x:Name="buttonEliminaGridRecords" Content="Elimina" Width="50" FontSize="8" Margin="0,5,0,0"/>
+                    </WrapPanel>
+
+                </StackPanel>
+                <StackPanel Height="90" Width="157" DockPanel.Dock="Right" Margin="10,0,0,0" VerticalAlignment="Top">
+                    <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Numero documenti: " FontSize="11"/>
+                    <TextBlock x:Name="textBlock_Copy" TextWrapping="Wrap" Text="Numero pagine:" FontSize="11"/>
+                    <TextBlock x:Name="textBlock_Copy1" TextWrapping="Wrap" Text="Dimensione:" FontSize="11"/>
+                    <TextBlock x:Name="textBlock_Copy2" TextWrapping="Wrap" Text="Documento corrente:" FontSize="11"/>
+                    <TextBlock x:Name="textBlock_Copy3" TextWrapping="Wrap" Text="Ultimo inserimento:" FontSize="11"/>
+                </StackPanel>
+            </DockPanel>
+            <StackPanel Height="30" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="buttonContiunaInserimento" Content="Cancella" Height="20" Width="75" FontSize="11" Margin="0,0,5,0"/>
+                <Button x:Name="buttonCheck" Content="Continua" Height="20" Width="75" Margin="0,5,5,5" FontSize="11"/>
+                <Button x:Name="buttonChiudiBatch" Content="Continua" Height="20" Width="75" Margin="0,5" FontSize="11"/>
+            </StackPanel>
+        </DockPanel>
+
+    </Grid>
+</Window>

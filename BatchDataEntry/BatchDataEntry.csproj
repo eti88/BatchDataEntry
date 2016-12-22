@@ -35,8 +35,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Apitron.PDF.Controls, Version=1.0.89.0, Culture=neutral, PublicKeyToken=6e759dbb0039406e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Apitron.PDF.Controls.1.0.89.0\lib\net451\Apitron.PDF.Controls.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Apitron.PDF.Rasterizer, Version=3.0.89.0, Culture=neutral, PublicKeyToken=6e759dbb0039406e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Apitron.PDF.Controls.1.0.89.0\lib\net451\Apitron.PDF.Rasterizer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -46,16 +56,42 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="MainWindow.xaml">
+    <Compile Include="Views\BatchSelected.xaml.cs">
+      <DependentUpon>BatchSelected.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Documento.xaml.cs">
+      <DependentUpon>Documento.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NuovoBatch.xaml.cs">
+      <DependentUpon>NuovoBatch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NuovoCampo.xaml.cs">
+      <DependentUpon>NuovoCampo.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Views\Applicazione.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\BatchSelected.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Documento.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -63,12 +99,28 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Views\Applicazione.xaml.cs">
+      <DependentUpon>Applicazione.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\NuovoBatch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NuovoCampo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Batch.cs" />
+    <Compile Include="Models\Campo.cs" />
+    <Compile Include="Models\Documento.cs" />
+    <Compile Include="Models\FileCSV.cs" />
+    <Compile Include="Models\Modello.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -86,6 +138,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
