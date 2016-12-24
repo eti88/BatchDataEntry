@@ -8,6 +8,8 @@ namespace BatchDataEntry.ViewModels
 {
     class ViewModelBatchSelected : ViewModelMain
     {
+        public ViewModelBatchSelected() { }
 
+        public ViewModelBatchSelected(Object item) { }
     }
 }

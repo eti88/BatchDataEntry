@@ -1,9 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace BatchDataEntry.Models
 {
+    [Table("Batch")]
     public class Batch
     {
         public enum TipoFileProcessato
@@ -14,10 +17,13 @@ namespace BatchDataEntry.Models
 
         public event EventHandler BatchChanged;
 
+        public int Id { get; set; }
+
         public string Nome { get; set; }
         public TipoFileProcessato TipoFile { get; set; }
         public string DirectoryInput { get; set; }
         public string DirectoryOutput { get; set; }
+
         public Modello Applicazione { get; set; }
         public int NumDoc { get; set; }
         public int NumPages { get; set; }

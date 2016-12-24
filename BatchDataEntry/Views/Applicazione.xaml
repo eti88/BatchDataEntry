@@ -5,31 +5,45 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BatchDataEntry.Views"
         mc:Ignorable="d"
-        Title="Applicazione" Height="350" Width="400">
+        Title="Applicazione"
+        Height="470"
+        Width="540"
+        MinWidth="560"
+        >
     <Grid>
-        <ListBox x:Name="listBox" HorizontalAlignment="Left" Height="252" Margin="10,10,0,0" VerticalAlignment="Top" Width="150"/>
-        <Button x:Name="button" Content="Modifica" HorizontalAlignment="Left" Margin="62,267,0,0" VerticalAlignment="Top" Width="45" FontSize="10"/>
-        <Button x:Name="button_Copy" Content="Nuovo" HorizontalAlignment="Left" Margin="10,267,0,0" VerticalAlignment="Top" Width="45" FontSize="10"/>
-        <Button x:Name="button_Copy1" Content="Elimina" HorizontalAlignment="Left" Margin="115,267,0,0" VerticalAlignment="Top" Width="45" FontSize="10"/>
-        <Label x:Name="label" HorizontalAlignment="Left" Margin="175,10,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="label_Copy3" HorizontalAlignment="Left" Margin="179,189,0,0" VerticalAlignment="Top"/>
-        <StackPanel HorizontalAlignment="Left" Height="274" Margin="175,10,0,0" VerticalAlignment="Top" Width="207">
-            <Label x:Name="label1">
-                <Label x:Name="label2" Content="Nome" FontSize="11"/>
-            </Label>
-            <TextBox x:Name="textBox" Height="23" TextWrapping="Wrap" Text="TextBoxNome" FontSize="11" Margin="10,0"/>
-            <Label x:Name="label_Copy" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Label x:Name="label_Copy2" Content="Tipo" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="11"/>
-            </Label>
-            <ComboBox x:Name="comboBox" FontSize="11" Margin="10,0"/>
-            <CheckBox x:Name="checkBox" Content="Includi Csv" Margin="10,10,10,0" FontSize="11"/>
-            <WrapPanel Height="24" Margin="10,10,10,0">
-                <TextBox x:Name="textBox1" Height="23" TextWrapping="Wrap" Text="TextBoxSelectFile" Width="160" Margin="0,0,5,0" FontSize="11"/>
-                <Button x:Name="button1" Content="..." Width="22"/>
-            </WrapPanel>
-        </StackPanel>
-        <Button x:Name="button2" Content="Salva" HorizontalAlignment="Left" Margin="307,289,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button x:Name="button2_Copy" Content="Cancella" HorizontalAlignment="Left" Margin="227,289,0,0" VerticalAlignment="Top" Width="75"/>
+        <DockPanel LastChildFill="True">
+            <DockPanel LastChildFill="True" DockPanel.Dock="Top" Height="386">
+                <StackPanel DockPanel.Dock="Left" Margin="5" Width="200">
+                    <ListBox x:Name="listBoxApps" Margin="0" Height="350"/>
+                    <WrapPanel Height="23" RenderTransformOrigin="0.5,0.5" Margin="0,5,0,0">
+                        <Button x:Name="buttonNuovoItemList" Content="Nuovo" HorizontalAlignment="Left" VerticalAlignment="Top" Width="45" FontSize="12" Margin="0,0,5,0"/>
+                        <Button x:Name="buttonModificaSelectedItem" Content="Modifica" HorizontalAlignment="Left" VerticalAlignment="Top" Width="45" FontSize="12" Margin="5,0"/>
+                        <Button x:Name="buttonEliminaSelectedItem" Content="Elimina" HorizontalAlignment="Left" VerticalAlignment="Top" Width="45" FontSize="12" Margin="5,0"/>
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Margin="0,0,0,10">
+                    <Label x:Name="labelNome" Content="Nome"/>
+                    <TextBox x:Name="textBoxNome" Height="23" TextWrapping="Wrap" Text="TextBoxNome" Margin="10,0"/>
+                    <Label x:Name="labelTipo" Content="Tipo"/>
+                    <ComboBox x:Name="comboBoxTipo" Margin="10,0"/>
+                    <CheckBox x:Name="checkBoxCsv" Content="Includi Csv" Margin="10,10,10,0"/>
+                    <WrapPanel Height="24" Margin="10,10,10,0">
+                        <TextBox x:Name="textBoxFileCsv" Height="23" TextWrapping="Wrap" Text="TextBoxSelectFile" Width="274" Margin="0,0,5,0"/>
+                        <Button x:Name="buttonChooseFile" Click="ButtonChooseFile_OnClick" Content="..." Width="22"/>
+                    </WrapPanel>
+                </StackPanel>
+            </DockPanel>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="50" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10,0">
+                <Button x:Name="buttonCancellaApp" Content="Cancella" Click="ButtonCancellaApp_OnClick" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Margin="1,0,10,0"/>
+                <Button x:Name="buttonSalvaApp" Content="Salva" Click="ButtonSalvaApp_OnClick" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Margin="10,0"/>
+            </StackPanel>
+        </DockPanel>
+
+
+
+
+
+
 
     </Grid>
 </Window>

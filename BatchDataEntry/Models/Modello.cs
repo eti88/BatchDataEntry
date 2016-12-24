@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BatchDataEntry.Models
 {
@@ -7,8 +9,11 @@ namespace BatchDataEntry.Models
     /// Modello per la definizione dei campi per ogni "applicazione" cioè viene generato un modello personalizzato
     /// per l'utilizzo di determinati campi senza inserirli ogni volta. (I modelli sono unici)
     /// </summary>
+    
     public class Modello : INotifyPropertyChanged
     {
+        public int Id { get; set; }
+
         private string _Nome;
         public string Nome {
             get { return _Nome; }

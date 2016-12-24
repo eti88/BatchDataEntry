@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using BatchDataEntry.Models;
+using BatchDataEntry.ViewModels;
 using BatchDataEntry.Views;
 
 namespace BatchDataEntry
@@ -9,11 +11,14 @@ namespace BatchDataEntry
     /// Logica di interazione per MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {
+    {    
+
         public MainWindow()
         {
             InitializeComponent();
         }
+
+        
 
         private void buttonNewBatch_Click(object sender, RoutedEventArgs e)
         {
@@ -32,6 +37,12 @@ namespace BatchDataEntry
         private void buttonDeleteBatch_Click(object sender, RoutedEventArgs e)
         {
             throw new NotImplementedException();
+        }
+
+        private void ButtonAddApp_OnClick(object sender, RoutedEventArgs e)
+        {
+            var addModel = new Applicazione();
+            addModel.Show();
         }
     }
 }

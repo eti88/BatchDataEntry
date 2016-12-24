@@ -23,5 +23,20 @@ namespace BatchDataEntry.Views
         {
             InitializeComponent();
         }
+
+        private void ButtonSalvaApp_OnClick(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ButtonCancellaApp_OnClick(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ButtonChooseFile_OnClick(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

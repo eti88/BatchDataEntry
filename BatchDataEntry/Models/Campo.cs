@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BatchDataEntry.Models
 {
+
     public class Campo
     {
+        public int Id { get; set; }
         public string Nome { get; set; }
         public bool SalvaValori { get; set; }
         public string ValorePredefinito { get; set; }

@@ -23,5 +23,17 @@ namespace BatchDataEntry.Views
         {
             InitializeComponent();
         }
+
+        private void ButtonContinua_OnClick(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ButtonCancella_Click(object sender, RoutedEventArgs e)
+        {
+            var MainWindows = new MainWindow();
+            MainWindows.Show();
+            this.Close();
+        }
     }
 }

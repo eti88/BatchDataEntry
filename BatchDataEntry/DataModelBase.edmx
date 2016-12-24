@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="databaseModel.Store" Provider="System.Data.SQLite.EF6" ProviderManifestToken="data source=&quot;C:\Users\etienne\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\database.sqlite&quot;" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Batch">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="integer" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nome" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="TipoFile" Type="integer" />
+          <Property Name="DirectoryInput" Type="nvarchar" MaxLength="2147483647" />
+          <Property Name="DirectoryOutput" Type="nvarchar" MaxLength="2147483647" />
+          <Property Name="NumDoc" Type="integer" />
+          <Property Name="NumPages" Type="integer" />
+          <Property Name="DocCorrente" Type="integer" />
+          <Property Name="UltimoIndicizzato" Type="integer" />
+          <Property Name="FKModello" Type="integer" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Campo">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="integer" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nome" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="SalvaValori" Type="integer" />
+          <Property Name="ValorePredefinito" Type="nvarchar" MaxLength="2147483647" />
+          <Property Name="IndicePrimario" Type="integer" />
+          <Property Name="TipoCampo" Type="integer" />
+          <Property Name="FKModello" Type="integer" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Modello">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="integer" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nome" Type="nvarchar" MaxLength="2147483647" />
+          <Property Name="Tipo" Type="nvarchar" MaxLength="2147483647" />
+          <Property Name="OrigineCsv" Type="integer" Nullable="false" />
+          <Property Name="FKCsv" Type="integer" />
+        </EntityType>
+        <EntityType Name="OrigineDatiCSV">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="integer" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Path" Type="nvarchar" MaxLength="2147483647" />
+          <Property Name="Separatore" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Batch_0_0">
+          <End Role="Modello" Type="Self.Modello" Multiplicity="1" />
+          <End Role="Batch" Type="Self.Batch" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Modello">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Batch">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Campo_0_0">
+          <End Role="Modello" Type="Self.Modello" Multiplicity="1" />
+          <End Role="Campo" Type="Self.Campo" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Modello">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Campo">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Modello_0_0">
+          <End Role="OrigineDatiCSV" Type="Self.OrigineDatiCSV" Multiplicity="1" />
+          <End Role="Modello" Type="Self.Modello" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="OrigineDatiCSV">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Modello">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="databaseModelStoreContainer">
+          <EntitySet Name="Batch" EntityType="Self.Batch" store:Type="Tables" />
+          <EntitySet Name="Campo" EntityType="Self.Campo" store:Type="Tables" />
+          <EntitySet Name="Modello" EntityType="Self.Modello" store:Type="Tables" />
+          <EntitySet Name="OrigineDatiCSV" EntityType="Self.OrigineDatiCSV" store:Type="Tables" />
+          <AssociationSet Name="FK_Batch_0_0" Association="Self.FK_Batch_0_0">
+            <End Role="Modello" EntitySet="Modello" />
+            <End Role="Batch" EntitySet="Batch" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Campo_0_0" Association="Self.FK_Campo_0_0">
+            <End Role="Modello" EntitySet="Modello" />
+            <End Role="Campo" EntitySet="Campo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Modello_0_0" Association="Self.FK_Modello_0_0">
+            <End Role="OrigineDatiCSV" EntitySet="OrigineDatiCSV" />
+            <End Role="Modello" EntitySet="Modello" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="databaseModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="dbEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Batch" EntityType="databaseModel.Batch" />
+          <EntitySet Name="Campo" EntityType="databaseModel.Campo" />
+          <EntitySet Name="Modello" EntityType="databaseModel.Modello" />
+          <EntitySet Name="OrigineDatiCSV" EntityType="databaseModel.OrigineDatiCSV" />
+          <AssociationSet Name="FK_Batch_0_0" Association="databaseModel.FK_Batch_0_0">
+            <End Role="Modello" EntitySet="Modello" />
+            <End Role="Batch" EntitySet="Batch" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Campo_0_0" Association="databaseModel.FK_Campo_0_0">
+            <End Role="Modello" EntitySet="Modello" />
+            <End Role="Campo" EntitySet="Campo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Modello_0_0" Association="databaseModel.FK_Modello_0_0">
+            <End Role="OrigineDatiCSV" EntitySet="OrigineDatiCSV" />
+            <End Role="Modello" EntitySet="Modello" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Batch">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nome" Type="String" Nullable="false" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <Property Name="TipoFile" Type="Int64" />
+          <Property Name="DirectoryInput" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <Property Name="DirectoryOutput" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <Property Name="NumDoc" Type="Int64" />
+          <Property Name="NumPages" Type="Int64" />
+          <Property Name="DocCorrente" Type="Int64" />
+          <Property Name="UltimoIndicizzato" Type="Int64" />
+          <Property Name="FKModello" Type="Int64" Nullable="false" />
+          <NavigationProperty Name="Modello" Relationship="databaseModel.FK_Batch_0_0" FromRole="Batch" ToRole="Modello" />
+        </EntityType>
+        <EntityType Name="Campo">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nome" Type="String" Nullable="false" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <Property Name="SalvaValori" Type="Int64" />
+          <Property Name="ValorePredefinito" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <Property Name="IndicePrimario" Type="Int64" />
+          <Property Name="TipoCampo" Type="Int64" />
+          <Property Name="FKModello" Type="Int64" Nullable="false" />
+          <NavigationProperty Name="Modello" Relationship="databaseModel.FK_Campo_0_0" FromRole="Campo" ToRole="Modello" />
+        </EntityType>
+        <EntityType Name="Modello">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nome" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <Property Name="Tipo" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <Property Name="OrigineCsv" Type="Int64" Nullable="false" />
+          <Property Name="FKCsv" Type="Int64" />
+          <NavigationProperty Name="Batch" Relationship="databaseModel.FK_Batch_0_0" FromRole="Modello" ToRole="Batch" />
+          <NavigationProperty Name="Campo" Relationship="databaseModel.FK_Campo_0_0" FromRole="Modello" ToRole="Campo" />
+          <NavigationProperty Name="OrigineDatiCSV" Relationship="databaseModel.FK_Modello_0_0" FromRole="Modello" ToRole="OrigineDatiCSV" />
+        </EntityType>
+        <EntityType Name="OrigineDatiCSV">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Path" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <Property Name="Separatore" Type="String" Nullable="false" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Modello" Relationship="databaseModel.FK_Modello_0_0" FromRole="OrigineDatiCSV" ToRole="Modello" />
+        </EntityType>
+        <Association Name="FK_Batch_0_0">
+          <End Type="databaseModel.Modello" Role="Modello" Multiplicity="1" />
+          <End Type="databaseModel.Batch" Role="Batch" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Modello">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Batch">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Campo_0_0">
+          <End Type="databaseModel.Modello" Role="Modello" Multiplicity="1" />
+          <End Type="databaseModel.Campo" Role="Campo" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Modello">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Campo">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Modello_0_0">
+          <End Type="databaseModel.OrigineDatiCSV" Role="OrigineDatiCSV" Multiplicity="1" />
+          <End Type="databaseModel.Modello" Role="Modello" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="OrigineDatiCSV">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Modello">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="databaseModelStoreContainer" CdmEntityContainer="dbEntities">
+          <EntitySetMapping Name="Batch">
+            <EntityTypeMapping TypeName="databaseModel.Batch">
+              <MappingFragment StoreEntitySet="Batch">
+                <ScalarProperty Name="FKModello" ColumnName="FKModello" />
+                <ScalarProperty Name="UltimoIndicizzato" ColumnName="UltimoIndicizzato" />
+                <ScalarProperty Name="DocCorrente" ColumnName="DocCorrente" />
+                <ScalarProperty Name="NumPages" ColumnName="NumPages" />
+                <ScalarProperty Name="NumDoc" ColumnName="NumDoc" />
+                <ScalarProperty Name="DirectoryOutput" ColumnName="DirectoryOutput" />
+                <ScalarProperty Name="DirectoryInput" ColumnName="DirectoryInput" />
+                <ScalarProperty Name="TipoFile" ColumnName="TipoFile" />
+                <ScalarProperty Name="Nome" ColumnName="Nome" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Campo">
+            <EntityTypeMapping TypeName="databaseModel.Campo">
+              <MappingFragment StoreEntitySet="Campo">
+                <ScalarProperty Name="FKModello" ColumnName="FKModello" />
+                <ScalarProperty Name="TipoCampo" ColumnName="TipoCampo" />
+                <ScalarProperty Name="IndicePrimario" ColumnName="IndicePrimario" />
+                <ScalarProperty Name="ValorePredefinito" ColumnName="ValorePredefinito" />
+                <ScalarProperty Name="SalvaValori" ColumnName="SalvaValori" />
+                <ScalarProperty Name="Nome" ColumnName="Nome" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Modello">
+            <EntityTypeMapping TypeName="databaseModel.Modello">
+              <MappingFragment StoreEntitySet="Modello">
+                <ScalarProperty Name="FKCsv" ColumnName="FKCsv" />
+                <ScalarProperty Name="OrigineCsv" ColumnName="OrigineCsv" />
+                <ScalarProperty Name="Tipo" ColumnName="Tipo" />
+                <ScalarProperty Name="Nome" ColumnName="Nome" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OrigineDatiCSV">
+            <EntityTypeMapping TypeName="databaseModel.OrigineDatiCSV">
+              <MappingFragment StoreEntitySet="OrigineDatiCSV">
+                <ScalarProperty Name="Separatore" ColumnName="Separatore" />
+                <ScalarProperty Name="Path" ColumnName="Path" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Nessuno" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BatchDataEntry.Views"
         mc:Ignorable="d"
-        Title="Nuovo Batch" Height="303.213" Width="300">
+        Title="Nuovo Batch" Height="310" Width="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="48*"/>
@@ -29,8 +29,8 @@
                 </WrapPanel>
             </StackPanel>
             <WrapPanel Height="30" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
-                <Button x:Name="button1" Content="Cancella" Height="20" VerticalAlignment="Center" Width="75" Margin="0,5,10,5" FontSize="11"/>
-                <Button x:Name="button" Content="Continua" Height="20" VerticalAlignment="Center" Width="75" RenderTransformOrigin="1.84,0.65" Margin="0,5" FontSize="11"/>
+                <Button x:Name="buttonCancella" Click="ButtonCancella_Click" Content="Cancella" Height="20" VerticalAlignment="Center" Width="75" Margin="0,5,10,5" FontSize="11"/>
+                <Button x:Name="buttonContinua" Click="ButtonContinua_OnClick" Content="Continua" Height="20" VerticalAlignment="Center" Width="75" RenderTransformOrigin="1.84,0.65" Margin="0,5" FontSize="11"/>
             </WrapPanel>
         </DockPanel>
 
