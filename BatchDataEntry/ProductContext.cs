@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Entity;
 using BatchDataEntry.Models;
 
 namespace BatchDataEntry
@@ -19,10 +14,10 @@ namespace BatchDataEntry
 
         }
 
-        public virtual DbSet<Batch> Batches { get; set; }
-        public virtual DbSet<Campo> Campi { get; set; }
-        public virtual DbSet<Modello> Modelli { get; set; }
-        public virtual DbSet<FileCSV> File { get; set; }
+        public virtual DbSet<Models.Batch> Batches { get; set; }
+        public virtual DbSet<Models.Campo> Campi { get; set; }
+        public virtual DbSet<Models.Modello> Modelli { get; set; }
+        public virtual DbSet<Models.FileCSV> File { get; set; }
 
         public static void ReloadEntity<TEntity>(DbContext context, TEntity entity) where TEntity : class
         {

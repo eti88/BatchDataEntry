@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using BatchDataEntry.Models;
 using NLog;
 
@@ -26,9 +23,9 @@ namespace BatchDataEntry.Helpers
         /// Restituisce tutto il contenuto della tabella Batch
         /// </summary>
         /// <returns></returns>
-        public static async Task<List<Batch>> GetBatchesTask()
+        public static async Task<List<Models.Batch>> GetBatchesTask()
         {
-            List<Batch> result = new List<Batch>();
+            List<Models.Batch> result = new List<Models.Batch>();
             try
             {
                 using (var context = new ProductContext())
@@ -50,9 +47,9 @@ namespace BatchDataEntry.Helpers
         /// </summary>
         /// <param name="idModello">Id del modello</param>
         /// <returns>Lista dei campi sotto forma di List</returns>
-        public static async Task<List<Campo>> GetCampiTask(long idModello)
+        public static async Task<List<Models.Campo>> GetCampiTask(long idModello)
         {
-            List<Campo> result = new List<Campo>();
+            List<Models.Campo> result = new List<Models.Campo>();
 
             try
             {
@@ -73,9 +70,9 @@ namespace BatchDataEntry.Helpers
         /// Restituisce la lista dei Modelli presenti nella tabella
         /// </summary>
         /// <returns></returns>
-        public static async Task<List<Modello>> GetModelliTask()
+        public static async Task<List<Models.Modello>> GetModelliTask()
         {
-            List<Modello> result = new List<Modello>();
+            List<Models.Modello> result = new List<Models.Modello>();
 
             try
             {
@@ -98,9 +95,9 @@ namespace BatchDataEntry.Helpers
         /// </summary>
         /// <param name="idFile"></param>
         /// <returns></returns>
-        public static async Task<FileCSV> GetOrigineDatiTask(long idFile)
+        public static async Task<Models.FileCSV> GetOrigineDatiTask(long idFile)
         {
-            FileCSV result = new FileCSV();
+            Models.FileCSV result = new Models.FileCSV();
 
             try
             {
@@ -117,9 +114,9 @@ namespace BatchDataEntry.Helpers
             return result;
         }
 
-        public static async Task<Modello> GetModelloTask(long idModello)
+        public static async Task<Models.Modello> GetModelloTask(long idModello)
         {
-            Modello result = new Modello();
+            Models.Modello result = new Models.Modello();
 
             try
             {
@@ -137,9 +134,9 @@ namespace BatchDataEntry.Helpers
             return result;
         }
 
-        public static async Task<Batch> GetBatchTask(long idBatch)
+        public static async Task<Models.Batch> GetBatchTask(long idBatch)
         {
-            Batch result = new Batch();
+            Models.Batch result = new Models.Batch();
 
             try
             {
@@ -158,9 +155,9 @@ namespace BatchDataEntry.Helpers
         }
 
 
-        public static async Task<Campo> GetCampoTask(long idCampo)
+        public static async Task<Models.Campo> GetCampoTask(long idCampo)
         {
-            Campo result = new Campo();
+            Models.Campo result = new Models.Campo();
 
             try
             {
@@ -182,7 +179,7 @@ namespace BatchDataEntry.Helpers
 
         #region InsertTasks
 
-        public static async Task<bool> InsertBatchTask(Batch b)
+        public static async Task<bool> InsertBatchTask(Models.Batch b)
         {
             bool result = false;
 
@@ -203,7 +200,7 @@ namespace BatchDataEntry.Helpers
             return result;
         }
 
-        public static async Task<bool> InsertCampoTask(Campo c)
+        public static async Task<bool> InsertCampoTask(Models.Campo c)
         {
             bool result = false;
 
@@ -225,7 +222,7 @@ namespace BatchDataEntry.Helpers
         }
 
 
-        public static async Task<bool> InsertModelloTask(Modello m)
+        public static async Task<bool> InsertModelloTask(Models.Modello m)
         {
             bool result = false;
 
@@ -246,7 +243,7 @@ namespace BatchDataEntry.Helpers
             return result;
         }
 
-        public static async Task<bool> InsertOrigineCsvTask(FileCSV f)
+        public static async Task<bool> InsertOrigineCsvTask(Models.FileCSV f)
         {
             bool result = false;
 
@@ -271,7 +268,7 @@ namespace BatchDataEntry.Helpers
 
         #region UpdateTasks
 
-        public static async Task<bool> UpdateBatchTask(Batch b)
+        public static async Task<bool> UpdateBatchTask(Models.Batch b)
         {
             bool result = false;
 
@@ -279,9 +276,9 @@ namespace BatchDataEntry.Helpers
             {
                 using (var context = new ProductContext())
                 {
-                    Batch oldOne = await context.Batches.FindAsync(b.Id);
+                    Models.Batch oldOne = await context.Batches.FindAsync(b.Id);
                     // Iterazione sulle propietà
-                    PropertyInfo[] properties = typeof(Batch).GetProperties();
+                    PropertyInfo[] properties = typeof(Models.Batch).GetProperties();
                     foreach (PropertyInfo p in properties)
                     {
                         object first = p.GetValue(oldOne, null);
@@ -306,7 +303,7 @@ namespace BatchDataEntry.Helpers
         }
 
 
-        public static async Task<bool> UpdateCampoTask(Campo c)
+        public static async Task<bool> UpdateCampoTask(Models.Campo c)
         {
             bool result = false;
 
@@ -314,9 +311,9 @@ namespace BatchDataEntry.Helpers
             {
                 using (var context = new ProductContext())
                 {
-                    Batch oldOne = await context.Batches.FindAsync(c.Id);
+                    Models.Batch oldOne = await context.Batches.FindAsync(c.Id);
                     // Iterazione sulle propietà
-                    PropertyInfo[] properties = typeof(Campo).GetProperties();
+                    PropertyInfo[] properties = typeof(Models.Campo).GetProperties();
                     foreach (PropertyInfo p in properties)
                     {
                         object first = p.GetValue(oldOne, null);
@@ -340,7 +337,7 @@ namespace BatchDataEntry.Helpers
             return result;
         }
         
-        public static async Task<bool> UpdateModelloTask(Modello m)
+        public static async Task<bool> UpdateModelloTask(Models.Modello m)
         {
             bool result = false;
 
@@ -348,9 +345,9 @@ namespace BatchDataEntry.Helpers
             {
                 using (var context = new ProductContext())
                 {
-                    Batch oldOne = await context.Batches.FindAsync(m.Id);
+                    Models.Batch oldOne = await context.Batches.FindAsync(m.Id);
                     // Iterazione sulle propietà
-                    PropertyInfo[] properties = typeof(Modello).GetProperties();
+                    PropertyInfo[] properties = typeof(Models.Modello).GetProperties();
                     foreach (PropertyInfo p in properties)
                     {
                         object first = p.GetValue(oldOne, null);
@@ -374,7 +371,7 @@ namespace BatchDataEntry.Helpers
             return result;
         }
         
-        public static async Task<bool> UpdateOrigineDatiTask(FileCSV f)
+        public static async Task<bool> UpdateOrigineDatiTask(Models.FileCSV f)
         {
             bool result = false;
 
@@ -382,9 +379,9 @@ namespace BatchDataEntry.Helpers
             {
                 using (var context = new ProductContext())
                 {
-                    Batch oldOne = await context.Batches.FindAsync(f.Id);
+                    Models.Batch oldOne = await context.Batches.FindAsync(f.Id);
                     // Iterazione sulle propietà
-                    PropertyInfo[] properties = typeof(FileCSV).GetProperties();
+                    PropertyInfo[] properties = typeof(Models.FileCSV).GetProperties();
                     foreach (PropertyInfo p in properties)
                     {
                         object first = p.GetValue(oldOne, null);
@@ -420,7 +417,7 @@ namespace BatchDataEntry.Helpers
             {
                 using (var context = new ProductContext())
                 {
-                    Batch existing = await context.Batches.FindAsync(id);
+                    Models.Batch existing = await context.Batches.FindAsync(id);
                     context.Batches.Remove(existing);
                     await context.SaveChangesAsync();
                     result = true;
@@ -442,7 +439,7 @@ namespace BatchDataEntry.Helpers
             {
                 using (var context = new ProductContext())
                 {
-                    Campo existing = await context.Campi.FindAsync(id);
+                    Models.Campo existing = await context.Campi.FindAsync(id);
                     context.Campi.Remove(existing);
                     await context.SaveChangesAsync();
                     result = true;
@@ -464,7 +461,7 @@ namespace BatchDataEntry.Helpers
             {
                 using (var context = new ProductContext())
                 {
-                    Modello existing = await context.Modelli.FindAsync(id);
+                    Models.Modello existing = await context.Modelli.FindAsync(id);
                     context.Modelli.Remove(existing);
                     await context.SaveChangesAsync();
                     result = true;
@@ -486,7 +483,7 @@ namespace BatchDataEntry.Helpers
             {
                 using (var context = new ProductContext())
                 {
-                    FileCSV existing = await context.File.FindAsync(id);
+                    Models.FileCSV existing = await context.File.FindAsync(id);
                     context.File.Remove(existing);
                     await context.SaveChangesAsync();
                     result = true;

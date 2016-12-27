@@ -12,7 +12,33 @@ namespace BatchDataEntry.Models
     
     public class Modello : INotifyPropertyChanged
     {
-        public int Id { get; set; }
+        public Modello()
+        {
+            this.OrigineCsv = false;
+            this.Campi = new List<Campo>();
+            this.OrigineDatiCSV = new FileCSV();
+        }
+
+        public Modello(string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
+        {
+            this.Nome = nome;
+            this.Tipo = tipo;
+            this.OrigineCsv = orig;
+            this.Campi = campi;
+            this.OrigineDatiCSV = file;
+        }
+
+        public Modello(int id, string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
+        {
+            this.Id = id;
+            this.Nome = nome;
+            this.Tipo = tipo;
+            this.OrigineCsv = orig;
+            this.Campi = campi;
+            this.OrigineDatiCSV = file;
+        }
+
+        public long Id { get; set; }
 
         private string _Nome;
         public string Nome {
@@ -27,8 +53,8 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private int _Tipo;
-        public int Tipo {
+        private Batch.TipoFileProcessato _Tipo;
+        public Batch.TipoFileProcessato Tipo {
             get { return _Tipo; }
             set
             {
@@ -79,6 +105,9 @@ namespace BatchDataEntry.Models
             }
         }
 
+        public virtual Batch Batch { get; set; }
+        public virtual Campo Campo { get; set; }
+
         void RaisePropertyChanged(string prop)
         {
             if (PropertyChanged != null)
@@ -86,6 +115,8 @@ namespace BatchDataEntry.Models
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
             }
         }
+
+
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

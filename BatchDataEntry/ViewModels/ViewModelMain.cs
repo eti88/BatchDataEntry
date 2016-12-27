@@ -14,7 +14,7 @@ namespace BatchDataEntry.ViewModels
         public ViewModelMain()
         {
             this.Batches = new ObservableCollection<Batch>();
-            FillBatchesListbox();
+            //FillBatchesListbox();
         }
 
         private ObservableCollection<Batch> _Batches { get; set; }
@@ -43,6 +43,7 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        /*
         private void FillBatchesListbox()
         {
             Batches = new ObservableCollection<Batch>();
@@ -51,6 +52,6 @@ namespace BatchDataEntry.ViewModels
                 
             }
         }
-        
+        */
     }
 }

@@ -1,19 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BatchDataEntry.Models
+﻿namespace BatchDataEntry.Models
 {
 
     public class FileCSV
     {
 
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Path { get; set; }
         public char Separatore { get; set; }
+
+        public virtual Modello Modello { get; set; }
+
+        public FileCSV()
+        {
+        }
+
+        public FileCSV(string p, char s)
+        {
+            this.Path = p;
+            this.Separatore = s;
+        }
+
+        public FileCSV(long id, string p, char s)
+        {
+            this.Id = id;
+            this.Path = p;
+            this.Separatore = s;
+        }
     }
 }
