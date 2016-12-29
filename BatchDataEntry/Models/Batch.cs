@@ -6,7 +6,7 @@ using SQLite;
 namespace BatchDataEntry.Models
 {
     [System.ComponentModel.DataAnnotations.Schema.Table("Batch")]
-    public class Batch
+    public class Batch : BaseModel
     {
 
         public enum TipoFileProcessato
@@ -33,7 +33,6 @@ namespace BatchDataEntry.Models
         public long Dimensioni { get; set; }
         public int DocCorrente { get; set; }
         public int UltimoIndicizzato { get; set; }
-        
 
         /*
          - Nel caso della cancellazione di un documento oltre all'eliminazione del record bisogna eliminare anche il documento di origine (file)

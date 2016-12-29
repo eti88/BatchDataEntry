@@ -1,15 +1,42 @@
-﻿using SQLite;
+﻿using System.ComponentModel;
+using SQLite;
 
 namespace BatchDataEntry.Models
 {
     [System.ComponentModel.DataAnnotations.Schema.Table("FileCSV")]
-    public class FileCSV
+    public class FileCSV : BaseModel
     {
         [PrimaryKey, AutoIncrement]
         public long Id { get; set; }
-        public string Path { get; set; }
+
+        private string _Path { get; set; }
+        public string Path
+        {
+            get
+            {
+                return _Path;
+            }
+            set
+            {
+                if (_Path != null)
+                {
+                    _Path = value;
+                    RaisePropertyChanged("Path");
+                }
+            }
+        }
+
+        private string _Separatore { get; set; }
         [MaxLength(1)]
-        public string Separatore { get; set; }
+        public string Separatore { get { return _Separatore; }
+            set
+            {
+                if (_Separatore != null)
+                {
+                    _Separatore = value;
+                    RaisePropertyChanged("Separatore");
+                }
+            } }
 
         public FileCSV()
         {

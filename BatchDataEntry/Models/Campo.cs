@@ -4,7 +4,7 @@ namespace BatchDataEntry.Models
 {
 
     [System.ComponentModel.DataAnnotations.Schema.Table("Campo")]
-    public class Campo
+    public class Campo : BaseModel
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }

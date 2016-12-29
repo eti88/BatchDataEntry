@@ -48,6 +48,14 @@ namespace BatchDataEntry.Helpers
             }
         }
 
+        private void ErrorCatch(Exception e)
+        {
+            logger.Error(e.ToString);
+            #if DEBUG
+            Console.WriteLine(e.ToString());
+            #endif
+        }
+
         public void InsertRecord<T>(T model)
         {
             var db = new SQLiteConnection(PATHDB);
@@ -62,10 +70,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -87,10 +92,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -98,7 +100,7 @@ namespace BatchDataEntry.Helpers
             }
         }
 
-        public void DeleteRecord<T>(T model)
+        public void DeleteRecord<T>(T model, int id)
         {
             var db = new SQLiteConnection(PATHDB);
 
@@ -107,14 +109,11 @@ namespace BatchDataEntry.Helpers
                 #if DEBUG
                 Console.WriteLine(@"Delete nella tabella " + typeof(T));
                 #endif
-                db.Delete(model);
+                db.Delete<T>(id);
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -136,10 +135,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -162,10 +158,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -188,10 +181,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -214,10 +204,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -226,7 +213,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Batch> GetBatchRecords(Batch model)
+        public ObservableCollection<Batch> GetBatchRecords()
         {
             var db = new SQLiteConnection(PATHDB);
 
@@ -243,10 +230,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -255,7 +239,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Campo> GetCampoRecords(Campo model)
+        public ObservableCollection<Campo> GetCampoRecords()
         {
             var db = new SQLiteConnection(PATHDB);
 
@@ -272,10 +256,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -284,7 +265,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Modello> GetBatchRecords(Modello model)
+        public ObservableCollection<Modello> GetModelloRecords()
         {
             var db = new SQLiteConnection(PATHDB);
 
@@ -301,10 +282,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -330,10 +308,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -359,10 +334,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -387,10 +359,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {
@@ -415,10 +384,7 @@ namespace BatchDataEntry.Helpers
             }
             catch (Exception e)
             {
-                logger.Error(e.ToString);
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
+                ErrorCatch(e);
             }
             finally
             {

@@ -12,7 +12,7 @@ namespace BatchDataEntry.Models
     /// </summary>
 
     [System.ComponentModel.DataAnnotations.Schema.Table("Modello")]
-    public class Modello : INotifyPropertyChanged
+    public class Modello : BaseModel
     {
 
         [PrimaryKey, AutoIncrement]
@@ -27,19 +27,6 @@ namespace BatchDataEntry.Models
                 {
                     _Nome = value;
                     RaisePropertyChanged("Nome");
-                }
-            }
-        }
-
-        private Batch.TipoFileProcessato _Tipo;
-        public Batch.TipoFileProcessato Tipo {
-            get { return _Tipo; }
-            set
-            {
-                if (_Tipo != null)
-                {
-                    _Tipo = value;
-                    RaisePropertyChanged("Tipo");
                 }
             }
         }
@@ -88,7 +75,7 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private int IdFileCsv { get; set; }
+        public int IdFileCsv { get; set; }
 
         public Modello()
         {
@@ -100,7 +87,6 @@ namespace BatchDataEntry.Models
         public Modello(string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
         {
             this.Nome = nome;
-            this.Tipo = tipo;
             this.OrigineCsv = orig;
             this.Campi = campi;
             this.OrigineDatiCSV = file;
@@ -110,20 +96,9 @@ namespace BatchDataEntry.Models
         {
             this.Id = id;
             this.Nome = nome;
-            this.Tipo = tipo;
             this.OrigineCsv = orig;
             this.Campi = campi;
             this.OrigineDatiCSV = file;
         }
-
-        void RaisePropertyChanged(string prop)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(prop));
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
