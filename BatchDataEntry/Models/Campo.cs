@@ -1,19 +1,24 @@
-﻿using System;
+﻿using SQLite;
 
 namespace BatchDataEntry.Models
 {
 
+    [System.ComponentModel.DataAnnotations.Schema.Table("Campo")]
     public class Campo
     {
-        public long Id { get; set; }
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+        [NotNull]
+        [MaxLength(255)]
         public string Nome { get; set; }
+        public int Posizione { get; set; }
         public bool SalvaValori { get; set; }
+        [MaxLength(255)]
         public string ValorePredefinito { get; set; }
         public bool IndicePrimario { get; set; }
         public int TipoCampo { get; set; }  // Utilizzato per future implementazioni (es textbox[0], combobox[1], checkbox[2])
-        public long FKModello { get; set; }
-
-        public virtual Modello Modello { get; set; }
+        [Indexed]
+        public int IdModello { get; set; }
 
         /*
          SalvaValori permette di tenere traccia dei dati nel medesimo campo velocizzando
@@ -23,7 +28,7 @@ namespace BatchDataEntry.Models
         public Campo()
         {
             this.TipoCampo = 0;
-            this.FKModello = -1;
+            //this.FKModello = -1;
         }
 
         public Campo(string nome, bool sv, string vp, bool ip)
@@ -33,7 +38,7 @@ namespace BatchDataEntry.Models
             this.ValorePredefinito = vp;
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
-            this.FKModello = -1;
+            //this.FKModello = -1;
         }
 
         public Campo(string nome, bool sv, string vp, bool ip, int fk)
@@ -43,7 +48,7 @@ namespace BatchDataEntry.Models
             this.ValorePredefinito = vp;
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
-            this.FKModello = fk;
+            //this.FKModello = fk;
         }
 
         public Campo(int id, string nome, bool sv, string vp, bool ip)
@@ -54,7 +59,7 @@ namespace BatchDataEntry.Models
             this.ValorePredefinito = vp;
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
-            this.FKModello = -1;
+            //this.FKModello = -1;
         }
 
         public Campo(int id, string nome, bool sv, string vp, bool ip, int fk)
@@ -65,7 +70,7 @@ namespace BatchDataEntry.Models
             this.ValorePredefinito = vp;
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
-            this.FKModello = fk;
+            //this.FKModello = fk;
         }
     }
 }

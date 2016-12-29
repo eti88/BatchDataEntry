@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using SQLite;
+
 
 namespace BatchDataEntry.Models
 {
@@ -9,36 +10,13 @@ namespace BatchDataEntry.Models
     /// Modello per la definizione dei campi per ogni "applicazione" cioè viene generato un modello personalizzato
     /// per l'utilizzo di determinati campi senza inserirli ogni volta. (I modelli sono unici)
     /// </summary>
-    
+
+    [System.ComponentModel.DataAnnotations.Schema.Table("Modello")]
     public class Modello : INotifyPropertyChanged
     {
-        public Modello()
-        {
-            this.OrigineCsv = false;
-            this.Campi = new List<Campo>();
-            this.OrigineDatiCSV = new FileCSV();
-        }
 
-        public Modello(string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
-        {
-            this.Nome = nome;
-            this.Tipo = tipo;
-            this.OrigineCsv = orig;
-            this.Campi = campi;
-            this.OrigineDatiCSV = file;
-        }
-
-        public Modello(int id, string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
-        {
-            this.Id = id;
-            this.Nome = nome;
-            this.Tipo = tipo;
-            this.OrigineCsv = orig;
-            this.Campi = campi;
-            this.OrigineDatiCSV = file;
-        }
-
-        public long Id { get; set; }
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
 
         private string _Nome;
         public string Nome {
@@ -80,6 +58,7 @@ namespace BatchDataEntry.Models
         }
 
         private List<Campo> _Campi;
+        [Ignore]
         public List<Campo> Campi {
             get { return _Campi; }
             set
@@ -92,7 +71,11 @@ namespace BatchDataEntry.Models
             }
         }
 
+        [Indexed]
+        public int IdFileCSV { get; set; }
+
         private FileCSV _OrigineDatiCsv;
+        [Ignore]
         public FileCSV OrigineDatiCSV {
             get { return _OrigineDatiCsv; }
             set
@@ -105,8 +88,33 @@ namespace BatchDataEntry.Models
             }
         }
 
-        public virtual Batch Batch { get; set; }
-        public virtual Campo Campo { get; set; }
+        private int IdFileCsv { get; set; }
+
+        public Modello()
+        {
+            this.OrigineCsv = false;
+            this.Campi = new List<Campo>();
+            this.OrigineDatiCSV = new FileCSV();
+        }
+
+        public Modello(string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
+        {
+            this.Nome = nome;
+            this.Tipo = tipo;
+            this.OrigineCsv = orig;
+            this.Campi = campi;
+            this.OrigineDatiCSV = file;
+        }
+
+        public Modello(int id, string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
+        {
+            this.Id = id;
+            this.Nome = nome;
+            this.Tipo = tipo;
+            this.OrigineCsv = orig;
+            this.Campi = campi;
+            this.OrigineDatiCSV = file;
+        }
 
         void RaisePropertyChanged(string prop)
         {
@@ -115,8 +123,6 @@ namespace BatchDataEntry.Models
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
             }
         }
-
-
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

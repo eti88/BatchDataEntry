@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows;
+using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.ViewModels;
 using BatchDataEntry.Views;
@@ -22,9 +23,12 @@ namespace BatchDataEntry
 
         private void buttonNewBatch_Click(object sender, RoutedEventArgs e)
         {
-            var newBatchWindow = new NuovoBatch();
-            newBatchWindow.Show();
-            this.Close();
+            DatabaseHelper db = new DatabaseHelper();
+            db.InitTabs();
+
+            //var newBatchWindow = new NuovoBatch();
+            //newBatchWindow.Show();
+            //this.Close();
         }
 
         private void buttonResumeBatch_Click(object sender, RoutedEventArgs e)

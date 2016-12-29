@@ -1,15 +1,14 @@
 ﻿using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Windows.Forms;
+using SQLite;
 
 
 namespace BatchDataEntry.Models
 {
-    [Table("Batch")]
+    [System.ComponentModel.DataAnnotations.Schema.Table("Batch")]
     public class Batch
     {
+
         public enum TipoFileProcessato
         {
             Tiff = 0,
@@ -18,20 +17,23 @@ namespace BatchDataEntry.Models
 
         public event EventHandler BatchChanged;
 
-        public long Id { get; set; }
-
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
         public string Nome { get; set; }
         public TipoFileProcessato TipoFile { get; set; }
         public string DirectoryInput { get; set; }
         public string DirectoryOutput { get; set; }
-
+        [Indexed]
+        public int IdModello { get; set; }
+        [Ignore]
         public Modello Applicazione { get; set; }
         public int NumDoc { get; set; }
         public int NumPages { get; set; }
+        [Ignore]
         public long Dimensioni { get; set; }
         public int DocCorrente { get; set; }
         public int UltimoIndicizzato { get; set; }
-        public int FKModello { get; set; }
+        
 
         /*
          - Nel caso della cancellazione di un documento oltre all'eliminazione del record bisogna eliminare anche il documento di origine (file)
@@ -52,12 +54,11 @@ namespace BatchDataEntry.Models
             Dimensioni = 0L;
             DocCorrente = 0;
             UltimoIndicizzato = 0;
-            this.FKModello = -1;
         }
 
-        public Batch(string Nome, TipoFileProcessato t, string input, string output)
+        public Batch(string nome, TipoFileProcessato t, string input, string output)
         {
-            this.Nome = Nome;
+            this.Nome = nome;
             this.TipoFile = t;
             this.DirectoryInput = input;
             this.DirectoryOutput = output;
@@ -67,12 +68,11 @@ namespace BatchDataEntry.Models
             this.Dimensioni = 0;
             this.DocCorrente = 0;
             this.UltimoIndicizzato = 0;
-            this.FKModello = -1;
         }
 
-        public Batch(string Nome, TipoFileProcessato t, string input, string output, Modello m)
+        public Batch(string nome, TipoFileProcessato t, string input, string output, Modello m)
         {
-            this.Nome = Nome;
+            this.Nome = nome;
             this.TipoFile = t;
             this.DirectoryInput = input;
             this.DirectoryOutput = output;
@@ -81,13 +81,12 @@ namespace BatchDataEntry.Models
             this.NumPages = 0;
             this.Dimensioni = 0;
             this.DocCorrente = 0;
-            this.UltimoIndicizzato = 0;
-            this.FKModello = -1;
+            this.UltimoIndicizzato = 0;      
         }
 
-        public Batch(string Nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui)
+        public Batch(string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui)
         {
-            this.Nome = Nome;
+            this.Nome = nome;
             this.TipoFile = t;
             this.DirectoryInput = input;
             this.DirectoryOutput = output;
@@ -97,12 +96,11 @@ namespace BatchDataEntry.Models
             this.Dimensioni = dim;
             this.DocCorrente = dc;
             this.UltimoIndicizzato = ui;
-            this.FKModello = -1;
         }
 
-        public Batch(string Nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, int fk)
+        public Batch(string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, int fk)
         {
-            this.Nome = Nome;
+            this.Nome = nome;
             this.TipoFile = t;
             this.DirectoryInput = input;
             this.DirectoryOutput = output;
@@ -112,13 +110,12 @@ namespace BatchDataEntry.Models
             this.Dimensioni = dim;
             this.DocCorrente = dc;
             this.UltimoIndicizzato = ui;
-            this.FKModello = fk;
         }
 
-        public Batch(int id, string Nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui)
+        public Batch(int id, string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui)
         {
             this.Id = id;
-            this.Nome = Nome;
+            this.Nome = nome;
             this.TipoFile = t;
             this.DirectoryInput = input;
             this.DirectoryOutput = output;
@@ -130,10 +127,10 @@ namespace BatchDataEntry.Models
             this.UltimoIndicizzato = ui;
         }
 
-        public Batch(int id, string Nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, int fk)
+        public Batch(int id, string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, int fk)
         {
             this.Id = id;
-            this.Nome = Nome;
+            this.Nome = nome;
             this.TipoFile = t;
             this.DirectoryInput = input;
             this.DirectoryOutput = output;
@@ -143,7 +140,6 @@ namespace BatchDataEntry.Models
             this.Dimensioni = dim;
             this.DocCorrente = dc;
             this.UltimoIndicizzato = ui;
-            this.FKModello = fk;
         }
 
         void StausTipoFileProcessatoChangeTick(object stato)

@@ -4,23 +4,28 @@ using System.IO;
 using System.Threading.Tasks;
 using BatchDataEntry.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using BatchDataEntry.Helpers;
 
 namespace UnitTestBatchDataEntry
 {
     [TestClass]
     public class DbHelperTest
     {
-        // Insert test section
-     
+        private DatabaseHelper dbh = new DatabaseHelper();
+
+        [TestMethod]
+        public async Task InitTaskTest()
+        {
+            dbh.InitTabs();
+        }
+
         [TestMethod]
         public async Task InsertCampoTaskTest()
         {
             Campo c1 = new Campo("colonnaIndice", false, "", true);
             Campo c2 = new Campo("colonna2", true, "prova", true);
-            Campo c3 = new Campo("colonna3", false, "", true);
-            await BatchDataEntry.Helpers.HDatabase.InsertCampoTask(c1);
-            await BatchDataEntry.Helpers.HDatabase.InsertCampoTask(c2);
-            await BatchDataEntry.Helpers.HDatabase.InsertCampoTask(c3);
+            await dbh.InsertAsync(c1);
+            await dbh.InsertAsync(c2);
         }
         
         [TestMethod]
@@ -36,14 +41,14 @@ namespace UnitTestBatchDataEntry
             listCampi.Add(c3);
 
             Modello m = new Modello("test modello", Batch.TipoFileProcessato.Pdf, false, listCampi, new FileCSV());
-            await BatchDataEntry.Helpers.HDatabase.InsertModelloTask(m);
+            await dbh.InsertAsync(m);
         }
 
         [TestMethod]
         public async Task InsertOrigineCsvTaskTest()
         {
             FileCSV fc = new FileCSV("null/path", ';');
-            await BatchDataEntry.Helpers.HDatabase.InsertOrigineCsvTask(fc);
+            await dbh.InsertAsync(fc);
         }
 
         [TestMethod]
@@ -66,7 +71,35 @@ namespace UnitTestBatchDataEntry
                 Path.Combine(Directory.GetCurrentDirectory(), "pdf_test"), 
                 Path.Combine(Directory.GetCurrentDirectory(), "output_test"), 
                 m, 0, 0, 0L, 0, 0);
-            await BatchDataEntry.Helpers.HDatabase.InsertBatchTask(b);
+            await dbh.InsertAsync(b);
+        }
+
+        [TestMethod]
+        public async Task GetRecordsCampo()
+        {
+            var res = dbh.GetRecordsAsync(typeof(Batch));
+            Console.WriteLine(res);
+        }
+
+        [TestMethod]
+        public async Task GetRecordsFile()
+        {
+            var res = dbh.GetRecordsAsync(typeof(Batch));
+            Console.WriteLine(res);
+        }
+
+        [TestMethod]
+        public async Task GetRecordsModello()
+        {
+            var res = dbh.GetRecordsAsync(typeof(Batch));
+            Console.WriteLine(res);
+        }
+
+        [TestMethod]
+        public async Task GetRecordsBatch()
+        {
+            var res = dbh.GetRecordsAsync(typeof(Batch));
+            Console.WriteLine(res);
         }
     }
 }
