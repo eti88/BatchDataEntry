@@ -3,36 +3,94 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BatchDataEntry.Views"
+        xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
+        xmlns:models="clr-namespace:BatchDataEntry.Models"
+        xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
-        Title="Nuovo Batch" Height="310" Width="300">
+        Title="Nuovo Batch" Height="510" Width="450">
+    <Window.Resources>
+        <viewModels:ViewModelNewBatch x:Key="ViewModelNewBatch"/>
+        <ObjectDataProvider x:Key="fileTypeEnum" MethodName="GetValues" ObjectType="{x:Type models:TipoFileProcessato}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="models:TipoFileProcessato"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ControlTemplate x:Key="validationErrorTemplate">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                    <Grid Width="12" Height="12">
+                        <Ellipse Width="12" Height="12" Fill="Red" HorizontalAlignment="Center" VerticalAlignment="Center"></Ellipse>
+                        <TextBlock Foreground="White" FontWeight="Heavy" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" ToolTip="{Binding ElementName=ErrorAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">X</TextBlock>
+                    </Grid>
+                    <TextBlock Foreground="Red" Margin="2,0,0,0" 
+                       Text="{Binding ElementName=ErrorAdorner, 
+                       Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">
+                    </TextBlock>
+                </StackPanel>
+                <AdornedElementPlaceholder x:Name="ErrorAdorner" ></AdornedElementPlaceholder>
+            </DockPanel>
+        </ControlTemplate>
+    </Window.Resources>
+       
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="48*"/>
-            <RowDefinition Height="7*"/>
-        </Grid.RowDefinitions>
-        <DockPanel LastChildFill="True" Grid.RowSpan="2">
-            <StackPanel Height="240" Background="#FFF0F0F0" DockPanel.Dock="Top">
-                <Label x:Name="label" Content="Nome" FontSize="11"/>
-                <TextBox x:Name="textBox" Height="23" TextWrapping="Wrap" Text="TextBoxNome" Margin="10,5,10,0" FontSize="11"/>
-                <Label x:Name="label1" Content="Tipo file"/>
-                <ComboBox x:Name="comboBox" Margin="10,0"/>
-                <Label x:Name="label2" Content="Directory di Input"/>
-                <WrapPanel Height="24" Margin="10,10,10,0">
-                    <TextBox x:Name="textBox1" Height="23" TextWrapping="Wrap" Text="TextBoxSelectDir" Width="245" Margin="0,0,5,0" FontSize="11"/>
-                    <Button x:Name="button2" Content="..." Width="22"/>
-                </WrapPanel>
-                <Label x:Name="label3" Content="Directory di Output"/>
-                <WrapPanel Height="24" Margin="10,10,10,0">
-                    <TextBox x:Name="textBox2" Height="23" TextWrapping="Wrap" Text="TextBoxSelectDir" Width="245" Margin="0,0,5,0" FontSize="11"/>
-                    <Button x:Name="button3" Content="..." Width="22"/>
-                </WrapPanel>
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Top" Height="424">
+                <StackPanel Orientation="Vertical" Height="325">
+                    <Label Content="Nome" />
+                    <TextBox VerticalContentAlignment="Center" FontSize="14" Height="30" Margin="10,10,10,0" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
+                        <TextBox.Text>
+                            <Binding Path="CurrentBatch.Nome" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <validators:NameValidator></validators:NameValidator>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                        <Label Content="Tipo File" />
+                    <ComboBox x:Name="comboBoxTipoFile" VerticalContentAlignment="Center" ItemsSource="{Binding Source={StaticResource fileTypeEnum}}" SelectedItem="{Binding Path=CurrentBatch.TipoFile}" IsSynchronizedWithCurrentItem="True" Margin="10,10,10,0" Height="30" FontSize="14"/>
+                    <Label Content="Directory Input" />
+                    <WrapPanel Height="40" Margin="10,10,0,0">
+                        <TextBox x:Name="textBoxDirInput" VerticalContentAlignment="Center" Height="30" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0" FontSize="14" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
+                            <TextBox.Text>
+                                <Binding Path="CurrentBatch.DirectoryInput" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding.ValidationRules>
+                                        <validators:PathValidator></validators:PathValidator>
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                        <Button x:Name="buttonSelectPathInput" Content="..." Click="ButtonSelectPathInput_OnClick" Width="35" Margin="0,5,0,0" Height="30">
+                            <Button.DataContext>
+                                <viewModels:ViewModelNewBatch/>
+                            </Button.DataContext>
+                        </Button>
+                    </WrapPanel>
+                    <Label Content="Directory Output" />
+                    <WrapPanel Height="40" Margin="10,10,0,0">
+                        <TextBox x:Name="textBoxDirOutput" VerticalContentAlignment="Center" Height="30" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0" FontSize="14">
+                            <TextBox.Text>
+                                <Binding Path="CurrentBatch.DirectoryOutput" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                                    <Binding.ValidationRules>
+                                        <validators:PathValidator></validators:PathValidator>
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </TextBox.Text>
+                        </TextBox>
+                        <Button x:Name="buttonSelectPathOutput" Content="..." Click="ButtonSelectPathOutput_OnClick" Width="35" Margin="0,5,0,0" Height="30">
+                            <Button.DataContext>
+                                <viewModels:ViewModelNewBatch/>
+                            </Button.DataContext>
+                        </Button>
+                    </WrapPanel>
+                </StackPanel>
             </StackPanel>
-            <WrapPanel Height="30" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
-                <Button x:Name="buttonCancella" Click="ButtonCancella_Click" Content="Cancella" Height="20" VerticalAlignment="Center" Width="75" Margin="0,5,10,5" FontSize="11"/>
-                <Button x:Name="buttonContinua" Click="ButtonContinua_OnClick" Content="Continua" Height="20" VerticalAlignment="Center" Width="75" RenderTransformOrigin="1.84,0.65" Margin="0,5" FontSize="11"/>
-            </WrapPanel>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="45" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Button Content="Cancella" Click="ButtonCancella_Click"  Width="140" Height="35" VerticalAlignment="Center" Margin="15,5,5,5"/>
+                <Button Content="Continua" Command="{Binding Path=ApplyCommand}" Click="ButtonBase_OnClick" Width="140" Height="35" VerticalAlignment="Center" Margin="15,5,5,5"/>
+            </StackPanel>
         </DockPanel>
-
     </Grid>
 </Window>
+
+
+

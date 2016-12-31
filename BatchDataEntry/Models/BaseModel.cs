@@ -1,17 +1,40 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
+
 
 namespace BatchDataEntry.Models
 {
     public class BaseModel : INotifyPropertyChanged
     {
-        protected void RaisePropertyChanged(string prop)
+       
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            this.VerifyPropertyName(propertyName);
+
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(prop));
+                var  e = new PropertyChangedEventArgs(propertyName);
+                this.PropertyChanged(this, e);
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        [Conditional("DEBUG")]
+        [DebuggerStepThrough]
+        public virtual void VerifyPropertyName(string propertyName)
+        {
+            if (TypeDescriptor.GetProperties(this)[propertyName] == null)
+            {
+                string msg = "Invalid property name: " + propertyName;
+                if(this.ThrowOnInvalidPropertyName)
+                    throw new Exception(msg);
+                else
+                    Debug.Fail(msg);
+            }
+        }
+
+        protected virtual bool ThrowOnInvalidPropertyName { get; private set; }
     }
 }

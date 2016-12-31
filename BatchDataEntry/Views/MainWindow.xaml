@@ -29,10 +29,10 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             <StackPanel DockPanel.Dock="Right" Width="230" Margin="20,10,0,10" HorizontalAlignment="Right">
-                <Button x:Name="buttonNewBatch" Click="buttonNewBatch_Click" Content="Nuovo Batch" Height="35" Margin="0,20,0,0" Width="140" FontWeight="Bold"/>
-                <Button x:Name="buttonModifyBatch" Click="buttonResumeBatch_Click"  Content="Modifica" Height="35" Margin="45,20,45,0" Width="140" FontWeight="Bold"/>
-                <Button x:Name="buttonResumeBatch" Click="buttonResumeBatch_Click"  Content="Continua" Height="35" Margin="0,20,0,0" Width="140" FontWeight="Bold"/>
-                <Button x:Name="buttonAddApp" Click="ButtonAddApp_OnClick"  Content="Aggiungi Modello" Height="35" Margin="0,20,0,0" Width="140" FontWeight="Bold"/>
+                <Button x:Name="buttonNewBatch" Command="{Binding Path=NewCommand}" Content="Nuovo Batch" Height="35" Margin="0,20,0,0" Width="140" FontWeight="Bold"/>
+                <Button x:Name="buttonModifyBatch" Command="{Binding Path=ModifyCommand}"  Content="Modifica" Height="35" Margin="45,20,45,0" Width="140" FontWeight="Bold"/>
+                <Button x:Name="buttonResumeBatch" Command="{Binding Path=ResumeCommand}"  Content="Continua" Height="35" Margin="0,20,0,0" Width="140" FontWeight="Bold"/>
+                <Button x:Name="buttonAddApp" Command="{Binding Path=ModelAddCommand}"  Content="Aggiungi Modello" Height="35" Margin="0,20,0,0" Width="140" FontWeight="Bold"/>
                 <Button x:Name="buttonDeleteBatch" Command="{Binding Path=DeleteCommand}"  Content="Elimina" Height="35" Margin="0,20,0,0" Width="140" Background="#FFE02B2B" Foreground="White" FontWeight="Bold"/>
             </StackPanel>
         </DockPanel>

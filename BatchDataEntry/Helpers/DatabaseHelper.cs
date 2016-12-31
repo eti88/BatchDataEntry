@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using BatchDataEntry.Models;
 using NLog;
 using SQLite;
@@ -28,10 +27,9 @@ namespace BatchDataEntry.Helpers
                 {
                     var db = new SQLiteConnection(PATHDB);
 
-                    db.CreateTable<Campo>();
-                    db.CreateTable<FileCSV>();
-                    db.CreateTable<Modello>();
-                    db.CreateTable<Batch>();
+                    db.CreateTable<DBModels.Campo>();
+                    db.CreateTable<DBModels.Modello>();
+                    db.CreateTable<DBModels.Batch>();
                     
                 }
 
@@ -130,8 +128,9 @@ namespace BatchDataEntry.Helpers
                 #if DEBUG
                 Console.WriteLine(@"Get elements by id nella tabella Batch");
                 #endif
-
-                return db.Find<Batch>(id);
+                Batch b = new Batch(db.Find<DBModels.Batch>(id));
+                
+                return b;
             }
             catch (Exception e)
             {
@@ -153,31 +152,8 @@ namespace BatchDataEntry.Helpers
                 #if DEBUG
                 Console.WriteLine(@"Get elements by id nella tabella Campo");
                 #endif
-
-                return db.Find<Campo>(id);
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Close();
-            }
-            return null;
-        }
-
-        public FileCSV GetFileCSVById(int id)
-        {
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-            #if DEBUG
-            Console.WriteLine(@"Get elements by id nella tabella FileCSV");
-            #endif
-
-                return db.Find<FileCSV>(id);
+                Campo c = new Campo(db.Find<DBModels.Campo>(id));
+                return c;
             }
             catch (Exception e)
             {
@@ -199,8 +175,8 @@ namespace BatchDataEntry.Helpers
             #if DEBUG
             Console.WriteLine(@"Get elements by id nella tabella Modello");
             #endif
-
-                return db.Find<Modello>(id);
+                Modello m = new Modello(db.Find<DBModels.Modello>(id));
+                return m;
             }
             catch (Exception e)
             {
@@ -223,8 +199,13 @@ namespace BatchDataEntry.Helpers
                 Console.WriteLine(@"Get record dalla tabella Batch");
                 #endif
 
-                var list = db.Table<Batch>().ToList();
-                var obsc = new ObservableCollection<Batch>(list);
+                var list = db.Table<DBModels.Batch>().ToList();
+                var obsc = new ObservableCollection<Batch>();
+                foreach (DBModels.Batch element in list)
+                {
+                    obsc.Add(new Batch(element));
+                }
+
 
                 return obsc;
             }
@@ -249,9 +230,12 @@ namespace BatchDataEntry.Helpers
             Console.WriteLine(@"Get record dalla tabella Campo");
             #endif
 
-                var list = db.Table<Campo>().ToList();
-                var obsc = new ObservableCollection<Campo>(list);
-
+                var list = db.Table<DBModels.Campo>().ToList();
+                var obsc = new ObservableCollection<Campo>();
+                foreach (DBModels.Campo element in list)
+                {
+                    obsc.Add(new Campo(element));
+                }
                 return obsc;
             }
             catch (Exception e)
@@ -275,9 +259,12 @@ namespace BatchDataEntry.Helpers
             Console.WriteLine(@"Get record dalla tabella Batch");
             #endif
 
-                var list = db.Table<Modello>().ToList();
-                var obsc = new ObservableCollection<Modello>(list);
-
+                var list = db.Table<DBModels.Modello>().ToList();
+                var obsc = new ObservableCollection<Modello>();
+                foreach (DBModels.Modello element in list)
+                {
+                    obsc.Add(new Modello(element));
+                }
                 return obsc;
             }
             catch (Exception e)
@@ -301,9 +288,12 @@ namespace BatchDataEntry.Helpers
                 Console.WriteLine(@"Query su tabella Batch");
                 #endif
 
-                var list = db.Query<Batch>(query).ToList();
-                var obsc = new ObservableCollection<Batch>(list);
-
+                var list = db.Query<DBModels.Batch>(query).ToList();
+                var obsc = new ObservableCollection<Batch>();
+                foreach (DBModels.Batch element in list)
+                {
+                    obsc.Add(new Batch(element));
+                }
                 return obsc;
             }
             catch (Exception e)
@@ -327,34 +317,12 @@ namespace BatchDataEntry.Helpers
                 Console.WriteLine(@"Query su tabella Campo");
                 #endif
 
-                var list = db.Query<Campo>(query).ToList();
-                var obsc = new ObservableCollection<Campo>(list);
-
-                return obsc;
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Close();
-            }
-            return null;
-        }
-
-        public ObservableCollection<FileCSV> FileCSVQuery(string query)
-        {
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-                #if DEBUG
-                Console.WriteLine(@"Query su tabella FileCSV");
-                #endif
-                var list = db.Query<FileCSV>(query).ToList();
-                var obsc = new ObservableCollection<FileCSV>(list);
-
+                var list = db.Query<DBModels.Campo>(query).ToList();
+                var obsc = new ObservableCollection<Campo>();
+                foreach (DBModels.Campo element in list)
+                {
+                    obsc.Add(new Campo(element));
+                }
                 return obsc;
             }
             catch (Exception e)
@@ -377,9 +345,12 @@ namespace BatchDataEntry.Helpers
                 #if DEBUG
                 Console.WriteLine(@"Query sulla tabella Modello");
                 #endif
-                var list = db.Query<Modello>(query).ToList();
-                var obsc = new ObservableCollection<Modello>(list);
-
+                var list = db.Query<DBModels.Modello>(query).ToList();
+                var obsc = new ObservableCollection<Modello>();
+                foreach (DBModels.Modello element in list)
+                {
+                    obsc.Add(new Modello(element));
+                }
                 return obsc;
             }
             catch (Exception e)

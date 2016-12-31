@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using BatchDataEntry.Helpers;
 using SQLite;
 
 
@@ -11,94 +13,128 @@ namespace BatchDataEntry.Models
     /// per l'utilizzo di determinati campi senza inserirli ogni volta. (I modelli sono unici)
     /// </summary>
 
-    [System.ComponentModel.DataAnnotations.Schema.Table("Modello")]
     public class Modello : BaseModel
     {
+        private int _id;
+        private string _nome;
+        private bool _origine;
+        private ObservableCollection<Campo> _campi;
+        private string _filecsv;
+        private string _separatore;
 
-        [PrimaryKey, AutoIncrement]
-        public int Id { get; set; }
-
-        private string _Nome;
+        public int Id
+        {
+            get { return _id; }
+            set
+            {
+                if (value != _id)
+                {
+                    _id = value;
+                    OnPropertyChanged("Id");
+                }
+            }
+        }
         public string Nome {
-            get { return _Nome; }
+            get { return _nome; }
             set
             {
-                if (_Nome != null)
+                if (value != _nome)
                 {
-                    _Nome = value;
-                    RaisePropertyChanged("Nome");
+                    _nome = value;
+                    OnPropertyChanged("Nome");
+                }
+            }
+        }
+        public bool OrigineCsv
+        {
+            get { return _origine; }
+            set
+            {
+                if (value != _origine)
+                {
+                    _origine = value;
+                    OnPropertyChanged("OrigineCsv");
+                }
+            }
+        }
+        public ObservableCollection<Campo> Campi
+        {
+            get { return _campi; }
+            set
+            {
+                if (value != _campi)
+                {
+                    _campi = value;
+                    OnPropertyChanged("Campi");
+                }
+            }
+        }
+        public string PathFileCsv
+        {
+            get { return _filecsv; }
+            set
+            {
+                if (value != _filecsv)
+                {
+                    _filecsv = value;
+                    OnPropertyChanged("PathFileCsv");
+                }
+            }
+        }
+        public string Separatore
+        {
+            get { return _separatore; }
+            set
+            {
+                if (value != _separatore)
+                {
+                    _separatore = value;
+                    OnPropertyChanged("Separatore");
                 }
             }
         }
 
-        private bool _OrigineCsv;
-        public bool OrigineCsv {
-            get { return _OrigineCsv; }
-            set
-            {
-                if (_OrigineCsv != null)
-                {
-                    _OrigineCsv = value;
-                    RaisePropertyChanged("OrigineCsv");
-                }
-            }
-        }
-
-        private List<Campo> _Campi;
-        [Ignore]
-        public List<Campo> Campi {
-            get { return _Campi; }
-            set
-            {
-                if (_Campi != null)
-                {
-                    _Campi = value;
-                    RaisePropertyChanged("Campi");
-                }
-            }
-        }
-
-        [Indexed]
-        public int IdFileCSV { get; set; }
-
-        private FileCSV _OrigineDatiCsv;
-        [Ignore]
-        public FileCSV OrigineDatiCSV {
-            get { return _OrigineDatiCsv; }
-            set
-            {
-                if (_OrigineDatiCsv != null)
-                {
-                    _OrigineDatiCsv = value;
-                    RaisePropertyChanged("OrigineDatiCsv");
-                }
-            }
-        }
-
-        public int IdFileCsv { get; set; }
 
         public Modello()
         {
             this.OrigineCsv = false;
-            this.Campi = new List<Campo>();
-            this.OrigineDatiCSV = new FileCSV();
+            this.Campi = new ObservableCollection<Campo>();
         }
 
-        public Modello(string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
+        public Modello(string nome, bool orig, ObservableCollection<Campo> campi)
         {
             this.Nome = nome;
             this.OrigineCsv = orig;
             this.Campi = campi;
-            this.OrigineDatiCSV = file;
         }
 
-        public Modello(int id, string nome, Batch.TipoFileProcessato tipo, bool orig, List<Campo> campi, FileCSV file)
+        public Modello(int id, string nome, bool orig, ObservableCollection<Campo> campi)
         {
             this.Id = id;
             this.Nome = nome;
             this.OrigineCsv = orig;
             this.Campi = campi;
-            this.OrigineDatiCSV = file;
+        }
+
+        public Modello(int id, string nome, bool orig, ObservableCollection<Campo> campi, string path, string sep)
+        {
+            this.Id = id;
+            this.Nome = nome;
+            this.OrigineCsv = orig;
+            this.Campi = campi;
+            this.PathFileCsv = path;
+            this.Separatore = sep;
+        }
+
+        public Modello(DBModels.Modello m)
+        {
+            Id = m.Id;
+            Nome = m.Nome;
+            OrigineCsv = m.OrigineCsv;
+            DatabaseHelper db = new DatabaseHelper();
+            Campi = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", m.Id));
+            PathFileCsv = m.PathFileCsv;
+            Separatore = m.Separatore;
         }
     }
 }
