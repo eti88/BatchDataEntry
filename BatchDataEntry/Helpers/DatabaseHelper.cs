@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -54,6 +56,10 @@ namespace BatchDataEntry.Helpers
             #endif
         }
 
+        /* TODO: Verificare se effettivamente serve effettuare la conversione degli oggetti in DBModels
+         * prima di effettuare le operazioni di inserimento, modifica, eliminazione su generic types
+         */
+
         public void InsertRecord<T>(T model)
         {
             var db = new SQLiteConnection(PATHDB);
@@ -63,8 +69,26 @@ namespace BatchDataEntry.Helpers
                 Console.WriteLine(@"Insertnella tabella " + typeof(T));
                 #endif
 
-                db.Insert(model);
+                switch (typeof(T).ToString())
+                {
+                    case "Batch":
+                        var a = model as Batch;
+                        var tmpa = new DBModels.Batch(a);
+                        db.Insert(tmpa);
+                        break;
 
+                    case "Campo":
+                        var b = model as Campo;
+                        var tmpb = new DBModels.Campo(b);
+                        db.Insert(tmpb);
+                        break;
+
+                    case "Modello":
+                        var c = model as Modello;
+                        var tmpc = new DBModels.Modello(c);
+                        db.Insert(tmpc);
+                        break;
+                }
             }
             catch (Exception e)
             {
@@ -86,7 +110,26 @@ namespace BatchDataEntry.Helpers
                 Console.WriteLine(@"Update nella tabella " + typeof(T));
                 #endif
 
-                db.Update(model);
+                switch (typeof(T).ToString())
+                {
+                    case "Batch":
+                        var a = model as Batch;
+                        var tmpa = new DBModels.Batch(a);
+                        db.Update(tmpa);
+                        break;
+
+                    case "Campo":
+                        var b = model as Campo;
+                        var tmpb = new DBModels.Campo(b);
+                        db.Update(tmpb);
+                        break;
+
+                    case "Modello":
+                        var c = model as Modello;
+                        var tmpc = new DBModels.Modello(c);
+                        db.Update(tmpc);
+                        break;
+                }
             }
             catch (Exception e)
             {
@@ -107,6 +150,7 @@ namespace BatchDataEntry.Helpers
                 #if DEBUG
                 Console.WriteLine(@"Delete nella tabella " + typeof(T));
                 #endif
+
                 db.Delete<T>(id);
             }
             catch (Exception e)
@@ -336,7 +380,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Modello> Query(string query)
+        public ObservableCollection<Modello> ModelloQuery(string query)
         {
             var db = new SQLiteConnection(PATHDB);
 
@@ -352,6 +396,31 @@ namespace BatchDataEntry.Helpers
                     obsc.Add(new Modello(element));
                 }
                 return obsc;
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                db.Close();
+            }
+            return null;
+        }
+
+        public IEnumerable<DBModels.Modello> IEnumerableModelli()
+        {
+            var db = new SQLiteConnection(PATHDB);
+            string querycmd = "SELECT Id, Nome FROM Modello";
+            try
+            {
+#if DEBUG
+                Console.WriteLine(@"Query sulla tabella Modello");
+#endif
+                var list = db.Query<DBModels.Modello>(querycmd).ToList();
+                IEnumerable<DBModels.Modello> tmp = list.AsEnumerable();
+
+                return tmp;
             }
             catch (Exception e)
             {

@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
 using BatchDataEntry.Helpers;
-using SQLite;
+
 
 
 namespace BatchDataEntry.Models
@@ -135,6 +133,11 @@ namespace BatchDataEntry.Models
             Campi = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", m.Id));
             PathFileCsv = m.PathFileCsv;
             Separatore = m.Separatore;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("[{0}, {1}, {2}, {3}, {4}, c: {5}]", this.Id, this.Nome, this.OrigineCsv, this.PathFileCsv, this.Separatore, Campi.Count);
         }
     }
 }

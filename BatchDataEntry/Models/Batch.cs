@@ -1,8 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
 using BatchDataEntry.Helpers;
-using SQLite;
 
 
 namespace BatchDataEntry.Models

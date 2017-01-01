@@ -22,7 +22,7 @@ namespace BatchDataEntry.ViewModels
             set
             {
                 _Batches = value;
-                RaisePropertyChanged("LstBatchesUpd");
+                RaisePropertyChanged("Batches");
             }
         }   
 
@@ -168,8 +168,8 @@ namespace BatchDataEntry.ViewModels
 
         private void ModelAddItem()
         {
-            var addModel = new Applicazione();
-            addModel.ShowDialog();
+            var Models = new Applicazione();
+            Models.ShowDialog();
         }
 
         private void DeleteBatchItem()

@@ -7,7 +7,7 @@
         xmlns:models="clr-namespace:BatchDataEntry.Models"
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
-        Title="Nuovo Batch" Height="510" Width="450">
+        Title="Nuovo Batch" Height="590" Width="450" MinHeight="590">
     <Window.Resources>
         <viewModels:ViewModelNewBatch x:Key="ViewModelNewBatch"/>
         <ObjectDataProvider x:Key="fileTypeEnum" MethodName="GetValues" ObjectType="{x:Type models:TipoFileProcessato}">
@@ -15,29 +15,14 @@
                 <x:Type TypeName="models:TipoFileProcessato"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        <ControlTemplate x:Key="validationErrorTemplate">
-            <DockPanel>
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-                    <Grid Width="12" Height="12">
-                        <Ellipse Width="12" Height="12" Fill="Red" HorizontalAlignment="Center" VerticalAlignment="Center"></Ellipse>
-                        <TextBlock Foreground="White" FontWeight="Heavy" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" ToolTip="{Binding ElementName=ErrorAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">X</TextBlock>
-                    </Grid>
-                    <TextBlock Foreground="Red" Margin="2,0,0,0" 
-                       Text="{Binding ElementName=ErrorAdorner, 
-                       Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">
-                    </TextBlock>
-                </StackPanel>
-                <AdornedElementPlaceholder x:Name="ErrorAdorner" ></AdornedElementPlaceholder>
-            </DockPanel>
-        </ControlTemplate>
     </Window.Resources>
        
     <Grid>
         <DockPanel>
-            <StackPanel DockPanel.Dock="Top" Height="424">
-                <StackPanel Orientation="Vertical" Height="325">
+            <StackPanel DockPanel.Dock="Top" Height="485">
+                <StackPanel Orientation="Vertical" Height="454">
                     <Label Content="Nome" />
-                    <TextBox VerticalContentAlignment="Center" FontSize="14" Height="30" Margin="10,10,10,0" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
+                    <TextBox Margin="10,10,10,0" VerticalContentAlignment="Center" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" Height="30">
                         <TextBox.Text>
                             <Binding Path="CurrentBatch.Nome" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
@@ -47,10 +32,10 @@
                         </TextBox.Text>
                     </TextBox>
                         <Label Content="Tipo File" />
-                    <ComboBox x:Name="comboBoxTipoFile" VerticalContentAlignment="Center" ItemsSource="{Binding Source={StaticResource fileTypeEnum}}" SelectedItem="{Binding Path=CurrentBatch.TipoFile}" IsSynchronizedWithCurrentItem="True" Margin="10,10,10,0" Height="30" FontSize="14"/>
+                    <ComboBox x:Name="comboBoxTipoFile" VerticalContentAlignment="Center" ItemsSource="{Binding Source={StaticResource fileTypeEnum}}" SelectedItem="{Binding Path=CurrentBatch.TipoFile}" IsSynchronizedWithCurrentItem="True" Margin="10,10,10,0"/>
                     <Label Content="Directory Input" />
                     <WrapPanel Height="40" Margin="10,10,0,0">
-                        <TextBox x:Name="textBoxDirInput" VerticalContentAlignment="Center" Height="30" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0" FontSize="14" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
+                        <TextBox x:Name="textBoxDirInput" VerticalContentAlignment="Center" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
                             <TextBox.Text>
                                 <Binding Path="CurrentBatch.DirectoryInput" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                                     <Binding.ValidationRules>
@@ -59,7 +44,7 @@
                                 </Binding>
                             </TextBox.Text>
                         </TextBox>
-                        <Button x:Name="buttonSelectPathInput" Content="..." Click="ButtonSelectPathInput_OnClick" Width="35" Margin="0,5,0,0" Height="30">
+                        <Button x:Name="buttonSelectPathInput" Style="{StaticResource OpenDirDialogButton}" Content="..." Click="ButtonSelectPathInput_OnClick">
                             <Button.DataContext>
                                 <viewModels:ViewModelNewBatch/>
                             </Button.DataContext>
@@ -67,7 +52,7 @@
                     </WrapPanel>
                     <Label Content="Directory Output" />
                     <WrapPanel Height="40" Margin="10,10,0,0">
-                        <TextBox x:Name="textBoxDirOutput" VerticalContentAlignment="Center" Height="30" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0" FontSize="14">
+                        <TextBox x:Name="textBoxDirOutput" VerticalContentAlignment="Center" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0">
                             <TextBox.Text>
                                 <Binding Path="CurrentBatch.DirectoryOutput" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                                     <Binding.ValidationRules>
@@ -76,17 +61,21 @@
                                 </Binding>
                             </TextBox.Text>
                         </TextBox>
-                        <Button x:Name="buttonSelectPathOutput" Content="..." Click="ButtonSelectPathOutput_OnClick" Width="35" Margin="0,5,0,0" Height="30">
+                        <Button x:Name="buttonSelectPathOutput" Content="..." Click="ButtonSelectPathOutput_OnClick" Style="{StaticResource OpenDirDialogButton}">
                             <Button.DataContext>
                                 <viewModels:ViewModelNewBatch/>
                             </Button.DataContext>
                         </Button>
                     </WrapPanel>
+                    <Label Content="Modello" />
+                    <ComboBox x:Name="comboBoxModello" VerticalContentAlignment="Center" ItemsSource="{Binding Path=Models}" SelectedValue="{Binding CurrentBatch.IdModello, Mode=TwoWay}" IsSynchronizedWithCurrentItem="True"
+                              SelectedValuePath="Id" 
+                              DisplayMemberPath="Nome" Margin="10,10,10,0"/>
                 </StackPanel>
             </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="45" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                <Button Content="Cancella" Click="ButtonCancella_Click"  Width="140" Height="35" VerticalAlignment="Center" Margin="15,5,5,5"/>
-                <Button Content="Continua" Command="{Binding Path=ApplyCommand}" Click="ButtonBase_OnClick" Width="140" Height="35" VerticalAlignment="Center" Margin="15,5,5,5"/>
+                <Button Content="Cancella" Click="ButtonCancella_Click"  VerticalAlignment="Center" Style="{StaticResource GenericButton}"/>
+                <Button Content="Continua" Command="{Binding Path=ApplyCommand}" Click="ButtonBase_OnClick" VerticalAlignment="Center" Style="{StaticResource GenericButton}" Margin="15,5,5,5"/>
             </StackPanel>
         </DockPanel>
     </Grid>

@@ -15,13 +15,23 @@ using System.Windows.Shapes;
 namespace BatchDataEntry.Views
 {
     /// <summary>
-    /// Logica di interazione per NuovoCampo.xaml
+    /// Logica di interazione per CampiV.xaml
     /// </summary>
-    public partial class NuovoCampo : Window
+    public partial class CampiV : Window
     {
-        public NuovoCampo()
+        public CampiV()
         {
             InitializeComponent();
+        }
+
+        private void checkBoxValorePre_Checked(object sender, RoutedEventArgs e)
+        {
+            textBoxValPre.IsEnabled = true;
+        }
+
+        private void checkBoxValorePre_OnUnchecked(object sender, RoutedEventArgs e)
+        {
+            textBoxValPre.IsEnabled = false;
         }
     }
 }

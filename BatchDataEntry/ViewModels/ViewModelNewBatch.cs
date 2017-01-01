@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Forms;
@@ -22,6 +24,17 @@ namespace BatchDataEntry.ViewModels
             {
                 _currentBatch = value;
                 RaisePropertyChanged("CurrentBatch");
+            }
+        }
+
+        private IEnumerable<DBModels.Modello> _models;
+        public IEnumerable<DBModels.Modello> Models
+        {
+            get { return _models; }
+            set
+            {
+                _models = value;
+                RaisePropertyChanged("Models");
             }
         }
 
@@ -54,13 +67,15 @@ namespace BatchDataEntry.ViewModels
         public ViewModelNewBatch()
         {
             CurrentBatch = new Batch();
-            _alreadyExist = false;          
+            _alreadyExist = false;
+            PopulateComboboxModels();
         }
 
         public ViewModelNewBatch(Batch batch)
         {
             CurrentBatch = batch;
             _alreadyExist = true;
+            PopulateComboboxModels();
         }
 
         private void AddOrUpdateBatchItem()
@@ -81,12 +96,15 @@ namespace BatchDataEntry.ViewModels
                 db.InsertRecord(batch);
                 RaisePropertyChanged("Batches");
                 this.CloseWindow(true);
-            }
-            
-            // ricaricare la lista dei batch nella view principale
-            
+            }         
         }
 
-        
+        private void PopulateComboboxModels()
+        {
+            DatabaseHelper db = new DatabaseHelper();
+            IEnumerable<DBModels.Modello> tmp = db.IEnumerableModelli();      
+            Models = tmp;
+            RaisePropertyChanged("Models");
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using System;
+using SQLite;
 
 namespace BatchDataEntry.Models
 {
@@ -167,6 +168,13 @@ namespace BatchDataEntry.Models
             this.IndicePrimario = c.IndicePrimario;
             this.TipoCampo = c.TipoCampo;
             this.IdModello = c.IdModello;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}]", this.Id, this.Nome,
+                this.Posizione, this.SalvaValori, this.ValorePredefinito, this.IndicePrimario, this.TipoCampo,
+                this.IdModello);
         }
     }
 }

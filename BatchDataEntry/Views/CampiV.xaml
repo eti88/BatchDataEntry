@@ -1,0 +1,61 @@
+﻿<Window x:Class="BatchDataEntry.Views.CampiV"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BatchDataEntry.Views"
+        xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
+        mc:Ignorable="d"
+        Title="Campi" Height="580" Width="720"
+        MinHeight="580" MaxHeight="580"
+        MinWidth="720" MaxWidth="720">
+    <Window.Resources>
+        <viewModels:ViewModelCampi x:Key="ViewModelCampi"/>
+    </Window.Resources>
+
+        <Grid>
+        <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+            <StackPanel DockPanel.Dock="Left" Margin="5,15,5,10" Width="256">
+                <ListBox x:Name="listBoxCampi" Height="466" FontSize="14" ItemsSource="{Binding Campi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectedItem="{Binding Path=SelectedCampo}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Nome}"></TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Orientation="Horizontal" Height="55" VerticalAlignment="Top">
+                    <Button x:Name="BtnNewItem" Command="{Binding Path=AddNewCampoCmd}" Content="Nuovo" VerticalAlignment="Center" Width="85" FontSize="14" Height="30" HorizontalAlignment="Center" Margin="5,2,70,2"/>
+                    <Button x:Name="BtnDelItem" Command="{Binding Path=DelCampoCmd}" Content="Elimina" VerticalAlignment="Center" Width="85" FontSize="14" Height="30" HorizontalAlignment="Center" Margin="5,2,0,2"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Right" Width="434" HorizontalAlignment="Right" Margin="0,10,0,0" Height="529" VerticalAlignment="Top">
+                <Border BorderThickness="1,1,1,1" Margin="5" Padding="0" BorderBrush="Gray" Height="519" VerticalAlignment="Top">
+                    <DockPanel Margin="0,13,0,0" VerticalAlignment="Top" Height="495">
+                        <StackPanel DockPanel.Dock="Top" Height="451" Margin="0,0,0,5" >
+                            <StackPanel Height="419" HorizontalAlignment="Center">
+                                <Label x:Name="labelNome" Content="Nome" FontSize="14"/>
+                                <TextBox x:Name="textBoxNome" Text="{Binding SelectedCampo.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,10,20" Style="{StaticResource generalTextbox}"/>
+                                <StackPanel Orientation="Horizontal" Margin="10,0,10,10">
+                                    <CheckBox x:Name="checkBoxValorePre" Unchecked="checkBoxValorePre_OnUnchecked" Content="Valore Predefinito" Margin="0,0,5,0" FontSize="14" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center" Checked="checkBoxValorePre_Checked"/>
+                                    <CheckBox x:Name="checkBoxSalvaVal" IsChecked="{Binding Path=SelectedCampo.SalvaValori, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Salva Valori" Margin="5,0" FontSize="14" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"/>
+                                    <CheckBox x:Name="checkBoxPrimary" IsChecked="{Binding Path=SelectedCampo.IndicePrimario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Chiave primaria" Margin="5,0" FontSize="14" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"/>
+                                </StackPanel>
+
+                                <Label x:Name="labelPos" Content="Posizione" FontSize="14"/>
+                                <TextBox x:Name="textBoxPos" Text="{Binding Path=SelectedCampo.Posizione, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource generalTextbox}" Margin="10,0,10,20"></TextBox>
+                                <Label x:Name="labelPre" Content="Valore predefinito" FontSize="14"/>
+                                <TextBox x:Name="textBoxValPre" Text="{Binding Path=SelectedCampo.ValorePredefinito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource generalTextbox}" Margin="10,0,10,20"></TextBox>
+                            </StackPanel>
+
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right">
+                            <Button Content="Salva" Command="{Binding Path=SalvaCampoCmd}" Style="{StaticResource GenericButton}" Margin="0,0,5,0"></Button>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>
