@@ -5,13 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using BatchDataEntry.DBModels;
 using BatchDataEntry.Helpers;
-using BatchDataEntry.Models;
+using Campo = BatchDataEntry.Models.Campo;
 
 namespace BatchDataEntry.ViewModels
 {
     class ViewModelCampi : ViewModelBase
     {
+        /*
+         TODO: aggiungere un oggetto ponte in cui salvare le modifiche
+         dei campi altrimenti vengono aggiornate in automatico nella lista
+         da riportare anche le stesse modifiche nel vmApplicazione
+         */
+
         public ViewModelCampi()
         {
             Campi = new ObservableCollection<Campo>();
@@ -104,13 +111,45 @@ namespace BatchDataEntry.ViewModels
 
         private void AddItem()
         {
+            Campo c = new Campo();
+            this.Campi.Add(c);
+            this.SelectedCampo = c;
         }
 
         private void DelItem()
         {
+            #if DEBUG
+                Console.WriteLine("DeleteCampo: " + SelectedCampo.ToString());
+            #endif
+            if (SelectedCampo.Id >= 0)
+            {
+                DatabaseHelper db = new DatabaseHelper();
+                DBModels.Campo tmp = new DBModels.Campo(SelectedCampo);
+                db.DeleteRecord(tmp, tmp.Id);
+                Campi.Remove(SelectedCampo);
+            }
         }
 
-        private void SaveCampo() { }
+        private void SaveCampo()
+        {
+            DatabaseHelper db = new DatabaseHelper();
+            #if DEBUG
+                Console.WriteLine("SaveCampo: " + SelectedCampo.ToString());
+            #endif
+
+            if (SelectedCampo.Id > 0)
+            {
+                DBModels.Campo tc = new DBModels.Campo(SelectedCampo);
+                db.UpdateRecord(tc);
+                RaisePropertyChanged("Campi");
+            }
+            else
+            {
+                DBModels.Campo tc = new DBModels.Campo(SelectedCampo);
+                db.InsertRecord(tc);
+                RaisePropertyChanged("Campi");
+            }
+        }
 
     }
 }

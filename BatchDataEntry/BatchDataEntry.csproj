@@ -179,6 +179,7 @@
     <Compile Include="Models\BaseModel.cs" />
     <Compile Include="Models\TipoFileProcessato.cs" />
     <Compile Include="Validators\NameValidator.cs" />
+    <Compile Include="Validators\NumValidator.cs" />
     <Compile Include="Validators\PathValidator.cs" />
     <Compile Include="ViewModels\ViewModelApplicazione.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />

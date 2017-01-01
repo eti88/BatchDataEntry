@@ -68,27 +68,7 @@ namespace BatchDataEntry.Helpers
                 #if DEBUG
                 Console.WriteLine(@"Insertnella tabella " + typeof(T));
                 #endif
-
-                switch (typeof(T).ToString())
-                {
-                    case "Batch":
-                        var a = model as Batch;
-                        var tmpa = new DBModels.Batch(a);
-                        db.Insert(tmpa);
-                        break;
-
-                    case "Campo":
-                        var b = model as Campo;
-                        var tmpb = new DBModels.Campo(b);
-                        db.Insert(tmpb);
-                        break;
-
-                    case "Modello":
-                        var c = model as Modello;
-                        var tmpc = new DBModels.Modello(c);
-                        db.Insert(tmpc);
-                        break;
-                }
+                db.Insert(model);
             }
             catch (Exception e)
             {
@@ -109,27 +89,7 @@ namespace BatchDataEntry.Helpers
                 #if DEBUG
                 Console.WriteLine(@"Update nella tabella " + typeof(T));
                 #endif
-
-                switch (typeof(T).ToString())
-                {
-                    case "Batch":
-                        var a = model as Batch;
-                        var tmpa = new DBModels.Batch(a);
-                        db.Update(tmpa);
-                        break;
-
-                    case "Campo":
-                        var b = model as Campo;
-                        var tmpb = new DBModels.Campo(b);
-                        db.Update(tmpb);
-                        break;
-
-                    case "Modello":
-                        var c = model as Modello;
-                        var tmpc = new DBModels.Modello(c);
-                        db.Update(tmpc);
-                        break;
-                }
+                db.Update(model);
             }
             catch (Exception e)
             {

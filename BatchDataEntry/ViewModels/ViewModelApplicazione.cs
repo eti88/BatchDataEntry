@@ -95,7 +95,9 @@ namespace BatchDataEntry.ViewModels
 
         private void AddNewModelItem()
         {
-            this.SelectedModel = new Modello();
+            Modello m = new Modello();
+            Modelli.Add(m);
+            this.SelectedModel = m;
         }
 
         private void RemoveModelItem()
@@ -106,10 +108,10 @@ namespace BatchDataEntry.ViewModels
             if (SelectedModel.Id >= 0)
             {
                 DatabaseHelper db = new DatabaseHelper();
-                db.DeleteRecord(SelectedModel, SelectedModel.Id);
+                DBModels.Modello tmp = new DBModels.Modello(SelectedModel);
+                db.DeleteRecord(tmp, tmp.Id);
                 Modelli.Remove(SelectedModel);
-            }
-            
+            }        
         }
 
         private void SaveModelModified()

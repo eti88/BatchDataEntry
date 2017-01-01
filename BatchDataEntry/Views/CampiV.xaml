@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BatchDataEntry.Views"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
+        xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
         Title="Campi" Height="580" Width="720"
         MinHeight="580" MaxHeight="580"
@@ -30,13 +30,22 @@
                     <Button x:Name="BtnDelItem" Command="{Binding Path=DelCampoCmd}" Content="Elimina" VerticalAlignment="Center" Width="85" FontSize="14" Height="30" HorizontalAlignment="Center" Margin="5,2,0,2"/>
                 </StackPanel>
             </StackPanel>
+            <!-- right panel -->
             <StackPanel DockPanel.Dock="Right" Width="434" HorizontalAlignment="Right" Margin="0,10,0,0" Height="529" VerticalAlignment="Top">
                 <Border BorderThickness="1,1,1,1" Margin="5" Padding="0" BorderBrush="Gray" Height="519" VerticalAlignment="Top">
                     <DockPanel Margin="0,13,0,0" VerticalAlignment="Top" Height="495">
                         <StackPanel DockPanel.Dock="Top" Height="451" Margin="0,0,0,5" >
                             <StackPanel Height="419" HorizontalAlignment="Center">
                                 <Label x:Name="labelNome" Content="Nome" FontSize="14"/>
-                                <TextBox x:Name="textBoxNome" Text="{Binding SelectedCampo.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,10,20" Style="{StaticResource generalTextbox}"/>
+                                <TextBox x:Name="textBoxNome" Margin="10,0,10,20" Style="{StaticResource generalTextbox}">
+                                    <TextBox.Text>
+                                        <Binding Path="SelectedCampo.Nome" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <validators:NameValidator></validators:NameValidator>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
                                 <StackPanel Orientation="Horizontal" Margin="10,0,10,10">
                                     <CheckBox x:Name="checkBoxValorePre" Unchecked="checkBoxValorePre_OnUnchecked" Content="Valore Predefinito" Margin="0,0,5,0" FontSize="14" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center" Checked="checkBoxValorePre_Checked"/>
                                     <CheckBox x:Name="checkBoxSalvaVal" IsChecked="{Binding Path=SelectedCampo.SalvaValori, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Salva Valori" Margin="5,0" FontSize="14" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"/>
@@ -44,7 +53,15 @@
                                 </StackPanel>
 
                                 <Label x:Name="labelPos" Content="Posizione" FontSize="14"/>
-                                <TextBox x:Name="textBoxPos" Text="{Binding Path=SelectedCampo.Posizione, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource generalTextbox}" Margin="10,0,10,20"></TextBox>
+                                <TextBox x:Name="textBoxPos" Style="{StaticResource generalTextbox}" Margin="10,0,10,20">
+                                    <TextBox.Text>
+                                        <Binding Path="SelectedCampo.Posizione" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <validators:NumValidator></validators:NumValidator>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
                                 <Label x:Name="labelPre" Content="Valore predefinito" FontSize="14"/>
                                 <TextBox x:Name="textBoxValPre" Text="{Binding Path=SelectedCampo.ValorePredefinito, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource generalTextbox}" Margin="10,0,10,20"></TextBox>
                             </StackPanel>
