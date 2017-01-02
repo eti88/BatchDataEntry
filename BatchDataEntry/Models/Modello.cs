@@ -13,6 +13,8 @@ namespace BatchDataEntry.Models
 
     public class Modello : BaseModel
     {
+        private MementoModello MyMemento;
+
         private int _id;
         private string _nome;
         private bool _origine;
@@ -122,6 +124,18 @@ namespace BatchDataEntry.Models
             this.Campi = campi;
             this.PathFileCsv = path;
             this.Separatore = sep;
+            this.MyMemento = new MementoModello(nome, orig, campi, path, sep);
+        }
+
+        public Modello(Modello m)
+        {
+            this.Id = m.Id;
+            this.Nome = m.Nome;
+            this.OrigineCsv = m.OrigineCsv;
+            this.Campi = m.Campi;
+            this.PathFileCsv = m.PathFileCsv;
+            this.Separatore = m.Separatore;
+            this.MyMemento = new MementoModello(m.Nome, m.OrigineCsv, m.Campi, m.PathFileCsv, m.Separatore);
         }
 
         public Modello(DBModels.Modello m)
@@ -130,14 +144,79 @@ namespace BatchDataEntry.Models
             Nome = m.Nome;
             OrigineCsv = m.OrigineCsv;
             DatabaseHelper db = new DatabaseHelper();
-            Campi = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", m.Id));
+            ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", m.Id));
+            Campi = tmpc;
             PathFileCsv = m.PathFileCsv;
             Separatore = m.Separatore;
+            this.MyMemento = new MementoModello(m.Nome, m.OrigineCsv, tmpc, m.PathFileCsv, m.Separatore);
+        }
+
+        public void Revert()
+        {
+            this.Nome = this.MyMemento.nome;
+            this.OrigineCsv = this.MyMemento.origine;
+            this.Campi = this.MyMemento.campi;
+            this.PathFileCsv = this.MyMemento.filecsv;
+            this.Separatore = this.MyMemento.separatore;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+
+            if (GetType() != obj.GetType())
+                return false;
+
+            Modello modello = obj as Modello;
+            if (this.Id != modello.Id)
+                return false;
+            if (this.Nome != modello.Nome)
+                return false;
+            if (this.OrigineCsv != modello.OrigineCsv)
+                return false;
+            if (this.Campi != modello.Campi)
+                return false;
+            if (this.PathFileCsv != modello.PathFileCsv)
+                return false;
+            if (this.Separatore != modello.Separatore)
+                return false;
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            int resutl = this.Id.GetHashCode();
+            resutl += string.IsNullOrEmpty(this.Nome) ? 0 : this.Nome.GetHashCode();
+            resutl += (this.OrigineCsv) ? 1 : 0;
+            resutl += (Campi == null) ? 0 : 1;
+            resutl += string.IsNullOrEmpty(this.PathFileCsv) ? 0 : this.PathFileCsv.GetHashCode();
+            resutl += string.IsNullOrEmpty(this.Separatore) ? 0 : this.Separatore.GetHashCode();
+            return resutl;
         }
 
         public override string ToString()
         {
             return String.Format("[{0}, {1}, {2}, {3}, {4}, c: {5}]", this.Id, this.Nome, this.OrigineCsv, this.PathFileCsv, this.Separatore, Campi.Count);
+        }
+    }
+
+    public class MementoModello
+    {
+        public readonly string nome;
+        public readonly bool origine;
+        public readonly ObservableCollection<Campo> campi;
+        public readonly string filecsv;
+        public readonly string separatore;
+
+        public MementoModello(string _nome, bool _origine, ObservableCollection<Campo> _campi, string _file, string _sep)
+        {
+            this.nome = _nome;
+            this.origine = _origine;
+            this.campi = _campi;
+            this.filecsv = _file;
+            this.separatore = _sep;
         }
     }
 }

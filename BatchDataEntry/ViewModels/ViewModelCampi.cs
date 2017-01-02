@@ -48,6 +48,9 @@ namespace BatchDataEntry.ViewModels
             set
             {
                 _selectedCampo = value;
+
+                
+
                 RaisePropertyChanged("SelectedCampo");
             }
         }
