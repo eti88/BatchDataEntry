@@ -5,9 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BatchDataEntry.Views"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
-        xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
-        Title="Applicazione"
+        Title="Modelli"
         Height="550"
         Width="700"
         MinWidth="700"
@@ -18,63 +17,31 @@
         <viewModels:ViewModelApplicazione></viewModels:ViewModelApplicazione>
     </Window.DataContext>
     <Grid>
-        <DockPanel LastChildFill="True" DockPanel.Dock="Top">
-            <StackPanel DockPanel.Dock="Left" Margin="5,15,5,29" Width="256">
-                <ListBox x:Name="listBoxApps" Height="434" FontSize="14" ItemsSource="{Binding Modelli, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectedItem="{Binding SelectedModel}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Nome}"></TextBlock>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-                <StackPanel Orientation="Horizontal" Height="55" VerticalAlignment="Top">
-                    <Button x:Name="buttonNuovoItemList" Command="{Binding Path=AddNewModelCmd}" Content="Nuovo" VerticalAlignment="Top" Width="85" FontSize="14" Height="30" HorizontalAlignment="Center" Margin="0,2"/>
-                    <Button x:Name="buttonEliminaSelectedItem" Command="{Binding Path=DeleteModelCmd}" Content="Elimina" VerticalAlignment="Top" Width="85" FontSize="14" Height="30" HorizontalAlignment="Center" Margin="5,2,0,2"/>
+        <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Height="80" Background="Gainsboro" >
+                <StackPanel Margin="30,20,30,0" Orientation="Horizontal">
+                    <Button x:Name="btnAdd" Command="{Binding Path=addNewItemCommand}" Content="Aggiungi" Style="{StaticResource 'ButtonMenu'}"></Button>
+                    <Button x:Name="btnUpdate" Command="{Binding Path=updateItemCommand}" Content="Modifica" Style="{StaticResource 'ButtonMenu'}"></Button>
+                    <Button x:Name="btnColonne" Command="{Binding Path=ButtonColonneCommand}" CommandParameter="{Binding SelectedModel.Campi}" Content="Colonne" Style="{StaticResource 'ButtonMenu'}"></Button>
+                    <Button x:Name="btnDelete" Command="{Binding Path=deleteItemCommand}" Content="Elimina" Style="{StaticResource 'ButtonMenu'}"></Button>
                 </StackPanel>
             </StackPanel>
-            <!-- right panel -->
-            <StackPanel DockPanel.Dock="Right" Width="408" HorizontalAlignment="Right" Margin="0,10" Height="490" VerticalAlignment="Top">
-                <Border BorderThickness="1,1,1,1" Margin="5" Padding="0" BorderBrush="Gray" Height="481" VerticalAlignment="Top">
-                    <DockPanel Margin="0,3,0,27" Height="468" VerticalAlignment="Center">
-                        <StackPanel DockPanel.Dock="Top" >
-                            <StackPanel Height="401">
-                                <Label x:Name="labelNome" Content="Nome" FontSize="14"/>
-                                <TextBox x:Name="textBoxNome" Margin="10,0,10,20" Style="{StaticResource generalTextbox}">
-                                    <TextBox.Text>
-                                        <Binding Path="SelectedModel.Nome" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
-                                            <Binding.ValidationRules>
-                                                <validators:NameValidator></validators:NameValidator>
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <CheckBox x:Name="checkBoxCsv" IsChecked="{Binding Path=SelectedModel.OrigineCsv, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Unchecked="CheckBoxCsv_OnUnchecked" Content="Includi Csv" Margin="10,0" FontSize="14" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center" Checked="checkBoxCsv_Checked"/>
-                                <Label x:Name="labelPath" Content="Path file Csv" FontSize="14"/>
-                                <WrapPanel Height="40" Margin="10,10,10,0">
-                                    <TextBox x:Name="textBoxFileCsv" TextWrapping="Wrap" Width="330" Margin="0,0,5,0" Style="{StaticResource generalTextbox}" VerticalAlignment="Bottom"  Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
-                                        <TextBox.Text>
-                                            <Binding Path="SelectedModel.PathFileCsv" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
-                                                <Binding.ValidationRules>
-                                                    <validators:PathValidator></validators:PathValidator>
-                                                </Binding.ValidationRules>
-                                            </Binding>
-                                        </TextBox.Text>
-                                    </TextBox>
-                                    <Button x:Name="buttonChooseFile" Click="ButtonChooseFile_OnClick" Content="..." Style="{StaticResource OpenDirDialogButton}"/>
-                                </WrapPanel>
-                                <Label x:Name="labelSep" Content="Carattere separatore" FontSize="14"/>
-                                <TextBox x:Name="textBoxSeparator" Text="{Binding SelectedModel.Separatore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,336,20" Style="{StaticResource generalTextbox}" Padding="10,3,10,3"/>
-                                <Button x:Name="buttonCampi" Content="Campi" Command="{Binding Path=OpenCampiViewCmd}" HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource GenericButton}" Margin="10,3,10,0" Background="#FF97D11B" Foreground="#FFECECEC"/>
-                            </StackPanel>
-
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="5,0" Width="159" HorizontalAlignment="Right">
-
-                            <Button x:Name="buttonSalvaApp" Content="Modifica / Salva" Command="{Binding Path=SaveModelModifyCmd}" VerticalAlignment="Center" Style="{StaticResource GenericButton}" Margin="10,0" HorizontalAlignment="Left"/>
-                        </StackPanel>
-                    </DockPanel>
+            <StackPanel DockPanel.Dock="Bottom" Margin="25,20,25,10">
+                <Border>
+                    <ListBox x:Name="listBoxApps" Height="398" FontSize="14" ItemsSource="{Binding Modelli, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectedItem="{Binding SelectedModel}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="260" SharedSizeGroup="Column0"/>
+                                        <ColumnDefinition Width="130" SharedSizeGroup="Column1"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Nome}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding contaColonne}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </Border>
             </StackPanel>
         </DockPanel>

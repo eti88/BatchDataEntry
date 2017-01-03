@@ -4,37 +4,59 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BatchDataEntry.Views"
+        xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
+        xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
         mc:Ignorable="d"
         Title="Batch Selected" 
         Height="400" 
-        Width="540"
+        Width="700.169"
         MinWidth="400"
         MinHeight="540">
+    <Window.Resources>
+        <viewModels:ViewModelBatchSelected x:Key="ViewModelBatchSelected"/>
+    </Window.Resources>
     <Grid>
-        <DockPanel LastChildFill="True">
-            <DockPanel LastChildFill="True" DockPanel.Dock="Top" Height="465">
-                <StackPanel Width="237" DockPanel.Dock="Left" Margin="0,10">
-                    <DataGrid x:Name="dataGridRecords" VerticalAlignment="Top" Height="410" Margin="0,5,0,0"/>
-                    <WrapPanel Height="30" VerticalAlignment="Bottom" Margin="5,0,0,0" HorizontalAlignment="Right">
-                        <Button x:Name="buttonModificaGridRecords" Content="Modifica" Width="50" Margin="0,5,10,0"/>
-                        <Button x:Name="buttonEliminaGridRecords" Content="Elimina" Width="50" Margin="0,5,0,0"/>
-                    </WrapPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-                </StackPanel>
-                <StackPanel Height="455" Width="279" DockPanel.Dock="Right" Margin="10,0,0,0" HorizontalAlignment="Left">
-                    <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Numero documenti: " Margin="5"/>
-                    <TextBlock x:Name="textBlock_Copy" TextWrapping="Wrap" Text="Numero pagine:" Margin="5"/>
-                    <TextBlock x:Name="textBlock_Copy1" TextWrapping="Wrap" Text="Dimensione:" Margin="5"/>
-                    <TextBlock x:Name="textBlock_Copy2" TextWrapping="Wrap" Text="Documento corrente:" Margin="5"/>
-                    <TextBlock x:Name="textBlock_Copy3" TextWrapping="Wrap" Text="Ultimo inserimento:" Margin="5"/>
-                </StackPanel>
-            </DockPanel>
-            <StackPanel Height="30" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                <Button x:Name="buttonChiudiBatch" Content="Chiudi" Height="20" Width="75" Margin="5"/>
-                <Button x:Name="buttonContiunaInserimento" Content="Continua" Height="20" Width="75" Margin="5"/>
-                <Button x:Name="buttonCheck" Content="Check" Height="20" Width="75" Margin="5"/>
+        <DataGrid x:Name="dataGridRecords" Grid.Column="0" Margin="10" ColumnHeaderHeight="25" ItemsSource="{Binding Path=DataSource, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <Grid Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="70"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1">
+                <WrapPanel>
+                    <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="Numero documenti: " Margin="5"/>
+                    <TextBlock x:Name="textBlockNumDocVal" Text="{Binding Path=NumeroDocumenti}" Width="180"/>
+                </WrapPanel>
+                <WrapPanel>
+                    <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="Dimensione:" Margin="5"/>
+                    <TextBlock x:Name="textBlockDimVal" Text="{Binding Path=Dimensioni}" Width="180"/>
+                </WrapPanel>
+                <WrapPanel>
+                    <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="Documento corrente:" Margin="5"/>
+                    <TextBlock x:Name="textBlockDocCorrenteVal" Text="{Binding Path=DocumentoCorrente}" Width="180"/>
+                </WrapPanel>
+                <WrapPanel>
+                    <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="Ultimo inserimento:" Margin="5"/>
+                    <TextBlock x:Name="textBlockUltimoVal" Text="{Binding Path=UltimoIndicizzato}" Width="180"/>
+                </WrapPanel>
             </StackPanel>
-        </DockPanel>
-
+            <StackPanel Height="50" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Button x:Name="buttonContiunaInserimento" Content="Continua" Command="{Binding Path=ContinuaCmd}" Height="30" Width="75" Margin="5" Background="#FFA9FF80"/>
+                <Button x:Name="buttonCheck" Content="Check" Command="{Binding Path=CheckCmd}" Height="30" Width="75" Margin="5" Background="#FFFFF272"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

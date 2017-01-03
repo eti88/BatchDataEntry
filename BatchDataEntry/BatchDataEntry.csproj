@@ -118,6 +118,14 @@
       <HintPath>..\packages\Apitron.PDF.Controls.1.0.90.0\lib\net451\Apitron.PDF.Rasterizer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="CsvHelper, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
+      <HintPath>..\packages\CsvHelper.2.16.3.0\lib\net45\CsvHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MadMilkman.Ini, Version=1.0.6.0, Culture=neutral, PublicKeyToken=4e0b5157a7ffbb74, processorArchitecture=MSIL">
+      <HintPath>..\packages\MadMilkman.Ini.1.0.6.0\lib\net20\MadMilkman.Ini.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.4.1\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
@@ -162,6 +170,10 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="WPFTextBoxAutoComplete, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WPFTextBoxAutoComplete.1.0.2\lib\net40\WPFTextBoxAutoComplete.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -172,12 +184,14 @@
     <Compile Include="DBModels\Campo.cs" />
     <Compile Include="DBModels\Modello.cs" />
     <Compile Include="Helpers\Converters.cs" />
+    <Compile Include="Helpers\DataSource.cs" />
     <Compile Include="Helpers\DialogCloser.cs" />
     <Compile Include="Helpers\DatabaseHelper.cs" />
     <Compile Include="Helpers\IClosableViewModel.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Models\BaseModel.cs" />
     <Compile Include="Models\TipoFileProcessato.cs" />
+    <Compile Include="Models\Voce.cs" />
     <Compile Include="Validators\NameValidator.cs" />
     <Compile Include="Validators\NumValidator.cs" />
     <Compile Include="Validators\PathValidator.cs" />
@@ -185,8 +199,11 @@
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\ViewModelBatchSelected.cs" />
     <Compile Include="ViewModels\ViewModelCampi.cs" />
+    <Compile Include="ViewModels\ViewModelDataEntry.cs" />
     <Compile Include="ViewModels\ViewModelMain.cs" />
     <Compile Include="ViewModels\ViewModelNewBatch.cs" />
+    <Compile Include="ViewModels\ViewModelNuovaColonna.cs" />
+    <Compile Include="ViewModels\ViewModelNuovoModello.cs" />
     <Compile Include="Views\BatchSelected.xaml.cs">
       <DependentUpon>BatchSelected.xaml</DependentUpon>
     </Compile>
@@ -196,8 +213,14 @@
     <Compile Include="Views\Documento.xaml.cs">
       <DependentUpon>Documento.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\NuovaColonna.xaml.cs">
+      <DependentUpon>NuovaColonna.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\NuovoBatch.xaml.cs">
       <DependentUpon>NuovoBatch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NuovoModello.xaml.cs">
+      <DependentUpon>NuovoModello.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\Applicazione.xaml">
       <SubType>Designer</SubType>
@@ -230,7 +253,15 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\NuovaColonna.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\NuovoBatch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NuovoModello.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -257,6 +288,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="Img\undo-5.png" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

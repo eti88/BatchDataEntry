@@ -38,7 +38,7 @@ namespace BatchDataEntry.ViewModels
         }
 
         private RelayCommand _addNewModel;
-        public ICommand AddNewModelCmd
+        public ICommand addNewItemCommand
         {
             get
             {
@@ -48,40 +48,40 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private RelayCommand _updateModel;
+        public ICommand updateItemCommand
+        {
+            get
+            {
+                if (_updateModel == null)
+                    _updateModel = new RelayCommand(param => this.ModifyItem(), param => this.CanModify);
+                return _updateModel;
+            }
+        }
+
         private RelayCommand _deleteModel;
-        public ICommand DeleteModelCmd
+        public ICommand deleteItemCommand
         {
             get
             {
                 if(_deleteModel == null)
-                    _deleteModel = new RelayCommand(param => this.RemoveModelItem());
+                    _deleteModel = new RelayCommand(param => this.RemoveModelItem(), param => this.CanModify);
                 return _deleteModel;
             }
         }
 
-        private RelayCommand _salvaModel;
-        public ICommand SaveModelModifyCmd
-        {
-            get
-            {
-                if(_salvaModel == null)
-                    _salvaModel = new RelayCommand(param => this.SaveModelModified(), param => this.CanUpdate);
-                return _salvaModel;
-            }
-        }
-
         private RelayCommand _openCampiView;
-        public ICommand OpenCampiViewCmd
+        public ICommand ButtonColonneCommand
         {
             get
             {
                 if (_openCampiView == null)
-                    _openCampiView = new RelayCommand(param => this.OpenCampiView(), param => this.CanUpdate);
+                    _openCampiView = new RelayCommand(param => this.OpenCampiView(), param => this.CanModify);
                 return _openCampiView;
             }
         }
 
-        private bool CanUpdate
+        private bool CanModify
         {
             get { return (SelectedModel == null) ? false : true; }
         }
@@ -95,53 +95,45 @@ namespace BatchDataEntry.ViewModels
 
         private void AddNewModelItem()
         {
+            var nuovoModello = new NuovoModello();       
             Modello m = new Modello();
-            Modelli.Add(m);
-            this.SelectedModel = m;
+            nuovoModello.DataContext = new ViewModelNuovoModello(m, false);
+            var res = nuovoModello.ShowDialog();
+            if (res == true)
+            {
+                Modelli.Add(m);
+            }
+            RaisePropertyChanged("Modelli");         
         }
 
         private void RemoveModelItem()
         {
-            #if DEBUG
-                        Console.WriteLine("DeleteModello: " + SelectedModel.ToString());
-            #endif
-            if (SelectedModel.Id >= 0)
+            if (SelectedModel != null && SelectedModel.Id >= 0)
             {
                 DatabaseHelper db = new DatabaseHelper();
                 DBModels.Modello tmp = new DBModels.Modello(SelectedModel);
-                db.DeleteRecord(tmp, tmp.Id);
                 Modelli.Remove(SelectedModel);
-            }        
+                db.DeleteRecord(tmp, tmp.Id);
+                RaisePropertyChanged("Modelli");
+            }
         }
 
-        private void SaveModelModified()
+        private void ModifyItem()
         {
-            DatabaseHelper db = new DatabaseHelper();
-            #if DEBUG
-                        Console.WriteLine("SaveModello: " + SelectedModel.ToString());
-            #endif
-
-            if (SelectedModel.Id > 0)
-            {
-                //Update
-                DBModels.Modello mu = new DBModels.Modello(SelectedModel);
-                db.UpdateRecord(mu);
-                RaisePropertyChanged("Modelli");
-            }
-            else
-            {
-                //Insert
-                DBModels.Modello mi = new DBModels.Modello(SelectedModel);
-                db.InsertRecord(mi);
-                RaisePropertyChanged("Modelli");
-            }
+            var nuovoModello = new NuovoModello();
+            nuovoModello.DataContext = new ViewModelNuovoModello(SelectedModel, true);
+            nuovoModello.ShowDialog();
+            RaisePropertyChanged("Modelli");
         }
 
         private void OpenCampiView()
         {
-            var campiView = new CampiV();
-            campiView.DataContext = new ViewModelCampi(SelectedModel.Campi);
-            campiView.ShowDialog();
+            if (SelectedModel != null)
+            {
+                var campiView = new CampiV();
+                campiView.DataContext = new ViewModelCampi(SelectedModel.Id);
+                campiView.ShowDialog();
+            }          
         }
     }
 }

@@ -152,16 +152,7 @@ namespace BatchDataEntry.Models
             }
         }
 
-        /*
-         - Nel caso della cancellazione di un documento oltre all'eliminazione del record bisogna eliminare anche il documento di origine (file)
-         - Nella cartella di input si genera un file .ini per associare:
-            * indice -> cartella (nel caso dei Tiff)
-            * indice -> pdf (nel caso del pdf)
-         - Nella cartella do output vengono generati:
-            * copia del pdf inserito
-            * file cache (ini)
-            * file db (csv
-         */
+        
 
         public Batch()
         {
@@ -267,8 +258,12 @@ namespace BatchDataEntry.Models
             this.DirectoryInput = b.DirectoryInput;
             this.DirectoryOutput = b.DirectoryOutput;
             this.IdModello = b.IdModello;
-            DatabaseHelper db = new DatabaseHelper();
-            this.Applicazione = db.GetModelloById(b.IdModello);
+            if (this.IdModello > 0)
+            {
+                DatabaseHelper db = new DatabaseHelper();
+                this.Applicazione = db.GetModelloById(b.IdModello);
+            }
+
             this.NumDoc = b.NumDoc;
             this.NumPages = b.NumPages;
             this.Dimensioni = 0;
@@ -276,11 +271,6 @@ namespace BatchDataEntry.Models
             this.UltimoIndicizzato = b.UltimoIndicizzato;
 
         }
-
-        public void GeneraDirOutput() { }
-        public void ImportaPdf(string sorgente) { }
-        public void ConvertiTiffInPdf() { }
-        public void RimuoviDocumento(int indice) { }
 
         public override string ToString()
         {

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.IO;
 using System.Linq;
 using BatchDataEntry.Models;
@@ -56,19 +57,19 @@ namespace BatchDataEntry.Helpers
             #endif
         }
 
-        /* TODO: Verificare se effettivamente serve effettuare la conversione degli oggetti in DBModels
-         * prima di effettuare le operazioni di inserimento, modifica, eliminazione su generic types
-         */
-
-        public void InsertRecord<T>(T model)
+        public int InsertRecord<T>(T model)
         {
             var db = new SQLiteConnection(PATHDB);
+            int lastID = -1;
+
             try
             {
                 #if DEBUG
                 Console.WriteLine(@"Insertnella tabella " + typeof(T));
                 #endif
                 db.Insert(model);
+                lastID = db.ExecuteScalar<int>("SELECT last_insert_rowid()");
+
             }
             catch (Exception e)
             {
@@ -78,6 +79,7 @@ namespace BatchDataEntry.Helpers
             {
                 db.Close();
             }
+            return lastID;
         }
 
         public void UpdateRecord<T>(T model)
@@ -179,8 +181,11 @@ namespace BatchDataEntry.Helpers
             #if DEBUG
             Console.WriteLine(@"Get elements by id nella tabella Modello");
             #endif
-                Modello m = new Modello(db.Find<DBModels.Modello>(id));
-                return m;
+                DBModels.Modello raw = new DBModels.Modello();
+                raw = db.Find<DBModels.Modello>(id);
+                if (raw != null)
+                    return new Modello(raw);
+                
             }
             catch (Exception e)
             {

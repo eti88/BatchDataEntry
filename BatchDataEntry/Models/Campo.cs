@@ -112,11 +112,7 @@ namespace BatchDataEntry.Models
          futuri inserimenti.
          */
 
-        public Campo()
-        {
-            this.TipoCampo = 0;
-            //this.FKModello = -1;
-        }
+        public Campo() { }
 
         public Campo(string nome, bool sv, string vp, bool ip)
         {

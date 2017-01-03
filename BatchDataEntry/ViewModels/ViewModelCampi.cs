@@ -1,43 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using BatchDataEntry.DBModels;
 using BatchDataEntry.Helpers;
+using BatchDataEntry.Views;
 using Campo = BatchDataEntry.Models.Campo;
 
 namespace BatchDataEntry.ViewModels
 {
     class ViewModelCampi : ViewModelBase
     {
-        /*
-         TODO: aggiungere un oggetto ponte in cui salvare le modifiche
-         dei campi altrimenti vengono aggiornate in automatico nella lista
-         da riportare anche le stesse modifiche nel vmApplicazione
-         */
-
         public ViewModelCampi()
         {
-            Campi = new ObservableCollection<Campo>();
+            this.Colonne = new ObservableCollection<Campo>();
         }
 
-        public ViewModelCampi(ObservableCollection<Campo> campi)
+        public ViewModelCampi(int idModello)
         {
-            this.Campi = campi;
-            RaisePropertyChanged("Campi");
+            DatabaseHelper db = new DatabaseHelper();
+            this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
+            RaisePropertyChanged("Colonne");
+            this._idModello = idModello;
         }
 
-        private ObservableCollection<Campo> _campi;
-        public ObservableCollection<Campo> Campi
+        private int _countCols
         {
-            get { return _campi; }
+            get { return Colonne.Count; }
+        }
+        private readonly int _idModello;
+
+        private ObservableCollection<Campo> _clos;
+        public ObservableCollection<Campo> Colonne
+        {
+            get { return _clos; }
             set
             {
-                _campi = value;
-                RaisePropertyChanged("Campi");
+                _clos = value;
+                RaisePropertyChanged("Colonne");
             }
         }
 
@@ -48,15 +45,12 @@ namespace BatchDataEntry.ViewModels
             set
             {
                 _selectedCampo = value;
-
-                
-
                 RaisePropertyChanged("SelectedCampo");
             }
         }
 
         private RelayCommand _addnew;
-        public ICommand AddNewCampoCmd
+        public ICommand addNewItemCommand
         {
             get
             {
@@ -81,16 +75,16 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private RelayCommand _save;
-        public ICommand SalvaCampoCmd
+        private RelayCommand _update;
+        public ICommand updateItemCommand
         {
             get
             {
-                if (_save == null)
+                if (_update == null)
                 {
-                    _save = new RelayCommand(param => this.SaveCampo(), param => this.CanSave);
+                    _update = new RelayCommand(param => this.UpdateItem(), param => this.CanDel);
                 }
-                return _save;
+                return _update;
             }
         }
 
@@ -99,60 +93,38 @@ namespace BatchDataEntry.ViewModels
             get { return (SelectedCampo == null) ? false : true; }
         }
 
-        private bool CanSave
-        {
-            get
-            {
-                if (SelectedCampo == null)
-                    return false;
-                else if (!string.IsNullOrEmpty(SelectedCampo.Nome) && SelectedCampo.Posizione >= 0)
-                    return true;
-                else
-                    return false;
-            }
-        }
-
         private void AddItem()
         {
-            Campo c = new Campo();
-            this.Campi.Add(c);
-            this.SelectedCampo = c;
+            var colonna = new NuovaColonna();
+            Campo campo = new Campo();
+            campo.IdModello = this._idModello;
+            colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols);
+            var result = colonna.ShowDialog();
+            if (result == true)
+            {
+                Colonne.Add(campo);
+            }         
+            RaisePropertyChanged("Colonne");
         }
 
         private void DelItem()
         {
-            #if DEBUG
-                Console.WriteLine("DeleteCampo: " + SelectedCampo.ToString());
-            #endif
-            if (SelectedCampo.Id >= 0)
+            if (SelectedCampo != null && SelectedCampo.Id >= 0)
             {
                 DatabaseHelper db = new DatabaseHelper();
                 DBModels.Campo tmp = new DBModels.Campo(SelectedCampo);
+                Colonne.Remove(SelectedCampo);
                 db.DeleteRecord(tmp, tmp.Id);
-                Campi.Remove(SelectedCampo);
+                RaisePropertyChanged("Colonne");
             }
         }
 
-        private void SaveCampo()
+        private void UpdateItem()
         {
-            DatabaseHelper db = new DatabaseHelper();
-            #if DEBUG
-                Console.WriteLine("SaveCampo: " + SelectedCampo.ToString());
-            #endif
-
-            if (SelectedCampo.Id > 0)
-            {
-                DBModels.Campo tc = new DBModels.Campo(SelectedCampo);
-                db.UpdateRecord(tc);
-                RaisePropertyChanged("Campi");
-            }
-            else
-            {
-                DBModels.Campo tc = new DBModels.Campo(SelectedCampo);
-                db.InsertRecord(tc);
-                RaisePropertyChanged("Campi");
-            }
+            var colonna = new NuovaColonna();
+            colonna.DataContext = new ViewModelNuovaColonna(SelectedCampo, true);
+            colonna.ShowDialog();
+            RaisePropertyChanged("Colonne");
         }
-
     }
 }

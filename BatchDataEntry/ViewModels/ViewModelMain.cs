@@ -162,6 +162,7 @@ namespace BatchDataEntry.ViewModels
         private void ResumeBatchItem()
         {
             var resumeBatchWindow = new BatchSelected();
+            resumeBatchWindow.DataContext = new ViewModelBatchSelected(SelectedBatch);
             resumeBatchWindow.Show();
             CloseWindow();
         }
