@@ -3,19 +3,76 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 
 namespace BatchDataEntry.ViewModels
 {
     class ViewModelDataEntry : ViewModelBase
     {
+        private readonly string FILENAME_CACHE;
+        private readonly string FILENAME_DBCSV;
+        private readonly string FILENAME_VALUES;
+
         public ViewModelDataEntry()
         {
+            FILENAME_CACHE = "";
+            FILENAME_DBCSV = "";
+            FILENAME_VALUES = "";
         }
 
-        public ViewModelDataEntry(Batch b)
+        public ViewModelDataEntry(Batch b, string cache, string db, string auto)
         {
+            FILENAME_CACHE = cache;
+            FILENAME_DBCSV = db;
+            FILENAME_VALUES = auto;
+        }
 
+        public ViewModelDataEntry(string fileIndex, Batch b, string cache, string db, string auto)
+        {
+            FILENAME_CACHE = cache;
+            FILENAME_DBCSV = db;
+            FILENAME_VALUES = auto;
+        }
+
+        private RelayCommand _applyCmd;
+        public ICommand ApplyCommand
+        {
+            get
+            {
+                if (_applyCmd == null)
+                {
+                    _applyCmd = new RelayCommand(param => this.Indicizza());
+                }
+                return _applyCmd;
+            }
+        }
+
+        private RelayCommand _saltaCmd;
+        public ICommand SaltaCmd
+        {
+            get
+            {
+                if (_saltaCmd == null)
+                {
+                    _saltaCmd = new RelayCommand(param => this.Salta());
+                }
+                return _saltaCmd;
+            }
+        }
+
+        private RelayCommand _stopCmd;
+        public ICommand StopCmd
+        {
+            get
+            {
+                if (_stopCmd == null)
+                {
+                    _stopCmd = new RelayCommand(param => this.Interrompi());
+                }
+                return _stopCmd;
+            }
         }
 
         /*
@@ -26,5 +83,9 @@ namespace BatchDataEntry.ViewModels
         //protected void ConvertiTiffInPdf() { }
         //copy pdf() { }
         //protected void RimuoviDocumento(int indice) { }
+
+        public void Indicizza() { }
+        public void Salta() { }
+        public void Interrompi() { }
     }
 }

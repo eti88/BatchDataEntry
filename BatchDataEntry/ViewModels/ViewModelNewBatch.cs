@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Forms;
+using System.Linq;
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
-using BatchDataEntry.Views;
 using MadMilkman.Ini;
 using NLog;
 
@@ -177,29 +174,38 @@ namespace BatchDataEntry.ViewModels
 
         protected void CreateIniFile(string input_path, string output_path, TipoFileProcessato ext)
         {
-            IniFile file = new IniFile();
-            IniSection docsSection = file.Sections.Add("Documenti");
+            string fileOutputPathCache = Path.Combine(output_path, FILENAME_CACHE);
+            string fileOutputPathDb = Path.Combine(output_path, FILENAME_CACHE);
 
-            if (ext == TipoFileProcessato.Pdf)
+            if (Business.Cache.CreateFile(fileOutputPathCache))
             {
-                string[] docs = Directory.GetFiles(input_path, string.Format("*.{0}", ext));
-
-                for (int i = 0; i < docs.Length; i++)
+                int primaryIndex = 0;
+                foreach (Campo campo in _currentBatch.Applicazione.Campi)
                 {
-                    docsSection.Keys.Add(i.ToString(), docs[i]);
+                    if (campo.IndicePrimario)
+                    {
+                        primaryIndex = campo.Posizione;
+                        break;
+                    }
+                }
+
+                //TODO: da vedere dove leggere i nomi dei file
+                string[] fileNames = Business.Csv.ReadColumn(output_path, primaryIndex).ToArray();
+                
+                Business.Cache.AddSection(fileOutputPathCache, "Documenti");
+
+                if (ext == TipoFileProcessato.Pdf)
+                {
+                    string[] docs = Directory.GetFiles(input_path, string.Format("*.{0}", ext));
+                    Business.Cache.AddMultipleKeyToSection(fileOutputPathCache, "Documenti", fileNames, docs);
+                }
+                else if (ext == TipoFileProcessato.Tiff)
+                {
+                    string[] dirs = Directory.GetDirectories(input_path);
+                    Business.Cache.AddMultipleKeyToSection(fileOutputPathCache, "Documenti", fileNames, dirs);
+
                 }
             }
-            else if(ext == TipoFileProcessato.Tiff)
-            {
-                // i tiff sono suddivisi per subdirs contenenti i tiff sotto forma di pagine
-                string[] dirs = Directory.GetDirectories(input_path);
-                for (int i = 0; i < dirs.Length; i++)
-                {
-                    docsSection.Keys.Add(i.ToString(), dirs[i]);
-                }
-            }
-
-            file.Save(Path.Combine(output_path, FILENAME_CACHE));
         }
 
         protected void CreateDbCsv(string output_dir)
@@ -209,24 +215,19 @@ namespace BatchDataEntry.ViewModels
 
         protected void CreateAutocompleteIniFile(string output_dir, int idModello)
         {
-            IniFile file = new IniFile();
-            
+            string fileName = Path.Combine(output_dir, FILENAME_VALUES);
+
+            Business.Cache.CreateFile(fileName);
             DatabaseHelper db = new DatabaseHelper();
             ObservableCollection<Campo> campi = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
+            List<string> colNames = new List<string>(campi.Select((campo) => campo.Nome));
+            Console.WriteLine(@"=============DBG==============");
 
             if (campi == null || campi.Count == 0)
             {
                 logger.Error("Creazione del file per l'autocompletamento non riuscito! (La query non ha restituito nessuna colonna associata al modello)");
             }
-
-            foreach (Campo campo in campi)
-            {
-                if(campo.SalvaValori)
-                    file.Sections.Add(campo.Nome);
-            }
-
-            if(file.Sections.Count > 0)
-                file.Save(Path.Combine(output_dir, FILENAME_VALUES));
+            Business.Cache.AddMultipleSection(fileName, colNames);
         }
     }
 }

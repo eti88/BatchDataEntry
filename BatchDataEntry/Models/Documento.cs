@@ -9,15 +9,31 @@ using System.Threading.Tasks;
 namespace BatchDataEntry.Models
 {
 
-    public class Documento 
+    public class Documento : BaseModel
     {
+        private string _id;
+        public string Id
+        {
+            get
+            {
+                return _id;
+            }
+            set
+            {
+                _id = value;
+                OnPropertyChanged("Id");
+            }
+        }
 
-        public int Id { get; set; }
-        public string Origine { get; set; } // Documento di origine es: pdf
+        // Documento di origine es: pdf
+        public string _origine;
+        public string Origine { get { return _origine; }
+            set
+            {
+                _origine = value;
+                OnPropertyChanged("Origine");
+            }
+        } 
 
-        public void Indicizza() { }
-        public void Salta() { }
-        public void Interrompi() { }
-        
     }
 }

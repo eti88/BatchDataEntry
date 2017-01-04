@@ -1,34 +1,41 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using BatchDataEntry.Views;
+using NLog;
 
 namespace BatchDataEntry.ViewModels
 {
     class ViewModelBatchSelected : ViewModelMain
     {
+        private readonly string FILENAME_CACHE = "cache.ini";
+        private readonly string FILENAME_DBCSV = "db.csv";
+        private readonly string FILENAME_VALUES = "autocomp.ini";
+
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public ViewModelBatchSelected() { }
 
         public ViewModelBatchSelected(Batch batch)
         {
             _currentBatch = batch;
-            long bytes = GetDirectorySize(batch.DirectoryInput);
-            Dimensioni = String.Format("{0} MB",ConvertSize((double)bytes, "MB").ToString("0.00"));
-            NumeroDocumenti = CountFiles(batch.DirectoryInput, batch.TipoFile);      
+            long bytes = Utility.GetDirectorySize(batch.DirectoryInput);
+            TaskLoadGrid();
+            Dimensioni = String.Format("{0} MB", Utility.ConvertSize((double)bytes, "MB").ToString("0.00"));
+            NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);      
         }
 
         private Batch _currentBatch { get; set; }
 
         private DataView _dtSource;
-
         public DataView DataSource
         {
             get { return _dtSource; }
@@ -38,6 +45,7 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("DataSource");
             }
         }
+
         private int _ndocs;
         public int NumeroDocumenti
         {
@@ -82,6 +90,17 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private DataRowView _selectedRow;
+        public DataRowView SelectedRow
+        {
+            get { return _selectedRow; }
+            set
+            {
+                _selectedRow = value;
+                RaisePropertyChanged("SelectedRow");
+            }
+        }
+
         private RelayCommand _continuaCmd;
         public ICommand ContinuaCmd
         {
@@ -108,12 +127,64 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private RelayCommand _daSelezCmd;
+        public ICommand ContinuaDaSelezioneCmd
+        {
+            get
+            {
+                if (_daSelezCmd == null)
+                {
+                    _daSelezCmd = new RelayCommand(param => this.ContinuaDaSelezione(), param => this.isSelectedRow);
+                }
+                return _daSelezCmd;
+            }
+        }
+
+        private bool isSelectedRow
+        {
+            get { return (SelectedRow == null) ? false : true; }
+        }
+
+        private void ContinuaDaSelezione()
+        {
+            int posizioneCol = -1;
+            #if DEBUG
+            Console.Write("riga selezionata: (");
+            for(int i=0; i< this.DataSource.Count;i++)
+            {
+                Console.Write("[" + SelectedRow[i] + "]");
+            }
+            Console.Write(")\n");
+            #endif
+            foreach (Campo campo in SelectedBatch.Applicazione.Campi)
+            {
+                if (campo.IndicePrimario == true)
+                {
+                    posizioneCol = campo.Posizione;
+                }
+            }
+
+            if (posizioneCol == -1)
+            {
+                logger.Error("Errore impossibile continuare da posizione (Colonna)...");
+                return;
+            }
+
+            Views.Documento continua = new Views.Documento();
+            string indexFile = SelectedRow[posizioneCol].ToString();
+            if (!string.IsNullOrEmpty(indexFile))
+            {
+                continua.DataContext = new ViewModelDataEntry(indexFile, _currentBatch, FILENAME_CACHE, FILENAME_DBCSV, FILENAME_VALUES);
+                continua.Show();
+            }
+        }
+
         private void ContinuaInserimento()
         {
             if (_currentBatch != null)
             {
                 Views.Documento inserimento = new Views.Documento();
-                inserimento.DataContext = new ViewModelDataEntry(_currentBatch);
+                inserimento.DataContext = new ViewModelDataEntry(_currentBatch, FILENAME_CACHE, FILENAME_DBCSV, FILENAME_VALUES);
                 inserimento.Show();
             }
         }
@@ -124,74 +195,28 @@ namespace BatchDataEntry.ViewModels
             //TODO: da verificare come implementarlo
         }
 
-        private int CountFiles(string path, TipoFileProcessato ext)
+        private async void TaskLoadGrid()
         {
-            DirectoryInfo dinfo = new DirectoryInfo(path);
-            return dinfo.GetFiles(string.Format("*.{0}", ext)).Length;
+            await LoadDataTask();
         }
 
-        private long GetDirectorySize(string fullDirectoryPath)
+        private async Task LoadDataTask()
         {
-            long startDirectorySize = 0;
-            if (!Directory.Exists(fullDirectoryPath))
-                return startDirectorySize; //Return 0 while Directory does not exist.
 
-            var currentDirectory = new DirectoryInfo(fullDirectoryPath);
-            //Add size of files in the Current Directory to main size.
-            currentDirectory.GetFiles().ToList().ForEach(f => startDirectorySize += f.Length);
-
-            //Loop on Sub Direcotries in the Current Directory and Calculate it's files size.
-            currentDirectory.GetDirectories().ToList()
-                .ForEach(d => startDirectorySize += GetDirectorySize(d.FullName));
-
-            return startDirectorySize;  //Return full Size of this Directory.
+            Func<DataView> function = new Func<DataView>(() => LoadDataFromFile(Path.Combine(_currentBatch.DirectoryOutput, FILENAME_DBCSV), _currentBatch.Applicazione.Campi));
+            DataView res = await Task.Run<DataView>(function);
+            if (res != null)
+                this.DataSource = res;
+            else
+                logger.Warn(string.Format("[SelectedBatchView]Errore nel caricamento dei dati dal file {0} nella tabella", Path.Combine(_currentBatch.DirectoryOutput, FILENAME_DBCSV)));
         }
 
-        private double ConvertSize(double bytes, string type)
+        private DataView LoadDataFromFile(string path, ObservableCollection<Campo> campi)
         {
-            try
-            {
-                const int CONVERSION_VALUE = 1024;
-                //determine what conversion they want
-                switch (type)
-                {
-                    case "BY":
-                        //convert to bytes (default)
-                        return bytes;
-                        break;
-                    case "KB":
-                        //convert to kilobytes
-                        return (bytes / CONVERSION_VALUE);
-                        break;
-                    case "MB":
-                        //convert to megabytes
-                        return (bytes / CalculateSquare(CONVERSION_VALUE));
-                        break;
-                    case "GB":
-                        //convert to gigabytes
-                        return (bytes / CalculateCube(CONVERSION_VALUE));
-                        break;
-                    default:
-                        //default
-                        return bytes;
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return 0;
-            }
-        }
-
-        private double CalculateSquare(Int32 number)
-        {
-            return Math.Pow(number, 2);
-        }
-
-        private double CalculateCube(Int32 number)
-        {
-            return Math.Pow(number, 3);
+            if(File.Exists(path) && campi != null && campi.Count > 0)
+                return (DataView)Helpers.DataSource.CreateDataSourceFromCsv(path, campi);
+            else
+                return null;
         }
     }
 }

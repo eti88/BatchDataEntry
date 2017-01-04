@@ -18,6 +18,14 @@ namespace BatchDataEntry.Models
             this.Value = value;
         }
 
+        public Voce(int id, string key, string value, ObservableCollection<string> sugg)
+        {
+            this.Id = id;
+            this.Key = key;
+            this.Value = value;
+            this.Suggestions = sugg;
+        }
+
         private int _id;
         public int Id
         {
