@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="CampoTest.cs" />
     <Compile Include="CsvTest.cs" />
+    <Compile Include="DbTest.cs" />
     <Compile Include="ModelloTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
