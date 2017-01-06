@@ -57,6 +57,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="CacheTest.cs" />
     <Compile Include="CampoTest.cs" />
     <Compile Include="CsvTest.cs" />
     <Compile Include="DbTest.cs" />

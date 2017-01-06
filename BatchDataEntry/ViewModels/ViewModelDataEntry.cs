@@ -110,12 +110,28 @@ namespace BatchDataEntry.ViewModels
          - Output copia dei file pdf
          */
 
-        //copy pdf() { }
-        //protected void RimuoviDocumento(int indice) { }
 
-        protected void LoadFile() { }
-        private void isPdfFile(string file) { } // richiamato da loadfile
-        private void isTiffFile(string file) { } //richiamato da loadfile
+        protected void LoadFile()
+        {
+            if (Batch.TipoFile == TipoFileProcessato.Pdf)
+            {
+                isPdfFile("");
+            }
+            else
+            {
+                isTiffFile("");
+            }
+        }
+
+        private void isPdfFile(string file)
+        {
+            
+        } 
+
+        private void isTiffFile(string file)
+        {
+            
+        }
 
         protected void LoadFields() { } // carica la lista dei campi
 
