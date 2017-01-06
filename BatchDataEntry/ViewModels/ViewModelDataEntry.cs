@@ -31,9 +31,39 @@ namespace BatchDataEntry.ViewModels
 
         public ViewModelDataEntry(string fileIndex, Batch b, string cache, string db, string auto)
         {
-            FILENAME_CACHE = cache;
-            FILENAME_DBCSV = db;
-            FILENAME_VALUES = auto;
+            this.Index = fileIndex;
+            this.Batch = b;
+            this.FILENAME_CACHE = cache;
+            this.FILENAME_DBCSV = db;
+            this.FILENAME_VALUES = auto;
+        }
+
+        private string _index;
+        public string Index
+        {
+            get { return _index; }
+            set
+            {
+                if (_index != value)
+                {
+                    _index = value;
+                    RaisePropertyChanged("Index");
+                }
+                
+            }
+        }
+
+        private Batch _batch;
+        public Batch Batch
+        {
+            get { return _batch; }
+            set {
+                if (_batch != value)
+                {
+                    _batch = value;
+                    RaisePropertyChanged("Batch");
+                }
+            }
         }
 
         private RelayCommand _applyCmd;
@@ -80,9 +110,16 @@ namespace BatchDataEntry.ViewModels
          - Output copia dei file pdf
          */
 
-        //protected void ConvertiTiffInPdf() { }
         //copy pdf() { }
         //protected void RimuoviDocumento(int indice) { }
+
+        protected void LoadFile() { }
+        private void isPdfFile(string file) { } // richiamato da loadfile
+        private void isTiffFile(string file) { } //richiamato da loadfile
+
+        protected void LoadFields() { } // carica la lista dei campi
+
+
 
         public void Indicizza() { }
         public void Salta() { }

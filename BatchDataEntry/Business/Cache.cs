@@ -77,7 +77,7 @@ namespace BatchDataEntry.Business
             file.Save(fileName);
         }
 
-        public static Dictionary<string, string> GetKeyByKey(string fileName, string sectionName, string keyName)
+        public static Dictionary<string, string> GetKey(string fileName, string sectionName, string keyName)
         {
             if (!File.Exists(fileName))
                 return null;

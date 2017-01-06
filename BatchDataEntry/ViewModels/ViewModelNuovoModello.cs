@@ -27,8 +27,11 @@ namespace BatchDataEntry.ViewModels
             get { return _selectedModel; }
             set
             {
-                _selectedModel = value;
-                RaisePropertyChanged("SelectedModel");
+                if (_selectedModel != value)
+                {
+                    _selectedModel = value;
+                    RaisePropertyChanged("SelectedModel");
+                }
             }
         }
 

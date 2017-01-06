@@ -41,8 +41,11 @@ namespace BatchDataEntry.ViewModels
             get { return _dtSource; }
             set
             {
-                _dtSource = value;
-                RaisePropertyChanged("DataSource");
+                if (_dtSource != value)
+                {
+                    _dtSource = value;
+                    RaisePropertyChanged("DataSource");
+                }
             }
         }
 
@@ -52,8 +55,11 @@ namespace BatchDataEntry.ViewModels
             get { return _ndocs; }
             set
             {
-                _ndocs = value;
-                RaisePropertyChanged("NumeroDocumenti");
+                if (_ndocs != value)
+                {
+                    _ndocs = value;
+                    RaisePropertyChanged("NumeroDocumenti");
+                }
             }
         }
 
@@ -63,8 +69,11 @@ namespace BatchDataEntry.ViewModels
             get { return _dimfiles; }
             set
             {
-                _dimfiles = value;
-                RaisePropertyChanged("Dimensioni");
+                if (_dimfiles != value)
+                {
+                    _dimfiles = value;
+                    RaisePropertyChanged("Dimensioni");
+                }
             }
         }
 
@@ -74,8 +83,11 @@ namespace BatchDataEntry.ViewModels
             get { return _curDoc; }
             set
             {
-                _curDoc = value;
-                RaisePropertyChanged("DocumentoCorrente");
+                if (_curDoc != value)
+                {
+                    _curDoc = value;
+                    RaisePropertyChanged("DocumentoCorrente");
+                }
             }
         }
 
@@ -85,8 +97,11 @@ namespace BatchDataEntry.ViewModels
             get { return _ulti; }
             set
             {
-                _ulti = value;
-                RaisePropertyChanged("UltimoIndicizzato");
+                if (_ulti != value)
+                {
+                    _ulti = value;
+                    RaisePropertyChanged("UltimoIndicizzato");
+                }
             }
         }
 
@@ -96,8 +111,11 @@ namespace BatchDataEntry.ViewModels
             get { return _selectedRow; }
             set
             {
-                _selectedRow = value;
-                RaisePropertyChanged("SelectedRow");
+                if (_selectedRow != value)
+                {
+                    _selectedRow = value;
+                    RaisePropertyChanged("SelectedRow");
+                }
             }
         }
 
@@ -137,6 +155,18 @@ namespace BatchDataEntry.ViewModels
                     _daSelezCmd = new RelayCommand(param => this.ContinuaDaSelezione(), param => this.isSelectedRow);
                 }
                 return _daSelezCmd;
+            }
+        }
+
+        private RelayCommand _deleteCmd;
+        public ICommand EliminaSelezCmd
+        {
+            get {
+                if (_deleteCmd == null)
+                {
+                    _deleteCmd = new RelayCommand(param => this.EliminaSelezione(), param => this.isSelectedRow);
+                }
+                return _deleteCmd;
             }
         }
 
@@ -189,8 +219,38 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private void EliminaSelezione()
+        {
+            if (SelectedRow != null)
+            {
+                int colPrimary = 0;
+                if(_currentBatch.Applicazione == null)
+                    _currentBatch.LoadModel();
+                if(_currentBatch.Applicazione.Campi == null || _currentBatch.Applicazione.Campi.Count == 0)
+                    _currentBatch.Applicazione.LoadCampi();
+
+                foreach (Campo c in _currentBatch.Applicazione.Campi)
+                {
+                    if (c.IndicePrimario)
+                    {
+                        colPrimary = c.Posizione;
+                        break;
+                    }
+                }
+                string cacheFile = Path.Combine(_currentBatch.DirectoryOutput, FILENAME_CACHE);
+                string dbFile = Path.Combine(_currentBatch.DirectoryOutput, FILENAME_DBCSV);
+                string fileName = Business.Cache.GetKey(cacheFile, "Documenti", SelectedRow[colPrimary].ToString()).ElementAt(0).Value;
+                Business.Csv.DeleteRow(fileName, SelectedRow[colPrimary].ToString(), colPrimary);
+                File.Delete(fileName);
+                TaskLoadGrid();
+                RaisePropertyChanged("DataSource");
+            }
+        }
+
+
         private void CheckBatch()
         {
+
             MessageBox.Show("Non implementato!");
             //TODO: da verificare come implementarlo
         }

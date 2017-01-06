@@ -32,8 +32,11 @@ namespace BatchDataEntry.Models
             get { return _id; }
             set
             {
-                _id = value;
-                OnPropertyChanged("Id");
+                if (_id != value)
+                {
+                    _id = value;
+                    OnPropertyChanged("Id");
+                }
             }
         }
 
@@ -43,8 +46,11 @@ namespace BatchDataEntry.Models
             get { return _k; }
             set
             {
-                _k = value;
-                OnPropertyChanged("Key");
+                if (_k != value)
+                {
+                    _k = value;
+                    OnPropertyChanged("Key");
+                }
             }
         }
 
@@ -52,14 +58,28 @@ namespace BatchDataEntry.Models
         public string Value
         {
             get { return _val; }
-            set { _val = value; OnPropertyChanged("Value"); }
+            set
+            {
+                if (_val != value)
+                {
+                    _val = value;
+                    OnPropertyChanged("Value");
+                }
+            }
         }
 
         private ObservableCollection<string> _suggestions;
         public ObservableCollection<string> Suggestions
         {
             get { return _suggestions; }
-            set { _suggestions = value; OnPropertyChanged("Suggestions"); }
+            set
+            {
+                if (_suggestions != value)
+                {
+                    _suggestions = value;
+                    OnPropertyChanged("Suggestions");
+                } 
+            }
         }
         
         // Aggiungere sorgente per l'autocompletamento

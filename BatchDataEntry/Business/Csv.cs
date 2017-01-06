@@ -1,10 +1,8 @@
-﻿using CsvHelper;
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BatchDataEntry.Business
 {
@@ -12,35 +10,69 @@ namespace BatchDataEntry.Business
     {
         public static void CreateCsv(string fullPath)
         {
-            File.Create(fullPath);
+            File.Create(fullPath).Dispose();
         }
 
-        public static void AddRow(string fullPath, string row)
+        public static void AddRow(string fullPath, string line)
         {
-            CsvWriter writer = new CsvWriter(new StreamWriter(fullPath));
-            writer.WriteRecord(row);          
+            using (CsvFileWriter writer = new CsvFileWriter(fullPath, true))
+            {
+                writer._separator = ';';
+                CsvRow row = new CsvRow();
+                row.Add(line);
+                writer.WriteRow(row);
+            }       
+        }
+
+        public static void AddRows(string fullPath, IEnumerable records)
+        {
+            using (CsvFileWriter writer = new CsvFileWriter(fullPath))
+            {
+                writer._separator = ';';
+                foreach (var record in records)
+                {
+                    CsvRow row = new CsvRow();
+                    row.Add(record.ToString());
+                    writer.WriteRow(row);
+                }
+            }
         }
 
         public static List<string> ReadRows(string fullPath)
         {
-            return new CsvReader(new StreamReader(fullPath)).GetRecords<string>().ToList<string>();
+            List < string > result = new List<string>();
+            using (CsvFileReader reader = new CsvFileReader(fullPath))
+            {
+                reader._separator = ';';
+                CsvRow row = new CsvRow();
+                while (reader.ReadRow(row))
+                {
+                    string line = "";
+                    for(int i=0;i<row.Count;i++)
+                    {
+                        if (i == (row.Count - 1))
+                            line += row[i];
+                        else
+                            line += row[i] + reader._separator;
+                    }
+                    result.Add(line);
+                }
+                return result;
+            }
         }
 
         public static List<string> ReadColumn(string fullPath, int columnNumber)
         {
             List<string> result = new List<string>();
-            using (var fr = File.OpenText(fullPath))
+            using (CsvFileReader reader = new CsvFileReader(fullPath))
             {
-                using (CsvReader reader = new CsvReader(fr))
+                reader._separator = ';';
+                CsvRow row = new CsvRow();
+                while (reader.ReadRow(row))
                 {
-                    while (reader.Read())
-                    {
-                        string field = reader.GetField<string>(columnNumber);
-                        result.Add(field);
-                    }
+                    result.Add(row[columnNumber]);
                 }
             }
-
             return result;
         }
 
@@ -94,23 +126,60 @@ namespace BatchDataEntry.Business
 
         }
 
-        public static bool UpdateRow(string file, int line, string content)
+        public static bool DeleteRow(string file, string val, int colToSearch)
         {
+
             try
             {
                 string[] values = File.ReadAllLines(file);
                 StreamWriter Writer = new StreamWriter(file);
                 for (int i = 0; i < values.Length; i++)
                 {
-                    if (i == line)
+                    if (values[i].Contains(val))
                     {
-                        Writer.WriteLine(content);
-                        continue;
+                        string[] cells = values[i].Split(';');
+                        if (cells[colToSearch] == val)
+                        {
+                            continue;
+                        }
                     }
                     Writer.WriteLine(values[i]);
                 }
 
                 Writer.Close();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+        }
+
+        public static bool UpdateRow(string file, int line, string content)
+        {
+            try
+            {
+                List<string> rows = ReadRows(file);
+                using (CsvFileWriter writer = new CsvFileWriter(file))
+                {
+                    writer._separator = ';';
+
+                    for (int i = 0; i < rows.Count; i++)
+                    {
+                        CsvRow r = new CsvRow();
+                        if (i == line)
+                        {
+                            r.Add(content);
+                        }
+                        else
+                        {
+                            r.Add(rows[i]);
+                        }
+                        writer.WriteRow(r);
+                    }
+                    writer.Close();
+                }             
                 return true;
             }
             catch (Exception)
@@ -123,23 +192,55 @@ namespace BatchDataEntry.Business
         {
             try
             {
-                string[] values = File.ReadAllLines(file);
-                StreamWriter Writer = new StreamWriter(file);
-                for (int i = 0; i < values.Length; i++)
+                List<string> rows = ReadRows(file);
+                using (CsvFileWriter writer = new CsvFileWriter(file))
                 {
-                    if(values[i].Contains(original))
-                        Writer.WriteLine(replace);
+                    writer._separator = ';';
 
-                    Writer.WriteLine(values[i]);
+                    for (int i = 0; i < rows.Count; i++)
+                    {
+                        CsvRow r = new CsvRow();
+                        if (rows[i] == original)
+                        {
+                            r.Add(replace);
+                        }
+                        else
+                        {
+                            r.Add(rows[i]);
+                        }
+                        writer.WriteRow(r);
+                    }
+                    writer.Close();
                 }
-
-                Writer.Close();
                 return true;
             }
             catch (Exception)
             {
                 return false;
             }
+        }
+
+        public static string[] CSVRowToStringArray(string r, char fieldSep = ';', char stringSep = '\"')
+        {
+            bool bolQuote = false;
+            StringBuilder bld = new StringBuilder();
+            List<string> retAry = new List<string>();
+
+            foreach (char c in r.ToCharArray())
+                if ((c == fieldSep && !bolQuote))
+                {
+                    retAry.Add(bld.ToString());
+                    bld.Clear();
+                }
+                else
+                    if (c == stringSep)
+                    bolQuote = !bolQuote;
+                else
+                    bld.Append(c);
+
+            /* to solve the last element problem */
+            retAry.Add(bld.ToString()); /* added this line */
+            return retAry.ToArray();
         }
     }
 }

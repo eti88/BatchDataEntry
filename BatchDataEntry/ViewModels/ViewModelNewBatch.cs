@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using MadMilkman.Ini;
@@ -27,8 +28,11 @@ namespace BatchDataEntry.ViewModels
             get { return _currentBatch; }
             set
             {
-                _currentBatch = value;
-                RaisePropertyChanged("CurrentBatch");
+                if (_currentBatch != value)
+                {
+                    _currentBatch = value;
+                    RaisePropertyChanged("CurrentBatch");
+                }
             }
         }
 
@@ -38,8 +42,10 @@ namespace BatchDataEntry.ViewModels
             get { return _models; }
             set
             {
-                _models = value;
-                RaisePropertyChanged("Models");
+                if(_models != value) { 
+                    _models = value;
+                    RaisePropertyChanged("Models");
+                }
             }
         }
 
@@ -175,33 +181,45 @@ namespace BatchDataEntry.ViewModels
         protected void CreateIniFile(string input_path, string output_path, TipoFileProcessato ext)
         {
             string fileOutputPathCache = Path.Combine(output_path, FILENAME_CACHE);
-            string fileOutputPathDb = Path.Combine(output_path, FILENAME_CACHE);
+            //string fileOutputPathDb = Path.Combine(output_path, FILENAME_CACHE);
 
             if (Business.Cache.CreateFile(fileOutputPathCache))
             {
-                int primaryIndex = 0;
-                foreach (Campo campo in _currentBatch.Applicazione.Campi)
-                {
-                    if (campo.IndicePrimario)
-                    {
-                        primaryIndex = campo.Posizione;
-                        break;
-                    }
-                }
+                // Nel file di index inserire i nomi dei file senza estensione e puliti quindi se DOC00000002 -> 00000002             
+                /*
+                 * Recupera i nomi dei file direttamente da un file csv (forse da inserire più avanti)
+                 * string[] fileNames = Business.Csv.ReadColumn(output_path, primaryIndex).ToArray();
+                 */
 
-                //TODO: da vedere dove leggere i nomi dei file
-                string[] fileNames = Business.Csv.ReadColumn(output_path, primaryIndex).ToArray();
-                
                 Business.Cache.AddSection(fileOutputPathCache, "Documenti");
 
                 if (ext == TipoFileProcessato.Pdf)
                 {
                     string[] docs = Directory.GetFiles(input_path, string.Format("*.{0}", ext));
+                    string[] fileNames = new string[docs.Length];
+
+                    for (int i = 0; i < docs.Length; i++)
+                    {
+                        string fileName = Path.GetFileNameWithoutExtension(docs[i]);
+                        if (!Business.Utility.ContainsOnlyNumbers(fileName))
+                        {
+                            fileName = Business.Utility.RemovePatternFromString(fileName, "DOC");
+                        }
+                        
+                        fileNames[i] = fileName;
+                    }
+
                     Business.Cache.AddMultipleKeyToSection(fileOutputPathCache, "Documenti", fileNames, docs);
                 }
                 else if (ext == TipoFileProcessato.Tiff)
                 {
                     string[] dirs = Directory.GetDirectories(input_path);
+                    string[] fileNames = new string[dirs.Length];
+                    for (int i = 0; i < dirs.Length; i++)
+                    {
+                        fileNames[i] = Business.Utility.RemovePatternFromString(dirs[i], "DOC");
+                    }
+                    
                     Business.Cache.AddMultipleKeyToSection(fileOutputPathCache, "Documenti", fileNames, dirs);
 
                 }

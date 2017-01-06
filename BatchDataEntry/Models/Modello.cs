@@ -155,6 +155,16 @@ namespace BatchDataEntry.Models
             this.MyMemento = new MementoModello(m.Nome, m.OrigineCsv, tmpc, m.PathFileCsv, m.Separatore);
         }
 
+        public void LoadCampi()
+        {
+            if (this.Id > 0)
+            {
+                DatabaseHelper db = new DatabaseHelper();
+                ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", this.Id));
+                this.Campi = tmpc;
+            }
+        }
+
         public void Revert()
         {
             this.Nome = this.MyMemento.nome;

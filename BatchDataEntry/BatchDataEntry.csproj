@@ -118,10 +118,6 @@
       <HintPath>..\packages\Apitron.PDF.Controls.1.0.90.0\lib\net451\Apitron.PDF.Rasterizer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="CsvHelper, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
-      <HintPath>..\packages\CsvHelper.2.16.3.0\lib\net45\CsvHelper.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="MadMilkman.Ini, Version=1.0.6.0, Culture=neutral, PublicKeyToken=4e0b5157a7ffbb74, processorArchitecture=MSIL">
       <HintPath>..\packages\MadMilkman.Ini.1.0.6.0\lib\net20\MadMilkman.Ini.dll</HintPath>
       <Private>True</Private>
@@ -191,6 +187,9 @@
     <Compile Include="Business\AutoCompleteSource.cs" />
     <Compile Include="Business\Cache.cs" />
     <Compile Include="Business\Csv.cs" />
+    <Compile Include="Business\CsvFileReader.cs" />
+    <Compile Include="Business\CsvFileWriter.cs" />
+    <Compile Include="Business\CsvRow.cs" />
     <Compile Include="Business\Utility.cs" />
     <Compile Include="DBModels\Batch.cs" />
     <Compile Include="DBModels\Campo.cs" />

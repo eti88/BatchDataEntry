@@ -140,5 +140,20 @@ namespace BatchDataEntry.Business
                 return null;
             }
         }
+
+        public static bool ContainsOnlyNumbers(string text)
+        {
+            if (text.Length == 0)
+                return true;
+            if (Char.IsLetter(text.ElementAt(text.Length - 1)))
+                return false;
+            else
+                return ContainsOnlyNumbers(text.Remove(text.Length - 1));
+        }
+
+        public static string RemovePatternFromString(string origin, string pattern)
+        {
+            return origin.Replace(pattern, "");
+        }
     }
 }

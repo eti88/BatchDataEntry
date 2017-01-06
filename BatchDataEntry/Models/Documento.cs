@@ -20,20 +20,48 @@ namespace BatchDataEntry.Models
             }
             set
             {
-                _id = value;
-                OnPropertyChanged("Id");
+                if (_id != value)
+                {
+                    _id = value;
+                    OnPropertyChanged("Id");
+                }
             }
         }
 
-        // Documento di origine es: pdf
+        // Documento di origine es: path pdf
         public string _origine;
         public string Origine { get { return _origine; }
             set
             {
-                _origine = value;
-                OnPropertyChanged("Origine");
+                if (_origine != value)
+                {
+                    _origine = value;
+                    OnPropertyChanged("Origine");
+                }
             }
-        } 
+        }
 
+        public string _fileName;
+        public string FileName
+        {
+            get { return _fileName; }
+            set
+            {
+                if (_fileName != value)
+                {
+                    _fileName = value;
+                    OnPropertyChanged("FileName");
+                }
+            }
+        }
+
+        public Documento() { }
+
+        public Documento(string id, string origine, string filename)
+        {
+            this.Id = id;
+            this.Origine = origine;
+            this.FileName = filename;
+        }
     }
 }

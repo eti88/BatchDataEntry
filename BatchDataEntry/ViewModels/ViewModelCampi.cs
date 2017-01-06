@@ -33,8 +33,11 @@ namespace BatchDataEntry.ViewModels
             get { return _clos; }
             set
             {
-                _clos = value;
-                RaisePropertyChanged("Colonne");
+                if (_clos != value)
+                {
+                    _clos = value;
+                    RaisePropertyChanged("Colonne");
+                }
             }
         }
 
@@ -44,8 +47,11 @@ namespace BatchDataEntry.ViewModels
             get { return _selectedCampo; }
             set
             {
-                _selectedCampo = value;
-                RaisePropertyChanged("SelectedCampo");
+                if (_selectedCampo != value)
+                {
+                    _selectedCampo = value;
+                    RaisePropertyChanged("SelectedCampo");
+                }
             }
         }
 

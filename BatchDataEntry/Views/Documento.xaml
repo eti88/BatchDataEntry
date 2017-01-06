@@ -42,9 +42,5 @@
                 <Button x:Name="button1Stop" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
             </StackPanel>
         </Grid>
-
-
-
-
     </Grid>
 </Window>

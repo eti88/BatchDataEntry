@@ -21,8 +21,12 @@ namespace BatchDataEntry.ViewModels
             }
             set
             {
-                _Batches = value;
-                RaisePropertyChanged("Batches");
+                if (_Batches != value)
+                {
+                    _Batches = value;
+                    RaisePropertyChanged("Batches");
+                }
+                
             }
         }   
 
@@ -32,9 +36,11 @@ namespace BatchDataEntry.ViewModels
             get { return _SelectedBatch; }
             set
             {
-                _SelectedBatch = value;
-                RaisePropertyChanged("SelectedBatch");
-                // Dosomething
+                if (_SelectedBatch != value)
+                {
+                    _SelectedBatch = value;
+                    RaisePropertyChanged("SelectedBatch");
+                }
             }
         }
 
