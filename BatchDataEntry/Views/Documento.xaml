@@ -3,18 +3,27 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:behaviours="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
+        xmlns:controls="clr-namespace:Apitron.PDF.Controls;assembly=Apitron.PDF.Controls"
+        xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
+        xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
         mc:Ignorable="d"
-        Title="Documento" Height="650" Width="700">
+        Title="Documento" Height="650" Width="800">
+    <Window.DataContext>
+        <viewModels:ViewModelDocumento></viewModels:ViewModelDocumento>
+    </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <WindowsFormsHost Grid.Column="0" Grid.Row="0" Panel.ZIndex="2" Margin="10"/>
+        <Border BorderThickness="1" BorderBrush="Black">
+        <WindowsFormsHost Grid.Column="0" Grid.Row="0" Panel.ZIndex="2" Margin="10">
+            <controls:PDFViewer x:Name="pdfViewerMain" Document="{Binding Path=Document, Mode=OneTime}"/>
+        </WindowsFormsHost>
+        </Border>
         <Grid Grid.Column="1" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -23,23 +32,24 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
-            <ScrollViewer x:Name="properyDataEntryPanel">
-                <ItemsControl ItemsSource="{Binding Path=DataList}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <Label Content="{Binding Path=DataList.Nome}"/>
-                                <TextBox Text="{Binding Path=DataList.Value, UpdateSourceTrigger=PropertyChanged}" behaviours:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding DataList.Suggestions}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+            <ScrollViewer>
+                <StackPanel x:Name="dataEntryElements">
+                    <ItemsControl ItemsSource="{Binding Path=Voci}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Label Content="{Binding Key}"/>
+                                    <TextBox Text="{Binding Value}" wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding Suggestions}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </ScrollViewer>
-
             <StackPanel Grid.Row="1" Height="40" Orientation="Horizontal">
-                <Button x:Name="buttonNext" Content="Prossimo" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
-                <Button x:Name="buttonJump" Content="Salta" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
-                <Button x:Name="button1Stop" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
+                <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="Prossimo" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
+                <Button x:Name="buttonJump" Command="{Binding Path=CmdJump}" Content="Salta" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
+                <Button x:Name="buttonStop" Command="{Binding Path=CmdStop}" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
             </StackPanel>
         </Grid>
     </Grid>

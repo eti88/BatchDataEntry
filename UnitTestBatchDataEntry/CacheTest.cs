@@ -107,5 +107,47 @@ namespace UnitTestBatchDataEntry
                 
             }      
         }
+
+        [TestMethod]
+        public void TestAddSerializedArray()
+        {
+            string[] tmp = new string[] { "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8" };
+            try
+            {              
+                Cache.AddSeriazliedValueToSection(_PATH, _SECTION, "arrayprova", tmp);
+                Assert.IsTrue(true);
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(false, e.Message);
+
+            }
+        }
+
+        [TestMethod]
+        public void TestGetSerializedArray()
+        {
+            string[] res;
+            string[] exp = new string[] { "value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8" };
+            try
+            {
+                res = Cache.GetSerializedValue(_PATH, _SECTION, "arrayprova");
+
+                if(res.Length == 0)
+                    Assert.IsTrue(false, "Array recuperato dal file vuoto...");
+
+                for (int i = 0; i < res.Length; i++)
+                {
+                    Assert.AreEqual(res[i], exp[i]);
+                }
+
+                Assert.IsTrue(true);
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(false, e.Message);
+
+            }
+        }
     }
 }

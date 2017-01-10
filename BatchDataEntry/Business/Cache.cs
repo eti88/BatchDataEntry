@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace BatchDataEntry.Business
 {
@@ -43,6 +44,39 @@ namespace BatchDataEntry.Business
             file.Save(fileName);
         }
 
+        public static void AddSeriazliedValueToSection(string fileName, string sectionName, string keyName, string[] val)
+        {
+            if (!File.Exists(fileName))
+                return;
+
+            IniFile file = new IniFile();
+            file.Load(fileName);
+            IniSection section = file.Sections[sectionName];
+            section.Keys.Add(keyName, JsonConvert.SerializeObject(val));
+            file.Save(fileName);
+        }
+
+        public static string[] GetSerializedValue(string fileName, string sectionName, string keyName)
+        {
+            if (!File.Exists(fileName))
+                return null;
+
+            IniFile file = new IniFile();
+            try
+            {
+                file.Load(fileName);
+                IniSection section = file.Sections[sectionName];
+                string val = section.Keys[keyName].Value;
+                string[] res = JsonConvert.DeserializeObject<string[]>(val);
+
+                return res;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
         public static void AddMultipleSection(string fileName, List<string> sections)
         {
             if (!File.Exists(fileName))
@@ -70,6 +104,8 @@ namespace BatchDataEntry.Business
             file.Load(fileName);
             IniSection section = file.Sections[sectionName];
 
+            string[] tmp = values.ToArray();
+
             for (int i = 0; i < keys.Length; i++)
             {
                 section.Keys.Add(keys[i], values[i]);
@@ -90,6 +126,23 @@ namespace BatchDataEntry.Business
             IniKey key = section.Keys[keyName];
             result.Add(key.Name, key.Value);
             return result;
+        }
+
+        public static List<string> GetValuesFromSection(string fileName, string sectionName)
+        {
+            List<string> res = new List<string>();
+
+            if (!File.Exists(fileName))
+                return null;
+
+            IniFile file = new IniFile();
+            file.Load(fileName);
+            IniSection section = file.Sections[sectionName];
+            foreach (IniKey key in section.Keys)
+            {
+                res.Add(key.Value);
+            }
+            return res;
         }
     }
 }

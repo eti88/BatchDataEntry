@@ -11,6 +11,12 @@ namespace BatchDataEntry.Models
     {
         public Voce() { }
 
+        public Voce(int id, string key)
+        {
+            this.Id = id;
+            this.Key = key;
+        }
+
         public Voce(int id, string key, string value)
         {
             this.Id = id;
@@ -18,71 +24,72 @@ namespace BatchDataEntry.Models
             this.Value = value;
         }
 
-        public Voce(int id, string key, string value, ObservableCollection<string> sugg)
-        {
-            this.Id = id;
-            this.Key = key;
-            this.Value = value;
-            this.Suggestions = sugg;
-        }
-
         private int _id;
         public int Id
         {
-            get { return _id; }
+            get
+            {
+                return _id;
+            }
             set
             {
                 if (_id != value)
-                {
                     _id = value;
-                    OnPropertyChanged("Id");
-                }
+                OnPropertyChanged("Id");
             }
         }
 
-        private string _k;
-        public string Key
-        {
-            get { return _k; }
+        private string _key;
+        public string Key {
+            get
+            {
+                return _key;
+            }
             set
             {
-                if (_k != value)
-                {
-                    _k = value;
-                    OnPropertyChanged("Key");
-                }
+                if (_key != value)
+                    _key = value;
+                OnPropertyChanged("Key");
             }
         }
 
-        private string _val;
-        public string Value
-        {
-            get { return _val; }
+        private string _value;
+        public string Value {
+            get
+            {
+                return _value;
+            }
             set
             {
-                if (_val != value)
-                {
-                    _val = value;
-                    OnPropertyChanged("Value");
-                }
+                if (_value != value)
+                    _value = value;
+                OnPropertyChanged("Value");
             }
         }
 
-        private ObservableCollection<string> _suggestions;
-        public ObservableCollection<string> Suggestions
+        private bool _isAutocomplete;
+        public bool IsAutocomplete
         {
-            get { return _suggestions; }
+            get { return _isAutocomplete; }
             set
             {
-                if (_suggestions != value)
-                {
-                    _suggestions = value;
-                    OnPropertyChanged("Suggestions");
-                } 
+                if (_isAutocomplete != value)
+                    _isAutocomplete = value;
+                OnPropertyChanged("IsAutocomplete");
             }
         }
-        
-        // Aggiungere sorgente per l'autocompletamento
+
+        private IEnumerable<string> _suggestion;
+        public IEnumerable<string> Suggestions
+        {
+            get { return _suggestion; }
+            set
+            {
+                if (_suggestion != value && IsAutocomplete)
+                    _suggestion = value;
+                OnPropertyChanged("Suggestions");
+            }
+        }
 
         public override string ToString()
         {

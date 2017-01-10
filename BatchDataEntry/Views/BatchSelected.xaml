@@ -37,22 +37,10 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="1">
-                <WrapPanel>
-                    <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="Numero documenti: " Margin="5"/>
-                    <TextBlock x:Name="textBlockNumDocVal" Text="{Binding Path=NumeroDocumenti}" Width="180"/>
-                </WrapPanel>
-                <WrapPanel>
-                    <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="Dimensione:" Margin="5"/>
-                    <TextBlock x:Name="textBlockDimVal" Text="{Binding Path=Dimensioni}" Width="180"/>
-                </WrapPanel>
-                <WrapPanel>
-                    <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="Documento corrente:" Margin="5"/>
-                    <TextBlock x:Name="textBlockDocCorrenteVal" Text="{Binding Path=DocumentoCorrente}" Width="180"/>
-                </WrapPanel>
-                <WrapPanel>
-                    <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="Ultimo inserimento:" Margin="5"/>
-                    <TextBlock x:Name="textBlockUltimoVal" Text="{Binding Path=UltimoIndicizzato}" Width="180"/>
-                </WrapPanel>
+                <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="{Binding Path=NumeroDocumenti, StringFormat='Numero documenti:    {0}'}" Margin="5"/>
+                <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="{Binding Path=Dimensioni,StringFormat='Dimensione:    {0} MB'}" Margin="5"/>
+                <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="{Binding Path=DocumentoCorrente, StringFormat='Documento corrente:    {0}'}" Margin="5"/>
+                <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="{Binding Path=UltimoIndicizzato,StringFormat='Ultimo inserimento:    {0}'}" Margin="5"/>
             </StackPanel>
             <StackPanel Height="50" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button x:Name="buttonEliminaSelezione" Content="Elimina Selez." Command="{Binding Path=EliminaSelezCmd}" Height="30" Width="100" Margin="5" Background="#FFFF5656" FontSize="11"/>

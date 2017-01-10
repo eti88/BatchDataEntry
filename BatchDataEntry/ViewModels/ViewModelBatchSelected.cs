@@ -29,7 +29,7 @@ namespace BatchDataEntry.ViewModels
             _currentBatch = batch;
             long bytes = Utility.GetDirectorySize(batch.DirectoryInput);
             TaskLoadGrid();
-            Dimensioni = String.Format("{0} MB", Utility.ConvertSize((double)bytes, "MB").ToString("0.00"));
+            Dimensioni = Utility.ConvertSize((double)bytes, "MB").ToString("0.00");
             NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);      
         }
 
@@ -175,6 +175,7 @@ namespace BatchDataEntry.ViewModels
             get { return (SelectedRow == null) ? false : true; }
         }
 
+
         private void ContinuaDaSelezione()
         {
             int posizioneCol = -1;
@@ -204,7 +205,7 @@ namespace BatchDataEntry.ViewModels
             string indexFile = SelectedRow[posizioneCol].ToString();
             if (!string.IsNullOrEmpty(indexFile))
             {
-                continua.DataContext = new ViewModelDataEntry(indexFile, _currentBatch, FILENAME_CACHE, FILENAME_DBCSV, FILENAME_VALUES);
+                //continua.DataContext = new ViewModelDataEntry(indexFile, _currentBatch, FILENAME_CACHE, FILENAME_DBCSV, FILENAME_VALUES);
                 continua.Show();
             }
         }
@@ -214,7 +215,7 @@ namespace BatchDataEntry.ViewModels
             if (_currentBatch != null)
             {
                 Views.Documento inserimento = new Views.Documento();
-                inserimento.DataContext = new ViewModelDataEntry(_currentBatch, FILENAME_CACHE, FILENAME_DBCSV, FILENAME_VALUES);
+                //inserimento.DataContext = new ViewModelDataEntry(_currentBatch, FILENAME_CACHE, FILENAME_DBCSV, FILENAME_VALUES);
                 inserimento.Show();
             }
         }
