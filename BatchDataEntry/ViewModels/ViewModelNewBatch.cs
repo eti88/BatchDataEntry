@@ -8,17 +8,19 @@ using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using MadMilkman.Ini;
+using System.Configuration;
 using NLog;
 
 namespace BatchDataEntry.ViewModels
 {
     class ViewModelNewBatch : ViewModelBase
     {
-        private readonly string FILENAME_CACHE = "cache.ini";
-        private readonly string FILENAME_DBCSV = "db.csv";
-        private readonly string FILENAME_VALUES = "autocomp.ini";
-
         private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        private readonly string FILENAME_CACHE = Properties.Settings.Default["filename_cache_output_dir"].ToString();
+        private readonly string FILENAME_DBCSV = Properties.Settings.Default["filename_db_output_dir"].ToString();
+        private readonly string FILENAME_VALUES = Properties.Settings.Default["filename_autocomplete"].ToString();
+        private readonly string FILENAME_IN_CACHE = Properties.Settings.Default["filename_cache_input_dir"].ToString();
 
         private bool _alreadyExist;
 
@@ -98,7 +100,7 @@ namespace BatchDataEntry.ViewModels
                 DBModels.Batch batch = new DBModels.Batch(CurrentBatch);
                 db.UpdateRecord(batch);
                 RaisePropertyChanged("Batches");
-                bool[] resck = CheckOutputDirFiles(CurrentBatch.DirectoryOutput);
+                bool[] resck = CheckOutputDirFiles(CurrentBatch.DirectoryInput, CurrentBatch.DirectoryOutput);
                 CreateMissingFiles(resck, CurrentBatch);
             }
             else
@@ -140,11 +142,13 @@ namespace BatchDataEntry.ViewModels
             {
                 CreateAutocompleteIniFile(m.DirectoryOutput, m.IdModello);
             }
+            if (res[3])
+                GeneraDirInput(m.DirectoryInput, m.TipoFile);
         }
 
-        protected bool[] CheckOutputDirFiles(string output_path)
+        protected bool[] CheckOutputDirFiles(string input_path, string output_path)
         {
-            bool[] res = new bool[3];
+            bool[] res = new bool[4];
 
             if (!File.Exists(Path.Combine(output_path, FILENAME_CACHE)))
                 res[0] = true;
@@ -160,10 +164,45 @@ namespace BatchDataEntry.ViewModels
                 res[2] = true;
             else
                 res[2] = false;
+            if (!File.Exists(Path.Combine(input_path, FILENAME_IN_CACHE)))
+                res[3] = true;
+            else
+                res[3] = false;
 
             return res;
         }
-       
+
+        protected void GeneraDirInput(string input_path, TipoFileProcessato ext)
+        {
+            if (Directory.Exists(input_path))
+            {
+                string filePath = Path.Combine(input_path, FILENAME_IN_CACHE);
+                Csv.CreateCsv(filePath);
+                if (File.Exists(filePath))
+                {
+                    if (ext == TipoFileProcessato.Pdf)
+                    {
+                        string[] docs = Directory.GetFiles(input_path, string.Format("*.{0}", ext));
+                        for (int i = 0; i < docs.Length; i++)
+                        {
+                            string row = string.Format("{0};{1}", Path.GetFileNameWithoutExtension(docs[i]),false);
+                            Csv.AddRow(filePath, row);
+                        }
+                    }
+                    else if (ext == TipoFileProcessato.Tiff)
+                    {
+                        string[] dirs = Directory.GetDirectories(input_path);
+                        for (int i = 0; i < dirs.Length; i++)
+                        {
+
+                            string row = string.Format("{0};{1}", new DirectoryInfo(dirs[i]).Name, false);
+                            Csv.AddRow(filePath, row);
+                        }
+                    } 
+                }
+            }
+        }
+
         protected void GeneraDirOutput(string input_path, string output_path, TipoFileProcessato ext, int idModello)
         {
 
@@ -172,7 +211,7 @@ namespace BatchDataEntry.ViewModels
             {
                 Directory.CreateDirectory(output_path);
             }
-
+            GeneraDirInput(input_path, ext);
             CreateIniFile(input_path, output_path, ext);
             CreateAutocompleteIniFile(output_path, idModello);
             CreateDbCsv(output_path);
@@ -239,7 +278,6 @@ namespace BatchDataEntry.ViewModels
             DatabaseHelper db = new DatabaseHelper();
             ObservableCollection<Campo> campi = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
             List<string> colNames = new List<string>(campi.Select((campo) => campo.Nome));
-            Console.WriteLine(@"=============DBG==============");
 
             if (campi == null || campi.Count == 0)
             {

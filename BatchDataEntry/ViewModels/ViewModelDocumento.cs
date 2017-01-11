@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Input;
 using Apitron.PDF.Rasterizer;
 using BatchDataEntry.Helpers;
@@ -16,12 +12,14 @@ namespace BatchDataEntry.ViewModels
 {
     class ViewModelDocumento : ViewModelBase
     {
+        private readonly string FILENAME_CACHE = Properties.Settings.Default["filename_cache_output_dir"].ToString();
+        private readonly string FILENAME_DBCSV = Properties.Settings.Default["filename_db_output_dir"].ToString();
+        private readonly string FILENAME_VALUES = Properties.Settings.Default["filename_autocomplete"].ToString();
+        private readonly string FILENAME_IN_CACHE = Properties.Settings.Default["filename_cache_input_dir"].ToString();
+
         private Document _document;
+        private Doc _dc;
         private Batch _batch;
-        private string _fileCache;
-        private string _fileDb;
-        private string _fileValues;
-        private ObservableCollection<Voce> _voci;
 
         public Document Document
         {
@@ -33,6 +31,16 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("Document");
             }
         }
+        public Doc DocFile
+        {
+            get { return _dc; }
+            set
+            {
+                if (_dc != value)
+                    _dc = value;
+                RaisePropertyChanged("DocFile");
+            }
+        }
         public Batch Batch
         {
             get { return _batch; }
@@ -41,46 +49,6 @@ namespace BatchDataEntry.ViewModels
                 if (_batch != value)
                     _batch = value;
                 RaisePropertyChanged("Batch");
-            }
-        }
-        public string FileCache
-        {
-            get { return _fileCache; }
-            set
-            {
-                if (_fileCache != value)
-                    _fileCache = value;
-                RaisePropertyChanged("FileCache");
-            }
-        }
-        public string FileDb
-        {
-            get { return _fileDb; }
-            set
-            {
-                if (_fileDb != value)
-                    _fileDb = value;
-                RaisePropertyChanged("FileDb");
-            }
-        }
-        public string FileValues
-        {
-            get { return _fileValues; }
-            set
-            {
-                if (_fileValues != value)
-                    _fileValues = value;
-                RaisePropertyChanged("FileValues");
-            }
-        }
-        public ObservableCollection<Voce> Voci
-        {
-            get { return _voci; }
-            set
-            {
-                if (_voci != value)
-                    _voci = value;
-                RaisePropertyChanged("Voci");
             }
         }
 
@@ -126,20 +94,18 @@ namespace BatchDataEntry.ViewModels
         
         public ViewModelDocumento()
         {
-            
+            this.Document = null;
+            this.Batch = new Batch();
         }
 
-        public ViewModelDocumento(Batch _currentBatch, string fileIndex, string _cache, string _db, string _vals)
+        public ViewModelDocumento(Batch _currentBatch,string filePos, string filePath)
         {
-            this._fileCache = _cache;
-            this._fileDb = _db;
-            this._fileValues = _vals;
             if (_currentBatch != null)
                 Batch = _currentBatch;
 
-            string[] record = fileIndex.Split(';');
-
-            Voci = AddInputsToPanel(Batch.Applicazione.Campi);
+            DocFile.Index = filePos;
+            DocFile.Path = filePath;
+            DocFile.Voci = AddInputsToPanel(Batch.Applicazione.Campi);
         }
 
         protected ObservableCollection<Voce> AddInputsToPanel(ObservableCollection<Campo> campi)
@@ -150,7 +116,6 @@ namespace BatchDataEntry.ViewModels
             {
                 voci.Add(new Voce(campo.Posizione, campo.Nome));
             }
-
             return voci;
         }
 

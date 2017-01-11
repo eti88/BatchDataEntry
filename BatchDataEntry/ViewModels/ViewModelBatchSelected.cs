@@ -16,9 +16,10 @@ namespace BatchDataEntry.ViewModels
 {
     class ViewModelBatchSelected : ViewModelMain
     {
-        private readonly string FILENAME_CACHE = "cache.ini";
-        private readonly string FILENAME_DBCSV = "db.csv";
-        private readonly string FILENAME_VALUES = "autocomp.ini";
+        private readonly string FILENAME_CACHE = Properties.Settings.Default["filename_cache_output_dir"].ToString();
+        private readonly string FILENAME_DBCSV = Properties.Settings.Default["filename_db_output_dir"].ToString();
+        private readonly string FILENAME_VALUES = Properties.Settings.Default["filename_autocomplete"].ToString();
+        private readonly string FILENAME_IN_CACHE = Properties.Settings.Default["filename_cache_input_dir"].ToString();
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -251,7 +252,9 @@ namespace BatchDataEntry.ViewModels
 
         private void CheckBatch()
         {
-
+            /*
+             Controlla quali file devono ancora essere indicizzati
+             */
             MessageBox.Show("Non implementato!");
             //TODO: da verificare come implementarlo
         }
@@ -279,5 +282,13 @@ namespace BatchDataEntry.ViewModels
             else
                 return null;
         }
+
+
+        /*
+         * -> cache.ini -> tiene traccia dell'associazione numero,file
+         * -> db salva i record di output
+         * -> nella cartella di input creare un altro csv che traccia i file mancanti
+         *    quando viene effettuato il check controlla quest'ultimo file per vedere i record che han bisogno dell'inserimento
+         */
     }
 }

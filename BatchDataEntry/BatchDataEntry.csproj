@@ -204,6 +204,7 @@
     <Compile Include="Helpers\IClosableViewModel.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Models\BaseModel.cs" />
+    <Compile Include="Models\Doc.cs" />
     <Compile Include="Models\TipoFileProcessato.cs" />
     <Compile Include="Models\Voce.cs" />
     <Compile Include="Validators\NameValidator.cs" />
