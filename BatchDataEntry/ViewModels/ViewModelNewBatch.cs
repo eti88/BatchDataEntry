@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
-using MadMilkman.Ini;
 using System.Configuration;
+using BatchDataEntry.DBModels;
 using NLog;
+using Batch = BatchDataEntry.Models.Batch;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -108,13 +108,13 @@ namespace BatchDataEntry.ViewModels
             try
             {
                 if (!File.Exists(dbCache.PATHDB))
+                {
                     dbCache.CreateCacheDb();
-
-                if (CurrentBatch.Applicazione.Campi == null)
-                    CurrentBatch.Applicazione.LoadCampi();
-
-                if (CurrentBatch.Applicazione.Campi.Count > 0)
-                    dbCache.GenerateCacheTable(CurrentBatch.Applicazione.Campi);
+                    fillCacheDb(dbCache, CurrentBatch);
+                }
+                    
+                if (CheckOutputDirFiles(CurrentBatch.DirectoryOutput))
+                    CreateMissingFiles(true, CurrentBatch);
             }
             catch (Exception e)
             {
@@ -133,7 +133,50 @@ namespace BatchDataEntry.ViewModels
             IEnumerable<DBModels.Modello> tmp = db.IEnumerableModelli();      
             Models = tmp;
             RaisePropertyChanged("Models");
-        }     
-        
+        }
+
+        protected void CreateMissingFiles(bool res, Batch m)
+        {
+            if (res)
+                CreateDbCsv(m.DirectoryOutput);
+        }
+
+        protected bool CheckOutputDirFiles(string output_path)
+        {
+            bool res = !File.Exists(Path.Combine(output_path, ConfigurationManager.AppSettings["csv_file_name"]));                       
+            return res;
+        }
+
+        protected void CreateDbCsv(string output_dir)
+        {
+            File.Create(Path.Combine(output_dir, ConfigurationManager.AppSettings["csv_file_name"]));
+        }
+
+        private void fillCacheDb(DatabaseHelper db, Batch b)
+        {
+            List<string> files = new List<string>();
+            if (b.TipoFile == TipoFileProcessato.Pdf)
+            {
+                files = Directory.GetFiles(b.DirectoryInput, "*.pdf").ToList();
+            }
+            else
+            {
+                files = Directory.GetDirectories(b.DirectoryInput).ToList();
+            }
+
+            if(files.Count == 0)
+                return;
+
+            // adesso per ogni file in files aggiungere un record fileName, path, false
+            for (int i = 0; i < files.Count; i++)
+            {               
+                Documento doc = new Documento();
+                doc.Id = i + 1;
+                doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
+                doc.Path = files[i];
+                doc.isIndicizzato = false;
+                db.InsertRecord(doc);
+            }
+        }
     }
 }

@@ -9,10 +9,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BatchDataEntry.Business;
+using BatchDataEntry.DBModels;
 using BatchDataEntry.Helpers;
-using BatchDataEntry.Models;
 using BatchDataEntry.Views;
 using NLog;
+using Batch = BatchDataEntry.Models.Batch;
+using Campo = BatchDataEntry.Models.Campo;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -21,7 +23,11 @@ namespace BatchDataEntry.ViewModels
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         #region Constructors
-        public ViewModelBatchSelected() { }
+
+        public ViewModelBatchSelected()
+        {
+            this.needRefresh = false;
+        }
 
         public ViewModelBatchSelected(Batch batch)
         {
@@ -31,9 +37,7 @@ namespace BatchDataEntry.ViewModels
             Dimensioni = Utility.ConvertSize((double)bytes, "MB").ToString("0.00");
             NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
             _currentBatch.Applicazione.LoadCampi();
-            DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
-            db.GetBatchCachedTable(_currentBatch.Applicazione.Campi);
-
+            this.needRefresh = false;
         }
         #endregion
 
@@ -138,34 +142,9 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private string[] _missingRow;
-        public string[] MissingRow
-        {
-            get { return _missingRow; }
-            set
-            {
-                if (_missingRow != value)
-                    _missingRow = value;
-                RaisePropertyChanged("MissingRow");
-            }
-        }
-
         private bool isSelectedRow
         {
             get { return (SelectedRow == null) ? false : true; }
-        }
-
-        private bool notEmptyMissingRow
-        {
-            get
-            {
-                if (MissingRow == null)
-                    return false;
-                if (MissingRow.Length > 0)
-                    return true;
-                else
-                    return false;
-            }
         }
 
         private DataRowView _selectedRow;
@@ -181,8 +160,11 @@ namespace BatchDataEntry.ViewModels
                 }
             }
         }
+
+        private bool needRefresh;
         #endregion
 
+        #region Cmd
         private RelayCommand _continuaCmd;
         public ICommand ContinuaCmd
         {
@@ -190,7 +172,7 @@ namespace BatchDataEntry.ViewModels
             {
                 if (_continuaCmd == null)
                 {
-                    _continuaCmd = new RelayCommand(param => this.ContinuaInserimento(), param => this.notEmptyMissingRow);
+                    _continuaCmd = new RelayCommand(param => this.ContinuaInserimento(), param => this.isSelectedRow);
                 }
                 return _continuaCmd;
             }
@@ -232,7 +214,13 @@ namespace BatchDataEntry.ViewModels
                 }
                 return _deleteCmd;
             }
-        }     
+        }
+        #endregion
+
+        /*
+         * Nelle funzioni successive viene assunto che la colonna indice primario contenga il nome dei file
+         * in caso contrario bisogna modificarle
+         */
 
         private void ContinuaDaSelezione()
         {
@@ -256,8 +244,9 @@ namespace BatchDataEntry.ViewModels
             string indexFile = SelectedRow[posizioneCol].ToString();
             if (!string.IsNullOrEmpty(indexFile))
             {
-                //continua.DataContext = new ViewModelDataEntry(indexFile, _currentBatch, FILENAME_CACHE, FILENAME_DBCSV, FILENAME_VALUES);
-                continua.Show();
+                continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
+                continua.ShowDialog();
+                this.needRefresh = true;
             }
         }
 
@@ -266,8 +255,9 @@ namespace BatchDataEntry.ViewModels
             if (_currentBatch != null)
             {
                 Views.Documento inserimento = new Views.Documento();
-                //inserimento.DataContext = new ViewModelDataEntry(_currentBatch, FILENAME_CACHE, FILENAME_DBCSV, FILENAME_VALUES);
-                inserimento.Show();
+                inserimento.DataContext = new ViewModelDocumento(_currentBatch);
+                inserimento.ShowDialog();
+                this.needRefresh = true;
             }
         }
 
@@ -292,23 +282,16 @@ namespace BatchDataEntry.ViewModels
                         }
                     }
 
-                    /*
-                     *
-                     *
-                     */
+                    DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+                    Console.WriteLine("Valore: " + SelectedRow[colPrimary].ToString());
 
-                    //string cacheInFile = Path.Combine(_currentBatch.DirectoryInput, FILENAME_IN_CACHE);
-                    //string cacheFile = Path.Combine(_currentBatch.DirectoryOutput, FILENAME_CACHE);
-                    //string dbFile = Path.Combine(_currentBatch.DirectoryOutput, FILENAME_DBCSV);
-                    //string fileName = Business.Cache.GetKey(cacheFile, "Documenti", SelectedRow[colPrimary].ToString()).ElementAt(0).Value;
-
-
-                    //Business.Csv.DeleteRow(dbFile, SelectedRow[colPrimary].ToString(), colPrimary); // elimina il record dal file db (csv)
-                    //Business.Csv.DeleteRow(cacheInFile, SelectedRow[colPrimary].ToString(), colPrimary); // elimina il record dal file cache (input dir)
-                    //                                                                                     // Probabilmente non fa quello che deve fare
-                    //Business.Csv.DeleteRow(fileName, SelectedRow[colPrimary].ToString(), colPrimary); // elimina il record dal file cache ini (output)
-
-                    //File.Delete(fileName); // elimina il file pdf originario
+                    string dbCsvFile = Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]);
+                    DBModels.Documento current = db.GetDocumento(SelectedRow[colPrimary].ToString());
+                    db.DeleteRecord(typeof(DBModels.Documento), current.Id);
+                    string fileName = current.Path;
+                    
+                    Business.Csv.DeleteRow(dbCsvFile, SelectedRow[colPrimary].ToString(), colPrimary); // elimina il record dal file db (csv)                  
+                    File.Delete(fileName); // elimina il file pdf originario
                 });
             
                 TaskLoadGrid();
@@ -330,16 +313,10 @@ namespace BatchDataEntry.ViewModels
                 return;
             }
                 
-            /*
-             Controlla quali file devono ancora essere indicizzati
-             */
             Task.Factory.StartNew(() =>
             {
-                //List<string> file = Csv.ReadRows(Path.Combine(_currentBatch.DirectoryInput, FILENAME_IN_CACHE));
                 DatabaseHelper dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
                 
-                List<string> missing = new List<string>();
-
                 int rowCount = 0;
                 string cmd = string.Format("SELECT COUNT(*) FROM {0}", "Documento");
                 rowCount = dbc.CountRecords(cmd);
@@ -347,9 +324,8 @@ namespace BatchDataEntry.ViewModels
                 string cmd2 = string.Format("SELECT COUNT(*) FROM {0} WHERE isIndicizzato = 1", "Documento");
                 processedRow = dbc.CountRecords(cmd2);
 
-                MissingRow = missing.ToArray();
                 StatusBarCol1 = String.Format("File Indicizzati ({0} / {1})", processedRow, rowCount);
-                if (processedRow == rowCount)
+                if (processedRow == rowCount && rowCount > 0)
                     StatusBarCol2 = "Batch Completato!";
             });
         }
@@ -361,31 +337,20 @@ namespace BatchDataEntry.ViewModels
 
         private async Task LoadDataTask()
         {
-
-            //Func<DataView> function = new Func<DataView>(() => LoadDataFromFile(Path.Combine(_currentBatch.DirectoryOutput, FILENAME_DBCSV), _currentBatch.Applicazione.Campi));
-            //DataView res = await Task.Run<DataView>(function);
-            //if (res != null)
-            //    this.DataSource = res;
-            //else
-            //    logger.Warn(string.Format("[SelectedBatchView]Errore nel caricamento dei dati dal file {0} nella tabella", Path.Combine(_currentBatch.DirectoryOutput, FILENAME_DBCSV)));
+            Func<DataView> function = new Func<DataView>(() => LoadDataFromFile(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]), _currentBatch.Applicazione.Campi));
+            DataView res = await Task.Run<DataView>(function);
+            if (res != null)
+                this.DataSource = res;
+            else
+                logger.Warn(string.Format("[SelectedBatchView]Errore nel caricamento dei dati dal file {0} nella tabella", Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"])));
         }
 
         private DataView LoadDataFromFile(string path, ObservableCollection<Campo> campi)
         {
-            
-
-
             if (File.Exists(path) && campi != null && campi.Count > 0)
                 return (DataView)Helpers.DataSource.CreateDataSourceFromCsv(path, campi);
             else
                 return null;
         }
-
-        /*
-         * -> cache.ini -> tiene traccia dell'associazione numero,file
-         * -> db salva i record di output
-         * -> nella cartella di input creare un altro csv che traccia i file mancanti
-         *    quando viene effettuato il check controlla quest'ultimo file per vedere i record che han bisogno dell'inserimento
-         */
     }
 }

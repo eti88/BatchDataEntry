@@ -11,9 +11,12 @@ using System.Runtime.Remoting;
 using System.Text;
 using System.Windows.Documents;
 using BatchDataEntry.Business;
-using BatchDataEntry.Models;
+using BatchDataEntry.DBModels;
 using NLog;
 using SQLite;
+using Batch = BatchDataEntry.Models.Batch;
+using Campo = BatchDataEntry.Models.Campo;
+using Modello = BatchDataEntry.Models.Modello;
 
 namespace BatchDataEntry.Helpers
 {
@@ -77,7 +80,6 @@ namespace BatchDataEntry.Helpers
                 var dbCache = new SQLiteConnection(PATHDB);
                 dbCache.CreateTable<DBModels.Documento>();
                 dbCache.CreateTable<DBModels.Autocompletamento>();
-                // Tabella cache generata poi
             }
 
             #if DEBUG
@@ -223,6 +225,26 @@ namespace BatchDataEntry.Helpers
                 if (raw != null)
                     return new Modello(raw);
                 
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                db.Close();
+            }
+            return null;
+        }
+
+        public Documento GetDocumento(string name)
+        {
+            var db = new SQLiteConnection(PATHDB);
+
+            try
+            {
+                var query = db.Table<Documento>().Where(x => x.FileName.Equals(name)).First();
+                return query;
             }
             catch (Exception e)
             {
@@ -416,9 +438,9 @@ namespace BatchDataEntry.Helpers
             string querycmd = "SELECT Id, Nome FROM Modello";
             try
             {
-#if DEBUG
+                #if DEBUG
                 Console.WriteLine(@"Query sulla tabella Modello");
-#endif
+                #endif
                 var list = db.Query<DBModels.Modello>(querycmd).ToList();
                 IEnumerable<DBModels.Modello> tmp = list.AsEnumerable();
 
@@ -435,49 +457,13 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public void GenerateCacheTable(ObservableCollection<Campo> colonne)
-        {
-            var dbCache = new SQLiteConnection(PATHDB);
-            string sql = "CREATE TABLE Cache ('Id' integer NOT NULL PRIMARY KEY AUTOINCREMENT,";
-
-            try
-            {
-                if (colonne.Count > 0)
-                {
-                    for (int i = 0; i < colonne.Count; i++)
-                    {
-                        // è l'ultimo elemento
-                        if (i == colonne.Count - 1)
-                        {
-                            sql += " '" + SafeColName(colonne[i].Nome) + "' varchar";
-                        }
-                        else
-                        {
-                            sql += " '" + SafeColName(colonne[i].Nome) + "' varchar,";
-                        }
-                    }
-                    sql += ")";
-                    SQLiteCommand command = dbCache.CreateCommand(sql);
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                dbCache.Close();
-            }  
-        }
-
         public int CountRecords(string sqlCmdText)
         {
             SQLiteConnection dbc = new SQLiteConnection(PATHDB);
             int count = 0;
             try
             {
-                count = dbc.Execute(sqlCmdText);
+                count = dbc.ExecuteScalar<int>(sqlCmdText);
             }
             catch (Exception e)
             {
@@ -489,69 +475,6 @@ namespace BatchDataEntry.Helpers
             }
             return count;
         }
-
-        public DataTable GetBatchCachedTable(ObservableCollection<Campo> campi)
-        {
-            DataTable dt = new DataTable();
-            SQLiteConnection dbc = new SQLiteConnection(PATHDB);
-            try
-            {
-                
-                dynamic obj = Utility.GenerateClass(campi);
-                Type unknown = ((ObjectHandle) obj).Unwrap().GetType();
-                TableMapping tm = new TableMapping(unknown);
-
-                var tmp = dbc.Query(tm, "SELECT * FROM Cache");
-
-                foreach (var a in tmp)
-                {
-                    foreach (PropertyInfo info in a.GetType().GetProperties())
-                    {
-                        Console.WriteLine("=== x ===");
-                        Console.WriteLine(info);
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                dbc.Close();
-            }
-            return null;
-        }
-
-
-
-        private static string SafeColName(string input)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            foreach (char letter in input)
-            {
-                char l;
-                if (!char.IsLetterOrDigit(letter))
-                {
-                    if (char.IsWhiteSpace(letter))
-                    {
-                        l = '_';
-                    }
-                    else
-                    {
-                        continue;
-                    }   
-                }
-                else
-                {
-                    l = letter;
-                }
-                sb.Append(l);
-            }
-
-            return sb.ToString();
-        }
+      
     }
 }

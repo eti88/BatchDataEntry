@@ -20,11 +20,6 @@ namespace BatchDataEntry.ViewModels
          * quando viene selezionato contina (dopo check) -> cicla i file mancanti finché non sono finiti
            */
 
-        private readonly string FILENAME_CACHE = ConfigurationManager.AppSettings["filename_cache_output_dir"].ToString();
-        private readonly string FILENAME_DBCSV = ConfigurationManager.AppSettings["filename_db_output_dir"].ToString();
-        private readonly string FILENAME_VALUES = ConfigurationManager.AppSettings["filename_autocomplete"].ToString();
-        private readonly string FILENAME_IN_CACHE = ConfigurationManager.AppSettings["filename_cache_input_dir"].ToString();
-
         private Doc _doc;
         private ObservableCollection<Doc> _dc;
         private Batch _batch;
@@ -133,24 +128,20 @@ namespace BatchDataEntry.ViewModels
             this.Batch = new Batch();
         }
 
-        public ViewModelDocumento(Batch _currentBatch, string[] missingRows)
+        public ViewModelDocumento(Batch _currentBatch, string indexRowVal)
         {
-            DocFiles = InitObjectFiles(_currentBatch, missingRows);
-            if(DocFiles == null)
-                return;
-
+            Batch = _currentBatch;
             Voci = AddInputsToPanel(Batch.Applicazione.Campi);
-            lastItem = missingRows.Length;
+            // Caricare dbcache e precuperare dati ultimo valore indicato
+            
         }
 
-        public ViewModelDocumento(Batch _currentBatch,string filePos, string filePath)
+        public ViewModelDocumento(Batch _currentBatch)
         {
             if (_currentBatch != null)
                 Batch = _currentBatch;
-
-            DocFile.Index = filePos;
-            DocFile.Path = filePath;
             Voci = AddInputsToPanel(Batch.Applicazione.Campi);
+            // Caricare dbcache e partire dall'ultimo valore inserito
         }
 
         protected ObservableCollection<Voce> AddInputsToPanel(ObservableCollection<Campo> campi)
@@ -193,34 +184,13 @@ namespace BatchDataEntry.ViewModels
             return isLocked;
         }
 
-        private ObservableCollection<Doc> InitObjectFiles(Batch current, string[] missingRows)
-        {
-            ObservableCollection<Doc> docs = new ObservableCollection<Doc>();
-
-            if(missingRows == null)
-                return null;
-
-            if(missingRows.Length == 0)
-                return null;
-
-            for (int i = 0; i < missingRows.Length; i++)
-            {
-                string[] mis = missingRows[i].Split(';');
-
-                Doc d = new Doc(mis[0], GetFileFromIndex(current, mis[0]));
-
-                docs.Add(d);
-            }
-            return docs;
-        }
-
         private string GetFileFromIndex(Batch b, string index)
         {
-            Dictionary<string, string> record = Cache.GetKey(Path.Combine(b.DirectoryOutput, FILENAME_CACHE),
-                "Documenti", index);
-            string path = record.Values.ElementAt(0);
+            //Dictionary<string, string> record = Cache.GetKey(Path.Combine(b.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]),
+            //    "Documenti", index);
+            //string path = record.Values.ElementAt(0);
             
-            return path;
+            return "";
         }
 
         protected void LoadFile()
@@ -245,7 +215,7 @@ namespace BatchDataEntry.ViewModels
 
         public void Indicizza()
         {
-            if (!IsFileLocked(Path.Combine(Batch.DirectoryOutput, FILENAME_DBCSV), 5000))
+            if (!IsFileLocked(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]), 5000))
             {
                 // salvare record nel dbcsv
                 // cambiare da false a true nel file cache input dir

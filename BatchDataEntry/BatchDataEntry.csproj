@@ -110,10 +110,6 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MadMilkman.Ini, Version=1.0.6.0, Culture=neutral, PublicKeyToken=4e0b5157a7ffbb74, processorArchitecture=MSIL">
-      <HintPath>..\packages\MadMilkman.Ini.1.0.6.0\lib\net20\MadMilkman.Ini.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -181,12 +177,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Business\Cache.cs" />
     <Compile Include="Business\Csv.cs" />
     <Compile Include="Business\CsvFileReader.cs" />
     <Compile Include="Business\CsvFileWriter.cs" />
     <Compile Include="Business\CsvRow.cs" />
-    <Compile Include="Business\DynamicClass.cs" />
     <Compile Include="Business\Utility.cs" />
     <Compile Include="DBModels\Autocompletamento.cs" />
     <Compile Include="DBModels\Batch.cs" />

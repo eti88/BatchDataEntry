@@ -14,5 +14,13 @@ namespace BatchDataEntry.DBModels
         public bool isIndicizzato { get; set; }
 
         public Documento() { }
+
+        public Documento(int id, string name, string path, bool indicizzato)
+        {
+            this.Id = id;
+            this.FileName = name;
+            this.Path = path;
+            this.isIndicizzato = indicizzato;
+        }
     }
 }
