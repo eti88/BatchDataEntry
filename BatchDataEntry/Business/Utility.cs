@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -154,6 +156,36 @@ namespace BatchDataEntry.Business
         public static string RemovePatternFromString(string origin, string pattern)
         {
             return origin.Replace(pattern, "");
+        }
+
+        public static DynamicClass GenerateClass(ObservableCollection<Campo> campi)
+        {
+            var fields = new List<Field>();
+            Logger logger = LogManager.GetCurrentClassLogger();
+
+            try
+            {
+                foreach (Campo c in campi)
+                {
+                    fields.Add(new Field(c.Nome, typeof(string)));
+                }
+
+                if (fields.Count == 0)
+                    return null;
+
+                dynamic obj = new DynamicClass(fields);
+                return obj;
+            }
+            catch (Exception e)
+            {
+                #if DEBUG
+                Console.WriteLine(@"=== Error Generate Dynamic Class ===");
+                Console.WriteLine(e.ToString());
+                #endif
+                logger.Error(e.ToString());
+            }
+            
+            return null;
         }
     }
 }

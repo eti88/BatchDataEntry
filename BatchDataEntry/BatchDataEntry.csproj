@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BatchDataEntry</RootNamespace>
     <AssemblyName>BatchDataEntry</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -110,14 +110,6 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Apitron.PDF.Controls, Version=1.0.90.0, Culture=neutral, PublicKeyToken=6e759dbb0039406e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Apitron.PDF.Controls.1.0.90.0\lib\net451\Apitron.PDF.Controls.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Apitron.PDF.Rasterizer, Version=3.0.90.0, Culture=neutral, PublicKeyToken=6e759dbb0039406e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Apitron.PDF.Controls.1.0.90.0\lib\net451\Apitron.PDF.Rasterizer.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="MadMilkman.Ini, Version=1.0.6.0, Culture=neutral, PublicKeyToken=4e0b5157a7ffbb74, processorArchitecture=MSIL">
       <HintPath>..\packages\MadMilkman.Ini.1.0.6.0\lib\net20\MadMilkman.Ini.dll</HintPath>
       <Private>True</Private>
@@ -157,6 +149,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
@@ -193,9 +186,12 @@
     <Compile Include="Business\CsvFileReader.cs" />
     <Compile Include="Business\CsvFileWriter.cs" />
     <Compile Include="Business\CsvRow.cs" />
+    <Compile Include="Business\DynamicClass.cs" />
     <Compile Include="Business\Utility.cs" />
+    <Compile Include="DBModels\Autocompletamento.cs" />
     <Compile Include="DBModels\Batch.cs" />
     <Compile Include="DBModels\Campo.cs" />
+    <Compile Include="DBModels\Documento.cs" />
     <Compile Include="DBModels\Modello.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Helpers\DataSource.cs" />

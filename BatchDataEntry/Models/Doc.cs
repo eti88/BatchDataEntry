@@ -33,30 +33,16 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private ObservableCollection<Voce> _voci;
-        public ObservableCollection<Voce> Voci
-        {
-            get { return _voci; }
-            set
-            {
-                if (_voci != value)
-                    _voci = value;
-                OnPropertyChanged("Voci");
-            }
-        }
-
         public Doc()
         {
             this.Index = "";
             this.Path = "";
-            this.Voci = new ObservableCollection<Voce>();
         }
 
         public Doc(string index, string path)
         {
             this.Index = index;
             this.Path = path;
-            this.Voci = new ObservableCollection<Voce>();
         }
 
         public string FileName { get { return System.IO.Path.GetFileNameWithoutExtension(Path); } }

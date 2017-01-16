@@ -19,6 +19,16 @@ namespace BatchDataEntry.Models
             this.Value = value;
         }
 
+        public Voce(int id, string key, bool autocomp)
+        {
+            this.Id = id;
+            this.Key = key;
+            if (autocomp)
+            {
+                // recupera la lista dei valori
+            }
+        }
+
         private int _id;
         public int Id
         {

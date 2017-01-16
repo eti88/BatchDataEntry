@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Apitron.PDF.Rasterizer;
 using BatchDataEntry.Models;
 using ComboBox = System.Windows.Controls.ComboBox;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
@@ -29,6 +28,11 @@ namespace BatchDataEntry.Views
         public Documento()
         {
             InitializeComponent();
+        }
+
+        private void ButtonStop_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }
