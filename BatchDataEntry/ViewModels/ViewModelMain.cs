@@ -77,7 +77,7 @@ namespace BatchDataEntry.ViewModels
             {
                 if (_resumeCommand == null)
                 {
-                    _resumeCommand = new RelayCommand(param => this.ResumeBatchItem());
+                    _resumeCommand = new RelayCommand(param => this.ResumeBatchItem(), param => this.CanEdit);
                 }
                 return _resumeCommand;
             }

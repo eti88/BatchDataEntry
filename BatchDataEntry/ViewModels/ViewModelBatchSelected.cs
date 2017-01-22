@@ -26,7 +26,6 @@ namespace BatchDataEntry.ViewModels
 
         public ViewModelBatchSelected()
         {
-            this.needRefresh = false;
         }
 
         public ViewModelBatchSelected(Batch batch)
@@ -37,9 +36,10 @@ namespace BatchDataEntry.ViewModels
             Dimensioni = Utility.ConvertSize((double)bytes, "MB").ToString("0.00");
             NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
             _currentBatch.Applicazione.LoadCampi();
-            this.needRefresh = false;
         }
         #endregion
+
+        //TODO: aggiungere generazione file csv da bin
 
         #region Members
         private Batch _currentBatch { get; set; }
@@ -161,7 +161,6 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private bool needRefresh;
         #endregion
 
         #region Cmd
@@ -172,7 +171,7 @@ namespace BatchDataEntry.ViewModels
             {
                 if (_continuaCmd == null)
                 {
-                    _continuaCmd = new RelayCommand(param => this.ContinuaInserimento(), param => this.isSelectedRow);
+                    _continuaCmd = new RelayCommand(param => this.ContinuaInserimento());
                 }
                 return _continuaCmd;
             }
@@ -246,7 +245,8 @@ namespace BatchDataEntry.ViewModels
             {
                 continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
                 continua.ShowDialog();
-                this.needRefresh = true;
+                TaskLoadGrid();
+                RaisePropertyChanged("DataSource");
             }
         }
 
@@ -257,7 +257,8 @@ namespace BatchDataEntry.ViewModels
                 Views.Documento inserimento = new Views.Documento();
                 inserimento.DataContext = new ViewModelDocumento(_currentBatch);
                 inserimento.ShowDialog();
-                this.needRefresh = true;
+                TaskLoadGrid();
+                RaisePropertyChanged("DataSource");
             }
         }
 

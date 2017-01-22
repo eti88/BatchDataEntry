@@ -11,7 +11,9 @@ using System.Runtime.Remoting;
 using System.Text;
 using System.Windows.Documents;
 using BatchDataEntry.Business;
+using BatchDataEntry.Components;
 using BatchDataEntry.DBModels;
+using BatchDataEntry.Models;
 using NLog;
 using SQLite;
 using Batch = BatchDataEntry.Models.Batch;
@@ -30,6 +32,11 @@ namespace BatchDataEntry.Helpers
         public DatabaseHelper()
         {
             this.PATHDB = Path.Combine(Directory.GetCurrentDirectory(), DBNAME);
+        }
+
+        public DatabaseHelper(string path)
+        {
+            this.PATHDB = Path.Combine(path);
         }
 
         public DatabaseHelper(string dbname, string dbpath)
@@ -255,6 +262,49 @@ namespace BatchDataEntry.Helpers
                 db.Close();
             }
             return null;
+        }
+
+        public NavigationList<Doc> GetDocuments()
+        {
+            NavigationList<Doc> ret = new NavigationList<Doc>();
+            var db = new SQLiteConnection(PATHDB);
+            try
+            {
+                var tmp = db.Table<Documento>().ToList();
+                foreach (Documento doc in tmp)
+                {
+                    ret.Add(new Doc(doc));
+                }
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }finally { db.Close();}
+
+            return ret;
+        }
+
+        public List<string> GetAutocompleteList(string column)
+        {
+            var lst = new List<string>();
+            var db = new SQLiteConnection(PATHDB);
+            try
+            {
+                var tmp = db.Table<Autocompletamento>().Where(x => x.Colonna.Equals(column));
+                if (tmp.Count() > 0)
+                {
+                    foreach (var record in tmp)
+                    {
+                        lst.Add(record.Valore);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }finally { db.Close(); }
+
+            return lst;
         }
 
         public ObservableCollection<Batch> GetBatchRecords()

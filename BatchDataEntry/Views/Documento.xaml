@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
+        xmlns:ns="clr-namespace:BatchDataEntry.Components"
         xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
         mc:Ignorable="d"
         Title="{Binding Path=DocFile.FileName}" Height="650" Width="800">
@@ -19,9 +20,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Border BorderThickness="1" BorderBrush="Black">
-            <WebBrowser Source="C:\Users\etienne\Desktop\etienne_tomaselli31082016.pdf"/>
-
-            <!-- pdf viewer qui -->
+            <WebBrowser ns:WebBrowserUtility.BindableSource="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
         </Border>
         <Grid Grid.Column="1" Margin="10">
             <Grid.ColumnDefinitions>
@@ -33,12 +32,13 @@
             </Grid.RowDefinitions>
             <ScrollViewer>
                 <StackPanel x:Name="dataEntryElements">
-                    <ItemsControl ItemsSource="{Binding Path=Voci}">
+                    <ItemsControl ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel>
-                                    <Label Content="{Binding Key}"/>
-                                    <TextBox Text="{Binding Value}" wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding Suggestions}"/>
+                                <StackPanel Margin="5,0,5,0">
+                                    <Label Content="{Binding Key, Mode=OneTime}"/>
+                                    <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                             wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding Suggestions, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -46,8 +46,9 @@
                 </StackPanel>
             </ScrollViewer>
             <StackPanel Grid.Row="1" Height="40" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="Prossimo" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
-                <Button x:Name="buttonJump" Command="{Binding Path=CmdJump}" Content="Salta" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
+                <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
+                <Button x:Name="buttonIndexes" Command="{Binding Path=CmdIndex}" Content="Indicizza" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
+                <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
                 <Button x:Name="buttonStop" Click="ButtonStop_OnClick" Command="{Binding Path=CmdStop}" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
             </StackPanel>
         </Grid>

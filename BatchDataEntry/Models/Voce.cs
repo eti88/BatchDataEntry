@@ -1,15 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using BatchDataEntry.Helpers;
 
 namespace BatchDataEntry.Models
 {
     public class Voce : BaseModel
     {
-        public Voce() { }
+        public Voce()
+        {
+            Suggestions = new List<string>();
+        }
 
         public Voce(int id, string key)
         {
             this.Id = id;
             this.Key = key;
+            Suggestions = new List<string>();
         }
 
         public Voce(int id, string key, string value)
@@ -17,15 +23,38 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Key = key;
             this.Value = value;
+            Suggestions = new List<string>();
         }
 
-        public Voce(int id, string key, bool autocomp)
+        public Voce(int id, string key, bool autocomp, DatabaseHelper db)
         {
             this.Id = id;
             this.Key = key;
-            if (autocomp)
+            this.IsAutocomplete = autocomp;
+            if (this.IsAutocomplete)
             {
-                // recupera la lista dei valori
+                try
+                {
+                    if (!string.IsNullOrEmpty(key) && db != null)
+                    {
+                        var lst = new List<string>();
+                        lst = db.GetAutocompleteList(key);
+                        if (lst != null)
+                            Suggestions = lst;
+                        else
+                            Suggestions = new List<string>();
+                    }
+                    else
+                        Suggestions = new List<string>();
+                }
+                catch (Exception e)
+                {
+                    #if DEBUG
+                    Console.WriteLine(@"[VOCEEXCEPTION]" + e.ToString());
+                    #endif
+                    this.IsAutocomplete = false;
+                    Suggestions = new List<string>();
+                }
             }
         }
 

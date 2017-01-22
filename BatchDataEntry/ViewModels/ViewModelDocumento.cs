@@ -4,28 +4,27 @@ using System.Collections.ObjectModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using BatchDataEntry.Business;
+using BatchDataEntry.Components;
+using BatchDataEntry.DBModels;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using Batch = BatchDataEntry.Models.Batch;
+using Campo = BatchDataEntry.Models.Campo;
 
 namespace BatchDataEntry.ViewModels
 {
     class ViewModelDocumento : ViewModelBase
     {
-        /*
-         * Modificare:
-         * quando viene selezionato un specifico documento -> apre quel doc e quando viene indicizzato ritorna al selected batch.
-         * quando viene selezionato contina (dopo check) -> cicla i file mancanti finché non sono finiti
-           */
-
         private Doc _doc;
-        private ObservableCollection<Doc> _dc;
+        private NavigationList<Doc> _dc;
         private Batch _batch;
-
-        private int currentItem { get; set; }
-        private static int lastItem { get; set; }
+        private static DatabaseHelper _db;
 
         public Doc DocFile
         {
@@ -37,7 +36,7 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("DocFile");
             }
         }
-        public ObservableCollection<Doc> DocFiles
+        public NavigationList<Doc> DocFiles
         {
             get { return _dc; }
             set
@@ -56,33 +55,46 @@ namespace BatchDataEntry.ViewModels
                     _batch = value;
                 RaisePropertyChanged("Batch");
             }
-        }
+        }  
 
-        private ObservableCollection<Voce> _voci;
-        public ObservableCollection<Voce> Voci
+        /// <summary>
+        /// Contiene tutti i Records che verranno salvati in un file bin finché non viene generato il file csv dalla schermata precedente
+        /// </summary>
+        private Records _records;
+        public Records Records
         {
-            get { return _voci; }
+            get { return _records; }
             set
             {
-                if (_voci != value)
-                    _voci = value;
-                RaisePropertyChanged("Voci");
+                if (_records != value)
+                    _records = value;
+                RaisePropertyChanged("Records");
             }
         }
 
-        private string[] _ms;
-        public string[] MissingRows
+        private bool CanMoveNext {
+            get { return (DocFiles != null && DocFiles.Count > 0 && DocFiles.hasNext); }
+        }
+
+        private bool CanMovePrevious
         {
-            get { return _ms; }
-            set
-            {
-                if (_ms != value)
-                    _ms = value;
-                RaisePropertyChanged("MissingRows");
-            }
+            get { return (DocFiles != null && DocFiles.Count > 0 && DocFiles.hasPrevious); }
         }
 
         #region Command
+        private RelayCommand _cmdPrev;
+        public ICommand CmdPrev
+        {
+            get
+            {
+                if (_cmdPrev == null)
+                {
+                    _cmdPrev = new RelayCommand(param => this.MovePreviousItem(), param => this.CanMovePrevious);
+                }
+                return _cmdPrev;
+            }
+        }
+
         private RelayCommand _cmdNext;
         public ICommand CmdNext
         {
@@ -90,22 +102,22 @@ namespace BatchDataEntry.ViewModels
             {
                 if (_cmdNext == null)
                 {
-                    _cmdNext = new RelayCommand(param => this.Indicizza());
+                    _cmdNext = new RelayCommand(param => this.MoveNextItem(), param => this.CanMoveNext);
                 }
                 return _cmdNext;
             }
         }
 
-        private RelayCommand _cmdJump;
-        public ICommand CmdJump
+        private RelayCommand _cmdIndex;
+        public ICommand CmdIndex
         {
             get
             {
-                if (_cmdJump == null)
+                if (_cmdIndex == null)
                 {
-                    _cmdJump = new RelayCommand(param => this.Salta());
+                    _cmdIndex = new RelayCommand(param => this.Indexes());
                 }
-                return _cmdJump;
+                return _cmdIndex;
             }
         }
 
@@ -129,34 +141,71 @@ namespace BatchDataEntry.ViewModels
         }
 
         public ViewModelDocumento(Batch _currentBatch, string indexRowVal)
-        {
-            Batch = _currentBatch;
-            Voci = AddInputsToPanel(Batch.Applicazione.Campi);
-            // Caricare dbcache e precuperare dati ultimo valore indicato
-            
+        {        
+            if (_currentBatch != null)
+                Batch = _currentBatch;
+            _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+            LoadDocsList();
+            LoadRecords(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));          
+            //_voci = AddInputsToPanel(Batch.Applicazione.Campi);
+            DocFiles.CurrentIndex = getId(indexRowVal);
+            DocFile = DocFiles.Current;
+            DocFile.AddInputsToPanel(Batch, Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            RaisePropertyChanged("DocFile");
+            CheckFile();
         }
 
         public ViewModelDocumento(Batch _currentBatch)
         {
             if (_currentBatch != null)
                 Batch = _currentBatch;
-            Voci = AddInputsToPanel(Batch.Applicazione.Campi);
-            // Caricare dbcache e partire dall'ultimo valore inserito
+            _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+            if (Batch.Applicazione.Campi == null)
+                Batch.Applicazione.LoadCampi();
+            
+            LoadDocsList();
+            LoadRecords(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            DocFiles.CurrentIndex = getId();
+            DocFile = DocFiles.Current;
+            DocFile.AddInputsToPanel(Batch, Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            RaisePropertyChanged("DocFile");
+            CheckFile();
         }
 
-        protected ObservableCollection<Voce> AddInputsToPanel(ObservableCollection<Campo> campi)
+        private async Task LoadRecords(string path)
         {
-            ObservableCollection<Voce> voci = new ObservableCollection<Voce>();
-
-            foreach (Campo campo in campi)
+            Records result = new Records();
+            Task task = new Task(() =>
             {
-                if(campo.SalvaValori)
-                    Voci.Add(new Voce(campo.Posizione, campo.Nome, campo.SalvaValori));
-                else
-                    voci.Add(new Voce(campo.Posizione, campo.Nome));
-            }
-            return voci;
+                result.Load(path);
+            });
+            task.Start();
+            if(result != null)
+                this.Records = result;
         }
+
+        private void LoadDocsList()
+        {
+            DatabaseHelper dbCache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+            DocFiles = dbCache.GetDocuments();
+            RaisePropertyChanged("DocFiles");
+        }
+
+        // TODO: inserire controllo se campi sono modificati
+
+        private int getId()
+        {
+            return Batch.UltimoIndicizzato;
+        }
+
+        private int getId(string idx)
+        {
+            int res = 0;
+            res = DocFiles.IndexOf(DocFiles.Where(x => x.Id == idx).Single());
+            return res;
+        }
+
+        
 
         private bool IsFileLocked(string filePath, int secondsToWait)
         {
@@ -184,36 +233,30 @@ namespace BatchDataEntry.ViewModels
             return isLocked;
         }
 
-        private string GetFileFromIndex(Batch b, string index)
+        private async void CheckFile()
         {
-            //Dictionary<string, string> record = Cache.GetKey(Path.Combine(b.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]),
-            //    "Documenti", index);
-            //string path = record.Values.ElementAt(0);
-            
-            return "";
-        }
-
-        protected void LoadFile()
-        {
-            if (Batch.TipoFile == TipoFileProcessato.Pdf)
+            if (Batch != null)
             {
-                //isPdfFile("");
-            }
-            else
-            {
-                isTiffFile("");
+                if (Batch.TipoFile == TipoFileProcessato.Tiff && DocFile.IsDirectory())
+                {
+                    await Task.Run(() =>
+                 {
+                     DatabaseHelper db = new DatabaseHelper();
+                     string fileName = Path.GetDirectoryName(DocFile.Path);
+                     if (!Utility.ContainsOnlyNumbers(fileName))
+                         fileName = Regex.Replace(fileName, "[A-Za-z]", "");
+
+                     string newFilePath = Path.Combine(Batch.DirectoryOutput, fileName + ".pdf");
+                     Utility.ConvertTiffToPdf(DocFile.Path, Batch.DirectoryOutput, fileName);
+                     _db.UpdateRecord<Documento>(new Documento(DocFile)); // Aggiorna il Path nel cachedb
+                     DocFile.Path = newFilePath;
+                     RaisePropertyChanged("DocFile");
+                 });
+                }
             }
         }
 
-        private void isTiffFile(string file)
-        {
-            // converti la dir dei tiff in pdf in una directory temporanea
-
-        }
-
-
-
-        public void Indicizza()
+        public void Indexes()
         {
             if (!IsFileLocked(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]), 5000))
             {
@@ -223,10 +266,28 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        public void Salta()
+        public void MovePreviousItem()
         {
-            currentItem++;
-            // bindare elementi dall'elemento currentItem in lista
+            if (DocFiles.hasPrevious)
+            {
+                DocFile = DocFiles.MovePrevious;
+                if(DocFile.Voci == null || DocFile.Voci.Count == 0)
+                    DocFile.AddInputsToPanel(Batch, Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            }          
+            CheckFile();
+            RaisePropertyChanged("DocFile");
+        }
+
+        public void MoveNextItem()
+        {
+            if (DocFiles.hasNext)
+            {
+                DocFile = DocFiles.MoveNext;
+                if (DocFile.Voci == null || DocFile.Voci.Count == 0)
+                    DocFile.AddInputsToPanel(Batch, Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            }
+            CheckFile();
+            RaisePropertyChanged("DocFile");
         }
 
         public void Interrompi()

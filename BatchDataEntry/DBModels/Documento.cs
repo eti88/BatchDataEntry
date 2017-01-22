@@ -22,5 +22,12 @@ namespace BatchDataEntry.DBModels
             this.Path = path;
             this.isIndicizzato = indicizzato;
         }
+
+        public Documento(Models.Doc doc)
+        {
+            this.FileName = doc.FileName;
+            this.Path = doc.Path;
+            this.isIndicizzato = doc.IsIndexed;
+        }
     }
 }
