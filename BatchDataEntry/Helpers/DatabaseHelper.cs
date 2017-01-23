@@ -128,12 +128,14 @@ namespace BatchDataEntry.Helpers
             return lastID;
         }
 
+        /*
         public void UpdateRecord<T>(T model)
         {
             var db = new SQLiteConnection(PATHDB);
 
             try
             {
+                //int i = db.Table<T>().Single(x => x);
                 #if DEBUG
                 Console.WriteLine(@"Update nella tabella " + typeof(T));
                 #endif
@@ -145,6 +147,97 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
+                db.Commit();
+                db.Dispose();
+                db.Close();
+            }
+        }*/
+
+        public void UpdateRecord(Doc doc)
+        {
+            Documento tmp = new Documento(doc);
+            var db = new SQLiteConnection(PATHDB);
+
+            try
+            {
+                var origin = db.Table<Documento>().FirstOrDefault(x => x.FileName.Equals(tmp.FileName));
+                tmp.Id = origin.Id;
+                db.Update(tmp);
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                db.Commit();
+                db.Dispose();
+                db.Close();
+            }
+        }
+
+        public void UpdateRecord(DBModels.Modello modello)
+        {
+            var db = new SQLiteConnection(PATHDB);
+
+            try
+            {
+                var origin = db.Table<Documento>().FirstOrDefault(x => x.FileName.Equals(modello.Nome));
+                modello.Id = origin.Id;
+                db.Update(modello);
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                db.Commit();
+                db.Dispose();
+                db.Close();
+            }
+        }
+
+        public void UpdateRecord(DBModels.Campo campo)
+        {
+            var db = new SQLiteConnection(PATHDB);
+
+            try
+            {
+                var origin = db.Table<Documento>().FirstOrDefault(x => x.FileName.Equals(campo.Nome));
+                campo.Id = origin.Id;
+                db.Update(campo);
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                db.Commit();
+                db.Dispose();
+                db.Close();
+            }
+        }
+
+        public void UpdateRecord(DBModels.Batch batch)
+        {
+            var db = new SQLiteConnection(PATHDB);
+
+            try
+            {
+                var origin = db.Table<Documento>().FirstOrDefault(x => x.FileName.Equals(batch.Nome));
+                batch.Id = origin.Id;
+                db.Update(batch);
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                db.Commit();
+                db.Dispose();
                 db.Close();
             }
         }

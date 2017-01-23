@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BatchDataEntry.Business;
-using BatchDataEntry.DBModels;
 using BatchDataEntry.Helpers;
-using BatchDataEntry.Views;
+using BatchDataEntry.Models;
 using NLog;
 using Batch = BatchDataEntry.Models.Batch;
 using Campo = BatchDataEntry.Models.Campo;
@@ -36,10 +33,12 @@ namespace BatchDataEntry.ViewModels
             Dimensioni = Utility.ConvertSize((double)bytes, "MB").ToString("0.00");
             NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
             _currentBatch.Applicazione.LoadCampi();
+            LoadRecords(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
         }
         #endregion
 
         //TODO: aggiungere generazione file csv da bin
+        //
 
         #region Members
         private Batch _currentBatch { get; set; }
@@ -161,6 +160,18 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private Records _records;
+        public Records Records
+        {
+            get { return _records; }
+            set
+            {
+                if (_records != value)
+                    _records = value;
+                RaisePropertyChanged("Records");
+            }
+        }
+
         #endregion
 
         #region Cmd
@@ -221,6 +232,17 @@ namespace BatchDataEntry.ViewModels
          * in caso contrario bisogna modificarle
          */
 
+        private async Task LoadRecords(string path)
+        {
+            Records result = new Records();
+            Task task = new Task(() =>
+            {
+                result.Load(path);
+            });
+            task.Start();
+            this.Records = result;
+        }
+
         private void ContinuaDaSelezione()
         {
             int posizioneCol = -1;
@@ -243,7 +265,7 @@ namespace BatchDataEntry.ViewModels
             string indexFile = SelectedRow[posizioneCol].ToString();
             if (!string.IsNullOrEmpty(indexFile))
             {
-                continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
+                continua.DataContext = new ViewModelDocumento(_currentBatch, Records, indexFile);
                 continua.ShowDialog();
                 TaskLoadGrid();
                 RaisePropertyChanged("DataSource");
@@ -255,8 +277,16 @@ namespace BatchDataEntry.ViewModels
             if (_currentBatch != null)
             {
                 Views.Documento inserimento = new Views.Documento();
-                inserimento.DataContext = new ViewModelDocumento(_currentBatch);
-                inserimento.ShowDialog();
+                inserimento.DataContext = new ViewModelDocumento(_currentBatch, Records);
+                try
+                {
+                    inserimento.ShowDialog();
+                }
+                catch (Exception)
+                {
+                    
+                }
+                
                 TaskLoadGrid();
                 RaisePropertyChanged("DataSource");
             }

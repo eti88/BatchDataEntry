@@ -74,7 +74,54 @@ namespace BatchDataEntry.Models
                 Console.WriteLine(e.ToString());
                 #endif
                 logger.Error("[ReadHashTable] " + e.ToString());
+                this.Rows = new List<RecordRow>();
             }       
+        }
+
+        public void AddRecord(Doc doc)
+        {
+            if(doc == null)
+                return;
+
+            RecordRow row = new RecordRow();
+            foreach (var voce in doc.Voci)
+            {
+                row.Cells.Add(voce.Key, voce.Value);
+            }
+            row.Id = this.Rows.Count + 1;
+            this.Rows.Add(row);
+        }
+
+        public void UpdateRecord(Doc doc, int id)
+        {
+            if(doc == null)
+                return;
+
+            RecordRow row = new RecordRow();
+            foreach (var voce in doc.Voci)
+            {
+                row.Cells.Add(voce.Key, voce.Value);
+            }
+            row.Id = id;
+            Rows[id] = row;
+        }
+
+        public void DeleteRecord(Doc doc)
+        {
+            if (doc == null)
+                return;
+            int i = isRecordAlreadyInserted(doc);
+            Rows.RemoveAt(i);
+        }
+
+        public int isRecordAlreadyInserted(Doc doc)
+        {
+            if (this.Rows.Count == 0)
+                return -1;
+            //TODO: da testare
+            int r = -1;
+            r = Rows.Single(x => x.Cells.ContainsValue(doc.FileName)).Id;
+            return r;
         }
     }
 

@@ -103,10 +103,9 @@ namespace BatchDataEntry.Models
             this.Voci = new ObservableCollection<Voce>();
         }
 
-        public void AddInputsToPanel(Batch b,string path)
+        public void AddInputsToPanel(Batch b, DatabaseHelper db)
         {
-            ObservableCollection<Voce> voci = new ObservableCollection<Voce>();
-            DatabaseHelper db = new DatabaseHelper(path);
+            ObservableCollection<Voce> voci = new ObservableCollection<Voce>();         
             foreach (Campo campo in b.Applicazione.Campi)
             {
                 if (campo.SalvaValori)

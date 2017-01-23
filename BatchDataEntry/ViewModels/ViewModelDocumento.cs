@@ -133,6 +133,7 @@ namespace BatchDataEntry.ViewModels
                 return _cmdStop;
             }
         }
+
         #endregion
 
         public ViewModelDocumento()
@@ -140,48 +141,35 @@ namespace BatchDataEntry.ViewModels
             this.Batch = new Batch();
         }
 
-        public ViewModelDocumento(Batch _currentBatch, string indexRowVal)
+        public ViewModelDocumento(Batch _currentBatch, Records rec, string indexRowVal)
         {        
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
             LoadDocsList();
-            LoadRecords(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));          
-            //_voci = AddInputsToPanel(Batch.Applicazione.Campi);
+            //LoadRecords(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            Records = rec;
             DocFiles.CurrentIndex = getId(indexRowVal);
             DocFile = DocFiles.Current;
-            DocFile.AddInputsToPanel(Batch, Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            DocFile.AddInputsToPanel(Batch, _db);
             RaisePropertyChanged("DocFile");
             CheckFile();
         }
 
-        public ViewModelDocumento(Batch _currentBatch)
+        public ViewModelDocumento(Batch _currentBatch, Records rec)
         {
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
             if (Batch.Applicazione.Campi == null)
-                Batch.Applicazione.LoadCampi();
-            
+                Batch.Applicazione.LoadCampi();          
             LoadDocsList();
-            LoadRecords(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            Records = rec;
             DocFiles.CurrentIndex = getId();
             DocFile = DocFiles.Current;
-            DocFile.AddInputsToPanel(Batch, Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+            DocFile.AddInputsToPanel(Batch, _db);
             RaisePropertyChanged("DocFile");
             CheckFile();
-        }
-
-        private async Task LoadRecords(string path)
-        {
-            Records result = new Records();
-            Task task = new Task(() =>
-            {
-                result.Load(path);
-            });
-            task.Start();
-            if(result != null)
-                this.Records = result;
         }
 
         private void LoadDocsList()
@@ -190,8 +178,6 @@ namespace BatchDataEntry.ViewModels
             DocFiles = dbCache.GetDocuments();
             RaisePropertyChanged("DocFiles");
         }
-
-        // TODO: inserire controllo se campi sono modificati
 
         private int getId()
         {
@@ -203,9 +189,7 @@ namespace BatchDataEntry.ViewModels
             int res = 0;
             res = DocFiles.IndexOf(DocFiles.Where(x => x.Id == idx).Single());
             return res;
-        }
-
-        
+        }    
 
         private bool IsFileLocked(string filePath, int secondsToWait)
         {
@@ -248,7 +232,7 @@ namespace BatchDataEntry.ViewModels
 
                      string newFilePath = Path.Combine(Batch.DirectoryOutput, fileName + ".pdf");
                      Utility.ConvertTiffToPdf(DocFile.Path, Batch.DirectoryOutput, fileName);
-                     _db.UpdateRecord<Documento>(new Documento(DocFile)); // Aggiorna il Path nel cachedb
+                     _db.UpdateRecord(DocFile); // Aggiorna il Path nel cachedb
                      DocFile.Path = newFilePath;
                      RaisePropertyChanged("DocFile");
                  });
@@ -260,9 +244,32 @@ namespace BatchDataEntry.ViewModels
         {
             if (!IsFileLocked(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]), 5000))
             {
-                // salvare record nel dbcsv
-                // cambiare da false a true nel file cache input dir
-                // copiare il file nell a dir
+                DocFile.IsIndexed = true;
+                
+
+                _db.UpdateRecord(DocFile);
+                
+                // controllare se bisogna salvare il valore inserito per l'autocomletamento
+                int id = Records.isRecordAlreadyInserted(DocFile);
+                if (!(id >= 0))
+                    Records.AddRecord(DocFile);
+                else
+                    Records.UpdateRecord(DocFile, id);
+
+                foreach (var col in DocFile.Voci)
+                {
+                    if (col.IsAutocomplete)
+                    {
+                        var auto = new Autocompletamento();
+                        auto.Colonna = col.Id;
+                        auto.Valore = col.Value;
+                        _db.InsertRecord(auto);
+                    }
+                }
+                if(!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
+                    Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, (DocFile.FileName + ".pdf"));
+                SaveFile();
+                MoveNextItem();
             }
         }
 
@@ -272,7 +279,7 @@ namespace BatchDataEntry.ViewModels
             {
                 DocFile = DocFiles.MovePrevious;
                 if(DocFile.Voci == null || DocFile.Voci.Count == 0)
-                    DocFile.AddInputsToPanel(Batch, Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+                    DocFile.AddInputsToPanel(Batch, _db);
             }          
             CheckFile();
             RaisePropertyChanged("DocFile");
@@ -284,7 +291,7 @@ namespace BatchDataEntry.ViewModels
             {
                 DocFile = DocFiles.MoveNext;
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
-                    DocFile.AddInputsToPanel(Batch, Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
+                    DocFile.AddInputsToPanel(Batch, _db);
             }
             CheckFile();
             RaisePropertyChanged("DocFile");
@@ -292,7 +299,14 @@ namespace BatchDataEntry.ViewModels
 
         public void Interrompi()
         {
+            SaveFile();
             this.CloseWindow(true);
+        }
+
+        public void SaveFile()
+        {
+            if (Records != null && Records.Rows.Count > 0)
+                Records.Save(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));           
         }
     }
 }
