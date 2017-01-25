@@ -56,10 +56,7 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private bool CanUse
-        {
-            get { return this.alreadyExist; }     
-        }
+        private bool CanUse => this.alreadyExist;
 
         private bool CanSave
         {
@@ -79,12 +76,13 @@ namespace BatchDataEntry.ViewModels
             int lastId = -1;
 
             if (alreadyExist)
-                Console.WriteLine();
-                //db.UpdateRecord(m);
+                db.UpdateRecordModello(m);
             else
             {
-                //lastId = db.InsertRecord(m);
-                //SelectedModel.Id = lastId;
+                lastId = db.InsertRecordModello(m);
+                if(lastId == -1)
+                    return;
+                SelectedModel.Id = lastId;
                 RaisePropertyChanged("SelectedModel");
             }
 

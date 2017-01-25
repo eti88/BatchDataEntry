@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using BatchDataEntry.Helpers;
@@ -81,7 +82,21 @@ namespace BatchDataEntry.Models
 
         public Document(Dictionary<int, string> dictionary)
         {
-            //TODO: da completare
+            this.Voci = new ObservableCollection<Voce>();
+            foreach (KeyValuePair<int, string> voice in dictionary)
+            {
+                if(voice.Key > 3)
+                    this.Voci.Add(new Voce(voice.Key, voice.Value));
+                else if (voice.Key == 0)
+                    this.Id = Convert.ToInt32(voice.Value);
+                else if(voice.Key == 1)
+                    this.FileName = voice.Value;
+                else if (voice.Key == 2)
+                    this.Path = voice.Value;
+                else if (voice.Key == 3)
+                    this.IsIndexed = Convert.ToBoolean(voice.Value);
+     
+            }
         }
 
         public Document(int id, string name, string path, bool indexed)
@@ -108,7 +123,7 @@ namespace BatchDataEntry.Models
             foreach (Campo campo in b.Applicazione.Campi)
             {
                 if (campo.SalvaValori)
-                    voci.Add(new Voce(campo.Posizione, campo.Nome, campo.SalvaValori, db));
+                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, db));
                 else
                     voci.Add(new Voce(campo.Posizione, campo.Nome));
             }

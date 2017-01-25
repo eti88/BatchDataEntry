@@ -261,7 +261,7 @@ namespace BatchDataEntry.Models
             if (this.IdModello > 0)
             {
                 DatabaseHelper db = new DatabaseHelper();
-                //this.Applicazione = db.GetModelloById(b.IdModello);
+                this.Applicazione = db.GetModelloById(b.IdModello);
             }
 
             this.NumDoc = b.NumDoc;

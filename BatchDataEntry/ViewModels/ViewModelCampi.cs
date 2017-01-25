@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
@@ -28,7 +29,7 @@ namespace BatchDataEntry.ViewModels
         public ViewModelCampi(int idModello)
         {
             var db = new DatabaseHelper();
-            //this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
+            this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
             RaisePropertyChanged("Colonne");
             _idModello = idModello;
         }
@@ -126,7 +127,7 @@ namespace BatchDataEntry.ViewModels
                 var db = new DatabaseHelper();
                 Campo tmp = new Campo(SelectedCampo);
                 Colonne.Remove(SelectedCampo);
-                //db.DeleteRecord(tmp, tmp.Id);
+                db.Delete(@"Campo", String.Format("Id = {0}", tmp.Id));
                 RaisePropertyChanged("Colonne");
             }
         }

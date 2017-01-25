@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
@@ -100,7 +101,7 @@ namespace BatchDataEntry.ViewModels
         public void LoadModels()
         {
             var db = new DatabaseHelper();
-            //Modelli = db.GetModelloRecords();
+            Modelli = db.GetModelloRecords();
             RaisePropertyChanged("Modelli");
         }
 
@@ -124,7 +125,7 @@ namespace BatchDataEntry.ViewModels
                 var db = new DatabaseHelper();
                 Modello tmp = new Modello(SelectedModel);
                 Modelli.Remove(SelectedModel);
-                //db.DeleteRecord(tmp, tmp.Id);
+                db.Delete(@"Modello", String.Format("Id = {0}", tmp.Id));
                 RaisePropertyChanged("Modelli");
             }
         }

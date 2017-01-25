@@ -269,7 +269,7 @@ namespace BatchDataEntry.Helpers
             values = values.Substring(0, values.Length - 1);
             try
             {
-                this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
+                this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));             
             }
             catch (Exception e)
             {
@@ -279,7 +279,7 @@ namespace BatchDataEntry.Helpers
             return returnCode;
         }
 
-        public void InsertRecordBatch(Batch b)
+        public int InsertRecordBatch(Batch b)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", b.Id.ToString());
@@ -293,10 +293,14 @@ namespace BatchDataEntry.Helpers
             values.Add("DocCorrente", b.DocCorrente.ToString());
             values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
 
-            Insert("Batch", values);
+            bool r = Insert("Batch", values);
+            if (r)
+                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
+          
+            return -1;
         }
 
-        public void InsertRecordCampo(Campo c)
+        public int InsertRecordCampo(Campo c)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", c.Id.ToString());
@@ -308,20 +312,28 @@ namespace BatchDataEntry.Helpers
             values.Add("TipoCampo", c.TipoCampo.ToString());
             values.Add("IdModello", c.IdModello.ToString());
 
-            Insert("Campo", values);
+            bool r = Insert("Campo", values);
+            if (r)
+                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
+
+            return -1;
         }
 
-        public void InsertRecordAutocompletamento(Autocompletamento a)
+        public int InsertRecordAutocompletamento(Autocompletamento a)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", a.Id.ToString());
             values.Add("Colonna", a.Colonna.ToString());
             values.Add("Valore", a.Valore);
+           
+            bool r = Insert("Autocompletamento", values);
+            if (r)
+                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
 
-            Insert("Autocompletamento", values);
+            return -1;
         }
 
-        public void InsertRecordModello(Modello m)
+        public int InsertRecordModello(Modello m)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", m.Id.ToString());
@@ -329,11 +341,15 @@ namespace BatchDataEntry.Helpers
             values.Add("OrigineCsv", m.OrigineCsv.ToString());
             values.Add("PathFileCsv", m.PathFileCsv);
             values.Add("Separatore", m.Separatore);
+           
+            bool r = Insert("Modello", values);
+            if (r)
+                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
 
-            Insert("Modello", values);
+            return -1;
         }
 
-        public void InsertRecordDocumento(Document d)
+        public int InsertRecordDocumento(Document d)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", d.Id.ToString());
@@ -345,8 +361,12 @@ namespace BatchDataEntry.Helpers
             {
                 values.Add(col.Key, col.Value);
             }
+         
+            bool r = Insert("Autocompletamento", values);
+            if (r)
+                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
 
-            Insert("Autocompletamento", values);
+            return -1;
         }
 
         public void UpdateRecordBatch(Batch b)

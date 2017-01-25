@@ -18,8 +18,8 @@ namespace BatchDataEntry.ViewModels
             this.alreadyExist = needUpdate;
 
             DatabaseHelper db = new DatabaseHelper();
-            //Modello mod = db.GetModelloById(c.IdModello);
-            //this.NomeTabella = mod.Nome;
+            Modello mod = db.GetModelloById(c.IdModello);
+            this.NomeTabella = mod.Nome;
         }
 
         public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount)
@@ -28,9 +28,9 @@ namespace BatchDataEntry.ViewModels
             this.alreadyExist = needUpdate;
 
             DatabaseHelper db = new DatabaseHelper();
-            //Modello mod = db.GetModelloById(c.IdModello);
+            Modello mod = db.GetModelloById(c.IdModello);
             this.SelectedCampo.Posizione = colCount++;
-            //this.NomeTabella = mod.Nome;
+            this.NomeTabella = mod.Nome;
         }
 
         private bool alreadyExist = false;
@@ -108,12 +108,13 @@ namespace BatchDataEntry.ViewModels
             int lastId = -1;
 
             if (alreadyExist)
-                Console.WriteLine();
-                //db.UpdateRecord(m);
+                db.UpdateRecordCampo(m);
             else
             {
-                //lastId = db.InsertRecord(m);
-                //SelectedCampo.Id = lastId;
+                lastId = db.InsertRecordCampo(m);
+                if(lastId == -1)
+                    return;
+                SelectedCampo.Id = lastId;
                 RaisePropertyChanged("SelectedCampo");
             }
 

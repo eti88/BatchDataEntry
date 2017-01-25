@@ -6,58 +6,6 @@ namespace BatchDataEntry.Models
 {
     public class Voce : BaseModel
     {
-        public Voce()
-        {
-            Suggestions = new List<string>();
-        }
-
-        public Voce(int id, string key)
-        {
-            this.Id = id;
-            this.Key = key;
-            Suggestions = new List<string>();
-        }
-
-        public Voce(int id, string key, string value)
-        {
-            this.Id = id;
-            this.Key = key;
-            this.Value = value;
-            Suggestions = new List<string>();
-        }
-
-        public Voce(int id, string key, bool autocomp, DatabaseHelper db)
-        {
-            this.Id = id;
-            this.Key = key;
-            this.IsAutocomplete = autocomp;
-            if (this.IsAutocomplete)
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(key) && db != null)
-                    {
-                        var lst = new List<string>();
-                        //lst = db.GetAutocompleteList(key);
-                        //if (lst != null)
-                        //    Suggestions = lst;
-                        //else
-                        //    Suggestions = new List<string>();
-                    }
-                    else
-                        Suggestions = new List<string>();
-                }
-                catch (Exception e)
-                {
-                    #if DEBUG
-                    Console.WriteLine(@"[VOCEEXCEPTION]" + e.ToString());
-                    #endif
-                    this.IsAutocomplete = false;
-                    Suggestions = new List<string>();
-                }
-            }
-        }
-
         private int _id;
         public int Id
         {
@@ -74,7 +22,8 @@ namespace BatchDataEntry.Models
         }
 
         private string _key;
-        public string Key {
+        public string Key
+        {
             get
             {
                 return _key;
@@ -88,7 +37,8 @@ namespace BatchDataEntry.Models
         }
 
         private string _value;
-        public string Value {
+        public string Value
+        {
             get
             {
                 return _value;
@@ -125,6 +75,65 @@ namespace BatchDataEntry.Models
             }
         }
 
+        public Voce()
+        {
+            Suggestions = new List<string>();
+        }
+
+        public Voce(int id, string key)
+        {
+            this.Id = id;
+            this.Key = key;
+            Suggestions = new List<string>();
+        }
+
+        public Voce(string key, string value)
+        {
+            this.Key = key;
+            this.Value = value;
+            Suggestions = new List<string>();
+        }
+
+        public Voce(int id, string key, string value)
+        {
+            this.Id = id;
+            this.Key = key;
+            this.Value = value;
+            Suggestions = new List<string>();
+        }
+
+        public Voce(int id, string key, bool autocomp, DatabaseHelper db)
+        {
+            this.Id = id;
+            this.Key = key;
+            this.IsAutocomplete = autocomp;
+            if (this.IsAutocomplete)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(key) && db != null)
+                    {
+                        var lst = new List<string>();
+                        lst = db.GetAutocompleteList(id);
+                        if (lst != null)
+                            Suggestions = lst;
+                        else
+                            Suggestions = new List<string>();
+                    }
+                    else
+                        Suggestions = new List<string>();
+                }
+                catch (Exception e)
+                {
+                    #if DEBUG
+                    Console.WriteLine(@"[VOCEEXCEPTION]" + e.ToString());
+                    #endif
+                    this.IsAutocomplete = false;
+                    Suggestions = new List<string>();
+                }
+            }
+        }
+      
         public override string ToString()
         {
             return string.Format("[Key: {0}, Value: {1}, AutocompleteList: {2}]", this.Id, this.Key, this.Value);

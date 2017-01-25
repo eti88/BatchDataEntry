@@ -147,8 +147,8 @@ namespace BatchDataEntry.Models
             if (this.Id > 0)
             {
                 DatabaseHelper db = new DatabaseHelper();
-                //ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", this.Id));
-                //this.Campi = tmpc;
+                ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", this.Id));
+                this.Campi = tmpc;
             }
         }
 

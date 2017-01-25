@@ -93,23 +93,32 @@ namespace BatchDataEntry.ViewModels
             {
                 // Il batch è già esistente e quindi si effettua un update              
                 Batch batch = new Batch(CurrentBatch);
-                //db.UpdateRecord(batch);
+                db.UpdateRecordBatch(batch);
                 RaisePropertyChanged("Batches");             
             }
             else
             {
                 Batch batch = new Batch(CurrentBatch);
-                //db.InsertRecord(batch);
+                db.InsertRecordBatch(batch);
                 RaisePropertyChanged("Batches");
             }
 
             try
             {
-                //if (!File.Exists(dbCache.PATHDB))
-                //{
-                //    dbCache.CreateCacheDb();
-                //    fillCacheDb(dbCache, CurrentBatch);
-                //}
+                if (!File.Exists(Path.Combine(CurrentBatch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"])))
+                {
+                    if(CurrentBatch.Applicazione.Campi == null || CurrentBatch.Applicazione.Campi.Count == 0)
+                        CurrentBatch.Applicazione.LoadCampi();
+
+                    List<string> campi = new List<string>();
+                    for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)
+                    {
+                        campi.Add(CurrentBatch.Applicazione.Campi[i].Nome);
+                    }
+                    
+                    dbCache.CreateCacheDb(campi);
+                    fillCacheDb(dbCache, CurrentBatch);
+                }
                     
                 if (CheckOutputDirFiles(CurrentBatch.DirectoryOutput))
                     CreateMissingFiles(true, CurrentBatch);
@@ -128,8 +137,8 @@ namespace BatchDataEntry.ViewModels
         private void PopulateComboboxModels()
         {
             DatabaseHelper db = new DatabaseHelper();
-            //IEnumerable<DBModels.Modello> tmp = db.IEnumerableModelli();      
-            //Models = tmp;
+            IEnumerable<Modello> tmp = db.IEnumerableModelli();      
+            Models = tmp;
             RaisePropertyChanged("Models");
         }
 
@@ -173,7 +182,7 @@ namespace BatchDataEntry.ViewModels
                 doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
                 doc.Path = files[i];
                 doc.IsIndexed = false;
-                //db.InsertRecord(doc);
+                db.InsertRecordDocumento(doc);
             }
         }
     }

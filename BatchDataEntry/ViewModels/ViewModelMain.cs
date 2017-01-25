@@ -110,7 +110,7 @@ namespace BatchDataEntry.ViewModels
 
         private bool CanEdit
         {
-            get { return (SelectedBatch == null) ? false : true; }
+            get { return (SelectedBatch != null); }
         }
 
         public ViewModelMain()
@@ -126,7 +126,7 @@ namespace BatchDataEntry.ViewModels
 
             try
             {
-                //batches = db.GetBatchRecords();
+                batches = db.GetBatchRecords();
                 Batches = batches;
             }
             catch (Exception e)
@@ -182,7 +182,7 @@ namespace BatchDataEntry.ViewModels
         private void DeleteBatchItem()
         {
             DatabaseHelper db = new DatabaseHelper();
-            //db.DeleteRecord(SelectedBatch, SelectedBatch.Id);
+            db.Delete("Batch", String.Format("Id = {0}", SelectedBatch.Id));
             Batches.Remove(SelectedBatch);
         }
 

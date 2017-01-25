@@ -18,6 +18,185 @@ namespace BatchDataEntry.ViewModels
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+        #region Members
+
+        private Batch _currentBatch { get; }
+
+        private DataTable _dtSource;
+        public DataTable DataSource
+        {
+            get { return _dtSource; }
+            set
+            {
+                if (_dtSource != value)
+                {
+                    _dtSource = value;
+                    RaisePropertyChanged("DataSource");
+                }
+            }
+        }
+
+        private int _ndocs;
+        public int NumeroDocumenti
+        {
+            get { return _ndocs; }
+            set
+            {
+                if (_ndocs != value)
+                {
+                    _ndocs = value;
+                    RaisePropertyChanged("NumeroDocumenti");
+                }
+            }
+        }
+
+        private string _statusBar1;
+        public string StatusBarCol1
+        {
+            get { return _statusBar1; }
+            set
+            {
+                if (_statusBar1 != value)
+                {
+                    _statusBar1 = value;
+                    RaisePropertyChanged("StatusBarCol1");
+                }
+            }
+        }
+
+        private string _statusBar2;
+        public string StatusBarCol2
+        {
+            get { return _statusBar2; }
+            set
+            {
+                if (_statusBar2 != value)
+                {
+                    _statusBar2 = value;
+                    RaisePropertyChanged("StatusBarCol2");
+                }
+            }
+        }
+
+        private string _dimfiles;
+        public string Dimensioni
+        {
+            get { return _dimfiles; }
+            set
+            {
+                if (_dimfiles != value)
+                {
+                    _dimfiles = value;
+                    RaisePropertyChanged("Dimensioni");
+                }
+            }
+        }
+
+        private int _curDoc;
+        public int DocumentoCorrente
+        {
+            get { return _curDoc; }
+            set
+            {
+                if (_curDoc != value)
+                {
+                    _curDoc = value;
+                    RaisePropertyChanged("DocumentoCorrente");
+                }
+            }
+        }
+
+        private int _ulti;
+        public int UltimoIndicizzato
+        {
+            get { return _ulti; }
+            set
+            {
+                if (_ulti != value)
+                {
+                    _ulti = value;
+                    RaisePropertyChanged("UltimoIndicizzato");
+                }
+            }
+        }
+
+        private bool isSelectedRow
+        {
+            get { return SelectedRow == null ? false : true; }
+        }
+
+        private DataRowView _selectedRow;
+        public DataRowView SelectedRow
+        {
+            get { return _selectedRow; }
+            set
+            {
+                if (_selectedRow != value)
+                {
+                    _selectedRow = value;
+                    RaisePropertyChanged("SelectedRow");
+                }
+            }
+        }
+
+        #endregion
+
+        #region Cmd
+
+        private RelayCommand _continuaCmd;
+        public ICommand ContinuaCmd
+        {
+            get
+            {
+                if (_continuaCmd == null)
+                {
+                    _continuaCmd = new RelayCommand(param => ContinuaInserimento());
+                }
+                return _continuaCmd;
+            }
+        }
+
+        private RelayCommand _checkCmd;
+        public ICommand CheckCmd
+        {
+            get
+            {
+                if (_checkCmd == null)
+                {
+                    _checkCmd = new RelayCommand(param => CheckBatch());
+                }
+                return _checkCmd;
+            }
+        }
+
+        private RelayCommand _daSelezCmd;
+        public ICommand ContinuaDaSelezioneCmd
+        {
+            get
+            {
+                if (_daSelezCmd == null)
+                {
+                    _daSelezCmd = new RelayCommand(param => ContinuaDaSelezione(), param => isSelectedRow);
+                }
+                return _daSelezCmd;
+            }
+        }
+
+        private RelayCommand _deleteCmd;
+        public ICommand EliminaSelezCmd
+        {
+            get
+            {
+                if (_deleteCmd == null)
+                {
+                    _deleteCmd = new RelayCommand(param => EliminaSelezione(), param => isSelectedRow);
+                }
+                return _deleteCmd;
+            }
+        }
+
+        #endregion
+
         private void ContinuaDaSelezione()
         {
             var posizioneCol = -1;
@@ -42,7 +221,7 @@ namespace BatchDataEntry.ViewModels
             {
                 continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
                 continua.ShowDialog();
-                TaskLoadGrid();
+                LoadGrid();
                 RaisePropertyChanged("DataSource");
             }
         }
@@ -61,7 +240,7 @@ namespace BatchDataEntry.ViewModels
                 {
                 }
 
-                TaskLoadGrid();
+                LoadGrid();
                 RaisePropertyChanged("DataSource");
             }
         }
@@ -93,16 +272,16 @@ namespace BatchDataEntry.ViewModels
 
                     var dbCsvFile = Path.Combine(_currentBatch.DirectoryOutput,
                         ConfigurationManager.AppSettings["csv_file_name"]);
-                    //DBModels.Documento current = db.GetDocumento(SelectedRow[colPrimary].ToString());
-                    //db.DeleteRecord(typeof(DBModels.Documento), current.Id);
-                    //string fileName = current.Path;
+                    Document current = new Document(db.GetDocumento(SelectedRow[colPrimary].ToString()));
+                    db.Delete("Documento", string.Format("Id= {0}", current.Id));
+                    string fileName = current.Path;
 
                     Csv.DeleteRow(dbCsvFile, SelectedRow[colPrimary].ToString(), colPrimary);
-                        // elimina il record dal file db (csv)                  
-                    //File.Delete(fileName); // elimina il file pdf originario
+                    // elimina il record dal file db (csv)                  
+                    File.Delete(fileName); // elimina il file pdf originario
                 });
 
-                TaskLoadGrid();
+                LoadGrid();
                 RaisePropertyChanged("DataSource");
             }
         }
@@ -129,10 +308,10 @@ namespace BatchDataEntry.ViewModels
 
                 var rowCount = 0;
                 var cmd = string.Format("SELECT COUNT(*) FROM {0}", "Documento");
-                //rowCount = dbc.CountRecords(cmd);
+                rowCount = dbc.Count(cmd);
                 var processedRow = 0;
                 var cmd2 = string.Format("SELECT COUNT(*) FROM {0} WHERE isIndicizzato = 1", "Documento");
-                //processedRow = dbc.CountRecords(cmd2);
+                processedRow = dbc.Count(cmd2);
 
                 StatusBarCol1 = string.Format("File Indicizzati ({0} / {1})", processedRow, rowCount);
                 if (processedRow == rowCount && rowCount > 0)
@@ -150,7 +329,7 @@ namespace BatchDataEntry.ViewModels
         {
             _currentBatch = batch;
             var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
-            TaskLoadGrid();
+            LoadGrid();
             Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
             NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
             _currentBatch.Applicazione.LoadCampi();
@@ -158,225 +337,42 @@ namespace BatchDataEntry.ViewModels
 
         #endregion
 
-        #region Members
-
-        private Batch _currentBatch { get; }
-
-        private DataView _dtSource;
-
-        public DataView DataSource
-        {
-            get { return _dtSource; }
-            set
-            {
-                if (_dtSource != value)
-                {
-                    _dtSource = value;
-                    RaisePropertyChanged("DataSource");
-                }
-            }
-        }
-
-        private int _ndocs;
-
-        public int NumeroDocumenti
-        {
-            get { return _ndocs; }
-            set
-            {
-                if (_ndocs != value)
-                {
-                    _ndocs = value;
-                    RaisePropertyChanged("NumeroDocumenti");
-                }
-            }
-        }
-
-        private string _statusBar1;
-
-        public string StatusBarCol1
-        {
-            get { return _statusBar1; }
-            set
-            {
-                if (_statusBar1 != value)
-                {
-                    _statusBar1 = value;
-                    RaisePropertyChanged("StatusBarCol1");
-                }
-            }
-        }
-
-        private string _statusBar2;
-
-        public string StatusBarCol2
-        {
-            get { return _statusBar2; }
-            set
-            {
-                if (_statusBar2 != value)
-                {
-                    _statusBar2 = value;
-                    RaisePropertyChanged("StatusBarCol2");
-                }
-            }
-        }
-
-        private string _dimfiles;
-
-        public string Dimensioni
-        {
-            get { return _dimfiles; }
-            set
-            {
-                if (_dimfiles != value)
-                {
-                    _dimfiles = value;
-                    RaisePropertyChanged("Dimensioni");
-                }
-            }
-        }
-
-        private int _curDoc;
-
-        public int DocumentoCorrente
-        {
-            get { return _curDoc; }
-            set
-            {
-                if (_curDoc != value)
-                {
-                    _curDoc = value;
-                    RaisePropertyChanged("DocumentoCorrente");
-                }
-            }
-        }
-
-        private int _ulti;
-
-        public int UltimoIndicizzato
-        {
-            get { return _ulti; }
-            set
-            {
-                if (_ulti != value)
-                {
-                    _ulti = value;
-                    RaisePropertyChanged("UltimoIndicizzato");
-                }
-            }
-        }
-
-        private bool isSelectedRow
-        {
-            get { return SelectedRow == null ? false : true; }
-        }
-
-        private DataRowView _selectedRow;
-
-        public DataRowView SelectedRow
-        {
-            get { return _selectedRow; }
-            set
-            {
-                if (_selectedRow != value)
-                {
-                    _selectedRow = value;
-                    RaisePropertyChanged("SelectedRow");
-                }
-            }
-        }
-
-        #endregion
-
-        #region Cmd
-
-        private RelayCommand _continuaCmd;
-
-        public ICommand ContinuaCmd
-        {
-            get
-            {
-                if (_continuaCmd == null)
-                {
-                    _continuaCmd = new RelayCommand(param => ContinuaInserimento());
-                }
-                return _continuaCmd;
-            }
-        }
-
-        private RelayCommand _checkCmd;
-
-        public ICommand CheckCmd
-        {
-            get
-            {
-                if (_checkCmd == null)
-                {
-                    _checkCmd = new RelayCommand(param => CheckBatch());
-                }
-                return _checkCmd;
-            }
-        }
-
-        private RelayCommand _daSelezCmd;
-
-        public ICommand ContinuaDaSelezioneCmd
-        {
-            get
-            {
-                if (_daSelezCmd == null)
-                {
-                    _daSelezCmd = new RelayCommand(param => ContinuaDaSelezione(), param => isSelectedRow);
-                }
-                return _daSelezCmd;
-            }
-        }
-
-        private RelayCommand _deleteCmd;
-
-        public ICommand EliminaSelezCmd
-        {
-            get
-            {
-                if (_deleteCmd == null)
-                {
-                    _deleteCmd = new RelayCommand(param => EliminaSelezione(), param => isSelectedRow);
-                }
-                return _deleteCmd;
-            }
-        }
-
-        #endregion
+        
 
         #region LoadDataIntoGridView
 
-        private async void TaskLoadGrid()
+        private void LoadGrid()
         {
-            await LoadDataTask();
+            DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+            DataSource = db.GetDataTable("Documento");
         }
 
-        private async Task LoadDataTask()
-        {
-            Func<DataView> function =
-                () =>
-                    LoadDataFromFile(
-                        Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]),
-                        _currentBatch.Applicazione.Campi);
-            var res = await Task.Run(function);
-            if (res != null)
-                DataSource = res;
-            else
-                logger.Warn("[SelectedBatchView]Errore nel caricamento dei dati dal file {0} nella tabella",
-                    Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
-        }
+        //private async void TaskLoadGrid()
+        //{
+        //    await LoadDataTask();
+        //}
 
-        private DataView LoadDataFromFile(string path, ObservableCollection<Campo> campi)
-        {
-            if (File.Exists(path) && campi != null && campi.Count > 0)
-                return (DataView) Helpers.DataSource.CreateDataSourceFromCsv(path, campi);
-            return null;
-        }
+        //private async Task LoadDataTask()
+        //{
+        //    Func<DataView> function =
+        //        () =>
+        //            LoadDataFromFile(
+        //                Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]),
+        //                _currentBatch.Applicazione.Campi);
+        //    var res = await Task.Run(function);
+        //    if (res != null)
+        //        DataSource = res;
+        //    else
+        //        logger.Warn("[SelectedBatchView]Errore nel caricamento dei dati dal file {0} nella tabella",
+        //            Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
+        //}
+
+        //private DataView LoadDataFromFile(string path, ObservableCollection<Campo> campi)
+        //{
+        //    if (File.Exists(path) && campi != null && campi.Count > 0)
+        //        return (DataView) Helpers.DataSource.CreateDataSourceFromCsv(path, campi);
+        //    return null;
+        //}
 
         #endregion
     }
