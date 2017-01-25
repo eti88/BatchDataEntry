@@ -2,20 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using System.Runtime.Remoting;
 using System.Text;
-using System.Windows.Documents;
-using BatchDataEntry.Business;
 using BatchDataEntry.Components;
-using BatchDataEntry.DBModels;
 using BatchDataEntry.Models;
 using NLog;
-using SQLite;
 using Batch = BatchDataEntry.Models.Batch;
 using Campo = BatchDataEntry.Models.Campo;
 using Modello = BatchDataEntry.Models.Modello;
@@ -26,23 +19,570 @@ namespace BatchDataEntry.Helpers
     public class DatabaseHelper
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        public string DBNAME = @"database.db3";
-        public string PATHDB = @"";
+        public string dbConnection;
 
         public DatabaseHelper()
         {
-            this.PATHDB = Path.Combine(Directory.GetCurrentDirectory(), DBNAME);
+           dbConnection = string.Format("Data Source={0}", Path.Combine(Directory.GetCurrentDirectory(), @"database.db3"));
         }
 
         public DatabaseHelper(string path)
         {
-            this.PATHDB = Path.Combine(path);
+            dbConnection = string.Format("Data Source={0}", path);
         }
 
         public DatabaseHelper(string dbname, string dbpath)
         {
-            this.DBNAME = dbname;
-            this.PATHDB = Path.Combine(dbpath, dbname);
+            dbConnection = string.Format("Data Source={0}", Path.Combine(dbpath, dbname));
+        }
+
+        public DatabaseHelper(Dictionary<string, string> connectionOpts)
+        {
+            string str = "";
+            foreach (KeyValuePair<string, string> row in connectionOpts)
+            {
+                str += string.Format("{0}={1};", row.Key, row.Value);
+            }
+            str = str.Trim().Substring(0, str.Length - 1);
+            dbConnection = str;
+        }
+
+        /// <summary>
+        /// Permette di recuperare sottoforma di Datatable una tabella dal database
+        /// </summary>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
+        public DataTable GetDataTable(string tablename)
+        {
+            DataTable dt = new DataTable();
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            try
+            {
+                string cmd = String.Format("SELECT * FROM {0}", tablename);
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(cnn);
+                myCmd.CommandText = cmd;
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                dt.Load(reader);
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return dt;
+        }
+
+        public DataTable GetDataTableWithQuery(string sqlcmd)
+        {
+            DataTable dt = new DataTable();
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            if (string.IsNullOrEmpty(sqlcmd))
+                return null;
+
+            try
+            {
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(cnn);
+                myCmd.CommandText = sqlcmd;
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                dt.Load(reader);
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return dt;
+        }
+
+        /// <summary>
+        /// Permette di eseguire una query che ritorna un intero
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        public int Count(string sql)
+        {
+            int result = -1;
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            try
+            {
+                cnn.Open();
+                SQLiteCommand cmd = new SQLiteCommand(sql, cnn);
+                result = Convert.ToInt32(cmd.ExecuteScalar());
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+                result = -1;
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return result;
+        }
+
+        /// <summary>
+        ///     Allows the programmer to interact with the database for purposes other than a query.
+        /// </summary>
+        /// <param name="sql">The SQL to be run.</param>
+        /// <returns>An Integer containing the number of rows updated.</returns>
+        public int ExecuteNonQuery(string sql)
+        {
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            int rowsUpdated = 0;
+            try
+            {
+                cnn.Open();
+                SQLiteCommand mycommand = new SQLiteCommand(cnn);
+                mycommand.CommandText = sql;
+                rowsUpdated = mycommand.ExecuteNonQuery();
+                cnn.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+
+            return rowsUpdated;
+        }
+
+        /// <summary>
+        ///     Allows the programmer to retrieve single items from the DB.
+        /// </summary>
+        /// <param name="sql">The query to run.</param>
+        /// <returns>A string.</returns>
+        public string ExecuteScalar(string sql)
+        {
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+
+            try
+            {
+                cnn.Open();
+                SQLiteCommand mycommand = new SQLiteCommand(cnn);
+                mycommand.CommandText = sql;
+                object value = mycommand.ExecuteScalar();
+                cnn.Close();
+                if (value != null)
+                {
+                    return value.ToString();
+                }
+                else
+                {
+                    return "";
+                }
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+                return "";
+            }
+            finally
+            {
+                cnn.Close();
+            }
+        }
+
+        /// <summary>
+        ///     Allows the programmer to easily update rows in the DB.
+        /// </summary>
+        /// <param name="tableName">The table to update.</param>
+        /// <param name="data">A dictionary containing Column names and their new values.</param>
+        /// <param name="where">The where clause for the update statement.</param>
+        /// <returns>A boolean true or false to signify success or failure.</returns>
+        public bool Update(String tableName, Dictionary<String, String> data, String where)
+        {
+            String vals = "";
+            Boolean returnCode = true;
+            if (data.Count >= 1)
+            {
+                foreach (KeyValuePair<String, String> val in data)
+                {
+                    vals += String.Format(" {0} = '{1}',", val.Key.ToString(), val.Value.ToString());
+                }
+                vals = vals.Substring(0, vals.Length - 1);
+            }
+            try
+            {
+                this.ExecuteNonQuery(String.Format("update {0} set {1} where {2};", tableName, vals, where));
+            }
+            catch (Exception e)
+            {
+                returnCode = false;
+                ErrorCatch(e);
+            }
+
+            return returnCode;
+        }
+
+        /// <summary>
+        ///     Allows the programmer to easily delete rows from the DB.
+        /// </summary>
+        /// <param name="tableName">The table from which to delete.</param>
+        /// <param name="where">The where clause for the delete.</param>
+        /// <returns>A boolean true or false to signify success or failure.</returns>
+        public bool Delete(String tableName, String where)
+        {
+            Boolean returnCode = true;
+            try
+            {
+                this.ExecuteNonQuery(String.Format("delete from {0} where {1};", tableName, where));
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+                returnCode = false;
+            }
+            return returnCode;
+        }
+
+        /// <summary>
+        ///     Allows the programmer to easily insert into the DB
+        /// </summary>
+        /// <param name="tableName">The table into which we insert the data.</param>
+        /// <param name="data">A dictionary containing the column names and data for the insert.</param>
+        /// <returns>A boolean true or false to signify success or failure.</returns>
+        public bool Insert(String tableName, Dictionary<String, String> data)
+        {
+            String columns = "";
+            String values = "";
+            Boolean returnCode = true;
+            foreach (KeyValuePair<String, String> val in data)
+            {
+                columns += String.Format(" {0},", val.Key.ToString());
+                values += String.Format(" '{0}',", val.Value);
+            }
+            columns = columns.Substring(0, columns.Length - 1);
+            values = values.Substring(0, values.Length - 1);
+            try
+            {
+                this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+                returnCode = false;
+            }
+            return returnCode;
+        }
+
+        public void InsertRecordBatch(Batch b)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", b.Id.ToString());
+            values.Add("Nome", b.Nome);
+            values.Add("TipoFile", b.TipoFile.ToString());
+            values.Add("DirectoryInput", b.DirectoryInput);
+            values.Add("DirectoryOutput", b.DirectoryOutput);
+            values.Add("IdModello", b.IdModello.ToString());
+            values.Add("NumDoc", b.NumDoc.ToString());
+            values.Add("NumPages", b.NumPages.ToString());
+            values.Add("DocCorrente", b.DocCorrente.ToString());
+            values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
+
+            Insert("Batch", values);
+        }
+
+        public void InsertRecordCampo(Campo c)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", c.Id.ToString());
+            values.Add("Nome", c.Nome);
+            values.Add("Posizione", c.Posizione.ToString());
+            values.Add("SalvaValori", c.SalvaValori.ToString());
+            values.Add("ValorePredefinito", c.ValorePredefinito);
+            values.Add("IndicePrimario", c.IndicePrimario.ToString());
+            values.Add("TipoCampo", c.TipoCampo.ToString());
+            values.Add("IdModello", c.IdModello.ToString());
+
+            Insert("Campo", values);
+        }
+
+        public void InsertRecordAutocompletamento(Autocompletamento a)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", a.Id.ToString());
+            values.Add("Colonna", a.Colonna.ToString());
+            values.Add("Valore", a.Valore);
+
+            Insert("Autocompletamento", values);
+        }
+
+        public void InsertRecordModello(Modello m)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", m.Id.ToString());
+            values.Add("Nome", m.Nome);
+            values.Add("OrigineCsv", m.OrigineCsv.ToString());
+            values.Add("PathFileCsv", m.PathFileCsv);
+            values.Add("Separatore", m.Separatore);
+
+            Insert("Modello", values);
+        }
+
+        public void InsertRecordDocumento(Document d)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", d.Id.ToString());
+            values.Add("FileName", d.FileName);
+            values.Add("Path", d.Path);
+            values.Add("isIndicizzato", d.IsIndexed.ToString());
+
+            foreach (Voce col in d.Voci)
+            {
+                values.Add(col.Key, col.Value);
+            }
+
+            Insert("Autocompletamento", values);
+        }
+
+        public void UpdateRecordBatch(Batch b)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", b.Id.ToString());
+            values.Add("Nome", b.Nome);
+            values.Add("TipoFile", b.TipoFile.ToString());
+            values.Add("DirectoryInput", b.DirectoryInput);
+            values.Add("DirectoryOutput", b.DirectoryOutput);
+            values.Add("IdModello", b.IdModello.ToString());
+            values.Add("NumDoc", b.NumDoc.ToString());
+            values.Add("NumPages", b.NumPages.ToString());
+            values.Add("DocCorrente", b.DocCorrente.ToString());
+            values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
+
+            Update("Batch", values, string.Format("Id={0}", b.Id));
+        }
+
+        public void UpdateRecordCampo(Campo c)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", c.Id.ToString());
+            values.Add("Nome", c.Nome);
+            values.Add("Posizione", c.Posizione.ToString());
+            values.Add("SalvaValori", c.SalvaValori.ToString());
+            values.Add("ValorePredefinito", c.ValorePredefinito);
+            values.Add("IndicePrimario", c.IndicePrimario.ToString());
+            values.Add("TipoCampo", c.TipoCampo.ToString());
+            values.Add("IdModello", c.IdModello.ToString());
+
+            Update("Campo", values, string.Format("Id={0}", c.Id));
+        }
+
+        public void UpdateRecordAutocompletamento(Autocompletamento a)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", a.Id.ToString());
+            values.Add("Colonna", a.Colonna.ToString());
+            values.Add("Valore", a.Valore);
+
+            Update("Autocompletamento", values, string.Format("Id={0}", a.Id));
+        }
+
+        public void UpdateRecordModello(Modello m)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", m.Id.ToString());
+            values.Add("Nome", m.Nome);
+            values.Add("OrigineCsv", m.OrigineCsv.ToString());
+            values.Add("PathFileCsv", m.PathFileCsv);
+            values.Add("Separatore", m.Separatore);
+
+            Update("Modello", values, string.Format("Id={0}", m.Id));
+        }
+
+        public void UpdateRecordDocumento(Document d)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Id", d.Id.ToString());
+            values.Add("FileName", d.FileName);
+            values.Add("Path", d.Path);
+            values.Add("isIndicizzato", d.IsIndexed.ToString());
+
+            foreach (Voce col in d.Voci)
+            {
+                values.Add(col.Key, col.Value);
+            }
+
+            Update("Autocompletamento", values, string.Format("Id={0}", d.Id));
+        }
+
+        /// <summary>
+        ///     Allows the programmer to easily delete all data from the DB.
+        /// </summary>
+        /// <returns>A boolean true or false to signify success or failure.</returns>
+        public bool ClearDB()
+        {
+            DataTable tables;
+            try
+            {
+                tables = this.GetDataTable("select NAME from SQLITE_MASTER where type='table' order by NAME;");
+                foreach (DataRow table in tables.Rows)
+                {
+                    this.ClearTable(table["NAME"].ToString());
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///     Allows the user to easily clear all data from a specific table.
+        /// </summary>
+        /// <param name="table">The name of the table to clear.</param>
+        /// <returns>A boolean true or false to signify success or failure.</returns>
+        public bool ClearTable(String table)
+        {
+            try
+            {
+                this.ExecuteNonQuery(String.Format("delete from {0};", table));
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+
+        }
+
+        private void ErrorCatch(Exception e)
+        {
+            logger.Error(e.ToString);
+            #if DEBUG
+            Console.WriteLine(e.ToString()); 
+            #endif
+        }
+
+        public bool CreateTableCampo()
+        {
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Campo (Id INTEGER PRIMARY KEY," +
+                            "Nome VARCHAR(254)," +
+                            "Posizione INTEGER," +
+                            "SalvaValori INTEGER," +
+                            "ValorePredefinito VARCHAR(254)," +
+                            "IndicePrimario INTEGER," +
+                            "TipoCampo INTEGER," +
+                            "IdModello INTEGER)";                
+            try
+            {
+                this.ExecuteNonQuery(SQLCmd);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+        }
+
+        public bool CreateTableModello()
+        {
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Modello (Id INTEGER PRIMARY KEY," +
+                            "Nome VARCHAR(254)," +
+                            "OrigineCsv INTEGER," +
+                            "PathFileCsv TEXT," +
+                            "Separatore VARCHAR(1))";
+            try
+            {
+                this.ExecuteNonQuery(SQLCmd);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool CreateTableBatch()
+        {
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY," +
+                            "Nome VARCHAR(254)," +
+                            "TipoFile INTEGER," +
+                            "DirectoryInput TEXT," +
+                            "DirectoryOutput TEXT," +
+                            "IdModello INTEGER," +
+                            "NumDoc INTEGER," +
+                            "NumPages INTEGER," +
+                            "DocCorrente INTEGER," +
+                            "UltimoIndicizzato INTEGER)";
+            try
+            {
+                this.ExecuteNonQuery(SQLCmd);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Crea la tabella dei documenti con alcune colonne predefinite e inoltre aggiunge le colonne per il salvataggio dei valori
+        /// </summary>
+        /// <param name="columns">Lista dei nomi delle colonne</param>
+        /// <returns></returns>
+        public bool CreateTableDocumento(List<string> columns)
+        {
+            // Nel caso si voglia aggiungere il supporto per più tipi di file va modificato in dictionary il parametro columns
+            // per passare anche il tipo di campo (adesso si assume che sia sempre string)
+            StringBuilder sqlCmd = new StringBuilder();
+            sqlCmd.Append(@"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY,FileName VARCHAR(254),Path TEXT,isIndicizzato INTEGER");
+
+            if (columns.Count > 0)
+            {
+                sqlCmd.Append(",");
+                for (int i = 0; i < columns.Count; i++)
+                {
+                    if(i == columns.Count-1)
+                        sqlCmd.Append(string.Format("{0} VARCHAR(254)", columns[i]));
+                    else
+                        sqlCmd.Append(string.Format("{0} VARCHAR(254),", columns[i]));
+                }
+
+            }
+            sqlCmd.Append(")");
+            #if DEBUG
+            Console.WriteLine(sqlCmd);
+            #endif
+            try
+            {
+                this.ExecuteNonQuery(sqlCmd.ToString());
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool CreateTableAutocompletamento()
+        {
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY," +
+                            "Colonna INTEGER, Valore VARCHAR(254))";                          
+            try
+            {
+                this.ExecuteNonQuery(SQLCmd);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public void InitTabs()
@@ -52,17 +592,9 @@ namespace BatchDataEntry.Helpers
                 #if DEBUG
                 Console.WriteLine(@"Init tabelle...");
                 #endif
-
-                if (!File.Exists(PATHDB))
-                {
-                    var db = new SQLiteConnection(PATHDB);
-                    
-                    db.CreateTable<DBModels.Campo>();
-                    db.CreateTable<DBModels.Modello>();
-                    db.CreateTable<DBModels.Batch>();
-                    
-                }
-
+                CreateTableModello();
+                CreateTableCampo();
+                CreateTableBatch();
                 #if DEBUG
                 Console.WriteLine(@"Init tabelle completato.");
                 #endif
@@ -75,206 +607,45 @@ namespace BatchDataEntry.Helpers
                 #endif
             }
         }
-
-        public void CreateCacheDb()
+        
+        public void CreateCacheDb(List<string> columns)
         {
             #if DEBUG
             Console.WriteLine(@"Create cache database...");
             #endif
-
-            if (!File.Exists(PATHDB))
-            {
-                var dbCache = new SQLiteConnection(PATHDB);
-                dbCache.CreateTable<DBModels.Documento>();
-                dbCache.CreateTable<DBModels.Autocompletamento>();
-            }
-
+            CreateTableAutocompletamento();
+            CreateTableDocumento(columns);
             #if DEBUG
             Console.WriteLine(@"Cache db creato....");
             #endif
             
         }
 
-        private void ErrorCatch(Exception e)
-        {
-            logger.Error(e.ToString);
-            #if DEBUG
-            Console.WriteLine(e.ToString());
-            #endif
-        }
-
-        public int InsertRecord<T>(T model)
-        {
-            var db = new SQLiteConnection(PATHDB);
-            int lastID = -1;
-
-            try
-            {
-                #if DEBUG
-                Console.WriteLine(@"Insertnella tabella " + typeof(T));
-                #endif
-                db.Insert(model);
-                lastID = db.ExecuteScalar<int>("SELECT last_insert_rowid()");
-
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Close();
-            }
-            return lastID;
-        }
-
-        /*
-        public void UpdateRecord<T>(T model)
-        {
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-                //int i = db.Table<T>().Single(x => x);
-                #if DEBUG
-                Console.WriteLine(@"Update nella tabella " + typeof(T));
-                #endif
-                db.Update(model);
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Commit();
-                db.Dispose();
-                db.Close();
-            }
-        }*/
-
-        public void UpdateRecord(Doc doc)
-        {
-            Documento tmp = new Documento(doc);
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-                var origin = db.Table<Documento>().FirstOrDefault(x => x.FileName.Equals(tmp.FileName));
-                tmp.Id = origin.Id;
-                db.Update(tmp);
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Commit();
-                db.Dispose();
-                db.Close();
-            }
-        }
-
-        public void UpdateRecord(DBModels.Modello modello)
-        {
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-                var origin = db.Table<Documento>().FirstOrDefault(x => x.FileName.Equals(modello.Nome));
-                modello.Id = origin.Id;
-                db.Update(modello);
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Commit();
-                db.Dispose();
-                db.Close();
-            }
-        }
-
-        public void UpdateRecord(DBModels.Campo campo)
-        {
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-                var origin = db.Table<Documento>().FirstOrDefault(x => x.FileName.Equals(campo.Nome));
-                campo.Id = origin.Id;
-                db.Update(campo);
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Commit();
-                db.Dispose();
-                db.Close();
-            }
-        }
-
-        public void UpdateRecord(DBModels.Batch batch)
-        {
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-                var origin = db.Table<Documento>().FirstOrDefault(x => x.FileName.Equals(batch.Nome));
-                batch.Id = origin.Id;
-                db.Update(batch);
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Commit();
-                db.Dispose();
-                db.Close();
-            }
-        }
-
-        public void DeleteRecord<T>(T model, int id)
-        {
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-                #if DEBUG
-                Console.WriteLine(@"Delete nella tabella " + typeof(T));
-                #endif
-
-                db.Delete<T>(id);
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Close();
-            }
-        }
-
         public Batch GetBatchById(int id)
         {
-            var db = new SQLiteConnection(PATHDB);
-
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = string.Format("SELECT * FROM Batch WHERE Id = {0}", id);
             try
             {
-                #if DEBUG
-                Console.WriteLine(@"Get elements by id nella tabella Batch");
-                #endif
-                Batch b = new Batch(db.Find<DBModels.Batch>(id));
-                
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                Batch b = new Batch();
+
+                while (reader.Read())
+                {
+                    b.Id = Convert.ToInt32(reader["Id"]);
+                    b.Nome = Convert.ToString(reader["Nome"]);
+                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                }
+                reader.Close();
                 return b;
             }
             catch (Exception e)
@@ -283,21 +654,34 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
 
         public Campo GetCampoById(int id)
         {
-            var db = new SQLiteConnection(PATHDB);
-
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = string.Format("SELECT * FROM Campo WHERE Id = {0}", id);
             try
             {
-                #if DEBUG
-                Console.WriteLine(@"Get elements by id nella tabella Campo");
-                #endif
-                Campo c = new Campo(db.Find<DBModels.Campo>(id));
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                Campo c = new Campo();
+
+                while (reader.Read())
+                {
+                    c.Id = Convert.ToInt32(reader["Id"]);
+                    c.Nome = Convert.ToString(reader["Nome"]);
+                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                }
+                reader.Close();
                 return c;
             }
             catch (Exception e)
@@ -306,119 +690,195 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
 
         public Modello GetModelloById(int id)
         {
-            var db = new SQLiteConnection(PATHDB);
-
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = string.Format("SELECT * FROM Modello WHERE Id = {0}", id);
             try
             {
-            #if DEBUG
-            Console.WriteLine(@"Get elements by id nella tabella Modello");
-            #endif
-                DBModels.Modello raw = new DBModels.Modello();
-                raw = db.Find<DBModels.Modello>(id);
-                if (raw != null)
-                    return new Modello(raw);
-                
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Close();
-            }
-            return null;
-        }
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                Modello m = new Modello();
 
-        public Documento GetDocumento(string name)
-        {
-            var db = new SQLiteConnection(PATHDB);
-
-            try
-            {
-                var query = db.Table<Documento>().Where(x => x.FileName.Equals(name)).First();
-                return query;
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                db.Close();
-            }
-            return null;
-        }
-
-        public NavigationList<Doc> GetDocuments()
-        {
-            NavigationList<Doc> ret = new NavigationList<Doc>();
-            var db = new SQLiteConnection(PATHDB);
-            try
-            {
-                var tmp = db.Table<Documento>().ToList();
-                foreach (Documento doc in tmp)
+                while (reader.Read())
                 {
-                    ret.Add(new Doc(doc));
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
                 }
+                reader.Close();
+                return m;
             }
             catch (Exception e)
             {
                 ErrorCatch(e);
-            }finally { db.Close();}
-
-            return ret;
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
         }
 
-        public List<string> GetAutocompleteList(string column)
+        /// <summary>
+        /// Restituisce un Documento sotto forma di Dizionario in quanto il numero di colonne varia
+        /// da database a database.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Dictionary<int, string> GetDocumento(string name)
         {
-            var lst = new List<string>();
-            var db = new SQLiteConnection(PATHDB);
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = string.Format("SELECT * FROM Documento WHERE FileName = {0}", name);
             try
             {
-                var tmp = db.Table<Autocompletamento>().Where(x => x.Colonna.Equals(column));
-                if (tmp.Count() > 0)
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                Dictionary<int, string> doc = new Dictionary<int, string>();
+
+                while (reader.Read())
                 {
-                    foreach (var record in tmp)
+                    int i = 0;
+                    doc.Add(i, Convert.ToString(reader["Id"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["FileName"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["Path"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
+                    i++;
+
+                    for (int z=i; i < reader.FieldCount; z++)
                     {
-                        lst.Add(record.Valore);
-                    }
+                        doc.Add(i, Convert.ToString(reader[z]));
+                        
+                    }  
                 }
+                reader.Close();
+                return doc;
             }
             catch (Exception e)
             {
                 ErrorCatch(e);
-            }finally { db.Close(); }
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
 
-            return lst;
+        public NavigationList<Dictionary<int, string>> GetDocuments()
+        {
+            NavigationList<Dictionary<int, string>> ret = new NavigationList<Dictionary<int, string>>();
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = "SELECT * FROM Documento";
+            try
+            {
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Dictionary<int, string> doc = new Dictionary<int, string>();
+                    int i = 0;
+                    doc.Add(i, Convert.ToString(reader["Id"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["FileName"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["Path"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
+                    i++;
+
+                    for (int z = i; i < reader.FieldCount; z++)
+                    {
+                        doc.Add(i, Convert.ToString(reader[z]));
+
+                    }
+                    ret.Add(doc);
+                }
+                reader.Close();
+                return ret;
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public List<string> GetAutocompleteList(int column)
+        {
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = string.Format("SELECT Valore FROM Autocompletamento WHERE Colonna = {0}", column);
+            try
+            {
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                List<string> suggestions = new List<string>();
+
+                while (reader.Read())
+                    suggestions.Add(Convert.ToString(reader["Valore"]));
+
+                reader.Close();
+                return suggestions;
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
         }
 
         public ObservableCollection<Batch> GetBatchRecords()
         {
-            var db = new SQLiteConnection(PATHDB);
-
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = "SELECT * FROM Batch";
             try
             {
-                #if DEBUG
-                Console.WriteLine(@"Get record dalla tabella Batch");
-                #endif
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
 
-                var list = db.Table<DBModels.Batch>().ToList();
-                var obsc = new ObservableCollection<Batch>();
-                foreach (DBModels.Batch element in list)
+                while (reader.Read())
                 {
-                    obsc.Add(new Batch(element));
+                    Batch b = new Batch();
+                    b.Id = Convert.ToInt32(reader["Id"]);
+                    b.Nome = Convert.ToString(reader["Nome"]);
+                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    batches.Add(b);
                 }
 
-
-                return obsc;
+                reader.Close();
+                return batches;
             }
             catch (Exception e)
             {
@@ -426,28 +886,38 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
 
         public ObservableCollection<Campo> GetCampoRecords()
         {
-            var db = new SQLiteConnection(PATHDB);
-
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = "SELECT * FROM Campo";
             try
             {
-            #if DEBUG
-            Console.WriteLine(@"Get record dalla tabella Campo");
-            #endif
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
 
-                var list = db.Table<DBModels.Campo>().ToList();
-                var obsc = new ObservableCollection<Campo>();
-                foreach (DBModels.Campo element in list)
+                while (reader.Read())
                 {
-                    obsc.Add(new Campo(element));
+                    Campo c = new Campo();
+                    c.Id = Convert.ToInt32(reader["Id"]);
+                    c.Nome = Convert.ToString(reader["Nome"]);
+                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    campi.Add(c);
                 }
-                return obsc;
+
+                reader.Close();
+                return campi;
             }
             catch (Exception e)
             {
@@ -455,28 +925,35 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
 
         public ObservableCollection<Modello> GetModelloRecords()
         {
-            var db = new SQLiteConnection(PATHDB);
-
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = "SELECT * FROM Modello";
             try
             {
-            #if DEBUG
-            Console.WriteLine(@"Get record dalla tabella Batch");
-            #endif
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                ObservableCollection<Modello> models = new ObservableCollection<Modello>();
 
-                var list = db.Table<DBModels.Modello>().ToList();
-                var obsc = new ObservableCollection<Modello>();
-                foreach (DBModels.Modello element in list)
+                while (reader.Read())
                 {
-                    obsc.Add(new Modello(element));
+                    Modello m = new Modello();
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
+                    models.Add(m);
                 }
-                return obsc;
+
+                reader.Close();
+                return models;
             }
             catch (Exception e)
             {
@@ -484,28 +961,40 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
 
         public ObservableCollection<Batch> BatchQuery(string query)
         {
-            var db = new SQLiteConnection(PATHDB);
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 
             try
             {
-                #if DEBUG
-                Console.WriteLine(@"Query su tabella Batch");
-                #endif
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(query, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
 
-                var list = db.Query<DBModels.Batch>(query).ToList();
-                var obsc = new ObservableCollection<Batch>();
-                foreach (DBModels.Batch element in list)
+                while (reader.Read())
                 {
-                    obsc.Add(new Batch(element));
+                    Batch b = new Batch();
+                    b.Id = Convert.ToInt32(reader["Id"]);
+                    b.Nome = Convert.ToString(reader["Nome"]);
+                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    batches.Add(b);
                 }
-                return obsc;
+
+                reader.Close();
+                return batches;
             }
             catch (Exception e)
             {
@@ -513,28 +1002,37 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
 
         public ObservableCollection<Campo> CampoQuery(string query)
         {
-            var db = new SQLiteConnection(PATHDB);
-
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             try
             {
-                #if DEBUG
-                Console.WriteLine(@"Query su tabella Campo");
-                #endif
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(query, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
 
-                var list = db.Query<DBModels.Campo>(query).ToList();
-                var obsc = new ObservableCollection<Campo>();
-                foreach (DBModels.Campo element in list)
+                while (reader.Read())
                 {
-                    obsc.Add(new Campo(element));
+                    Campo c = new Campo();
+                    c.Id = Convert.ToInt32(reader["Id"]);
+                    c.Nome = Convert.ToString(reader["Nome"]);
+                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    campi.Add(c);
                 }
-                return obsc;
+
+                reader.Close();
+                return campi;
             }
             catch (Exception e)
             {
@@ -542,27 +1040,35 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
 
         public ObservableCollection<Modello> ModelloQuery(string query)
         {
-            var db = new SQLiteConnection(PATHDB);
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 
             try
             {
-                #if DEBUG
-                Console.WriteLine(@"Query sulla tabella Modello");
-                #endif
-                var list = db.Query<DBModels.Modello>(query).ToList();
-                var obsc = new ObservableCollection<Modello>();
-                foreach (DBModels.Modello element in list)
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(query, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                ObservableCollection<Modello> models = new ObservableCollection<Modello>();
+
+                while (reader.Read())
                 {
-                    obsc.Add(new Modello(element));
+                    Modello m = new Modello();
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
+                    models.Add(m);
                 }
-                return obsc;
+
+                reader.Close();
+                return models;
             }
             catch (Exception e)
             {
@@ -570,24 +1076,35 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
 
-        public IEnumerable<DBModels.Modello> IEnumerableModelli()
+        public IEnumerable<Modello> IEnumerableModelli()
         {
-            var db = new SQLiteConnection(PATHDB);
-            string querycmd = "SELECT Id, Nome FROM Modello";
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = "SELECT * FROM Modello";
             try
             {
-                #if DEBUG
-                Console.WriteLine(@"Query sulla tabella Modello");
-                #endif
-                var list = db.Query<DBModels.Modello>(querycmd).ToList();
-                IEnumerable<DBModels.Modello> tmp = list.AsEnumerable();
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                List<Modello> models = new List<Modello>();
 
-                return tmp;
+                while (reader.Read())
+                {
+                    Modello m = new Modello();
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
+                    models.Add(m);
+                }
+
+                reader.Close();
+                return models.AsEnumerable();
             }
             catch (Exception e)
             {
@@ -595,29 +1112,9 @@ namespace BatchDataEntry.Helpers
             }
             finally
             {
-                db.Close();
+                cnn.Close();
             }
             return null;
         }
-
-        public int CountRecords(string sqlCmdText)
-        {
-            SQLiteConnection dbc = new SQLiteConnection(PATHDB);
-            int count = 0;
-            try
-            {
-                count = dbc.ExecuteScalar<int>(sqlCmdText);
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                dbc.Close();
-            }
-            return count;
-        }
-      
     }
 }

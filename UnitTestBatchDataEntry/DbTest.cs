@@ -11,7 +11,8 @@ namespace UnitTestBatchDataEntry
     [TestClass]
     public class DbTest
     {
-        private DatabaseHelper testDb = new DatabaseHelper();
+        private DatabaseHelper testDb = new DatabaseHelper(Path.Combine(Directory.GetCurrentDirectory(), @"test.db3"));
+        private DatabaseHelper cacheTestDb = new DatabaseHelper(Path.Combine(Directory.GetCurrentDirectory(), @"cacheTest.db3"));
 
         [TestMethod]
         public void TestDbInit()
@@ -20,6 +21,8 @@ namespace UnitTestBatchDataEntry
             {
                 if (testDb != null)
                     testDb.InitTabs();
+                if (cacheTestDb != null)
+                    cacheTestDb.CreateCacheDb(new List<string>() {"Column1", "Column2"});
                 Assert.IsTrue(true);
             }
             catch (Exception e)
@@ -31,68 +34,79 @@ namespace UnitTestBatchDataEntry
         [TestMethod]
         public void TestInsertRecords()
         {
-            Campo campo1 = new Campo(1, "colonna test", 0, false, "", true, 1);
-            Campo campo2 = new Campo(2, "colonna test 2", 1, false, "", false, 1);
+            Campo campo1 = new Campo(1, "Column1", 0, false, "", true, 1);
+            Campo campo2 = new Campo(2, "Column2", 1, false, "", false, 1);
             Modello modello1 = new Modello(1, "Modello test", false, new ObservableCollection<Campo>());
             Modello modello2 = new Modello(2, "Modello test 2", false, new ObservableCollection<Campo>());
             Batch batch = new Batch(1, "batch test", TipoFileProcessato.Pdf, "C:/input/", "C:/output/", modello1, 1, 1, 0, 0, 0, 1);
-
             try
             {
-                testDb.InsertRecord(campo1);
-                testDb.InsertRecord(campo2);
-                testDb.InsertRecord(modello1);
-                testDb.InsertRecord(modello2);
-                testDb.InsertRecord(batch);
+                testDb.InsertRecordCampo(campo1);
+                testDb.InsertRecordCampo(campo2);
+                testDb.InsertRecordModello(modello1);
+                testDb.InsertRecordModello(modello2);
+                testDb.InsertRecordBatch(batch);
                 Assert.IsTrue(true);
             }
             catch (Exception e)
             {
                 Assert.IsTrue(false, e.Message);
-            }
+            }          
         }
 
         [TestMethod]
-        public void TestUpdateRecords()
-        {
-            Campo campo = new Campo(2, "colonna blablabla", 1, false, "", false, 1);
-            Modello modello = new Modello(2, "Modello ffffff", false, new ObservableCollection<Campo>());
-            try
-            {
-                testDb.UpdateRecord(campo);
-                testDb.UpdateRecord(modello);
-                Assert.IsTrue(true);
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(false, e.Message);
-            }
-        }
-
-        [TestMethod]
-        public void TestDeleteRecords()
-        {
-            try
-            {
-                testDb.DeleteRecord(new Campo(), 2);
-                Assert.IsTrue(true);
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(false, e.Message);
-            }
-        }
-
-        [TestMethod]
-        public void TestGetBatchRecord()
+        public void TestReadBatchRecords()
         {
             try
             {
                 Batch b = testDb.GetBatchById(1);
-                if (b == null)
-                    Assert.IsTrue(false);              
-                else
-                    Assert.IsTrue(true);
+                Assert.AreEqual(1, b.Id);
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(false);
+            }
+        }
+
+        [TestMethod]
+        public void TestReadCampoRecords()
+        {
+            try
+            {
+                Campo c = testDb.GetCampoById(2);
+                Assert.AreEqual("Column2", c.Nome);
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(false);
+            }
+        }
+
+        [TestMethod]
+        public void TestReadModelRecords()
+        {
+            try
+            {
+                Modello c = testDb.GetModelloById(2);
+                Assert.AreEqual("Modello test 2", c.Nome);
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(false);
+            }
+        }
+
+        [TestMethod]
+        public void TestUpdateBatchRecords()
+        {
+            try
+            {
+                Batch b = testDb.GetBatchById(1);
+                Batch b2 = new Batch(b);
+                b2.Nome = "Updated name";
+                testDb.UpdateRecordBatch(b2);
+                b2 = testDb.GetBatchById(1);
+                Assert.AreNotEqual(b.Nome, b2.Nome);
             }
             catch (Exception e)
             {
@@ -101,21 +115,16 @@ namespace UnitTestBatchDataEntry
         }
 
         [TestMethod]
-        public void TestGetCampoRecord()
+        public void TestUpdateCampoRecords()
         {
             try
             {
                 Campo c = testDb.GetCampoById(1);
-                if (c == null)
-                    Assert.IsTrue(false);
-                else if (c.Id != 1)
-                    Assert.IsTrue(false);
-                else if (string.IsNullOrEmpty(c.Nome))
-                    Assert.IsTrue(false);
-                else if (c.Posizione < 0)
-                    Assert.IsTrue(false);
-                else
-                    Assert.IsTrue(true);
+                Campo c2 = new Campo(c);
+                c2.Nome = "UnitTestColumn";
+                testDb.UpdateRecordCampo(c2);
+                c2 = testDb.GetCampoById(1);
+                Assert.AreNotEqual(c.Nome, c2.Nome);
             }
             catch (Exception e)
             {
@@ -124,19 +133,16 @@ namespace UnitTestBatchDataEntry
         }
 
         [TestMethod]
-        public void TestGetModelloRecord()
+        public void TestUpdateModelloRecords()
         {
             try
             {
                 Modello m = testDb.GetModelloById(1);
-                if (m == null)
-                    Assert.IsTrue(false);
-                else if (m.Id != 1)
-                    Assert.IsTrue(false);
-                else if (string.IsNullOrEmpty(m.Nome))
-                    Assert.IsTrue(false);
-                else
-                    Assert.IsTrue(true);
+                Modello m2 = new Modello(m);
+                m2.Nome = "Updated Model name";
+                testDb.UpdateRecordModello(m2);
+                m2 = testDb.GetModelloById(1);
+                Assert.AreNotEqual(m.Nome, m2.Nome);
             }
             catch (Exception e)
             {
@@ -150,7 +156,7 @@ namespace UnitTestBatchDataEntry
             try
             {
                 ObservableCollection<Batch> collection = testDb.GetBatchRecords();
-                if(collection.Count > 0)
+                if (collection.Count > 0)
                     Assert.IsTrue(true);
                 else
                     Assert.IsTrue(false);
@@ -236,9 +242,10 @@ namespace UnitTestBatchDataEntry
         {
             try
             {
-                string query = "SELECT * FROM Campo WHERE IndicePrimario = 1";
+                string query = @"SELECT * FROM Campo WHERE Id=1";
                 ObservableCollection<Campo> collection = testDb.CampoQuery(query);
-                if (collection.Count >= 1)
+
+                if (collection.Count == 1)
                     Assert.IsTrue(true);
                 else
                     Assert.IsTrue(false);
@@ -254,7 +261,7 @@ namespace UnitTestBatchDataEntry
         {
             try
             {
-                IEnumerable<BatchDataEntry.DBModels.Modello> res = testDb.IEnumerableModelli();
+                IEnumerable<Modello> res = testDb.IEnumerableModelli();
 
                 if (res != null)
                     Assert.IsTrue(true);

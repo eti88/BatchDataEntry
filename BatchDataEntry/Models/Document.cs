@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Configuration;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BatchDataEntry.DBModels;
 using BatchDataEntry.Helpers;
 
 namespace BatchDataEntry.Models
 {
-    public class Doc: BaseModel
+    public class Document: BaseModel
     {
-        private string _index;
-        public string Id
+        private int _index;
+        public int Id
         {
             get { return _index; }
             set
@@ -78,14 +72,19 @@ namespace BatchDataEntry.Models
             return (File.GetAttributes(this.Path) & FileAttributes.Directory) == FileAttributes.Directory;
         }
 
-        public Doc()
+        public Document()
         {
-            this.Id = "";
+            this.Id = 0;
             this.Path = "";
             this.Voci = new ObservableCollection<Voce>();
         }
 
-        public Doc(string id, string name, string path, bool indexed)
+        public Document(Dictionary<int, string> dictionary)
+        {
+            //TODO: da completare
+        }
+
+        public Document(int id, string name, string path, bool indexed)
         {
             this.Id = id;
             this.FileName = name;
@@ -94,12 +93,12 @@ namespace BatchDataEntry.Models
             this.Voci = new ObservableCollection<Voce>();
         }
 
-        public Doc(Documento dc)
+        public Document(Document dc)
         {
-            this.Id = dc.Id.ToString();
+            this.Id = dc.Id;
             this.FileName = dc.FileName;
             this.Path = dc.Path;
-            this.IsIndexed = dc.isIndicizzato;
+            this.IsIndexed = dc.IsIndexed;
             this.Voci = new ObservableCollection<Voce>();
         }
 

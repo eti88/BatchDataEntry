@@ -61,7 +61,6 @@
     <Compile Include="CampoTest.cs" />
     <Compile Include="CsvTest.cs" />
     <Compile Include="DbTest.cs" />
-    <Compile Include="RecordsTest.cs" />
     <Compile Include="ModelloTest.cs" />
     <Compile Include="NavigationListTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

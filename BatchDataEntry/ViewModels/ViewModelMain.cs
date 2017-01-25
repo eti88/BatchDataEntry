@@ -126,7 +126,7 @@ namespace BatchDataEntry.ViewModels
 
             try
             {
-                batches = db.GetBatchRecords();
+                //batches = db.GetBatchRecords();
                 Batches = batches;
             }
             catch (Exception e)
@@ -182,7 +182,7 @@ namespace BatchDataEntry.ViewModels
         private void DeleteBatchItem()
         {
             DatabaseHelper db = new DatabaseHelper();
-            db.DeleteRecord(SelectedBatch, SelectedBatch.Id);
+            //db.DeleteRecord(SelectedBatch, SelectedBatch.Id);
             Batches.Remove(SelectedBatch);
         }
 

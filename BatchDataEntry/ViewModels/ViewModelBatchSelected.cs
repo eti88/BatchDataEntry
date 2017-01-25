@@ -9,15 +9,136 @@ using System.Windows.Input;
 using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using BatchDataEntry.Views;
 using NLog;
-using Batch = BatchDataEntry.Models.Batch;
-using Campo = BatchDataEntry.Models.Campo;
 
 namespace BatchDataEntry.ViewModels
 {
-    class ViewModelBatchSelected : ViewModelMain
+    internal class ViewModelBatchSelected : ViewModelMain
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        private void ContinuaDaSelezione()
+        {
+            var posizioneCol = -1;
+
+            foreach (var campo in SelectedBatch.Applicazione.Campi)
+            {
+                if (campo.IndicePrimario)
+                {
+                    posizioneCol = campo.Posizione;
+                }
+            }
+
+            if (posizioneCol == -1)
+            {
+                logger.Error("Errore impossibile continuare da posizione (Colonna)...");
+                return;
+            }
+
+            var continua = new Documento();
+            var indexFile = SelectedRow[posizioneCol].ToString();
+            if (!string.IsNullOrEmpty(indexFile))
+            {
+                continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
+                continua.ShowDialog();
+                TaskLoadGrid();
+                RaisePropertyChanged("DataSource");
+            }
+        }
+
+        private void ContinuaInserimento()
+        {
+            if (_currentBatch != null)
+            {
+                var inserimento = new Documento();
+                inserimento.DataContext = new ViewModelDocumento(_currentBatch);
+                try
+                {
+                    inserimento.ShowDialog();
+                }
+                catch (Exception)
+                {
+                }
+
+                TaskLoadGrid();
+                RaisePropertyChanged("DataSource");
+            }
+        }
+
+        private void EliminaSelezione()
+        {
+            if (SelectedRow != null)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    var colPrimary = 0;
+                    if (_currentBatch.Applicazione == null)
+                        _currentBatch.LoadModel();
+                    if (_currentBatch.Applicazione.Campi == null || _currentBatch.Applicazione.Campi.Count == 0)
+                        _currentBatch.Applicazione.LoadCampi();
+
+                    foreach (var c in _currentBatch.Applicazione.Campi)
+                    {
+                        if (c.IndicePrimario)
+                        {
+                            colPrimary = c.Posizione;
+                            break;
+                        }
+                    }
+
+                    var db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
+                        _currentBatch.DirectoryOutput);
+                    Console.WriteLine("Valore: " + SelectedRow[colPrimary]);
+
+                    var dbCsvFile = Path.Combine(_currentBatch.DirectoryOutput,
+                        ConfigurationManager.AppSettings["csv_file_name"]);
+                    //DBModels.Documento current = db.GetDocumento(SelectedRow[colPrimary].ToString());
+                    //db.DeleteRecord(typeof(DBModels.Documento), current.Id);
+                    //string fileName = current.Path;
+
+                    Csv.DeleteRow(dbCsvFile, SelectedRow[colPrimary].ToString(), colPrimary);
+                        // elimina il record dal file db (csv)                  
+                    //File.Delete(fileName); // elimina il file pdf originario
+                });
+
+                TaskLoadGrid();
+                RaisePropertyChanged("DataSource");
+            }
+        }
+
+        private void CheckBatch()
+        {
+            if (_currentBatch == null)
+                return;
+
+            var cacheDbPath = Path.Combine(_currentBatch.DirectoryOutput,
+                ConfigurationManager.AppSettings["cache_db_name"]);
+
+            if (!File.Exists(cacheDbPath))
+            {
+                MessageBox.Show(
+                    "Database cache mancante! Aprire <<Modifica Batch>> e provare a risalvare le impostazioni per creare il database.");
+                return;
+            }
+
+            Task.Factory.StartNew(() =>
+            {
+                var dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
+                    _currentBatch.DirectoryOutput);
+
+                var rowCount = 0;
+                var cmd = string.Format("SELECT COUNT(*) FROM {0}", "Documento");
+                //rowCount = dbc.CountRecords(cmd);
+                var processedRow = 0;
+                var cmd2 = string.Format("SELECT COUNT(*) FROM {0} WHERE isIndicizzato = 1", "Documento");
+                //processedRow = dbc.CountRecords(cmd2);
+
+                StatusBarCol1 = string.Format("File Indicizzati ({0} / {1})", processedRow, rowCount);
+                if (processedRow == rowCount && rowCount > 0)
+                    StatusBarCol2 = "Batch Completato!";
+            });
+        }
 
         #region Constructors
 
@@ -28,18 +149,21 @@ namespace BatchDataEntry.ViewModels
         public ViewModelBatchSelected(Batch batch)
         {
             _currentBatch = batch;
-            long bytes = Utility.GetDirectorySize(batch.DirectoryInput);
+            var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
             TaskLoadGrid();
-            Dimensioni = Utility.ConvertSize((double)bytes, "MB").ToString("0.00");
+            Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
             NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
             _currentBatch.Applicazione.LoadCampi();
         }
+
         #endregion
 
         #region Members
-        private Batch _currentBatch { get; set; }
+
+        private Batch _currentBatch { get; }
 
         private DataView _dtSource;
+
         public DataView DataSource
         {
             get { return _dtSource; }
@@ -54,6 +178,7 @@ namespace BatchDataEntry.ViewModels
         }
 
         private int _ndocs;
+
         public int NumeroDocumenti
         {
             get { return _ndocs; }
@@ -68,6 +193,7 @@ namespace BatchDataEntry.ViewModels
         }
 
         private string _statusBar1;
+
         public string StatusBarCol1
         {
             get { return _statusBar1; }
@@ -82,6 +208,7 @@ namespace BatchDataEntry.ViewModels
         }
 
         private string _statusBar2;
+
         public string StatusBarCol2
         {
             get { return _statusBar2; }
@@ -96,6 +223,7 @@ namespace BatchDataEntry.ViewModels
         }
 
         private string _dimfiles;
+
         public string Dimensioni
         {
             get { return _dimfiles; }
@@ -110,6 +238,7 @@ namespace BatchDataEntry.ViewModels
         }
 
         private int _curDoc;
+
         public int DocumentoCorrente
         {
             get { return _curDoc; }
@@ -124,6 +253,7 @@ namespace BatchDataEntry.ViewModels
         }
 
         private int _ulti;
+
         public int UltimoIndicizzato
         {
             get { return _ulti; }
@@ -139,10 +269,11 @@ namespace BatchDataEntry.ViewModels
 
         private bool isSelectedRow
         {
-            get { return (SelectedRow == null) ? false : true; }
+            get { return SelectedRow == null ? false : true; }
         }
 
         private DataRowView _selectedRow;
+
         public DataRowView SelectedRow
         {
             get { return _selectedRow; }
@@ -159,175 +290,64 @@ namespace BatchDataEntry.ViewModels
         #endregion
 
         #region Cmd
+
         private RelayCommand _continuaCmd;
+
         public ICommand ContinuaCmd
         {
             get
             {
                 if (_continuaCmd == null)
                 {
-                    _continuaCmd = new RelayCommand(param => this.ContinuaInserimento());
+                    _continuaCmd = new RelayCommand(param => ContinuaInserimento());
                 }
                 return _continuaCmd;
             }
         }
 
         private RelayCommand _checkCmd;
+
         public ICommand CheckCmd
         {
             get
             {
                 if (_checkCmd == null)
                 {
-                    _checkCmd = new RelayCommand(param => this.CheckBatch());
+                    _checkCmd = new RelayCommand(param => CheckBatch());
                 }
                 return _checkCmd;
             }
         }
 
         private RelayCommand _daSelezCmd;
+
         public ICommand ContinuaDaSelezioneCmd
         {
             get
             {
                 if (_daSelezCmd == null)
                 {
-                    _daSelezCmd = new RelayCommand(param => this.ContinuaDaSelezione(), param => this.isSelectedRow);
+                    _daSelezCmd = new RelayCommand(param => ContinuaDaSelezione(), param => isSelectedRow);
                 }
                 return _daSelezCmd;
             }
         }
 
         private RelayCommand _deleteCmd;
+
         public ICommand EliminaSelezCmd
         {
-            get {
+            get
+            {
                 if (_deleteCmd == null)
                 {
-                    _deleteCmd = new RelayCommand(param => this.EliminaSelezione(), param => this.isSelectedRow);
+                    _deleteCmd = new RelayCommand(param => EliminaSelezione(), param => isSelectedRow);
                 }
                 return _deleteCmd;
             }
         }
+
         #endregion
-
-        private void ContinuaDaSelezione()
-        {
-            int posizioneCol = -1;
-            
-            foreach (Campo campo in SelectedBatch.Applicazione.Campi)
-            {
-                if (campo.IndicePrimario == true)
-                {
-                    posizioneCol = campo.Posizione;
-                }
-            }
-
-            if (posizioneCol == -1)
-            {
-                logger.Error("Errore impossibile continuare da posizione (Colonna)...");
-                return;
-            }
-
-            Views.Documento continua = new Views.Documento();
-            string indexFile = SelectedRow[posizioneCol].ToString();
-            if (!string.IsNullOrEmpty(indexFile))
-            {
-                continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
-                continua.ShowDialog();
-                TaskLoadGrid();
-                RaisePropertyChanged("DataSource");
-            }
-        }
-
-        private void ContinuaInserimento()
-        {
-            if (_currentBatch != null)
-            {
-                Views.Documento inserimento = new Views.Documento();
-                inserimento.DataContext = new ViewModelDocumento(_currentBatch);
-                try
-                {
-                    inserimento.ShowDialog();
-                }
-                catch (Exception)
-                {
-                    
-                }
-                
-                TaskLoadGrid();
-                RaisePropertyChanged("DataSource");
-            }
-        }
-
-        private void EliminaSelezione()
-        {
-            if (SelectedRow != null)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    int colPrimary = 0;
-                    if (_currentBatch.Applicazione == null)
-                        _currentBatch.LoadModel();
-                    if (_currentBatch.Applicazione.Campi == null || _currentBatch.Applicazione.Campi.Count == 0)
-                        _currentBatch.Applicazione.LoadCampi();
-
-                    foreach (Campo c in _currentBatch.Applicazione.Campi)
-                    {
-                        if (c.IndicePrimario)
-                        {
-                            colPrimary = c.Posizione;
-                            break;
-                        }
-                    }
-
-                    DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
-                    Console.WriteLine("Valore: " + SelectedRow[colPrimary].ToString());
-
-                    string dbCsvFile = Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]);
-                    DBModels.Documento current = db.GetDocumento(SelectedRow[colPrimary].ToString());
-                    db.DeleteRecord(typeof(DBModels.Documento), current.Id);
-                    string fileName = current.Path;
-                    
-                    Business.Csv.DeleteRow(dbCsvFile, SelectedRow[colPrimary].ToString(), colPrimary); // elimina il record dal file db (csv)                  
-                    File.Delete(fileName); // elimina il file pdf originario
-                });
-            
-                TaskLoadGrid();
-                RaisePropertyChanged("DataSource");
-            }
-        }
-
-        private void CheckBatch()
-        {
-            if (_currentBatch == null)
-                return;
-
-            string cacheDbPath = Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"]);
-
-            if (!File.Exists(cacheDbPath))
-            {
-                MessageBox.Show(
-                    "Database cache mancante! Aprire <<Modifica Batch>> e provare a risalvare le impostazioni per creare il database.");
-                return;
-            }
-                
-            Task.Factory.StartNew(() =>
-            {
-                DatabaseHelper dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
-                
-                int rowCount = 0;
-                string cmd = string.Format("SELECT COUNT(*) FROM {0}", "Documento");
-                rowCount = dbc.CountRecords(cmd);
-                int processedRow = 0;
-                string cmd2 = string.Format("SELECT COUNT(*) FROM {0} WHERE isIndicizzato = 1", "Documento");
-                processedRow = dbc.CountRecords(cmd2);
-
-                StatusBarCol1 = String.Format("File Indicizzati ({0} / {1})", processedRow, rowCount);
-                if (processedRow == rowCount && rowCount > 0)
-                    StatusBarCol2 = "Batch Completato!";
-            });
-        }
 
         #region LoadDataIntoGridView
 
@@ -338,21 +358,26 @@ namespace BatchDataEntry.ViewModels
 
         private async Task LoadDataTask()
         {
-            Func<DataView> function = new Func<DataView>(() => LoadDataFromFile(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]), _currentBatch.Applicazione.Campi));
-            DataView res = await Task.Run<DataView>(function);
+            Func<DataView> function =
+                () =>
+                    LoadDataFromFile(
+                        Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]),
+                        _currentBatch.Applicazione.Campi);
+            var res = await Task.Run(function);
             if (res != null)
-                this.DataSource = res;
+                DataSource = res;
             else
-                logger.Warn(string.Format("[SelectedBatchView]Errore nel caricamento dei dati dal file {0} nella tabella", Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"])));
+                logger.Warn("[SelectedBatchView]Errore nel caricamento dei dati dal file {0} nella tabella",
+                    Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
         }
 
         private DataView LoadDataFromFile(string path, ObservableCollection<Campo> campi)
         {
             if (File.Exists(path) && campi != null && campi.Count > 0)
-                return (DataView)Helpers.DataSource.CreateDataSourceFromCsv(path, campi);
-            else
-                return null;
+                return (DataView) Helpers.DataSource.CreateDataSourceFromCsv(path, campi);
+            return null;
         }
+
         #endregion
     }
 }

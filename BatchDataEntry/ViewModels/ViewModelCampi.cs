@@ -1,33 +1,43 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
+using BatchDataEntry.Models;
 using BatchDataEntry.Views;
-using Campo = BatchDataEntry.Models.Campo;
 
 namespace BatchDataEntry.ViewModels
 {
-    class ViewModelCampi : ViewModelBase
+    internal class ViewModelCampi : ViewModelBase
     {
+        private readonly int _idModello;
+
+        private RelayCommand _addnew;
+
+        private ObservableCollection<Campo> _clos;
+
+        private RelayCommand _delitem;
+
+        private Campo _selectedCampo;
+
+        private RelayCommand _update;
+
         public ViewModelCampi()
         {
-            this.Colonne = new ObservableCollection<Campo>();
+            Colonne = new ObservableCollection<Campo>();
         }
 
         public ViewModelCampi(int idModello)
         {
-            DatabaseHelper db = new DatabaseHelper();
-            this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
+            var db = new DatabaseHelper();
+            //this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
             RaisePropertyChanged("Colonne");
-            this._idModello = idModello;
+            _idModello = idModello;
         }
 
         private int _countCols
         {
             get { return Colonne.Count; }
         }
-        private readonly int _idModello;
 
-        private ObservableCollection<Campo> _clos;
         public ObservableCollection<Campo> Colonne
         {
             get { return _clos; }
@@ -41,7 +51,6 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private Campo _selectedCampo;
         public Campo SelectedCampo
         {
             get { return _selectedCampo; }
@@ -55,40 +64,37 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private RelayCommand _addnew;
         public ICommand addNewItemCommand
         {
             get
             {
                 if (_addnew == null)
                 {
-                    _addnew = new RelayCommand(param => this.AddItem());
+                    _addnew = new RelayCommand(param => AddItem());
                 }
                 return _addnew;
             }
         }
 
-        private RelayCommand _delitem;
         public ICommand DelCampoCmd
         {
             get
             {
                 if (_delitem == null)
                 {
-                    _delitem = new RelayCommand(param => this.DelItem(), param => this.CanDel);
+                    _delitem = new RelayCommand(param => DelItem(), param => CanDel);
                 }
                 return _delitem;
             }
         }
 
-        private RelayCommand _update;
         public ICommand updateItemCommand
         {
             get
             {
                 if (_update == null)
                 {
-                    _update = new RelayCommand(param => this.UpdateItem(), param => this.CanDel);
+                    _update = new RelayCommand(param => UpdateItem(), param => CanDel);
                 }
                 return _update;
             }
@@ -96,20 +102,20 @@ namespace BatchDataEntry.ViewModels
 
         private bool CanDel
         {
-            get { return (SelectedCampo == null) ? false : true; }
+            get { return SelectedCampo == null ? false : true; }
         }
 
         private void AddItem()
         {
             var colonna = new NuovaColonna();
-            Campo campo = new Campo();
-            campo.IdModello = this._idModello;
+            var campo = new Campo();
+            campo.IdModello = _idModello;
             colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols);
             var result = colonna.ShowDialog();
             if (result == true)
             {
                 Colonne.Add(campo);
-            }         
+            }
             RaisePropertyChanged("Colonne");
         }
 
@@ -117,10 +123,10 @@ namespace BatchDataEntry.ViewModels
         {
             if (SelectedCampo != null && SelectedCampo.Id >= 0)
             {
-                DatabaseHelper db = new DatabaseHelper();
-                DBModels.Campo tmp = new DBModels.Campo(SelectedCampo);
+                var db = new DatabaseHelper();
+                Campo tmp = new Campo(SelectedCampo);
                 Colonne.Remove(SelectedCampo);
-                db.DeleteRecord(tmp, tmp.Id);
+                //db.DeleteRecord(tmp, tmp.Id);
                 RaisePropertyChanged("Colonne");
             }
         }

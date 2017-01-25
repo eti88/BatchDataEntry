@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
@@ -7,15 +6,26 @@ using BatchDataEntry.Views;
 
 namespace BatchDataEntry.ViewModels
 {
-    class ViewModelApplicazione : ViewModelBase
+    internal class ViewModelApplicazione : ViewModelBase
     {
+        private RelayCommand _addNewModel;
+
+        private RelayCommand _deleteModel;
+
+        private ObservableCollection<Modello> _models;
+
+        private RelayCommand _openCampiView;
+
+        private Modello _selectedModel;
+
+        private RelayCommand _updateModel;
+
         public ViewModelApplicazione()
         {
-            this.Modelli = new ObservableCollection<Modello>();
+            Modelli = new ObservableCollection<Modello>();
             LoadModels();
         }
 
-        private ObservableCollection<Modello> _models;
         public ObservableCollection<Modello> Modelli
         {
             get { return _models; }
@@ -29,7 +39,6 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private Modello _selectedModel;
         public Modello SelectedModel
         {
             get { return _selectedModel; }
@@ -43,83 +52,79 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private RelayCommand _addNewModel;
         public ICommand addNewItemCommand
         {
             get
             {
-                if(_addNewModel == null)
-                    _addNewModel = new RelayCommand(param => this.AddNewModelItem());
+                if (_addNewModel == null)
+                    _addNewModel = new RelayCommand(param => AddNewModelItem());
                 return _addNewModel;
             }
         }
 
-        private RelayCommand _updateModel;
         public ICommand updateItemCommand
         {
             get
             {
                 if (_updateModel == null)
-                    _updateModel = new RelayCommand(param => this.ModifyItem(), param => this.CanModify);
+                    _updateModel = new RelayCommand(param => ModifyItem(), param => CanModify);
                 return _updateModel;
             }
         }
 
-        private RelayCommand _deleteModel;
         public ICommand deleteItemCommand
         {
             get
             {
-                if(_deleteModel == null)
-                    _deleteModel = new RelayCommand(param => this.RemoveModelItem(), param => this.CanModify);
+                if (_deleteModel == null)
+                    _deleteModel = new RelayCommand(param => RemoveModelItem(), param => CanModify);
                 return _deleteModel;
             }
         }
 
-        private RelayCommand _openCampiView;
         public ICommand ButtonColonneCommand
         {
             get
             {
                 if (_openCampiView == null)
-                    _openCampiView = new RelayCommand(param => this.OpenCampiView(), param => this.CanModify);
+                    _openCampiView = new RelayCommand(param => OpenCampiView(), param => CanModify);
                 return _openCampiView;
             }
         }
 
         private bool CanModify
         {
-            get { return (SelectedModel == null) ? false : true; }
+            get { return SelectedModel == null ? false : true; }
         }
 
         public void LoadModels()
         {
-            DatabaseHelper db = new DatabaseHelper();
-            Modelli = db.GetModelloRecords();
+            var db = new DatabaseHelper();
+            //Modelli = db.GetModelloRecords();
             RaisePropertyChanged("Modelli");
         }
 
         private void AddNewModelItem()
         {
-            var nuovoModello = new NuovoModello();       
-            Modello m = new Modello();
+            var nuovoModello = new NuovoModello();
+            var m = new Modello();
             nuovoModello.DataContext = new ViewModelNuovoModello(m, false);
             var res = nuovoModello.ShowDialog();
             if (res == true)
             {
                 Modelli.Add(m);
             }
-            RaisePropertyChanged("Modelli");         
+            RaisePropertyChanged("Modelli");
         }
 
         private void RemoveModelItem()
         {
             if (SelectedModel != null && SelectedModel.Id >= 0)
             {
-                DatabaseHelper db = new DatabaseHelper();
-                DBModels.Modello tmp = new DBModels.Modello(SelectedModel);
+                var db = new DatabaseHelper();
+                Modello tmp = new Modello(SelectedModel);
                 Modelli.Remove(SelectedModel);
-                db.DeleteRecord(tmp, tmp.Id);
+                //db.DeleteRecord(tmp, tmp.Id);
                 RaisePropertyChanged("Modelli");
             }
         }
@@ -139,7 +144,7 @@ namespace BatchDataEntry.ViewModels
                 var campiView = new CampiV();
                 campiView.DataContext = new ViewModelCampi(SelectedModel.Id);
                 campiView.ShowDialog();
-            }          
+            }
         }
     }
 }

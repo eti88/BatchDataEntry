@@ -1,5 +1,4 @@
 ﻿using System;
-using SQLite;
 
 namespace BatchDataEntry.Models
 {
@@ -169,19 +168,6 @@ namespace BatchDataEntry.Models
             this.TipoCampo = _campo.TipoCampo;
             this.IdModello = _campo.IdModello;
             this.MyMemento = new MementoCampo(_campo.Nome, _campo.Posizione, _campo.SalvaValori, _campo.ValorePredefinito, _campo.IndicePrimario);
-        }
-
-        public Campo(DBModels.Campo c)
-        {
-            this.Id = c.Id;
-            this.Nome = c.Nome;
-            this.Posizione = c.Posizione;
-            this.SalvaValori = c.SalvaValori;
-            this.ValorePredefinito = c.ValorePredefinito;
-            this.IndicePrimario = c.IndicePrimario;
-            this.TipoCampo = c.TipoCampo;
-            this.IdModello = c.IdModello;
-            this.MyMemento = new MementoCampo(c.Nome, c.Posizione, c.SalvaValori, c.ValorePredefinito, c.IndicePrimario);
         }
 
         public void Revert()

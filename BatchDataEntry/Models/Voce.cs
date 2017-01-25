@@ -38,11 +38,11 @@ namespace BatchDataEntry.Models
                     if (!string.IsNullOrEmpty(key) && db != null)
                     {
                         var lst = new List<string>();
-                        lst = db.GetAutocompleteList(key);
-                        if (lst != null)
-                            Suggestions = lst;
-                        else
-                            Suggestions = new List<string>();
+                        //lst = db.GetAutocompleteList(key);
+                        //if (lst != null)
+                        //    Suggestions = lst;
+                        //else
+                        //    Suggestions = new List<string>();
                     }
                     else
                         Suggestions = new List<string>();

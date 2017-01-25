@@ -250,7 +250,7 @@ namespace BatchDataEntry.Models
             this.UltimoIndicizzato = ui;
         }
 
-        public Batch(DBModels.Batch b)
+        public Batch(Batch b)
         {
             this.Id = b.Id;
             this.Nome = b.Nome;
@@ -261,7 +261,7 @@ namespace BatchDataEntry.Models
             if (this.IdModello > 0)
             {
                 DatabaseHelper db = new DatabaseHelper();
-                this.Applicazione = db.GetModelloById(b.IdModello);
+                //this.Applicazione = db.GetModelloById(b.IdModello);
             }
 
             this.NumDoc = b.NumDoc;
@@ -277,7 +277,7 @@ namespace BatchDataEntry.Models
             if (this.IdModello > 0)
             {
                 DatabaseHelper db = new DatabaseHelper();
-                this.Applicazione = db.GetModelloById(this.IdModello);
+                //this.Applicazione = db.GetModelloById(this.IdModello);
             }
         }
 

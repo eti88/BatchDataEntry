@@ -2,7 +2,6 @@
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
-using BatchDataEntry.Views;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -76,15 +75,16 @@ namespace BatchDataEntry.ViewModels
         private void AddNewItem()
         {
             DatabaseHelper db = new DatabaseHelper();
-            DBModels.Modello m = new DBModels.Modello(SelectedModel);
+            Modello m = new Modello(SelectedModel);
             int lastId = -1;
 
             if (alreadyExist)
-                db.UpdateRecord(m);
+                Console.WriteLine();
+                //db.UpdateRecord(m);
             else
             {
-                lastId = db.InsertRecord(m);
-                SelectedModel.Id = lastId;
+                //lastId = db.InsertRecord(m);
+                //SelectedModel.Id = lastId;
                 RaisePropertyChanged("SelectedModel");
             }
 

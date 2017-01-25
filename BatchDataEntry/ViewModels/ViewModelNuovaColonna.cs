@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
@@ -22,8 +18,8 @@ namespace BatchDataEntry.ViewModels
             this.alreadyExist = needUpdate;
 
             DatabaseHelper db = new DatabaseHelper();
-            Modello mod = db.GetModelloById(c.IdModello);
-            this.NomeTabella = mod.Nome;
+            //Modello mod = db.GetModelloById(c.IdModello);
+            //this.NomeTabella = mod.Nome;
         }
 
         public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount)
@@ -32,9 +28,9 @@ namespace BatchDataEntry.ViewModels
             this.alreadyExist = needUpdate;
 
             DatabaseHelper db = new DatabaseHelper();
-            Modello mod = db.GetModelloById(c.IdModello);
+            //Modello mod = db.GetModelloById(c.IdModello);
             this.SelectedCampo.Posizione = colCount++;
-            this.NomeTabella = mod.Nome;
+            //this.NomeTabella = mod.Nome;
         }
 
         private bool alreadyExist = false;
@@ -108,15 +104,16 @@ namespace BatchDataEntry.ViewModels
         private void AddNewItem()
         {
             DatabaseHelper db = new DatabaseHelper();
-            DBModels.Campo m = new DBModels.Campo(SelectedCampo);
+            Campo m = new Campo(SelectedCampo);
             int lastId = -1;
 
             if (alreadyExist)
-                db.UpdateRecord(m);
+                Console.WriteLine();
+                //db.UpdateRecord(m);
             else
             {
-                lastId = db.InsertRecord(m);
-                SelectedCampo.Id = lastId;
+                //lastId = db.InsertRecord(m);
+                //SelectedCampo.Id = lastId;
                 RaisePropertyChanged("SelectedCampo");
             }
 

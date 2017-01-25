@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Configuration;
-using BatchDataEntry.DBModels;
 using NLog;
 using Batch = BatchDataEntry.Models.Batch;
 
@@ -33,8 +31,8 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private IEnumerable<DBModels.Modello> _models;
-        public IEnumerable<DBModels.Modello> Models
+        private IEnumerable<Modello> _models;
+        public IEnumerable<Modello> Models
         {
             get { return _models; }
             set
@@ -94,24 +92,24 @@ namespace BatchDataEntry.ViewModels
             if (_alreadyExist)
             {
                 // Il batch è già esistente e quindi si effettua un update              
-                DBModels.Batch batch = new DBModels.Batch(CurrentBatch);
-                db.UpdateRecord(batch);
+                Batch batch = new Batch(CurrentBatch);
+                //db.UpdateRecord(batch);
                 RaisePropertyChanged("Batches");             
             }
             else
             {
-                DBModels.Batch batch = new DBModels.Batch(CurrentBatch);
-                db.InsertRecord(batch);
+                Batch batch = new Batch(CurrentBatch);
+                //db.InsertRecord(batch);
                 RaisePropertyChanged("Batches");
             }
 
             try
             {
-                if (!File.Exists(dbCache.PATHDB))
-                {
-                    dbCache.CreateCacheDb();
-                    fillCacheDb(dbCache, CurrentBatch);
-                }
+                //if (!File.Exists(dbCache.PATHDB))
+                //{
+                //    dbCache.CreateCacheDb();
+                //    fillCacheDb(dbCache, CurrentBatch);
+                //}
                     
                 if (CheckOutputDirFiles(CurrentBatch.DirectoryOutput))
                     CreateMissingFiles(true, CurrentBatch);
@@ -130,8 +128,8 @@ namespace BatchDataEntry.ViewModels
         private void PopulateComboboxModels()
         {
             DatabaseHelper db = new DatabaseHelper();
-            IEnumerable<DBModels.Modello> tmp = db.IEnumerableModelli();      
-            Models = tmp;
+            //IEnumerable<DBModels.Modello> tmp = db.IEnumerableModelli();      
+            //Models = tmp;
             RaisePropertyChanged("Models");
         }
 
@@ -170,12 +168,12 @@ namespace BatchDataEntry.ViewModels
             // adesso per ogni file in files aggiungere un record fileName, path, false
             for (int i = 0; i < files.Count; i++)
             {               
-                Documento doc = new Documento();
+                Document doc = new Document();
                 doc.Id = i + 1;
                 doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
                 doc.Path = files[i];
-                doc.isIndicizzato = false;
-                db.InsertRecord(doc);
+                doc.IsIndexed = false;
+                //db.InsertRecord(doc);
             }
         }
     }
