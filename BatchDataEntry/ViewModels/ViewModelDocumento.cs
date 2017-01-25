@@ -14,6 +14,8 @@ using BatchDataEntry.Components;
 using BatchDataEntry.DBModels;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using CsvHelper;
+using Newtonsoft.Json.Linq;
 using Batch = BatchDataEntry.Models.Batch;
 using Campo = BatchDataEntry.Models.Campo;
 
@@ -43,7 +45,7 @@ namespace BatchDataEntry.ViewModels
             {
                 if (_dc != value)
                     _dc = value;
-                RaisePropertyChanged("DocsFile");
+                RaisePropertyChanged("DocFiles");
             }
         }
         public Batch Batch
@@ -56,21 +58,6 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("Batch");
             }
         }  
-
-        /// <summary>
-        /// Contiene tutti i Records che verranno salvati in un file bin finché non viene generato il file csv dalla schermata precedente
-        /// </summary>
-        private Records _records;
-        public Records Records
-        {
-            get { return _records; }
-            set
-            {
-                if (_records != value)
-                    _records = value;
-                RaisePropertyChanged("Records");
-            }
-        }
 
         private bool CanMoveNext {
             get { return (DocFiles != null && DocFiles.Count > 0 && DocFiles.hasNext); }
@@ -141,14 +128,12 @@ namespace BatchDataEntry.ViewModels
             this.Batch = new Batch();
         }
 
-        public ViewModelDocumento(Batch _currentBatch, Records rec, string indexRowVal)
+        public ViewModelDocumento(Batch _currentBatch, string indexRowVal)
         {        
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
             LoadDocsList();
-            //LoadRecords(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));
-            Records = rec;
             DocFiles.CurrentIndex = getId(indexRowVal);
             DocFile = DocFiles.Current;
             DocFile.AddInputsToPanel(Batch, _db);
@@ -156,7 +141,7 @@ namespace BatchDataEntry.ViewModels
             CheckFile();
         }
 
-        public ViewModelDocumento(Batch _currentBatch, Records rec)
+        public ViewModelDocumento(Batch _currentBatch)
         {
             if (_currentBatch != null)
                 Batch = _currentBatch;
@@ -164,7 +149,6 @@ namespace BatchDataEntry.ViewModels
             if (Batch.Applicazione.Campi == null)
                 Batch.Applicazione.LoadCampi();          
             LoadDocsList();
-            Records = rec;
             DocFiles.CurrentIndex = getId();
             DocFile = DocFiles.Current;
             DocFile.AddInputsToPanel(Batch, _db);
@@ -217,6 +201,55 @@ namespace BatchDataEntry.ViewModels
             return isLocked;
         }
 
+        public void LoadCsvRowIntoVoci(Doc document)
+        {
+            if(document == null || !document.IsIndexed)
+                return;
+
+            Task<string> ret = Task.Run(async () => await GetRow(document.FileName));
+            string r = ret.Result;
+            if(string.IsNullOrEmpty(r))
+                return;
+
+            // 
+
+        }
+
+        private async Task<string> GetRow(string search)
+        {
+            string path = Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]);
+            if(!File.Exists(path))
+                return null;
+
+            int colNum = 0;
+            for (int i = 0; i < Batch.Applicazione.Campi.Count; i++)
+            {
+                if (Batch.Applicazione.Campi[i].IndicePrimario)
+                {
+                    colNum = i;
+                    break;
+                }
+            }
+
+            using (CsvFileReader reader = new CsvFileReader(path))
+            {
+                string currentLine;
+                reader._separator = ';';
+                while ((currentLine = reader.ReadLine()) != null)
+                {
+                    string[] cells = currentLine.Split(';');
+                    Console.WriteLine(cells[colNum].Equals(search));
+                    if (cells[colNum].Equals(search))
+                        return currentLine;
+                }
+            }
+            return "";
+        }
+
+        // Scrivere funzione che carichi il file csv in un array e lo
+        // associ al relativo documento 
+        // 
+
         private async void CheckFile()
         {
             if (Batch != null)
@@ -250,11 +283,7 @@ namespace BatchDataEntry.ViewModels
                 _db.UpdateRecord(DocFile);
                 
                 // controllare se bisogna salvare il valore inserito per l'autocomletamento
-                int id = Records.isRecordAlreadyInserted(DocFile);
-                if (!(id >= 0))
-                    Records.AddRecord(DocFile);
-                else
-                    Records.UpdateRecord(DocFile, id);
+                
 
                 foreach (var col in DocFile.Voci)
                 {
@@ -305,8 +334,7 @@ namespace BatchDataEntry.ViewModels
 
         public void SaveFile()
         {
-            if (Records != null && Records.Rows.Count > 0)
-                Records.Save(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["bin_file_name"]));           
+       
         }
     }
 }

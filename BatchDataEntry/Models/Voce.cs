@@ -127,7 +127,7 @@ namespace BatchDataEntry.Models
 
         public override string ToString()
         {
-            return string.Format("[{0}, {1}, {2}]", this.Id, this.Key, this.Value);
+            return string.Format("[Key: {0}, Value: {1}, AutocompleteList: {2}]", this.Id, this.Key, this.Value);
         }
     }
 }
