@@ -107,8 +107,11 @@ namespace BatchDataEntry.ViewModels
             {
                 if (!File.Exists(Path.Combine(CurrentBatch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"])))
                 {
-                    if(CurrentBatch.Applicazione.Campi == null || CurrentBatch.Applicazione.Campi.Count == 0)
-                        CurrentBatch.Applicazione.LoadCampi();
+                    if (CurrentBatch.Applicazione == null || CurrentBatch.Applicazione.Id == 0)
+                        CurrentBatch.LoadModel();
+
+                    if (CurrentBatch.Applicazione.Campi == null || CurrentBatch.Applicazione.Campi.Count == 0)
+                        CurrentBatch.Applicazione.LoadCampi();    
 
                     List<string> campi = new List<string>();
                     for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)

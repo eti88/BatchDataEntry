@@ -1,7 +1,6 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -18,41 +17,8 @@ namespace BatchDataEntry.ViewModels
     {
         private static DatabaseHelper _db;
         private Batch _batch;
-        private NavigationList<Document> _dc;
+        private NavigationList<Dictionary<int, string>> _dc;
         private Document _doc;
-
-        public ViewModelDocumento()
-        {
-            Batch = new Batch();
-        }
-
-        public ViewModelDocumento(Batch _currentBatch, string indexRowVal)
-        {
-            if (_currentBatch != null)
-                Batch = _currentBatch;
-            _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
-            LoadDocsList();
-            DocFiles.CurrentIndex = getId(indexRowVal);
-            DocFile = DocFiles.Current;
-            DocFile.AddInputsToPanel(Batch, _db);
-            RaisePropertyChanged("DocFile");
-            CheckFile();
-        }
-
-        public ViewModelDocumento(Batch _currentBatch)
-        {
-            if (_currentBatch != null)
-                Batch = _currentBatch;
-            _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
-            if (Batch.Applicazione.Campi == null)
-                Batch.Applicazione.LoadCampi();
-            LoadDocsList();
-            DocFiles.CurrentIndex = getId();
-            DocFile = DocFiles.Current;
-            DocFile.AddInputsToPanel(Batch, _db);
-            RaisePropertyChanged("DocFile");
-            CheckFile();
-        }
 
         public Document DocFile
         {
@@ -65,7 +31,7 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        public NavigationList<Document> DocFiles
+        public NavigationList<Dictionary<int, string>> DocFiles
         {
             get { return _dc; }
             set
@@ -97,23 +63,58 @@ namespace BatchDataEntry.ViewModels
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasPrevious; }
         }
 
+        public ViewModelDocumento()
+        {
+            Batch = new Batch();
+        }
+
+        public ViewModelDocumento(Batch _currentBatch, int indexRowVal)
+        {
+            if (_currentBatch != null)
+                Batch = _currentBatch;
+            _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+            if (Batch.Applicazione == null || Batch.Applicazione.Id == 0)
+                Batch.LoadModel();
+            if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0)
+                Batch.Applicazione.LoadCampi();
+            LoadDocsList();
+            DocFiles.CurrentIndex = indexRowVal;
+            DocFile = new Document(Batch, _db, DocFiles.Current);
+            //DocFile.AddInputsToPanel(Batch, _db);
+            RaisePropertyChanged("DocFile");
+            CheckFile();
+        }
+
+        public ViewModelDocumento(Batch _currentBatch)
+        {
+            if (_currentBatch != null)
+                Batch = _currentBatch;
+            _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+            if (Batch.Applicazione == null || Batch.Applicazione.Id == 0)
+                Batch.LoadModel();
+            if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0)
+                Batch.Applicazione.LoadCampi();
+
+            LoadDocsList();
+            DocFiles.CurrentIndex = GetId();
+            DocFile = new Document(Batch, _db, DocFiles.Current);
+            //DocFile.AddInputsToPanel(Batch, _db);
+            RaisePropertyChanged("DocFile");
+            CheckFile();
+        }
+
+        
+
         private void LoadDocsList()
         {
             var dbCache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
-            //DocFiles = dbCache.GetDocuments();
+            DocFiles = dbCache.GetDocuments();
             RaisePropertyChanged("DocFiles");
         }
 
-        private int getId()
+        private int GetId()
         {
             return Batch.UltimoIndicizzato;
-        }
-
-        private int getId(string idx)
-        {
-            var res = 0;
-            //res = DocFiles.IndexOf(DocFiles.Where(x => x.Id == idx).Single());
-            return res;
         }
 
         private bool IsFileLocked(string filePath, int secondsToWait)
@@ -144,54 +145,6 @@ namespace BatchDataEntry.ViewModels
             return isLocked;
         }
 
-        public void LoadCsvRowIntoVoci(Document document)
-        {
-            if (document == null || !document.IsIndexed)
-                return;
-
-            var ret = Task.Run(async () => await GetRow(document.FileName));
-            var r = ret.Result;
-            if (string.IsNullOrEmpty(r))
-                return;
-
-            // 
-        }
-
-        private async Task<string> GetRow(string search)
-        {
-            var path = Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]);
-            if (!File.Exists(path))
-                return null;
-
-            var colNum = 0;
-            for (var i = 0; i < Batch.Applicazione.Campi.Count; i++)
-            {
-                if (Batch.Applicazione.Campi[i].IndicePrimario)
-                {
-                    colNum = i;
-                    break;
-                }
-            }
-
-            using (var reader = new CsvFileReader(path))
-            {
-                string currentLine;
-                reader._separator = ';';
-                while ((currentLine = reader.ReadLine()) != null)
-                {
-                    var cells = currentLine.Split(';');
-                    Console.WriteLine(cells[colNum].Equals(search));
-                    if (cells[colNum].Equals(search))
-                        return currentLine;
-                }
-            }
-            return "";
-        }
-
-        // Scrivere funzione che carichi il file csv in un array e lo
-        // associ al relativo documento 
-        // 
-
         private async void CheckFile()
         {
             if (Batch != null)
@@ -207,7 +160,7 @@ namespace BatchDataEntry.ViewModels
 
                         var newFilePath = Path.Combine(Batch.DirectoryOutput, fileName + ".pdf");
                         Utility.ConvertTiffToPdf(DocFile.Path, Batch.DirectoryOutput, fileName);
-                        //_db.UpdateRecord(DocFile); // Aggiorna il Path nel cachedb
+                        _db.UpdateRecordDocumento(DocFile); // Aggiorna il Path nel cachedb
                         DocFile.Path = newFilePath;
                         RaisePropertyChanged("DocFile");
                     });
@@ -222,13 +175,9 @@ namespace BatchDataEntry.ViewModels
                     5000))
             {
                 DocFile.IsIndexed = true;
-
-
-                //_db.UpdateRecord(DocFile);
+                _db.UpdateRecordDocumento(DocFile);
 
                 // controllare se bisogna salvare il valore inserito per l'autocomletamento
-
-
                 foreach (var col in DocFile.Voci)
                 {
                     if (col.IsAutocomplete)
@@ -236,12 +185,11 @@ namespace BatchDataEntry.ViewModels
                         var auto = new Autocompletamento();
                         auto.Colonna = col.Id;
                         auto.Valore = col.Value;
-                        //_db.InsertRecord(auto);
+                        _db.InsertRecordAutocompletamento(auto);
                     }
                 }
                 if (!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
                     Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
-                SaveFile();
                 MoveNextItem();
             }
         }
@@ -250,7 +198,7 @@ namespace BatchDataEntry.ViewModels
         {
             if (DocFiles.hasPrevious)
             {
-                DocFile = DocFiles.MovePrevious;
+                DocFile = new Document(Batch, _db, DocFiles.MovePrevious);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, _db);
             }
@@ -262,7 +210,7 @@ namespace BatchDataEntry.ViewModels
         {
             if (DocFiles.hasNext)
             {
-                DocFile = DocFiles.MoveNext;
+                DocFile = new Document(Batch, _db, DocFiles.MoveNext);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, _db);
             }
@@ -272,12 +220,7 @@ namespace BatchDataEntry.ViewModels
 
         public void Interrompi()
         {
-            SaveFile();
             CloseWindow(true);
-        }
-
-        public void SaveFile()
-        {
         }
 
         #region Command

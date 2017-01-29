@@ -22,7 +22,7 @@
         <Border BorderThickness="1" BorderBrush="Black">
             <WebBrowser ns:WebBrowserUtility.BindableSource="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
         </Border>
-        <Grid Grid.Column="1" Margin="10">
+        <Grid Grid.Column="1" Margin="0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -31,7 +31,7 @@
                 <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
             <ScrollViewer>
-                <StackPanel x:Name="dataEntryElements">
+                <StackPanel x:Name="dataEntryElements" Margin="10,0">
                     <ItemsControl ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

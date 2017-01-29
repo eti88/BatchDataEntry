@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using BatchDataEntry.Helpers;
 
 namespace BatchDataEntry.Models
@@ -80,22 +81,34 @@ namespace BatchDataEntry.Models
             this.Voci = new ObservableCollection<Voce>();
         }
 
-        public Document(Dictionary<int, string> dictionary)
+        public Document(Batch b, DatabaseHelper db, Dictionary<int, string> dictionary)
         {
             this.Voci = new ObservableCollection<Voce>();
-            foreach (KeyValuePair<int, string> voice in dictionary)
+
+            if(b.Applicazione.Id == 0)
+                b.Applicazione.LoadCampi();
+            if(b.Applicazione.Campi.Count == 0)
+                b.Applicazione.LoadCampi();
+            int h = 0;
+            for (int i = 0; i < dictionary.Count; i++)
             {
-                if(voice.Key > 3)
-                    this.Voci.Add(new Voce(voice.Key, voice.Value));
-                else if (voice.Key == 0)
-                    this.Id = Convert.ToInt32(voice.Value);
-                else if(voice.Key == 1)
-                    this.FileName = voice.Value;
-                else if (voice.Key == 2)
-                    this.Path = voice.Value;
-                else if (voice.Key == 3)
-                    this.IsIndexed = Convert.ToBoolean(voice.Value);
-     
+                KeyValuePair<int, string> row = dictionary.ElementAt(i);
+                if (i == 0)
+                    this.Id = Convert.ToInt32(row.Value);
+                if(i == 1)
+                    this.FileName = row.Value;
+                if(i == 2)
+                    this.Path = row.Value;
+                if (i == 3)
+                    this.IsIndexed = GetBool(row.Value);
+                if (i > 3)
+                {         
+                    if(!string.IsNullOrEmpty(row.Value))
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value));
+                    else
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome));
+                    h++;
+                }       
             }
         }
 
@@ -128,6 +141,11 @@ namespace BatchDataEntry.Models
                     voci.Add(new Voce(campo.Posizione, campo.Nome));
             }
             this.Voci = voci;
+        }
+
+        private bool GetBool(string val)
+        {
+            return (val == "1") ? true : false;
         }
     }
 }

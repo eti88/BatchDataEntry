@@ -25,7 +25,7 @@
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
 
-        <DataGrid x:Name="dataGridRecords" Grid.Column="0" Margin="10" ColumnHeaderHeight="35" ItemsSource="{Binding Path=DataSource, IsAsync=True, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" CanUserDeleteRows="True" SelectedItem="{Binding Path=SelectedRow, Mode=OneWayToSource}"/>
+        <DataGrid x:Name="dataGridRecords" Grid.Column="0" Margin="10" ColumnHeaderHeight="29" ItemsSource="{Binding Path=DataSource, IsAsync=True, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" CanUserDeleteRows="True" SelectedIndex="{Binding Path=SelectedRowIndex, Mode=OneWayToSource}"/>
 
         <Grid Grid.Column="1">
             <Grid.ColumnDefinitions>
@@ -36,7 +36,9 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="70"/>
             </Grid.RowDefinitions>
-
+            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0">
+                <Button Content="Genera CSV" Width="90" Height="30" VerticalAlignment="Center" Command="{Binding Path=GeneraCsvCmd}"></Button>
+            </StackPanel>
             <StackPanel Grid.Row="1">
                 <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="{Binding Path=NumeroDocumenti, StringFormat='Numero documenti:    {0}'}" Margin="5"/>
                 <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="{Binding Path=Dimensioni,StringFormat='Dimensione:    {0} MB'}" Margin="5"/>
@@ -63,11 +65,11 @@
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem>
-                <TextBlock Name="sbTypeText" FontSize="11" LineHeight="25" Text="{Binding Path=StatusBarCol1}"/>
+                <TextBlock Name="sbTypeText" FontSize="11" LineHeight="20" Text="{Binding Path=StatusBarCol1}" Padding="0,0,0,2"/>
             </StatusBarItem>
             <Separator Grid.Column="1"/>
             <StatusBarItem Grid.Column="2">
-                <TextBlock FontSize="11" LineHeight="25" Text="{Binding Path=StatusBarCol2}" />
+                <TextBlock FontSize="11" LineHeight="20" Text="{Binding Path=StatusBarCol2}" Padding="0,0,0,2"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

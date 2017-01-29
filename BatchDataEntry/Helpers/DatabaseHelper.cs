@@ -77,6 +77,32 @@ namespace BatchDataEntry.Helpers
             return dt;
         }
 
+        public DataTable GetDataTableDocumenti()
+        {
+            DataTable dt = new DataTable();
+
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            try
+            {
+                string cmd = String.Format("SELECT * FROM {0}", "Documenti");
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(cnn);
+                myCmd.CommandText = cmd;
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                dt.Load(reader);
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return dt;
+        }
+
         public DataTable GetDataTableWithQuery(string sqlcmd)
         {
             DataTable dt = new DataTable();
@@ -284,7 +310,7 @@ namespace BatchDataEntry.Helpers
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", b.Id.ToString());
             values.Add("Nome", b.Nome);
-            values.Add("TipoFile", b.TipoFile.ToString());
+            values.Add("TipoFile", string.Format("{0}", (int)b.TipoFile));
             values.Add("DirectoryInput", b.DirectoryInput);
             values.Add("DirectoryOutput", b.DirectoryOutput);
             values.Add("IdModello", b.IdModello.ToString());
@@ -362,7 +388,7 @@ namespace BatchDataEntry.Helpers
                 values.Add(col.Key, col.Value);
             }
          
-            bool r = Insert("Autocompletamento", values);
+            bool r = Insert("Documenti", values);
             if (r)
                 return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
 
@@ -374,7 +400,7 @@ namespace BatchDataEntry.Helpers
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", b.Id.ToString());
             values.Add("Nome", b.Nome);
-            values.Add("TipoFile", b.TipoFile.ToString());
+            values.Add("TipoFile", string.Format("{0}", (int)b.TipoFile));
             values.Add("DirectoryInput", b.DirectoryInput);
             values.Add("DirectoryOutput", b.DirectoryOutput);
             values.Add("IdModello", b.IdModello.ToString());
@@ -436,7 +462,7 @@ namespace BatchDataEntry.Helpers
                 values.Add(col.Key, col.Value);
             }
 
-            Update("Autocompletamento", values, string.Format("Id={0}", d.Id));
+            Update("Documenti", values, string.Format("Id={0}", d.Id));
         }
 
         /// <summary>
@@ -556,12 +582,12 @@ namespace BatchDataEntry.Helpers
         /// </summary>
         /// <param name="columns">Lista dei nomi delle colonne</param>
         /// <returns></returns>
-        public bool CreateTableDocumento(List<string> columns)
+        public bool CreateTableDocumenti(List<string> columns)
         {
             // Nel caso si voglia aggiungere il supporto per più tipi di file va modificato in dictionary il parametro columns
             // per passare anche il tipo di campo (adesso si assume che sia sempre string)
             StringBuilder sqlCmd = new StringBuilder();
-            sqlCmd.Append(@"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY,FileName VARCHAR(254),Path TEXT,isIndicizzato INTEGER");
+            sqlCmd.Append(@"CREATE TABLE IF NOT EXISTS Documenti (Id INTEGER PRIMARY KEY,FileName VARCHAR(254),Path TEXT,isIndicizzato INTEGER");
 
             if (columns.Count > 0)
             {
@@ -592,7 +618,7 @@ namespace BatchDataEntry.Helpers
 
         public bool CreateTableAutocompletamento()
         {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY," +
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Autocompletamento (Id INTEGER PRIMARY KEY," +
                             "Colonna INTEGER, Valore VARCHAR(254))";                          
             try
             {
@@ -634,7 +660,7 @@ namespace BatchDataEntry.Helpers
             Console.WriteLine(@"Create cache database...");
             #endif
             CreateTableAutocompletamento();
-            CreateTableDocumento(columns);
+            CreateTableDocumenti(columns);
             #if DEBUG
             Console.WriteLine(@"Cache db creato....");
             #endif
@@ -748,16 +774,10 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        /// <summary>
-        /// Restituisce un Documento sotto forma di Dizionario in quanto il numero di colonne varia
-        /// da database a database.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public Dictionary<int, string> GetDocumento(string name)
+        public Dictionary<int, string> GetDocumento(int id)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT * FROM Documento WHERE FileName = {0}", name);
+            string sql = string.Format("SELECT * FROM Documenti WHERE Id = {0}", id);
             try
             {
                 cnn.Open();
@@ -777,9 +797,57 @@ namespace BatchDataEntry.Helpers
                     doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
                     i++;
 
-                    for (int z=i; i < reader.FieldCount; z++)
+                    for (int z = i; z < reader.FieldCount; z++)
                     {
-                        doc.Add(i, Convert.ToString(reader[z]));
+                        doc.Add(z, Convert.ToString(reader[z]));
+                    }
+                }
+                reader.Close();
+                return doc;
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Restituisce un Documento sotto forma di Dizionario in quanto il numero di colonne varia
+        /// da database a database.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Dictionary<int, string> GetDocumento(string name)
+        {
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = string.Format("SELECT * FROM Documenti WHERE FileName = {0}", name);
+            try
+            {
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                Dictionary<int, string> doc = new Dictionary<int, string>();
+
+                while (reader.Read())
+                {
+                    int i = 0;
+                    doc.Add(i, Convert.ToString(reader["Id"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["FileName"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["Path"]));
+                    i++;
+                    doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
+                    i++;
+
+                    for (int z=i; z < reader.FieldCount; z++)
+                    {
+                        doc.Add(z, Convert.ToString(reader[z]));
                         
                     }  
                 }
@@ -801,7 +869,7 @@ namespace BatchDataEntry.Helpers
         {
             NavigationList<Dictionary<int, string>> ret = new NavigationList<Dictionary<int, string>>();
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = "SELECT * FROM Documento";
+            string sql = "SELECT * FROM Documenti";
             try
             {
                 cnn.Open();
@@ -821,9 +889,9 @@ namespace BatchDataEntry.Helpers
                     doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
                     i++;
 
-                    for (int z = i; i < reader.FieldCount; z++)
+                    for (int z = i; z < reader.FieldCount; z++)
                     {
-                        doc.Add(i, Convert.ToString(reader[z]));
+                        doc.Add(z, Convert.ToString(reader[z]));
 
                     }
                     ret.Add(doc);

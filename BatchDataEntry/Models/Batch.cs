@@ -277,7 +277,7 @@ namespace BatchDataEntry.Models
             if (this.IdModello > 0)
             {
                 DatabaseHelper db = new DatabaseHelper();
-                //this.Applicazione = db.GetModelloById(this.IdModello);
+                this.Applicazione = db.GetModelloById(this.IdModello);
             }
         }
 
