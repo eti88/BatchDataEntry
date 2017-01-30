@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using BatchDataEntry.Models;
-using NLog;
-using PdfSharp;
-using PdfSharp.Drawing;
-using PdfSharp.Pdf;
 
 namespace BatchDataEntry.Business
 {
@@ -93,54 +86,6 @@ namespace BatchDataEntry.Business
         public static void DeletePdf(string pathFile)
         {
             File.Delete(pathFile);
-        }
-
-        public static string ConvertTiffToPdf(string source_dir, string output_dir, string newFileName)
-        {
-            string destination = Path.Combine(output_dir, newFileName);
-            string[] files = Directory.GetFiles(source_dir, "*.tiff");
-            Logger logger = LogManager.GetCurrentClassLogger();
-
-            try
-            {
-                Image[] tiffs = new Image[files.Length];
-                for (int i = 0; i < files.Length; i++)
-                {
-                    tiffs[i] = Image.FromFile(files[i]);
-                }
-
-                PdfDocument doc = new PdfDocument();
-                for (int index = 0; index < tiffs.Length; index++)
-                {
-                    PdfPage page = new PdfPage();
-                    XImage img = XImage.FromGdiPlusImage(tiffs[index]);
-
-                    if (img.PointWidth > img.PointHeight)
-                    {
-                        page.Orientation = PageOrientation.Landscape;
-                    }
-                    else
-                    {
-                        page.Orientation = PageOrientation.Portrait;
-                    }
-
-                    page.Width = img.PointWidth;
-                    page.Height = img.PointHeight;
-                    doc.Pages.Add(page);
-                    XGraphics xgr = XGraphics.FromPdfPage(doc.Pages[index]);
-                }
-                doc.Save(destination);
-                doc.Close();
-                #if DEBUG
-                Console.WriteLine("Generato pdf: " + destination);
-                #endif
-                return destination;
-            }
-            catch (Exception e)
-            {
-                logger.Error(string.Format("[{0}] {1}", destination, e.ToString()));
-                return null;
-            }
         }
 
         public static bool ContainsOnlyNumbers(string text)

@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Views;
+using iTextSharp.text.pdf;
 using NLog;
+using Document = BatchDataEntry.Models.Document;
+using MessageBox = System.Windows.MessageBox;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -24,6 +25,34 @@ namespace BatchDataEntry.ViewModels
         #region Members
 
         private Batch _currentBatch { get; }
+
+        private int _MaxProgressBarValue;
+        public int MaxProgressBarValue
+        {
+            get { return _MaxProgressBarValue; }
+            set
+            {
+                if (_MaxProgressBarValue != value)
+                {
+                    _MaxProgressBarValue = value;
+                    RaisePropertyChanged("MaxProgressBarValue");
+                }
+            }
+        }
+
+        private int _ValueProgressBar;
+        public int ValueProgressBar
+        {
+            get { return _ValueProgressBar; }
+            set
+            {
+                if (_ValueProgressBar != value)
+                {
+                    _ValueProgressBar = value;
+                    RaisePropertyChanged("ValueProgressBar");
+                }
+            }
+        }
 
         private DataTable _dtSource;
         public DataTable DataSource
@@ -127,7 +156,7 @@ namespace BatchDataEntry.ViewModels
         {
             get
             {
-                if (SelectedRowIndex == null || SelectedRowIndex <= 0)
+                if (SelectedRowIndex <= 0)
                     return false;           
                 return true;
             }
@@ -221,7 +250,7 @@ namespace BatchDataEntry.ViewModels
 
         private void ContinuaDaSelezione()
         {
-            if (SelectedRowIndex != null && SelectedRowIndex > 0 && _currentBatch != null)
+            if (SelectedRowIndex > 0 && _currentBatch != null)
             {
                 var continua = new Documento();
                 var indexFile = SelectedRowIndex;
@@ -254,7 +283,7 @@ namespace BatchDataEntry.ViewModels
 
         private void EliminaSelezione()
         {
-            if (SelectedRowIndex != null && SelectedRowIndex > 0)
+            if (SelectedRowIndex > 0)
             {
                 Task.Factory.StartNew(() =>
                 {
@@ -270,7 +299,7 @@ namespace BatchDataEntry.ViewModels
                     Console.WriteLine("SelectedRowIndex: " + SelectedRowIndex);
                     #endif
 
-                    Document current = new Document(_currentBatch, db, db.GetDocumento(SelectedRowIndex));
+                    Document current = new Document(_currentBatch, db.GetDocumento(SelectedRowIndex));
                     db.Delete("Documenti", string.Format("Id= {0}", current.Id));
 
                     try
@@ -299,7 +328,7 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private void CheckBatch()
+        private async void CheckBatch()
         {
             if (_currentBatch == null)
                 return;
@@ -313,8 +342,8 @@ namespace BatchDataEntry.ViewModels
                     "Database cache mancante! Aprire <<Modifica Batch>> e provare a risalvare le impostazioni per creare il database.");
                 return;
             }
-
-            Task.Factory.StartNew(() =>
+            ConvertTiffRecord(_currentBatch).Wait();
+            await Task.Factory.StartNew(() =>
             {
                 var dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
                     _currentBatch.DirectoryOutput);
@@ -323,13 +352,15 @@ namespace BatchDataEntry.ViewModels
                 var cmd = string.Format("SELECT COUNT(*) FROM {0}", "Documenti");
                 rowCount = dbc.Count(cmd);
                 var processedRow = 0;
-                var cmd2 = string.Format("SELECT COUNT(*) FROM {0} WHERE isIndicizzato=1", "Documenti");
+                var cmd2 = $"SELECT COUNT(*) FROM {"Documenti"} WHERE isIndicizzato=1";
                 processedRow = dbc.Count(cmd2);
 
-                StatusBarCol1 = string.Format("File Indicizzati ({0} / {1})", processedRow, rowCount);
+                StatusBarCol1 = $"File Indicizzati ({processedRow} / {rowCount})";
                 if (processedRow == rowCount && rowCount > 0)
                     StatusBarCol2 = "Batch Completato!";
             });
+            LoadGrid();
+            RaisePropertyChanged("DataSource");
         }
 
         #region Constructors
@@ -341,16 +372,21 @@ namespace BatchDataEntry.ViewModels
         public ViewModelBatchSelected(Batch batch)
         {
             _currentBatch = batch;
+
             var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
-            LoadGrid();
             Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
+            LoadGrid();           
             NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
             _currentBatch.Applicazione.LoadCampi();
+            //TODO: perché non carica il numero docs e ultimo indicizzato?
+            
+            ValueProgressBar = 100;
+            ValueProgressBar = 0;
         }
 
         #endregion
 
-        public async void GenerateCsv()
+        public void GenerateCsv()
         {
             if (DataSource.Rows.Count == 0)
                 return;
@@ -359,49 +395,95 @@ namespace BatchDataEntry.ViewModels
             {
                 File.Create(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
             }
-
-            DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
-
-            DataTable tmpDt = db.GetDataTableDocumenti();
-            List<string> tmpRecords = new List<string>();
-            int colNum = tmpDt.Columns.Count;
-
-            //TODO: da modificare
-            /* Attualmente genera il file csv con tutte le colonne della tabella
-             * invece bisogna creare una view che permette di selezionare le colonne dalla dt
-             * da usare per la generazione
-             */
-
-            await Task.Factory.StartNew(() =>
+            
+            var export = new Views.Export();          
+            export.DataContext = new ViewModelExport(DataSource, Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
+            bool dr = (bool)export.ShowDialog();
+            if (dr)
             {
-                try
-                {
-                    for (int i = 0; i < tmpDt.Rows.Count; i++)
-                    {
-                        StringBuilder record = new StringBuilder();
-                        for (int z = 0; z < colNum; z++)
-                        {
-                            record.Append(tmpDt.Rows[i][z]);
-                            if (z != colNum - 1)
-                                record.Append(';');
-                        }
-                        tmpRecords.Add(record.ToString());
-                    }
-                    Csv.AddRows(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]), tmpRecords);
-                    StatusBarCol1 = String.Format("Generazione del file Csv completato!");
-                }
-                catch (Exception e)
-                {
-                    logger.Error(e);
-                    StatusBarCol1 = String.Format("Generazione del file Csv Fallita! Controlla il file di log");
-                }
-            });
+                StatusBarCol1 = String.Format("Generazione del file Csv completato!");
+            }
+            else
+            {
+                StatusBarCol1 = String.Format("Generazione del file Csv Fallita! Controlla il file di log");
+            }
         }
 
         private void LoadGrid()
         {
             DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
             DataSource = db.GetDataTableDocumenti();
+        }
+        
+        private async Task ConvertTiffRecord(Batch b)
+        {
+            if (b.TipoFile != TipoFileProcessato.Tiff)
+                return;
+
+            if (b.Applicazione == null || b.Applicazione.Id == 0)
+                b.LoadModel();
+            if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
+                b.Applicazione.LoadCampi();
+
+            var db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], b.DirectoryOutput);
+            var docs = db.GetDocuments();
+            MaxProgressBarValue = docs.Count;
+            ValueProgressBar = 0;
+
+            foreach (var doc in docs)
+            {
+                Document dc = new Document(_currentBatch, doc);
+                string new_path = String.Empty;
+                var fileName = Path.GetFileName(dc.Path);
+                if (!Utility.ContainsOnlyNumbers(fileName))
+                    fileName = Regex.Replace(fileName, "[A-Za-z]", "");
+
+                new_path = Path.Combine(b.DirectoryOutput, fileName + ".pdf");
+                await Task.Factory.StartNew(() =>
+                {
+                    ConvertTiffToPdf(dc.Path, new_path);
+                });
+                
+                dc.Path = new_path;
+                db.UpdateRecordDocumento(dc);
+                ValueProgressBar++;
+            }
+            MessageBox.Show("Conversione Tiff Terminata");
+        }
+
+        public void ConvertTiffToPdf(string source_dir, string path_output_file)
+        {
+            List<string> files = Directory.GetFiles(source_dir, "*.*").Where(s => s.ToLower().EndsWith(".tif") || s.ToLower().EndsWith(".tiff")).ToList();
+            Logger logger = LogManager.GetCurrentClassLogger();
+
+            try
+            {
+                iTextSharp.text.Document document = new iTextSharp.text.Document();
+                using (PdfWriter pdfwriter = PdfWriter.GetInstance(document, new FileStream(path_output_file, FileMode.Create)))
+                {
+                    document.Open();
+                    document.SetMargins(0, 0, 0, 0);
+
+                    foreach (var file in files)
+                    {
+                        iTextSharp.text.Image tiff = iTextSharp.text.Image.GetInstance(file);
+                        
+                        iTextSharp.text.Rectangle pageSize = new iTextSharp.text.Rectangle(tiff.Width, tiff.Height);
+                        document.SetPageSize(pageSize);
+                        document.NewPage();
+
+                        PdfContentByte cb = pdfwriter.DirectContent;
+                        tiff.SetAbsolutePosition(0, 0);
+                        cb.AddImage(tiff);
+                    }
+                    document.Close();
+                }
+                
+            }
+            catch (Exception e)
+            {
+                logger.Error(string.Format("[{0}] {1}", path_output_file, e.ToString()));
+            }
         }
     }
 }

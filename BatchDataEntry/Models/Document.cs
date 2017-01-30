@@ -81,7 +81,7 @@ namespace BatchDataEntry.Models
             this.Voci = new ObservableCollection<Voce>();
         }
 
-        public Document(Batch b, DatabaseHelper db, Dictionary<int, string> dictionary)
+        public Document(Batch b, Dictionary<int, string> dictionary)
         {
             this.Voci = new ObservableCollection<Voce>();
 

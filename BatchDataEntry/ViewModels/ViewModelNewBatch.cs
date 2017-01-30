@@ -6,6 +6,7 @@ using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Configuration;
+using BatchDataEntry.Business;
 using NLog;
 using Batch = BatchDataEntry.Models.Batch;
 
@@ -61,7 +62,7 @@ namespace BatchDataEntry.ViewModels
         {
             get
             {
-                if (!string.IsNullOrEmpty(CurrentBatch.Nome) && CurrentBatch.TipoFile != null &&
+                if (!string.IsNullOrEmpty(CurrentBatch.Nome) &&
                     !string.IsNullOrEmpty(CurrentBatch.DirectoryInput) &&
                     !string.IsNullOrEmpty(CurrentBatch.DirectoryOutput))
                     return true;
@@ -164,6 +165,12 @@ namespace BatchDataEntry.ViewModels
 
         private void fillCacheDb(DatabaseHelper db, Batch b)
         {
+            List<string> sourceCsv = new List<string>();
+            if (b.Applicazione.OrigineCsv)
+            {
+                sourceCsv = Csv.ReadRows(b.Applicazione.PathFileCsv);
+            }
+
             List<string> files = new List<string>();
             if (b.TipoFile == TipoFileProcessato.Pdf)
             {
@@ -185,6 +192,15 @@ namespace BatchDataEntry.ViewModels
                 doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
                 doc.Path = files[i];
                 doc.IsIndexed = false;
+
+                if (b.Applicazione.OrigineCsv)
+                {
+                    string[] cells = sourceCsv.ElementAt(i).Split(b.Applicazione.Separatore[0]);
+                    for (int z = 0; z < b.Applicazione.Campi.Count; z++)
+                    {
+                        doc.Voci.Add(new Voce(z, cells[z]));
+                    }               
+                }
                 db.InsertRecordDocumento(doc);
             }
         }

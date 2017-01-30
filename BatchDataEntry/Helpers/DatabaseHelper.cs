@@ -459,7 +459,10 @@ namespace BatchDataEntry.Helpers
 
             foreach (Voce col in d.Voci)
             {
-                values.Add(col.Key, col.Value);
+                if(string.IsNullOrEmpty(col.Value))
+                    values.Add(col.Key, string.Empty);
+                else
+                    values.Add(col.Key, col.Value);
             }
 
             Update("Documenti", values, string.Format("Id={0}", d.Id));
