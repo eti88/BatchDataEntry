@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
@@ -24,6 +26,13 @@ namespace BatchDataEntry
             
         }
 
-        
+
+        private void ButtonLog_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "logFile.log")))
+            {
+                Process.Start(Path.Combine(Directory.GetCurrentDirectory(), "logFile.log"));
+            }
+        }
     }
 }

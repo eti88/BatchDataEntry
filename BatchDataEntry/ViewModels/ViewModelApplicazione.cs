@@ -95,7 +95,7 @@ namespace BatchDataEntry.ViewModels
 
         private bool CanModify
         {
-            get { return SelectedModel == null ? false : true; }
+            get { return SelectedModel != null; }
         }
 
         public void LoadModels()

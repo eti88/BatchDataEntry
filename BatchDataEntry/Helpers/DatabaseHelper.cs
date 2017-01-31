@@ -243,6 +243,10 @@ namespace BatchDataEntry.Helpers
             }
             try
             {
+                #if DEBUG
+                Console.WriteLine(String.Format("SQL: update {0} set {1} where {2};", tableName, vals, where));
+                #endif
+
                 this.ExecuteNonQuery(String.Format("update {0} set {1} where {2};", tableName, vals, where));
             }
             catch (Exception e)
@@ -295,6 +299,10 @@ namespace BatchDataEntry.Helpers
             values = values.Substring(0, values.Length - 1);
             try
             {
+                #if DEBUG
+                Console.WriteLine(String.Format("SQL: insert into {0}({1}) values({2});", tableName, columns, values));
+                #endif
+
                 this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));             
             }
             catch (Exception e)
@@ -329,12 +337,14 @@ namespace BatchDataEntry.Helpers
         public int InsertRecordCampo(Campo c)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Id", c.Id.ToString());
+            //values.Add("Id", c.Id.ToString());
             values.Add("Nome", c.Nome);
             values.Add("Posizione", c.Posizione.ToString());
-            values.Add("SalvaValori", c.SalvaValori.ToString());
+            int tmp1 = Convert.ToInt32(c.SalvaValori);
+            values.Add("SalvaValori", tmp1.ToString());
             values.Add("ValorePredefinito", c.ValorePredefinito);
-            values.Add("IndicePrimario", c.IndicePrimario.ToString());
+            int tmp2 = Convert.ToInt32(c.IndicePrimario);
+            values.Add("IndicePrimario", tmp2.ToString());
             values.Add("TipoCampo", c.TipoCampo.ToString());
             values.Add("IdModello", c.IdModello.ToString());
 
@@ -364,7 +374,10 @@ namespace BatchDataEntry.Helpers
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", m.Id.ToString());
             values.Add("Nome", m.Nome);
-            values.Add("OrigineCsv", m.OrigineCsv.ToString());
+
+            int getBool = Convert.ToInt32(m.OrigineCsv);
+
+            values.Add("OrigineCsv", getBool.ToString());
             values.Add("PathFileCsv", m.PathFileCsv);
             values.Add("Separatore", m.Separatore);
            
@@ -375,17 +388,26 @@ namespace BatchDataEntry.Helpers
             return -1;
         }
 
-        public int InsertRecordDocumento(Document d)
+        public int InsertRecordDocumento(Batch b, Document d)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", d.Id.ToString());
             values.Add("FileName", d.FileName);
             values.Add("Path", d.Path);
-            values.Add("isIndicizzato", d.IsIndexed.ToString());
+            int tmp = Convert.ToInt32(d.IsIndexed);
+            values.Add("isIndicizzato", tmp.ToString());
+
+            for (int i = 0; i < d.Voci.Count; i++)
+            {
+                if (string.IsNullOrEmpty(d.Voci[i].Value))
+                    values.Add(d.Voci[i].Key, string.Empty);
+                else
+                    values.Add(b.Applicazione.Campi.ElementAt(i).Nome, d.Voci[i].Value);
+            }
 
             foreach (Voce col in d.Voci)
             {
-                values.Add(col.Key, col.Value);
+                
             }
          
             bool r = Insert("Documenti", values);
@@ -418,9 +440,11 @@ namespace BatchDataEntry.Helpers
             values.Add("Id", c.Id.ToString());
             values.Add("Nome", c.Nome);
             values.Add("Posizione", c.Posizione.ToString());
-            values.Add("SalvaValori", c.SalvaValori.ToString());
+            int tmp1 = Convert.ToInt32(c.SalvaValori);
+            values.Add("SalvaValori", tmp1.ToString());
             values.Add("ValorePredefinito", c.ValorePredefinito);
-            values.Add("IndicePrimario", c.IndicePrimario.ToString());
+            int tmp2 = Convert.ToInt32(c.IndicePrimario);
+            values.Add("IndicePrimario", tmp2.ToString());
             values.Add("TipoCampo", c.TipoCampo.ToString());
             values.Add("IdModello", c.IdModello.ToString());
 
@@ -442,7 +466,8 @@ namespace BatchDataEntry.Helpers
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", m.Id.ToString());
             values.Add("Nome", m.Nome);
-            values.Add("OrigineCsv", m.OrigineCsv.ToString());
+            int getBool = Convert.ToInt32(m.OrigineCsv);
+            values.Add("OrigineCsv", getBool.ToString());
             values.Add("PathFileCsv", m.PathFileCsv);
             values.Add("Separatore", m.Separatore);
 

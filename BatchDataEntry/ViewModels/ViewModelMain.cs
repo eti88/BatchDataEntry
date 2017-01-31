@@ -176,6 +176,7 @@ namespace BatchDataEntry.ViewModels
         private void ModelAddItem()
         {
             var Models = new Applicazione();
+            Models.DataContext = new ViewModelApplicazione();
             Models.ShowDialog();
         }
 

@@ -6,6 +6,7 @@ using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Configuration;
+using System.Windows;
 using BatchDataEntry.Business;
 using NLog;
 using Batch = BatchDataEntry.Models.Batch;
@@ -198,11 +199,14 @@ namespace BatchDataEntry.ViewModels
                     string[] cells = sourceCsv.ElementAt(i).Split(b.Applicazione.Separatore[0]);
                     for (int z = 0; z < b.Applicazione.Campi.Count; z++)
                     {
-                        doc.Voci.Add(new Voce(z, cells[z]));
+                        string colName = b.Applicazione.Campi.ElementAt(z).Nome;
+                        string celValue = (!string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
+                        doc.Voci.Add(new Voce(colName, celValue));
                     }               
                 }
-                db.InsertRecordDocumento(doc);
+                db.InsertRecordDocumento(b, doc);
             }
+            MessageBox.Show(@"Generazione File Temporanei Terminata");
         }
     }
 }

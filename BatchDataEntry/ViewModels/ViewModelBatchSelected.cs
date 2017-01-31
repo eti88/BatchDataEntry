@@ -162,6 +162,11 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private bool CanConvertTiff
+        {
+            get { return (_currentBatch.TipoFile == TipoFileProcessato.Tiff) ? true : false; }
+        }
+
         private int _selectedRowIndex;
         public int SelectedRowIndex
         {
@@ -244,7 +249,19 @@ namespace BatchDataEntry.ViewModels
                 return _genCmd;
             }
         }
-        
+
+        private RelayCommand _genTiffCmd;
+        public ICommand GeneraTiffCmd
+        {
+            get
+            {
+                if (_genTiffCmd == null)
+                {
+                    _genTiffCmd = new RelayCommand(param => GeneratePdf(), param => CanConvertTiff);
+                }
+                return _genTiffCmd;
+            }
+        }
 
         #endregion
 
@@ -342,26 +359,52 @@ namespace BatchDataEntry.ViewModels
                     "Database cache mancante! Aprire <<Modifica Batch>> e provare a risalvare le impostazioni per creare il database.");
                 return;
             }
-            ConvertTiffRecord(_currentBatch).Wait();
+            
             await Task.Factory.StartNew(() =>
             {
                 var dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
                     _currentBatch.DirectoryOutput);
+                try
+                {
+                    var rowCount = 0;
+                    var cmd = string.Format("SELECT COUNT(*) FROM {0}", "Documenti");
+                    rowCount = dbc.Count(cmd);
+                    var processedRow = 0;
+                    var cmd2 = $"SELECT COUNT(*) FROM {"Documenti"} WHERE isIndicizzato=1";
+                    processedRow = dbc.Count(cmd2);
 
-                var rowCount = 0;
-                var cmd = string.Format("SELECT COUNT(*) FROM {0}", "Documenti");
-                rowCount = dbc.Count(cmd);
-                var processedRow = 0;
-                var cmd2 = $"SELECT COUNT(*) FROM {"Documenti"} WHERE isIndicizzato=1";
-                processedRow = dbc.Count(cmd2);
+                    StatusBarCol1 = $"File Indicizzati ({processedRow} / {rowCount})";
+                    if (processedRow == rowCount && rowCount > 0)
+                        StatusBarCol2 = "Batch Completato!";
+                }
+                catch (Exception e)
+                {
+                    logger.Error("[ERROR_CHECK]" + e.ToString());                
+                }
 
-                StatusBarCol1 = $"File Indicizzati ({processedRow} / {rowCount})";
-                if (processedRow == rowCount && rowCount > 0)
-                    StatusBarCol2 = "Batch Completato!";
             });
             LoadGrid();
             RaisePropertyChanged("DataSource");
         }
+
+        private async void GeneratePdf()
+        {
+            await Task.Factory.StartNew(async () =>
+            {
+                try
+                {
+                    await ConvertTiffRecord(_currentBatch);
+                    LoadGrid();
+                    RaisePropertyChanged("DataSource");
+                }
+                catch (Exception e)
+                {
+                    logger.Error("[ERROR_CONVERSION]" + e.ToString());
+                }    
+            });
+            
+        }
+
 
         #region Constructors
 
