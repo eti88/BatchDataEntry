@@ -28,7 +28,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -208,6 +208,8 @@
     <Compile Include="Models\ExportColumn.cs" />
     <Compile Include="Models\TipoFileProcessato.cs" />
     <Compile Include="Models\Voce.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="Validators\ColumnValidator.cs" />
     <Compile Include="Validators\NameValidator.cs" />
     <Compile Include="Validators\NumValidator.cs" />
     <Compile Include="Validators\PathValidator.cs" />
@@ -313,14 +315,14 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Content Include="database.db3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Img\undo-5.png" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="BatchDataEntry_ChiaveTemporanea.pfx" />
-    <None Include="database.db3">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>

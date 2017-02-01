@@ -38,5 +38,11 @@ namespace BatchDataEntry.Models
             m_text = text;
             IsChecked = true;
         }
+
+        public ExportColumn(String text, bool status)
+        {
+            m_text = text;
+            IsChecked = status;
+        }
     }
 }

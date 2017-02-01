@@ -202,7 +202,18 @@ namespace BatchDataEntry.ViewModels
                         string colName = b.Applicazione.Campi.ElementAt(z).Nome;
                         string celValue = (!string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
                         doc.Voci.Add(new Voce(colName, celValue));
-                    }               
+                    }
+                }
+                else
+                {
+                    for (int z = 0; z < b.Applicazione.Campi.Count; z++)
+                    {
+                        string colName = b.Applicazione.Campi.ElementAt(z).Nome;
+                        string valore = (string.IsNullOrEmpty(b.Applicazione.Campi.ElementAt(z).ValorePredefinito))
+                            ? ""
+                            : b.Applicazione.Campi.ElementAt(z).ValorePredefinito;
+                        doc.Voci.Add(new Voce(colName, valore));
+                    }
                 }
                 db.InsertRecordDocumento(b, doc);
             }

@@ -169,6 +169,7 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
+                logger.Debug("[SQL]: " + sql);
                 SQLiteCommand mycommand = new SQLiteCommand(cnn);
                 mycommand.CommandText = sql;
                 rowsUpdated = mycommand.ExecuteNonQuery();
@@ -329,7 +330,7 @@ namespace BatchDataEntry.Helpers
 
             bool r = Insert("Batch", values);
             if (r)
-                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
+                return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Batch"));
           
             return -1;
         }
@@ -350,7 +351,7 @@ namespace BatchDataEntry.Helpers
 
             bool r = Insert("Campo", values);
             if (r)
-                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
+                return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Campo"));
 
             return -1;
         }
@@ -364,7 +365,7 @@ namespace BatchDataEntry.Helpers
            
             bool r = Insert("Autocompletamento", values);
             if (r)
-                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
+                return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Autocompletamento"));
 
             return -1;
         }
@@ -372,7 +373,8 @@ namespace BatchDataEntry.Helpers
         public int InsertRecordModello(Modello m)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Id", m.Id.ToString());
+            if(m.Id > 0)
+                values.Add("Id", m.Id.ToString());
             values.Add("Nome", m.Nome);
 
             int getBool = Convert.ToInt32(m.OrigineCsv);
@@ -383,7 +385,7 @@ namespace BatchDataEntry.Helpers
            
             bool r = Insert("Modello", values);
             if (r)
-                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
+                return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Modello"));
 
             return -1;
         }
@@ -412,7 +414,7 @@ namespace BatchDataEntry.Helpers
          
             bool r = Insert("Documenti", values);
             if (r)
-                return Convert.ToInt32(ExecuteScalar("SELECT last_insert_rowid()"));
+                return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Documenti"));
 
             return -1;
         }

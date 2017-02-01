@@ -63,7 +63,10 @@ namespace BatchDataEntry.ViewModels
 
             for (int i=0;i<columnNames.Length;i++)
             {
-                ColumnList.Add(new ExportColumn(columnNames[i]));
+                if(i < 4)
+                    ColumnList.Add(new ExportColumn(columnNames[i], false));
+                else
+                    ColumnList.Add(new ExportColumn(columnNames[i]));
             }
             RaisePropertyChanged("Columns");
         }
