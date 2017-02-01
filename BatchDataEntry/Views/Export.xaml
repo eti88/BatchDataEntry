@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         mc:Ignorable="d"
-        Title="Esporta Csv" Height="400" Width="300" Closed="Window_Closed">
+        Title="Esporta Csv" Height="420" Width="340" Closed="Window_Closed">
     <Window.DataContext>
         <viewModels:ViewModelExport></viewModels:ViewModelExport>
     </Window.DataContext>
@@ -18,7 +18,7 @@
             <RowDefinition Height="35"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="10,0">
+        <ScrollViewer Grid.Row="0" Margin="10,0,10,5">
             <ListView Name="exportListView" ItemsSource="{Binding Path=ColumnList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <ListView.View>
                     <GridView>
@@ -42,7 +42,7 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-        </StackPanel>
+        </ScrollViewer>
         <StackPanel Grid.Row="1">
             <Button x:Name="BtnGenerate" Content="Genera Csv" Command="{Binding Path=CmdGen}" Width="140" Height="30" HorizontalAlignment="Right" Margin="0,2,10,0" Click="BtnGenerate_OnClick"></Button>
         </StackPanel>
