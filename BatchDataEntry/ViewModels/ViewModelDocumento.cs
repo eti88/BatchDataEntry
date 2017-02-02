@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using BatchDataEntry.Business;
 using BatchDataEntry.Components;
@@ -65,11 +67,20 @@ namespace BatchDataEntry.ViewModels
 
         public ViewModelDocumento()
         {
+            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+            {
+                return;
+            }
             Batch = new Batch();
         }
 
         public ViewModelDocumento(Batch _currentBatch, int indexRowVal)
         {
+            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+            {
+                return;
+            }
+
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);

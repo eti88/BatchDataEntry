@@ -169,7 +169,6 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                logger.Debug("[SQL]: " + sql);
                 SQLiteCommand mycommand = new SQLiteCommand(cnn);
                 mycommand.CommandText = sql;
                 rowsUpdated = mycommand.ExecuteNonQuery();
