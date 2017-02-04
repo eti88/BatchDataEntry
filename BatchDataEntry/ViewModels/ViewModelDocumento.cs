@@ -25,13 +25,6 @@ namespace BatchDataEntry.ViewModels
         private int _selectElementFocus;
         private string[] repeatValues;
 
-        // per gestire il valore salvato si può
-        /*
-            dichiarare un array di grandezza = al numero di campi
-            inizializzarlo vuoto
-            e ogni campo true salvare nella sua posizione contraddistina il valore
-             */
-
         public Document DocFile
         {
             get { return _doc; }
