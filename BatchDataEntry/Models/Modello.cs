@@ -21,6 +21,7 @@ namespace BatchDataEntry.Models
         private ObservableCollection<Campo> _campi;
         private string _filecsv;
         private string _separatore;
+        private int _startFocusColumn;
 
         public int Id
         {
@@ -93,6 +94,18 @@ namespace BatchDataEntry.Models
                 }
             }
         }
+        public int StartFocusColumn
+        {
+            get { return _startFocusColumn; }
+            set
+            {
+                if (value != _startFocusColumn)
+                {
+                    _startFocusColumn = value;
+                    OnPropertyChanged("StartFocusColumn");
+                }
+            }
+        }
 
         public string contaColonne
         {
@@ -128,7 +141,7 @@ namespace BatchDataEntry.Models
             this.Campi = campi;
             this.PathFileCsv = path;
             this.Separatore = sep;
-            this.MyMemento = new MementoModello(nome, orig, campi, path, sep);
+            this.MyMemento = new MementoModello(nome, orig, campi, path, sep, this.StartFocusColumn);
         }
 
         public Modello(Modello m)
@@ -139,7 +152,8 @@ namespace BatchDataEntry.Models
             this.Campi = m.Campi;
             this.PathFileCsv = m.PathFileCsv;
             this.Separatore = m.Separatore;
-            this.MyMemento = new MementoModello(m.Nome, m.OrigineCsv, m.Campi, m.PathFileCsv, m.Separatore);
+            this.StartFocusColumn = m.StartFocusColumn;
+            this.MyMemento = new MementoModello(m.Nome, m.OrigineCsv, m.Campi, m.PathFileCsv, m.Separatore, m.StartFocusColumn);
         }
 
         public void LoadCampi()
@@ -159,6 +173,7 @@ namespace BatchDataEntry.Models
             this.Campi = this.MyMemento.campi;
             this.PathFileCsv = this.MyMemento.filecsv;
             this.Separatore = this.MyMemento.separatore;
+            this.StartFocusColumn = this.MyMemento.focus;
         }
 
         public override bool Equals(object obj)
@@ -199,7 +214,7 @@ namespace BatchDataEntry.Models
 
         public override string ToString()
         {
-            return String.Format("[{0}, {1}, {2}, {3}, {4}, c: {5}]", this.Id, this.Nome, this.OrigineCsv, this.PathFileCsv, this.Separatore, Campi.Count);
+            return String.Format("[{0}, {1}, {2}, {3}, {4}, c: {5}, focus: {6}]", this.Id, this.Nome, this.OrigineCsv, this.PathFileCsv, this.Separatore, Campi.Count, this.StartFocusColumn);
         }
     }
 
@@ -210,14 +225,16 @@ namespace BatchDataEntry.Models
         public readonly ObservableCollection<Campo> campi;
         public readonly string filecsv;
         public readonly string separatore;
+        public readonly int focus;
 
-        public MementoModello(string _nome, bool _origine, ObservableCollection<Campo> _campi, string _file, string _sep)
+        public MementoModello(string _nome, bool _origine, ObservableCollection<Campo> _campi, string _file, string _sep, int _foc)
         {
             this.nome = _nome;
             this.origine = _origine;
             this.campi = _campi;
             this.filecsv = _file;
             this.separatore = _sep;
+            this.focus = _foc;
         }
     }
 }

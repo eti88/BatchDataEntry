@@ -15,6 +15,7 @@ namespace BatchDataEntry.Models
         private bool _primary;
         private int _tipo;
         private int _idModello;
+        private bool _riproponi;
 
         public int Id {
             get { return _id; }
@@ -105,6 +106,18 @@ namespace BatchDataEntry.Models
                 }
             }
         }
+        public bool Riproponi
+        {
+            get { return _riproponi; }
+            set
+            {
+                if (value != _riproponi)
+                {
+                    _riproponi = value;
+                    OnPropertyChanged("Riproponi");
+                }
+            }
+        }
 
         /*
          SalvaValori permette di tenere traccia dei dati nel medesimo campo velocizzando
@@ -120,20 +133,20 @@ namespace BatchDataEntry.Models
             this.ValorePredefinito = vp;
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
-            //this.FKModello = -1;
+            this.Riproponi = false;
         }
 
-        public Campo(string nome, bool sv, string vp, bool ip, int fk)
+        public Campo(string nome, bool sv, string vp, bool ip, bool rip)
         {
             this.Nome = nome;
             this.SalvaValori = sv;
             this.ValorePredefinito = vp;
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
-            //this.FKModello = fk;
+            this.Riproponi = rip;
         }
 
-        public Campo(int id, string nome, bool sv, string vp, bool ip)
+        public Campo(int id, string nome, bool sv, string vp, bool ip, bool rip)
         {
             this.Id = id;
             this.Nome = nome;
@@ -141,7 +154,7 @@ namespace BatchDataEntry.Models
             this.ValorePredefinito = vp;
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
-            //this.FKModello = -1;
+            this.Riproponi = rip;
         }
 
         public Campo(int id, string nome, int po, bool sv, string vp, bool ip, int fk)
@@ -167,6 +180,7 @@ namespace BatchDataEntry.Models
             this.IndicePrimario = _campo.IndicePrimario;
             this.TipoCampo = _campo.TipoCampo;
             this.IdModello = _campo.IdModello;
+            this.Riproponi = _campo.Riproponi;
             this.MyMemento = new MementoCampo(_campo.Nome, _campo.Posizione, _campo.SalvaValori, _campo.ValorePredefinito, _campo.IndicePrimario);
         }
 

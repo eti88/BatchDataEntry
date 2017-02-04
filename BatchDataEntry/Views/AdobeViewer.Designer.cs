@@ -42,6 +42,7 @@
             this.PdfViewer.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("PdfViewer.OcxState")));
             this.PdfViewer.Size = new System.Drawing.Size(367, 386);
             this.PdfViewer.TabIndex = 0;
+            this.PdfViewer.TabStop = false;
             // 
             // AdobeViewer
             // 

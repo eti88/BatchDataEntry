@@ -140,6 +140,7 @@ namespace BatchDataEntry.Models
                 else
                     voci.Add(new Voce(campo.Posizione, campo.Nome));
             }
+            
             this.Voci = voci;
         }
 

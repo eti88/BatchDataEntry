@@ -63,6 +63,21 @@ namespace BatchDataEntry.Models
             }
         }
 
+        private string _focus;
+        public string IsFocused
+        {
+            get
+            {
+                return _focus;
+            }
+            set
+            {
+                if (_focus != value)
+                    _focus = value;
+                OnPropertyChanged("IsFocused");
+            }
+        }
+
         private IEnumerable<string> _suggestion;
         public IEnumerable<string> Suggestions
         {
@@ -78,6 +93,7 @@ namespace BatchDataEntry.Models
         public Voce()
         {
             Suggestions = new List<string>();
+            IsFocused = "False";
         }
 
         public Voce(int id, string key)
@@ -85,6 +101,7 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Key = key;
             Suggestions = new List<string>();
+            IsFocused = "False";
         }
 
         public Voce(string key, string value)
@@ -92,6 +109,7 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.Value = value;
             Suggestions = new List<string>();
+            IsFocused = "False";
         }
 
         public Voce(int id, string key, string value)
@@ -100,6 +118,7 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.Value = value;
             Suggestions = new List<string>();
+            IsFocused = "False";
         }
 
         public Voce(int id, string key, bool autocomp, DatabaseHelper db)
@@ -132,6 +151,7 @@ namespace BatchDataEntry.Models
                     Suggestions = new List<string>();
                 }
             }
+            IsFocused = "False";
         }
       
         public override string ToString()

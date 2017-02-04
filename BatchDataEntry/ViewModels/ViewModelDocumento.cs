@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,15 @@ namespace BatchDataEntry.ViewModels
         private Batch _batch;
         private NavigationList<Dictionary<int, string>> _dc;
         private Document _doc;
+        private int _selectElementFocus;
+        private string[] repeatValues;
+
+        // per gestire il valore salvato si può
+        /*
+            dichiarare un array di grandezza = al numero di campi
+            inizializzarlo vuoto
+            e ogni campo true salvare nella sua posizione contraddistina il valore
+             */
 
         public Document DocFile
         {
@@ -60,6 +70,8 @@ namespace BatchDataEntry.ViewModels
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasNext; }
         }
 
+        private bool CanFocused {  get { return _selectElementFocus != null && _selectElementFocus >= 0; } }
+
         private bool CanMovePrevious
         {
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasPrevious; }
@@ -72,6 +84,7 @@ namespace BatchDataEntry.ViewModels
                 return;
             }
             Batch = new Batch();
+            repeatValues = new string[10];
         }
 
         public ViewModelDocumento(Batch _currentBatch, int indexRowVal)
@@ -91,6 +104,8 @@ namespace BatchDataEntry.ViewModels
             LoadDocsList();
             DocFiles.CurrentIndex = indexRowVal;
             DocFile = new Document(Batch, DocFiles.Current);
+            _selectElementFocus = Batch.Applicazione.StartFocusColumn;
+            repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
         }
 
         public ViewModelDocumento(Batch _currentBatch)
@@ -107,7 +122,8 @@ namespace BatchDataEntry.ViewModels
             DocFiles.CurrentIndex = GetId();
             Document tmp = new Document(Batch, DocFiles.Current);
             DocFile = new Document(Batch, DocFiles.Current);
-            
+            _selectElementFocus = Batch.Applicazione.StartFocusColumn;
+            repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
         }
 
         
@@ -161,6 +177,16 @@ namespace BatchDataEntry.ViewModels
                 DocFile.IsIndexed = true;
                 _db.UpdateRecordDocumento(DocFile);
 
+                // Salva il valore se bisogna riproporlo
+                Task.Factory.StartNew(() =>
+                {
+                    for (int z = 0; z < Batch.Applicazione.Campi.Count; z++)
+                    {
+                        if (Batch.Applicazione.Campi[z].Riproponi)
+                            repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Value);                     
+                    }                  
+                }).Wait();
+
                 // controllare se bisogna salvare il valore inserito per l'autocomletamento
                 foreach (var col in DocFile.Voci)
                 {
@@ -192,23 +218,36 @@ namespace BatchDataEntry.ViewModels
                 DocFile = new Document(Batch, DocFiles.MovePrevious);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, _db);
+                for (int i = 0; i < repeatValues.Length; i++)
+                {
+                    if (!string.IsNullOrEmpty(repeatValues[i]))
+                        DocFile.Voci.ElementAt(i).Value = repeatValues[i];
+                }
             }
 
             RaisePropertyChanged("DocFile");
+            SetFocusOnElement();
         }
 
         public void MoveNextItem()
         {
+            
             if (DocFiles.hasNext)
             {
                 DocFile = new Document(Batch, DocFiles.MoveNext);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, _db);
+                for (int i = 0; i < repeatValues.Length; i++)
+                {
+                    if (!string.IsNullOrEmpty(repeatValues[i]))
+                        DocFile.Voci.ElementAt(i).Value = repeatValues[i];
+                }
             }
             
             RaisePropertyChanged("DocFile");
+            SetFocusOnElement();
         }
-
+        
         public void Interrompi()
         {
             Batch.DocCorrente = DocFiles.CurrentIndex;
@@ -222,7 +261,33 @@ namespace BatchDataEntry.ViewModels
             CloseWindow(true);
         }
 
+        // Setta il focus con un piccolo ritardo su un elemento definito nel modello 
+        // (il ritardo è necessario per impedire al controller pdf di rubarlo)
+        public void SetFocusOnElement()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                System.Threading.Thread.Sleep(500);
+
+                if (_selectElementFocus > 0 && _selectElementFocus < (DocFile.Voci.Count - 1))
+                    DocFile.Voci[_selectElementFocus].IsFocused = "True";
+            });           
+        }
+
         #region Command
+        private RelayCommand _cmdWindowLoaded;
+        public ICommand CmdWindowLoaded
+        {
+            get
+            {
+                if (_cmdWindowLoaded == null)
+                {
+                    _cmdWindowLoaded = new RelayCommand(param => SetFocusOnElement(), param => CanFocused);
+                }
+                return _cmdPrev;
+            }
+        }
+
 
         private RelayCommand _cmdPrev;
         public ICommand CmdPrev

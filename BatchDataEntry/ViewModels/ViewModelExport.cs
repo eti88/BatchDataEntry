@@ -63,7 +63,7 @@ namespace BatchDataEntry.ViewModels
 
             for (int i=0;i<columnNames.Length;i++)
             {
-                if(i < 4)
+                if(i < 4 && i != 1) // deseleziona i campi predefiniti della tabella tranne il nome del file
                     ColumnList.Add(new ExportColumn(columnNames[i], false));
                 else
                     ColumnList.Add(new ExportColumn(columnNames[i]));

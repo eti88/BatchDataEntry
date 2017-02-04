@@ -347,6 +347,8 @@ namespace BatchDataEntry.Helpers
             values.Add("IndicePrimario", tmp2.ToString());
             values.Add("TipoCampo", c.TipoCampo.ToString());
             values.Add("IdModello", c.IdModello.ToString());
+            int rip = Convert.ToInt32(c.Riproponi);
+            values.Add("Riproponi", rip.ToString());
 
             bool r = Insert("Campo", values);
             if (r)
@@ -381,7 +383,7 @@ namespace BatchDataEntry.Helpers
             values.Add("OrigineCsv", getBool.ToString());
             values.Add("PathFileCsv", m.PathFileCsv);
             values.Add("Separatore", m.Separatore);
-           
+            values.Add("FocusColumn", m.StartFocusColumn.ToString());
             bool r = Insert("Modello", values);
             if (r)
                 return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Modello"));
@@ -448,6 +450,8 @@ namespace BatchDataEntry.Helpers
             values.Add("IndicePrimario", tmp2.ToString());
             values.Add("TipoCampo", c.TipoCampo.ToString());
             values.Add("IdModello", c.IdModello.ToString());
+            int rip = Convert.ToInt32(c.Riproponi);
+            values.Add("Riproponi", rip.ToString());
 
             Update("Campo", values, string.Format("Id={0}", c.Id));
         }
@@ -471,6 +475,7 @@ namespace BatchDataEntry.Helpers
             values.Add("OrigineCsv", getBool.ToString());
             values.Add("PathFileCsv", m.PathFileCsv);
             values.Add("Separatore", m.Separatore);
+            values.Add("FocusColumn", m.StartFocusColumn.ToString());
 
             Update("Modello", values, string.Format("Id={0}", m.Id));
         }
@@ -552,7 +557,8 @@ namespace BatchDataEntry.Helpers
                             "ValorePredefinito VARCHAR(254)," +
                             "IndicePrimario INTEGER," +
                             "TipoCampo INTEGER," +
-                            "IdModello INTEGER)";                
+                            "IdModello INTEGER," +
+                            "Riproponi INTEGER)";                
             try
             {
                 this.ExecuteNonQuery(SQLCmd);
@@ -571,7 +577,8 @@ namespace BatchDataEntry.Helpers
                             "Nome VARCHAR(254)," +
                             "OrigineCsv INTEGER," +
                             "PathFileCsv TEXT," +
-                            "Separatore VARCHAR(1))";
+                            "Separatore VARCHAR(1)," +
+                            "FocusColumn INTEGER)";
             try
             {
                 this.ExecuteNonQuery(SQLCmd);
@@ -755,6 +762,7 @@ namespace BatchDataEntry.Helpers
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
                 }
                 reader.Close();
                 return c;
@@ -788,6 +796,7 @@ namespace BatchDataEntry.Helpers
                     m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
                     m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
                     m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
                 }
                 reader.Close();
                 return m;
@@ -1030,6 +1039,7 @@ namespace BatchDataEntry.Helpers
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
                     campi.Add(c);
                 }
 
@@ -1066,6 +1076,7 @@ namespace BatchDataEntry.Helpers
                     m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
                     m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
                     m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
                     models.Add(m);
                 }
 
@@ -1145,6 +1156,7 @@ namespace BatchDataEntry.Helpers
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
                     campi.Add(c);
                 }
 
@@ -1181,6 +1193,8 @@ namespace BatchDataEntry.Helpers
                     m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
                     m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
                     m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                        
                     models.Add(m);
                 }
 
@@ -1217,6 +1231,7 @@ namespace BatchDataEntry.Helpers
                     m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
                     m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
                     m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
                     models.Add(m);
                 }
 

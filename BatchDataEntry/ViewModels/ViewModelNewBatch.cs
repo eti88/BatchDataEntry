@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.ComponentModel;
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Configuration;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Windows;
 using BatchDataEntry.Business;
 using NLog;
@@ -13,11 +15,54 @@ using Batch = BatchDataEntry.Models.Batch;
 
 namespace BatchDataEntry.ViewModels
 {
-    class ViewModelNewBatch : ViewModelBase
+    internal class ViewModelNewBatch : ViewModelBase
     {
+        private BackgroundWorker backgroundWorker = new BackgroundWorker();
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        
         private bool _alreadyExist;
+        private bool _saved = false;
+
+        private bool _isVisible = false;
+        public bool isVisible
+        {
+            get { return _isVisible; }
+            set
+            {
+                if (_isVisible != value)
+                {
+                    _isVisible = value;
+                    RaisePropertyChanged("isVisible");
+                }
+            }
+        }
+
+        private int _progress;
+        public int Progress
+        {
+            get { return _progress; }
+            set
+            {
+                if (_progress != value)
+                {
+                    _progress = value;
+                    RaisePropertyChanged("Progress");
+                }
+            }
+        }
+
+        private int _maxVal;
+        public int MaxValue
+        {
+            get { return _maxVal; }
+            set
+            {
+                if (_maxVal != value)
+                {
+                    _maxVal = value;
+                    RaisePropertyChanged("MaxValue");
+                }
+            }
+        }
 
         private Batch _currentBatch;
         public Batch CurrentBatch
@@ -59,11 +104,13 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+
         private bool CanSave
         {
             get
             {
-                if (!string.IsNullOrEmpty(CurrentBatch.Nome) &&
+                if (!_saved &&
+                    !string.IsNullOrEmpty(CurrentBatch.Nome) &&
                     !string.IsNullOrEmpty(CurrentBatch.DirectoryInput) &&
                     !string.IsNullOrEmpty(CurrentBatch.DirectoryOutput))
                     return true;
@@ -77,6 +124,11 @@ namespace BatchDataEntry.ViewModels
             CurrentBatch = new Batch();
             _alreadyExist = false;
             PopulateComboboxModels();
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.ProgressChanged += ProgressChanged;
+            backgroundWorker.DoWork += DoWork;
+            // not required for this question, but is a helpful event to handle
+            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
         }
 
         public ViewModelNewBatch(Batch batch)
@@ -84,12 +136,40 @@ namespace BatchDataEntry.ViewModels
             CurrentBatch = batch;
             _alreadyExist = true;
             PopulateComboboxModels();
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.ProgressChanged += ProgressChanged;
+            backgroundWorker.DoWork += DoWork;
+            // not required for this question, but is a helpful event to handle
+            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+        }
+
+        private void DoWork(object sender, DoWorkEventArgs e)
+        {
+            DatabaseHelper dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], CurrentBatch.DirectoryOutput);
+            Generate(CurrentBatch, dbc);
+
+            //backgroundWorker.ReportProgress(i);
+        }
+
+        private void ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            // This is called on the UI thread when ReportProgress method is called
+            Progress = e.ProgressPercentage;
+        }
+
+        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            isVisible = false;
+            MessageBox.Show("Finito");
         }
 
         private void AddOrUpdateBatchItem()
         {
+            isVisible = true;
+            Progress = 0;
+            MaxValue = 100;
+
             DatabaseHelper db = new DatabaseHelper();
-            DatabaseHelper dbCache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], CurrentBatch.DirectoryOutput);
 
             if (_alreadyExist)
             {
@@ -105,38 +185,8 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("Batches");
             }
 
-            try
-            {
-                if (!File.Exists(Path.Combine(CurrentBatch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"])))
-                {
-                    if (CurrentBatch.Applicazione == null || CurrentBatch.Applicazione.Id == 0)
-                        CurrentBatch.LoadModel();
-
-                    if (CurrentBatch.Applicazione.Campi == null || CurrentBatch.Applicazione.Campi.Count == 0)
-                        CurrentBatch.Applicazione.LoadCampi();    
-
-                    List<string> campi = new List<string>();
-                    for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)
-                    {
-                        campi.Add(CurrentBatch.Applicazione.Campi[i].Nome);
-                    }
-                    
-                    dbCache.CreateCacheDb(campi);
-                    fillCacheDb(dbCache, CurrentBatch);
-                }
-                    
-                if (CheckOutputDirFiles(CurrentBatch.DirectoryOutput))
-                    CreateMissingFiles(true, CurrentBatch);
-            }
-            catch (Exception e)
-            {
-                #if DEBUG
-                Console.WriteLine("Exception generazione cache db");
-                Console.WriteLine(e.ToString());
-                #endif
-                logger.Error(e.ToString());
-            }
-            this.CloseWindow(true);
+            backgroundWorker.RunWorkerAsync();
+            _saved = true;
         }
 
         private void PopulateComboboxModels()
@@ -147,24 +197,9 @@ namespace BatchDataEntry.ViewModels
             RaisePropertyChanged("Models");
         }
 
-        protected void CreateMissingFiles(bool res, Batch m)
-        {
-            if (res)
-                CreateDbCsv(m.DirectoryOutput);
-        }
+        #region CacheFilesInit
 
-        protected bool CheckOutputDirFiles(string output_path)
-        {
-            bool res = !File.Exists(Path.Combine(output_path, ConfigurationManager.AppSettings["csv_file_name"]));                       
-            return res;
-        }
-
-        protected void CreateDbCsv(string output_dir)
-        {
-            File.Create(Path.Combine(output_dir, ConfigurationManager.AppSettings["csv_file_name"]));
-        }
-
-        private void fillCacheDb(DatabaseHelper db, Batch b)
+        public void fillCacheDb(DatabaseHelper db, Batch b)
         {
             List<string> sourceCsv = new List<string>();
             if (b.Applicazione.OrigineCsv)
@@ -182,12 +217,14 @@ namespace BatchDataEntry.ViewModels
                 files = Directory.GetDirectories(b.DirectoryInput).ToList();
             }
 
-            if(files.Count == 0)
+            if (files.Count == 0)
                 return;
+
+            MaxValue = files.Count;
 
             // adesso per ogni file in files aggiungere un record fileName, path, false
             for (int i = 0; i < files.Count; i++)
-            {               
+            {
                 Document doc = new Document();
                 doc.Id = i + 1;
                 doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
@@ -216,8 +253,64 @@ namespace BatchDataEntry.ViewModels
                     }
                 }
                 db.InsertRecordDocumento(b, doc);
+                backgroundWorker.ReportProgress(i);
             }
-            MessageBox.Show(@"Generazione File Temporanei Terminata");
         }
+
+        public void Generate(Batch batch, DatabaseHelper dbc)
+        {
+            
+
+            try
+            {
+                if (!File.Exists(Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"])))
+                {
+                    if (batch.Applicazione == null || batch.Applicazione.Id == 0)
+                        batch.LoadModel();
+
+                    if (batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0)
+                        batch.Applicazione.LoadCampi();
+
+                    List<string> campi = new List<string>();
+                    for (int i = 0; i < batch.Applicazione.Campi.Count; i++)
+                    {
+                        campi.Add(batch.Applicazione.Campi[i].Nome);
+                    }
+
+                    dbc.CreateCacheDb(campi);
+                    fillCacheDb(dbc, batch);
+                }
+
+                if (CheckOutputDirFiles(batch.DirectoryOutput))
+                    CreateMissingFiles(true, batch);
+            }
+            catch (Exception ex)
+            {
+                #if DEBUG
+                    Console.WriteLine("Exception generazione cache db");
+                    Console.WriteLine(ex.ToString());
+                #endif
+                logger.Error(ex.ToString());
+            }
+        }
+
+        protected void CreateMissingFiles(bool res, Batch m)
+        {
+            if (res)
+                CreateDbCsv(m.DirectoryOutput);
+        }
+
+        protected bool CheckOutputDirFiles(string output_path)
+        {
+            bool res = !File.Exists(Path.Combine(output_path, ConfigurationManager.AppSettings["csv_file_name"]));
+            return res;
+        }
+
+        protected void CreateDbCsv(string output_dir)
+        {
+            File.Create(Path.Combine(output_dir, ConfigurationManager.AppSettings["csv_file_name"]));
+        }
+
+        #endregion
     }
 }

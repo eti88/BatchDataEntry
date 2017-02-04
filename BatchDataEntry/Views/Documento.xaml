@@ -6,11 +6,17 @@
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         xmlns:customComponents="clr-namespace:BatchDataEntry.Components"
         xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
+        xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
+        helpers:MyAttachedBehaviors.LoadedCommand="{Binding Path=CmdWindowLoaded}"
         mc:Ignorable="d"
         Title="{Binding Path=DocFile.FileName}" Height="650" Width="800">
     <Window.DataContext>
         <viewModels:ViewModelDocumento></viewModels:ViewModelDocumento>
     </Window.DataContext>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding Path=CmdIndex}" Key="Enter"></KeyBinding>
+    </Window.InputBindings>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -19,9 +25,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Border BorderThickness="1" BorderBrush="Black">
-            <!-- <WebBrowser ns:WebBrowserUtility.BindableSource="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/> -->
-            <customComponents:PdfViewerHost x:Name="PdfViewerUc" PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <Border BorderThickness="1" BorderBrush="Black" Focusable="False">
+            <customComponents:PdfViewerHost x:Name="PdfViewerUc" PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False"/>
         </Border>
         <Grid Grid.Column="1" Margin="0,10">
             <Grid.ColumnDefinitions>
@@ -39,6 +44,7 @@
                                 <StackPanel Margin="5,0,5,0">
                                     <Label Content="{Binding Key, Mode=OneTime}"/>
                                     <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                             helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}"
                                              wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding Suggestions, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
                             </DataTemplate>
@@ -49,7 +55,7 @@
             <StackPanel Grid.Row="1" Height="40" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
                 <Button x:Name="buttonIndexes" Command="{Binding Path=CmdIndex}" Content="Indicizza" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
-                <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
+                    <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
                 <Button x:Name="buttonStop" Click="ButtonStop_OnClick" Command="{Binding Path=CmdStop}" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
             </StackPanel>
         </Grid>

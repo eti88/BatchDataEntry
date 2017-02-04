@@ -80,12 +80,14 @@ namespace BatchDataEntry.Business
         public static void CopiaPdf(string source_file, string destination_path, string newFileName)
         {
             string destination = Path.Combine(destination_path, newFileName);
-            File.Copy(source_file, destination);
+            if(!File.Exists(destination))
+                File.Copy(source_file, destination);
         }
 
         public static void DeletePdf(string pathFile)
         {
-            File.Delete(pathFile);
+            if (File.Exists(pathFile))
+                File.Delete(pathFile);
         }
 
         public static bool ContainsOnlyNumbers(string text)

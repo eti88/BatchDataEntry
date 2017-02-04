@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
+using System.IO;
+using System.Linq;
 using System.Windows.Input;
+using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Views;
@@ -146,16 +151,10 @@ namespace BatchDataEntry.ViewModels
         {
             var newBatchWindow = new NuovoBatch();
             newBatchWindow.DataContext = new ViewModelNewBatch();          
-            var result = newBatchWindow.ShowDialog();
-            if (result == true)
-            {
-                #if DEBUG
-                Console.WriteLine("Refresh listbox...");
-                #endif
-                LoadBatches();
-                RaisePropertyChanged("Batches");
-            }
-            
+            newBatchWindow.ShowDialog();
+
+            LoadBatches();
+            RaisePropertyChanged("Batches");      
         }
 
         private void ModifyBatchItem()
@@ -163,6 +162,9 @@ namespace BatchDataEntry.ViewModels
             var newBatchWindow = new NuovoBatch();
             newBatchWindow.DataContext = new ViewModelNewBatch(SelectedBatch);
             newBatchWindow.ShowDialog();
+
+            LoadBatches();
+            RaisePropertyChanged("Batches");
         }
 
         private void ResumeBatchItem()
@@ -188,5 +190,7 @@ namespace BatchDataEntry.ViewModels
         }
 
         #endregion
+
+
     }
 }

@@ -15,8 +15,9 @@
                 <x:Type TypeName="models:TipoFileProcessato"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
-       
+
     <Grid>
         <DockPanel>
             <StackPanel DockPanel.Dock="Top" Height="485">
@@ -72,10 +73,11 @@
                               SelectedValuePath="Id" 
                               DisplayMemberPath="Nome" Margin="10,10,10,0"/>
                 </StackPanel>
+                <ProgressBar x:Name="ProgressBarInit" Visibility="{Binding Path=isVisible, Converter={StaticResource BoolToVis}}" Minimum="0" Value="{Binding Path=Progress}" Maximum="{Binding Path=MaxValue}" Height="30" VerticalAlignment="Bottom" Margin="10,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="45" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button Content="Cancella" Click="ButtonCancella_Click"  VerticalAlignment="Center" Style="{StaticResource GenericButton}"/>
-                <Button Content="Continua" Command="{Binding Path=ApplyCommand}" Click="ButtonBase_OnClick" VerticalAlignment="Center" Style="{StaticResource GenericButton}" Margin="15,5,5,5"/>
+                <Button Content="Continua" Command="{Binding Path=ApplyCommand}" VerticalAlignment="Center" Style="{StaticResource GenericButton}" Margin="15,5,5,5"/>
             </StackPanel>
         </DockPanel>
     </Grid>
