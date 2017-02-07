@@ -316,7 +316,7 @@ namespace BatchDataEntry.Helpers
         public int InsertRecordBatch(Batch b)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Id", b.Id.ToString());
+            //values.Add("Id", b.Id.ToString());
             values.Add("Nome", b.Nome);
             values.Add("TipoFile", string.Format("{0}", (int)b.TipoFile));
             values.Add("DirectoryInput", b.DirectoryInput);

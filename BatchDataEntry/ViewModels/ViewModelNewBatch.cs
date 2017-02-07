@@ -5,9 +5,11 @@ using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using BatchDataEntry.Business;
 using NLog;
@@ -199,12 +201,14 @@ namespace BatchDataEntry.ViewModels
 
         #region CacheFilesInit
 
-        public void fillCacheDb(DatabaseHelper db, Batch b)
+        public bool fillCacheDb(DatabaseHelper db, Batch b)
         {
             List<string> sourceCsv = new List<string>();
+            int srcCsvRows = 0;
             if (b.Applicazione.OrigineCsv)
             {
                 sourceCsv = Csv.ReadRows(b.Applicazione.PathFileCsv);
+                srcCsvRows = sourceCsv.Count;
             }
 
             List<string> files = new List<string>();
@@ -218,12 +222,12 @@ namespace BatchDataEntry.ViewModels
             }
 
             if (files.Count == 0)
-                return;
+                return false;
 
             MaxValue = files.Count;
-
+            
             // adesso per ogni file in files aggiungere un record fileName, path, false
-            for (int i = 0; i < files.Count; i++)
+            for (int i = 0; i < files.Count - 1; i++)
             {
                 Document doc = new Document();
                 doc.Id = i + 1;
@@ -233,13 +237,40 @@ namespace BatchDataEntry.ViewModels
 
                 if (b.Applicazione.OrigineCsv)
                 {
-                    string[] cells = sourceCsv.ElementAt(i).Split(b.Applicazione.Separatore[0]);
-                    for (int z = 0; z < b.Applicazione.Campi.Count; z++)
+                    try
                     {
-                        string colName = b.Applicazione.Campi.ElementAt(z).Nome;
-                        string celValue = (!string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
-                        doc.Voci.Add(new Voce(colName, celValue));
+                        if (srcCsvRows > 0 && (srcCsvRows < MaxValue))
+                        {
+                            string[] cells = sourceCsv.ElementAt(i).Split(b.Applicazione.Separatore[0]);
+
+                            if (cells.Length == 1) // viene restituita la riga di partenza
+                            {
+                                MessageBox.Show(
+                                    "Non è possibile leggere correttamente le righe del file csv di origine, sicuro di aver inserito il delimitatore di campo giusto?");                              
+                                return false;
+                            }
+
+                            // il numero di campi non corrisponde tra il modello e il file csv
+                            if (cells.Length != (CurrentBatch.Applicazione.Campi.Count - 1))
+                            {
+                                MessageBox.Show("Il numero di campi tra il file Csv e il modello non coincide!");                               
+                                return false;
+                            }
+        
+                            for (int z = 0; z < b.Applicazione.Campi.Count; z++)
+                            {
+                                string colName = b.Applicazione.Campi.ElementAt(z).Nome;
+                                string celValue = (!string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
+                                doc.Voci.Add(new Voce(colName, celValue));
+                            }
+                        }                     
                     }
+                    catch (Exception er)
+                    {   
+                        logger.Error(string.Format("Error into string[] cells (Source Csv) [{er.Source}] {er.Message}"));
+                        throw;
+                    }
+                    
                 }
                 else
                 {
@@ -255,6 +286,7 @@ namespace BatchDataEntry.ViewModels
                 db.InsertRecordDocumento(b, doc);
                 backgroundWorker.ReportProgress(i);
             }
+            return true;
         }
 
         public void Generate(Batch batch, DatabaseHelper dbc)
@@ -277,8 +309,40 @@ namespace BatchDataEntry.ViewModels
                         campi.Add(batch.Applicazione.Campi[i].Nome);
                     }
 
+                    bool res = false;
+
                     dbc.CreateCacheDb(campi);
-                    fillCacheDb(dbc, batch);
+                    res = fillCacheDb(dbc, batch);
+                    if (!res)
+                    {
+                        Task.Factory.StartNew(() =>
+                        {
+                            if (!File.Exists(Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"])))
+                                return;
+                            
+                            bool isLocked = true;
+
+                            while (isLocked)
+                            {
+                                try
+                                {
+                                    File.Delete(Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"]));
+                                    Thread.Sleep(5000);
+                                    isLocked = false;
+                                }
+                                catch (System.IO.IOException) { }
+                                
+                            }
+
+                            
+
+                            
+                                File.Delete(Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"]));
+                        });
+                        logger.Error("Creazione batch interrotta funzione FillCacheDb fallita." );
+                        return;
+                    }
+
                 }
 
                 if (CheckOutputDirFiles(batch.DirectoryOutput))
