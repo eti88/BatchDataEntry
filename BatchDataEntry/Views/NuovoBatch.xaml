@@ -23,7 +23,7 @@
             <StackPanel DockPanel.Dock="Top" Height="485">
                 <StackPanel Orientation="Vertical" Height="454">
                     <Label Content="Nome" />
-                    <TextBox Margin="10,10,10,0" VerticalContentAlignment="Center" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" Height="30">
+                    <TextBox Margin="10,10,10,0" VerticalContentAlignment="Center" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" Height="30" FontSize="12">
                         <TextBox.Text>
                             <Binding Path="CurrentBatch.Nome" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
@@ -32,11 +32,11 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                        <Label Content="Tipo File" />
-                    <ComboBox x:Name="comboBoxTipoFile" VerticalContentAlignment="Center" ItemsSource="{Binding Source={StaticResource fileTypeEnum}}" SelectedItem="{Binding Path=CurrentBatch.TipoFile}" IsSynchronizedWithCurrentItem="True" Margin="10,10,10,0"/>
+                    <Label Content="Tipo File" />
+                    <ComboBox x:Name="comboBoxTipoFile" VerticalContentAlignment="Center" ItemsSource="{Binding Source={StaticResource fileTypeEnum}}" SelectedItem="{Binding Path=CurrentBatch.TipoFile}" IsSynchronizedWithCurrentItem="True" Margin="10,10,10,0" FontSize="12"/>
                     <Label Content="Directory Input" />
                     <WrapPanel Height="40" Margin="10,10,0,0">
-                        <TextBox x:Name="textBoxDirInput" VerticalContentAlignment="Center" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
+                        <TextBox x:Name="textBoxDirInput" VerticalContentAlignment="Center" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" FontSize="12">
                             <TextBox.Text>
                                 <Binding Path="CurrentBatch.DirectoryInput" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                                     <Binding.ValidationRules>
@@ -53,7 +53,7 @@
                     </WrapPanel>
                     <Label Content="Directory Output" />
                     <WrapPanel Height="40" Margin="10,10,0,0">
-                        <TextBox x:Name="textBoxDirOutput" VerticalContentAlignment="Center" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0">
+                        <TextBox x:Name="textBoxDirOutput" VerticalContentAlignment="Center" TextWrapping="Wrap"  Width="375" Margin="0,5,5,0" FontSize="12">
                             <TextBox.Text>
                                 <Binding Path="CurrentBatch.DirectoryOutput" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                                     <Binding.ValidationRules>
@@ -71,13 +71,13 @@
                     <Label Content="Modello" />
                     <ComboBox x:Name="comboBoxModello" VerticalContentAlignment="Center" ItemsSource="{Binding Path=Models}" SelectedValue="{Binding CurrentBatch.IdModello, Mode=TwoWay}" IsSynchronizedWithCurrentItem="True"
                               SelectedValuePath="Id" 
-                              DisplayMemberPath="Nome" Margin="10,10,10,0"/>
+                              DisplayMemberPath="Nome" Margin="10,10,10,0" FontSize="12"/>
                 </StackPanel>
                 <ProgressBar x:Name="ProgressBarInit" Visibility="{Binding Path=isVisible, Converter={StaticResource BoolToVis}}" Minimum="0" Value="{Binding Path=Progress}" Maximum="{Binding Path=MaxValue}" Height="30" VerticalAlignment="Bottom" Margin="10,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="45" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-                <Button Content="Cancella" Click="ButtonCancella_Click"  VerticalAlignment="Center" Style="{StaticResource GenericButton}"/>
-                <Button Content="Continua" Command="{Binding Path=ApplyCommand}" VerticalAlignment="Center" Style="{StaticResource GenericButton}" Margin="15,5,5,5"/>
+                <Button Content="Cancella" Click="ButtonCancella_Click"  VerticalAlignment="Center" Style="{StaticResource GenericButton}" FontSize="12"/>
+                <Button Content="Continua" Command="{Binding Path=ApplyCommand}" VerticalAlignment="Center" Style="{StaticResource GenericButton}" Margin="15,5,5,5" FontSize="12"/>
             </StackPanel>
         </DockPanel>
     </Grid>

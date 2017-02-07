@@ -34,10 +34,12 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="260" SharedSizeGroup="Column0"/>
-                                        <ColumnDefinition Width="130" SharedSizeGroup="Column1"/>
+                                        <ColumnDefinition Width="110" SharedSizeGroup="Column1"/>
+                                        <ColumnDefinition Width="160" SharedSizeGroup="Column2"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="{Binding Nome}"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding contaColonne}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding OrigineCsv, StringFormat='Csv: {0}'}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding StartFocusColumn, StringFormat='Campo di partenza: {0}'}"></TextBlock>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

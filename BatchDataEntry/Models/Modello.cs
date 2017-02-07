@@ -107,11 +107,6 @@ namespace BatchDataEntry.Models
             }
         }
 
-        public string contaColonne
-        {
-            get { return string.Format("Colonne: {0}", Campi.Count); }
-        }
-
         public Modello()
         {
             this.OrigineCsv = false;

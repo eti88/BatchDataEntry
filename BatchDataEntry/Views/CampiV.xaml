@@ -22,7 +22,7 @@
             </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Margin="25,0">
                 <Border>
-                    <ListBox x:Name="listBoxColonne" Height="415" FontSize="14" ItemsSource="{Binding Colonne, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectedItem="{Binding SelectedCampo}">
+                    <ListBox x:Name="listBoxColonne" Height="415" ItemsSource="{Binding Colonne, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectedItem="{Binding SelectedCampo}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>

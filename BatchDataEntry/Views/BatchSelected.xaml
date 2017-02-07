@@ -14,6 +14,7 @@
         MinHeight="520">
     <Window.Resources>
         <viewModels:ViewModelBatchSelected x:Key="ViewModelBatchSelected"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -43,13 +44,13 @@
             <StackPanel Grid.Row="1">
                 <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="{Binding Path=NumeroDocumenti, StringFormat='Numero documenti:    {0}'}" Margin="5"/>
                 <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="{Binding Path=Dimensioni,StringFormat='Dimensione:    {0} MB'}" Margin="5"/>
-                <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="{Binding Path=DocumentoCorrente, StringFormat='Documento corrente:    {0}'}" Margin="5"/>
-                <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="{Binding Path=UltimoIndicizzato,StringFormat='Ultimo inserimento:    {0}'}" Margin="5"/>
+                <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.DocCorrente, StringFormat='Documento corrente:    {0}'}" Margin="5"/>
+                <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.UltimoIndicizzato,StringFormat='Ultimo inserimento:    {0}'}" Margin="5"/>
             </StackPanel>
             <StackPanel Height="50" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button x:Name="buttonEliminaSelezione" Content="Elimina Selez." Command="{Binding Path=EliminaSelezCmd}" Height="30" Width="100" Margin="5" Background="#FFFF5656" FontSize="11"/>
-                <Button x:Name="buttonContiunaDaSelezione" Content="Apri Selez." Command="{Binding Path=ContinuaDaSelezioneCmd}" Height="30" Width="100" Margin="5" Background="#FF80E2FF" FontSize="11"/>
-                <Button x:Name="buttonContiunaInserimento" Content="Continua" Command="{Binding Path=ContinuaCmd}" Height="30" Width="75" Margin="5" Background="#FFA9FF80" FontSize="11"/>
+                <Button x:Name="buttonContiunaDaSelezione" Content="Apri Selez." Command="{Binding Path=ContinuaDaSelezioneCmd}" Height="30" Width="100" Margin="5" FontSize="11"/>
+                <Button x:Name="buttonContiunaInserimento" Content="Continua" Command="{Binding Path=ContinuaCmd}" Height="30" Width="75" Margin="5" FontSize="11"/>
                 <Button x:Name="buttonCheck" Content="Check" Command="{Binding Path=CheckCmd}" Height="30" Width="75" Margin="5" Background="#FFFFF272" FontSize="11"/>
             </StackPanel>
         </Grid>
@@ -74,7 +75,7 @@
                 <TextBlock FontSize="11" LineHeight="20" Text="{Binding Path=StatusBarCol2}" Padding="0,0,0,2"/>
             </StatusBarItem>
             <StatusBarItem Grid.Column="3">
-                <ProgressBar Height="16" Width="300" HorizontalAlignment="Right" Minimum="0" Maximum="{Binding Path=MaxProgressBarValue}" Value="{Binding Path=ValueProgressBar}"/>
+                <ProgressBar Visibility="{Binding Path=isVisible, Converter={StaticResource BoolToVis}}" Height="16" Width="300" HorizontalAlignment="Right" Minimum="0" Maximum="{Binding Path=MaxProgressBarValue}" Value="{Binding Path=ValueProgressBar}"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

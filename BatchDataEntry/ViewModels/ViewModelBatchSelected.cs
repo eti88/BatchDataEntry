@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.IO;
@@ -21,10 +22,35 @@ namespace BatchDataEntry.ViewModels
     internal class ViewModelBatchSelected : ViewModelMain
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private BackgroundWorker backgroundWorker = new BackgroundWorker();
 
         #region Members
 
-        private Batch _currentBatch { get; }
+        private Batch _currentBatch;
+        public Batch CurrentBatch
+        {
+            get { return _currentBatch; }
+            set
+            {
+                if (_currentBatch != value)
+                    _currentBatch = value;
+                RaisePropertyChanged("CurrentBatch");
+            }
+        }
+
+        private bool _isVisible = false;
+        public bool isVisible
+        {
+            get { return _isVisible; }
+            set
+            {
+                if (_isVisible != value)
+                {
+                    _isVisible = value;
+                    RaisePropertyChanged("isVisible");
+                }
+            }
+        }
 
         private int _MaxProgressBarValue;
         public int MaxProgressBarValue
@@ -265,6 +291,49 @@ namespace BatchDataEntry.ViewModels
 
         #endregion
 
+        #region BackGroundWorker
+
+        private void DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                ConvertTiffRecord(CurrentBatch);
+                LoadGrid();
+                RaisePropertyChanged("DataSource");
+            }
+            catch (Exception ex)
+            {
+                logger.Error("[ERROR_CONVERSION]" + ex.ToString());
+            }
+        }
+
+        private void ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            // This is called on the UI thread when ReportProgress method is called
+            ValueProgressBar = e.ProgressPercentage;
+        }
+
+        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            isVisible = false;
+            MessageBox.Show("Conversione Tiff Terminata");
+        }
+
+        #endregion
+
+        private void UpdateValues()
+        {
+            DatabaseHelper db = new DatabaseHelper();
+            Batch tmp = db.GetBatchById(CurrentBatch.Id);
+            if (tmp != null)
+            {
+                CurrentBatch.UltimoIndicizzato = tmp.UltimoIndicizzato;
+                CurrentBatch.DocCorrente = tmp.DocCorrente;
+                RaisePropertyChanged("CurrentBatch");
+            }
+
+        }
+
         private void ContinuaDaSelezione()
         {
             if (SelectedRowIndex > 0 && _currentBatch != null)
@@ -275,6 +344,7 @@ namespace BatchDataEntry.ViewModels
                 continua.ShowDialog();
                 LoadGrid();
                 RaisePropertyChanged("DataSource");
+                UpdateValues();
             }
         }
 
@@ -295,6 +365,7 @@ namespace BatchDataEntry.ViewModels
 
                 LoadGrid();
                 RaisePropertyChanged("DataSource");
+                UpdateValues();
             }
         }
 
@@ -387,22 +458,18 @@ namespace BatchDataEntry.ViewModels
             RaisePropertyChanged("DataSource");
         }
 
-        private async void GeneratePdf()
+        private void GeneratePdf()
         {
-            await Task.Factory.StartNew(async () =>
+            try
             {
-                try
-                {
-                    await ConvertTiffRecord(_currentBatch);
-                    LoadGrid();
-                    RaisePropertyChanged("DataSource");
-                }
-                catch (Exception e)
-                {
-                    logger.Error("[ERROR_CONVERSION]" + e.ToString());
-                }    
-            });
+                backgroundWorker.RunWorkerAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.Error("[BGWORKER][GENPDF]" + ex);
+            }
             
+
         }
 
 
@@ -410,20 +477,30 @@ namespace BatchDataEntry.ViewModels
 
         public ViewModelBatchSelected()
         {
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.ProgressChanged += ProgressChanged;
+            backgroundWorker.DoWork += DoWork;
+            // not required for this question, but is a helpful event to handle
+            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
         }
 
         public ViewModelBatchSelected(Batch batch)
         {
-            _currentBatch = batch;
+            CurrentBatch = batch;
 
             var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
             Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
             LoadGrid();           
             NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
-            _currentBatch.Applicazione.LoadCampi();
+            CurrentBatch.Applicazione.LoadCampi();
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.ProgressChanged += ProgressChanged;
+            backgroundWorker.DoWork += DoWork;
+            // not required for this question, but is a helpful event to handle
+            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
             //TODO: perché non carica il numero docs e ultimo indicizzato?
-            
-            ValueProgressBar = 100;
+
+            MaxProgressBarValue = 100;
             ValueProgressBar = 0;
         }
 
@@ -458,7 +535,7 @@ namespace BatchDataEntry.ViewModels
             DataSource = db.GetDataTableDocumenti();
         }
         
-        private async Task ConvertTiffRecord(Batch b)
+        private async void ConvertTiffRecord(Batch b)
         {
             if (b.TipoFile != TipoFileProcessato.Tiff)
                 return;
@@ -491,7 +568,6 @@ namespace BatchDataEntry.ViewModels
                 db.UpdateRecordDocumento(dc);
                 ValueProgressBar++;
             }
-            MessageBox.Show("Conversione Tiff Terminata");
         }
 
         public void ConvertTiffToPdf(string source_dir, string path_output_file)
