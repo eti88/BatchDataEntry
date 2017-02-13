@@ -96,7 +96,7 @@ namespace BatchDataEntry.ViewModels
                 Batch.Applicazione.LoadCampi();
             LoadDocsList();
             DocFiles.CurrentIndex = indexRowVal;
-            DocFile = new Document(Batch, DocFiles.Current);
+            DocFile = new Document(Batch, DocFiles.Current, _db);
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
         }
@@ -113,8 +113,8 @@ namespace BatchDataEntry.ViewModels
 
             LoadDocsList();
             DocFiles.CurrentIndex = GetId();
-            Document tmp = new Document(Batch, DocFiles.Current);
-            DocFile = new Document(Batch, DocFiles.Current);
+            //Document tmp = new Document(Batch, DocFiles.Current);
+            DocFile = new Document(Batch, DocFiles.Current, _db);
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
         }
@@ -208,7 +208,7 @@ namespace BatchDataEntry.ViewModels
         {
             if (DocFiles.hasPrevious)
             {
-                DocFile = new Document(Batch, DocFiles.MovePrevious);
+                DocFile = new Document(Batch, DocFiles.MovePrevious, _db);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, _db);
                 for (int i = 0; i < repeatValues.Length; i++)
@@ -227,7 +227,7 @@ namespace BatchDataEntry.ViewModels
             
             if (DocFiles.hasNext)
             {
-                DocFile = new Document(Batch, DocFiles.MoveNext);
+                DocFile = new Document(Batch, DocFiles.MoveNext, _db);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, _db);
                 for (int i = 0; i < repeatValues.Length; i++)

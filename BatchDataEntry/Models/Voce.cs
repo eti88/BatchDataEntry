@@ -148,7 +148,7 @@ namespace BatchDataEntry.Models
             {
                 try
                 {
-                    if (string.IsNullOrEmpty(key) && db != null)
+                    if (!string.IsNullOrEmpty(key) && db != null)
                     {
                         var lst = new List<string>();
                         lst = db.GetAutocompleteList(id);
@@ -172,7 +172,42 @@ namespace BatchDataEntry.Models
             IsFocused = "False";
             IsDisabled = !enabled;
         }
-      
+
+        public Voce(int id, string key, string valu, bool autocomp, DatabaseHelper db, bool enabled = true)
+        {
+            this.Id = id;
+            this.Key = key;
+            this.IsAutocomplete = autocomp;
+            if (this.IsAutocomplete)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(key) && db != null)
+                    {
+                        var lst = new List<string>();
+                        lst = db.GetAutocompleteList(id);
+                        if (lst != null)
+                            Suggestions = lst;
+                        else
+                            Suggestions = new List<string>();
+                    }
+                    else
+                        Suggestions = new List<string>();
+                }
+                catch (Exception e)
+                {
+                    #if DEBUG
+                    Console.WriteLine(@"[VOCEEXCEPTION]" + e.ToString());
+                    #endif
+                    this.IsAutocomplete = false;
+                    Suggestions = new List<string>();
+                }
+            }
+            IsFocused = "False";
+            IsDisabled = !enabled;
+            this.Value = valu;
+        }
+
         public override string ToString()
         {
             return string.Format("[Key: {0}, Value: {1}, AutocompleteList: {2}]", this.Id, this.Key, this.Value);

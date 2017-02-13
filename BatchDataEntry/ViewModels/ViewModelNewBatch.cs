@@ -93,16 +93,16 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private bool _alternativeInit;
-        public bool AlternativeInit
+        private string _indexType;
+        public string IndexType
         {
-            get { return _alternativeInit; }
+            get { return _indexType; }
             set
             {
-                if (_alternativeInit != value)
+                if (_indexType != value)
                 {
-                    _alternativeInit = value;
-                    RaisePropertyChanged("AlternativeInit");
+                    _indexType = value;
+                    RaisePropertyChanged("IndexType");
                 }
             }
         }
@@ -215,22 +215,32 @@ namespace BatchDataEntry.ViewModels
 
         #region CacheFilesInit
 
-        public bool fillCacheDb(DatabaseHelper db, Batch b)
+        public string convertQuotes(string str)
         {
-            List<string> sourceCsv = new List<string>();
-            int srcCsvRows = 0;
-            if (b.Applicazione.OrigineCsv)
+            try
             {
-                sourceCsv = Csv.ReadRows(b.Applicazione.PathFileCsv);
-                srcCsvRows = sourceCsv.Count;
+                if (str == null)
+                    return String.Empty;
+
+                return str.Replace("'", "''");
+            }
+            catch (Exception)
+            {
+                return String.Empty;
             }
 
+        }
+
+        public bool fillCacheDb(DatabaseHelper db, Batch b)
+        {
             List<string> files = new List<string>();
 
             // Genera il file di cache partendo dal file csv invece che dalla lista all'interno della cartella.
-            if (AlternativeInit)
+            if (IndexType.Contains("Automatica"))
             {
-                Console.WriteLine(@"### USO GENERAZIONE ALTERNATIVA ###");
+                #if DEBUG
+                Console.WriteLine(@"### USO GENERAZIONE Automatica ###");
+                #endif
 
                 if(CurrentBatch.Applicazione.Id == 0)
                     CurrentBatch.LoadModel();
@@ -295,9 +305,12 @@ namespace BatchDataEntry.ViewModels
                     backgroundWorker.ReportProgress(i);
                 }
 
-            }
-            else
+            }else if (IndexType.Contains("Manuale"))
             {
+                #if DEBUG
+                Console.WriteLine(@"### USO GENERAZIONE Manuale ###");
+                #endif
+
                 if (b.TipoFile == TipoFileProcessato.Pdf)
                 {
                     files = Directory.GetFiles(b.DirectoryInput, "*.pdf").ToList();
@@ -310,7 +323,52 @@ namespace BatchDataEntry.ViewModels
                 if (files.Count == 0)
                     return false;
 
-                MaxValue = files.Count;
+                List<string> lines;
+
+                if (b.Applicazione.OrigineCsv)
+                {
+                    lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv);
+                }
+                else
+                {
+                    lines = new List<string>();
+                }
+
+                MaxValue = files.Count + lines.Count;
+                #if DEBUG
+                Console.WriteLine(@"### Aggiunta elementi di autocompletamento ###");
+                #endif
+                try
+                {
+                    for (int i = 0; i < lines.Count; i++)
+                    {
+                        string[] cells = lines.ElementAt(i).Split(b.Applicazione.Separatore[0]);
+                        if (cells.Length > 1)
+                        {
+                            for (int z = 0; z < b.Applicazione.Campi.Count; z++)
+                            {
+                                int colNumber = b.Applicazione.Campi[z].Posizione;
+                                string celValue = (z < cells.Length && !string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
+
+                                if (!string.IsNullOrEmpty(celValue))
+                                {
+                                    if (!(db.Count(String.Format("SELECT COUNT(Id) FROM Autocompletamento WHERE Valore='{0}'", convertQuotes(celValue))) > 0))
+                                        db.InsertRecordAutocompletamento(new Autocompletamento(colNumber, celValue));
+                                }
+                                backgroundWorker.ReportProgress(i);
+                            }
+                        }
+                    }
+                }
+                catch (Exception er)
+                {
+                    logger.Error(string.Format("Error populate Autocomp. Table {1}", er.Source, er.Message));
+                    throw;
+                }
+
+                #if DEBUG
+                Console.WriteLine(@"### Inizio indicizzazione files ###");
+                #endif
 
                 // adesso per ogni file in files aggiungere un record fileName, path, false
                 for (int i = 0; i < files.Count - 1; i++)
@@ -321,45 +379,8 @@ namespace BatchDataEntry.ViewModels
                     doc.Path = files[i];
                     doc.IsIndexed = false;
 
-                    if (b.Applicazione.OrigineCsv)
-                    {
-                        try
-                        {
-                            if (srcCsvRows > 0 && (srcCsvRows < MaxValue))
-                            {
-                                string[] cells = sourceCsv.ElementAt(i).Split(b.Applicazione.Separatore[0]);
-
-                                if (cells.Length == 1) // viene restituita la riga di partenza
-                                {
-                                    MessageBox.Show(
-                                        "Non è possibile leggere correttamente le righe del file csv di origine, sicuro di aver inserito il delimitatore di campo giusto?");
-                                    return false;
-                                }
-
-                                // il numero di campi non corrisponde tra il modello e il file csv
-                                if (cells.Length != CurrentBatch.Applicazione.Campi.Count)
-                                {
-                                    MessageBox.Show("Il numero di campi tra il file Csv e il modello non coincide!");
-                                    return false;
-                                }
-
-                                for (int z = 0; z < b.Applicazione.Campi.Count; z++)
-                                {
-                                    string colName = b.Applicazione.Campi.ElementAt(z).Nome;
-                                    string celValue = (!string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
-                                    doc.Voci.Add(new Voce(colName, celValue));
-                                }
-                            }
-                        }
-                        catch (Exception er)
-                        {
-                            logger.Error(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message));
-                            throw;
-                        }
-
-                    }
-                    else
-                    {
+                    if (!b.Applicazione.OrigineCsv)
+                    {                     
                         for (int z = 0; z < b.Applicazione.Campi.Count; z++)
                         {
                             string colName = b.Applicazione.Campi.ElementAt(z).Nome;
@@ -372,6 +393,11 @@ namespace BatchDataEntry.ViewModels
                     db.InsertRecordDocumento(b, doc);
                     backgroundWorker.ReportProgress(i);
                 }
+            }
+            else
+            {
+                MessageBox.Show("Metodo indicizzazione non selezionato");
+                return false;
             }
     
             return true;

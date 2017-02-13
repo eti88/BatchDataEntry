@@ -387,7 +387,7 @@ namespace BatchDataEntry.ViewModels
                     Console.WriteLine("SelectedRowIndex: " + SelectedRowIndex);
                     #endif
 
-                    Document current = new Document(_currentBatch, db.GetDocumento(SelectedRowIndex));
+                    Document current = new Document(_currentBatch, db.GetDocumento(SelectedRowIndex), db);
                     db.Delete("Documenti", string.Format("Id= {0}", current.Id));
 
                     try
@@ -551,7 +551,7 @@ namespace BatchDataEntry.ViewModels
 
             foreach (var doc in docs)
             {
-                Document dc = new Document(_currentBatch, doc);
+                Document dc = new Document(_currentBatch, doc, db);
                 string new_path = String.Empty;
                 var fileName = Path.GetFileName(dc.Path);
                 if (!Utility.ContainsOnlyNumbers(fileName))

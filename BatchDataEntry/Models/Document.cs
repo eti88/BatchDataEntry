@@ -81,7 +81,7 @@ namespace BatchDataEntry.Models
             this.Voci = new ObservableCollection<Voce>();
         }
 
-        public Document(Batch b, Dictionary<int, string> dictionary)
+        public Document(Batch b, Dictionary<int, string> dictionary, DatabaseHelper db)
         {
             this.Voci = new ObservableCollection<Voce>();
 
@@ -103,10 +103,21 @@ namespace BatchDataEntry.Models
                     this.IsIndexed = GetBool(row.Value);
                 if (i > 3)
                 {
-                    if (!string.IsNullOrEmpty(row.Value))
+                    if (!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori == true)
+                    {
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).SalvaValori, db, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    }
+                    else if(!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori == false)
+                    {
                         this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    }else if (b.Applicazione.Campi.ElementAt(h).SalvaValori && string.IsNullOrEmpty(row.Value))
+                    {
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).SalvaValori, db, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    }
                     else
+                    {
                         this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    }                       
                     h++;
                 }       
             }

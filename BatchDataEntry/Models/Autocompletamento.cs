@@ -13,5 +13,11 @@ namespace BatchDataEntry.Models
         public string Valore { get; set; }
 
         public Autocompletamento() { }
+
+        public Autocompletamento(int Col, string val)
+        {
+            this.Colonna = Col;
+            this.Valore = val;
+        }
     }
 }

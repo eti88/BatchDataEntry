@@ -381,7 +381,7 @@ namespace BatchDataEntry.Helpers
         public int InsertRecordAutocompletamento(Autocompletamento a)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Id", a.Id.ToString());
+            //values.Add("Id", a.Id.ToString());
             values.Add("Colonna", a.Colonna.ToString());
             values.Add("Valore", a.Valore);
            
@@ -573,7 +573,7 @@ namespace BatchDataEntry.Helpers
 
         public bool CreateTableCampo()
         {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Campo (Id INTEGER PRIMARY KEY," +
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Campo (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
                             "Nome VARCHAR(254)," +
                             "Posizione INTEGER," +
                             "SalvaValori INTEGER," +
@@ -597,7 +597,7 @@ namespace BatchDataEntry.Helpers
 
         public bool CreateTableModello()
         {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Modello (Id INTEGER PRIMARY KEY," +
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Modello (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
                             "Nome VARCHAR(254)," +
                             "OrigineCsv INTEGER," +
                             "PathFileCsv TEXT," +
@@ -616,7 +616,7 @@ namespace BatchDataEntry.Helpers
 
         public bool CreateTableBatch()
         {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY," +
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
                             "Nome VARCHAR(254)," +
                             "TipoFile INTEGER," +
                             "DirectoryInput TEXT," +
@@ -647,7 +647,7 @@ namespace BatchDataEntry.Helpers
             // Nel caso si voglia aggiungere il supporto per più tipi di file va modificato in dictionary il parametro columns
             // per passare anche il tipo di campo (adesso si assume che sia sempre string)
             StringBuilder sqlCmd = new StringBuilder();
-            sqlCmd.Append(@"CREATE TABLE IF NOT EXISTS Documenti (Id INTEGER PRIMARY KEY,FileName VARCHAR(254),Path TEXT,isIndicizzato INTEGER");
+            sqlCmd.Append(@"CREATE TABLE IF NOT EXISTS Documenti (Id INTEGER PRIMARY KEY AUTOINCREMENT,FileName VARCHAR(254),Path TEXT,isIndicizzato INTEGER");
 
             if (columns.Count > 0)
             {
@@ -678,7 +678,7 @@ namespace BatchDataEntry.Helpers
 
         public bool CreateTableAutocompletamento()
         {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Autocompletamento (Id INTEGER PRIMARY KEY," +
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Autocompletamento (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
                             "Colonna INTEGER, Valore VARCHAR(254))";                          
             try
             {
