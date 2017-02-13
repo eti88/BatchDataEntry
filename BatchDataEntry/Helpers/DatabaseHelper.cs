@@ -222,6 +222,22 @@ namespace BatchDataEntry.Helpers
             }
         }
 
+        public string convertQuotes(string str)
+        {
+            try
+            {
+                if(str == null)
+                    return String.Empty;
+
+                return str.Replace("'", "''");
+            }
+            catch (Exception)
+            {
+                return String.Empty;
+            }
+            
+        }
+
         /// <summary>
         ///     Allows the programmer to easily update rows in the DB.
         /// </summary>
@@ -237,7 +253,10 @@ namespace BatchDataEntry.Helpers
             {
                 foreach (KeyValuePair<String, String> val in data)
                 {
-                    vals += String.Format(" {0} = '{1}',", val.Key.ToString(), val.Value.ToString());
+                    if(val.Value == null)
+                        vals += String.Format(" {0} = '{1}',", convertQuotes(val.Key.ToString()), String.Empty);
+                    else
+                        vals += String.Format(" {0} = '{1}',", convertQuotes(val.Key.ToString()), convertQuotes(val.Value.ToString()));
                 }
                 vals = vals.Substring(0, vals.Length - 1);
             }
@@ -292,8 +311,8 @@ namespace BatchDataEntry.Helpers
             Boolean returnCode = true;
             foreach (KeyValuePair<String, String> val in data)
             {
-                columns += String.Format(" {0},", val.Key.ToString());
-                values += String.Format(" '{0}',", val.Value);
+                columns += String.Format(" {0},", convertQuotes(val.Key.ToString()));
+                values += String.Format(" '{0}',", convertQuotes(val.Value));
             }
             columns = columns.Substring(0, columns.Length - 1);
             values = values.Substring(0, values.Length - 1);

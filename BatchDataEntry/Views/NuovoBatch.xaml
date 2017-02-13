@@ -7,7 +7,7 @@
         xmlns:models="clr-namespace:BatchDataEntry.Models"
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
-        Title="Nuovo Batch" Height="590" Width="450" MinHeight="590">
+        Title="Nuovo Batch" Height="640" Width="450" MinHeight="640">
     <Window.Resources>
         <viewModels:ViewModelNewBatch x:Key="ViewModelNewBatch"/>
         <ObjectDataProvider x:Key="fileTypeEnum" MethodName="GetValues" ObjectType="{x:Type models:TipoFileProcessato}">
@@ -20,8 +20,8 @@
 
     <Grid>
         <DockPanel>
-            <StackPanel DockPanel.Dock="Top" Height="485">
-                <StackPanel Orientation="Vertical" Height="454">
+            <StackPanel DockPanel.Dock="Top" Height="548">
+                <StackPanel Orientation="Vertical" Height="475">
                     <Label Content="Nome" />
                     <TextBox Margin="10,10,10,0" VerticalContentAlignment="Center" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" Height="30" FontSize="12">
                         <TextBox.Text>
@@ -68,12 +68,13 @@
                             </Button.DataContext>
                         </Button>
                     </WrapPanel>
+                    <CheckBox x:Name="checkBoxUseFile" IsChecked="{Binding Path=AlternativeInit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Usa il file Csv esterno per generare la lista di file" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"></CheckBox>
                     <Label Content="Modello" />
                     <ComboBox x:Name="comboBoxModello" VerticalContentAlignment="Center" ItemsSource="{Binding Path=Models}" SelectedValue="{Binding CurrentBatch.IdModello, Mode=TwoWay}" IsSynchronizedWithCurrentItem="True"
                               SelectedValuePath="Id" 
-                              DisplayMemberPath="Nome" Margin="10,10,10,0" FontSize="12"/>
+                              DisplayMemberPath="Nome" Margin="10" FontSize="12"/>
                 </StackPanel>
-                <ProgressBar x:Name="ProgressBarInit" Visibility="{Binding Path=isVisible, Converter={StaticResource BoolToVis}}" Minimum="0" Value="{Binding Path=Progress}" Maximum="{Binding Path=MaxValue}" Height="30" VerticalAlignment="Bottom" Margin="10,0"/>
+                <ProgressBar x:Name="ProgressBarInit" Visibility="{Binding Path=isVisible, Converter={StaticResource BoolToVis}}" Minimum="0" Value="{Binding Path=Progress}" Maximum="{Binding Path=MaxValue}" Height="30" VerticalAlignment="Bottom" Margin="10,5,10,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="45" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button Content="Cancella" Click="ButtonCancella_Click"  VerticalAlignment="Center" Style="{StaticResource GenericButton}" FontSize="12"/>

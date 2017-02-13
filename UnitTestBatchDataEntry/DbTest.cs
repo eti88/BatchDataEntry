@@ -34,8 +34,8 @@ namespace UnitTestBatchDataEntry
         [TestMethod]
         public void TestInsertRecords()
         {
-            Campo campo1 = new Campo(1, "Column1", 0, false, "", true, 1);
-            Campo campo2 = new Campo(2, "Column2", 1, false, "", false, 1);
+            Campo campo1 = new Campo(1, "Column1", 0, false, "", true, false, 1);
+            Campo campo2 = new Campo(2, "Column2", 1, false, "", false, false, 1);
             Modello modello1 = new Modello(1, "Modello test", false, new ObservableCollection<Campo>());
             Modello modello2 = new Modello(2, "Modello test 2", false, new ObservableCollection<Campo>());
             Batch batch = new Batch(1, "batch test", TipoFileProcessato.Pdf, "C:/input/", "C:/output/", modello1, 1, 1, 0, 0, 0, 1);

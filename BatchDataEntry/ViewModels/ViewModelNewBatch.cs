@@ -93,6 +93,20 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private bool _alternativeInit;
+        public bool AlternativeInit
+        {
+            get { return _alternativeInit; }
+            set
+            {
+                if (_alternativeInit != value)
+                {
+                    _alternativeInit = value;
+                    RaisePropertyChanged("AlternativeInit");
+                }
+            }
+        }
+
         private RelayCommand _applyCommand;
         public ICommand ApplyCommand
         {
@@ -212,80 +226,154 @@ namespace BatchDataEntry.ViewModels
             }
 
             List<string> files = new List<string>();
-            if (b.TipoFile == TipoFileProcessato.Pdf)
-            {
-                files = Directory.GetFiles(b.DirectoryInput, "*.pdf").ToList();
-            }
-            else
-            {
-                files = Directory.GetDirectories(b.DirectoryInput).ToList();
-            }
 
-            if (files.Count == 0)
-                return false;
-
-            MaxValue = files.Count;
-            
-            // adesso per ogni file in files aggiungere un record fileName, path, false
-            for (int i = 0; i < files.Count - 1; i++)
+            // Genera il file di cache partendo dal file csv invece che dalla lista all'interno della cartella.
+            if (AlternativeInit)
             {
-                Document doc = new Document();
-                doc.Id = i + 1;
-                doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
-                doc.Path = files[i];
-                doc.IsIndexed = false;
+                Console.WriteLine(@"### USO GENERAZIONE ALTERNATIVA ###");
 
-                if (b.Applicazione.OrigineCsv)
+                if(CurrentBatch.Applicazione.Id == 0)
+                    CurrentBatch.LoadModel();
+
+                if (!CurrentBatch.Applicazione.OrigineCsv)
+                    return false;
+
+                if(CurrentBatch.Applicazione.Campi.Count == 0)
+                    CurrentBatch.Applicazione.LoadCampi();
+
+                int indexColumn = 0;
+
+                for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)
                 {
+                    if (CurrentBatch.Applicazione.Campi[i].IndicePrimario)
+                    {
+                        indexColumn = CurrentBatch.Applicazione.Campi[i].Posizione;
+                        break;
+                    }                       
+                }
+                
+                List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv);
+                MaxValue = lines.Count;
+
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    Document doc = new Document();
+                    doc.Id = i + 1;
+
                     try
                     {
-                        if (srcCsvRows > 0 && (srcCsvRows < MaxValue))
+                        string[] cells = lines[i].Split(b.Applicazione.Separatore[0]);
+
+                        if (cells.Length == 1) // viene restituita la riga di partenza
                         {
-                            string[] cells = sourceCsv.ElementAt(i).Split(b.Applicazione.Separatore[0]);
+                            MessageBox.Show(
+                                "Non è possibile leggere correttamente le righe del file csv di origine, sicuro di aver inserito il delimitatore di campo giusto?");
+                            return false;
+                        }
 
-                            if (cells.Length == 1) // viene restituita la riga di partenza
-                            {
-                                MessageBox.Show(
-                                    "Non è possibile leggere correttamente le righe del file csv di origine, sicuro di aver inserito il delimitatore di campo giusto?");                              
-                                return false;
-                            }
+                        doc.FileName = cells[indexColumn];
+                        doc.Path = Path.Combine(CurrentBatch.DirectoryInput, cells[indexColumn].Contains(".pdf") ? cells[indexColumn] : String.Format("{0}.pdf", cells[indexColumn]));
+                        doc.IsIndexed = false;
 
-                            // il numero di campi non corrisponde tra il modello e il file csv
-                            if (cells.Length != (CurrentBatch.Applicazione.Campi.Count - 1))
-                            {
-                                MessageBox.Show("Il numero di campi tra il file Csv e il modello non coincide!");                               
-                                return false;
-                            }
-        
-                            for (int z = 0; z < b.Applicazione.Campi.Count; z++)
-                            {
-                                string colName = b.Applicazione.Campi.ElementAt(z).Nome;
-                                string celValue = (!string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
-                                doc.Voci.Add(new Voce(colName, celValue));
-                            }
-                        }                     
+                        for (int z = 0; z < b.Applicazione.Campi.Count; z++)
+                        {
+                            string colName = b.Applicazione.Campi.ElementAt(z).Nome;
+                            
+                            string celValue = (z < cells.Length && !string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
+                            doc.Voci.Add(new Voce(colName, celValue));
+                        }
+
                     }
                     catch (Exception er)
-                    {   
+                    {
+                        logger.Error("### Init basato su file Csv esterno ### break at line: " + (i+1));
                         logger.Error(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message));
                         throw;
                     }
-                    
+
+                    db.InsertRecordDocumento(b, doc);
+                    backgroundWorker.ReportProgress(i);
+                }
+
+            }
+            else
+            {
+                if (b.TipoFile == TipoFileProcessato.Pdf)
+                {
+                    files = Directory.GetFiles(b.DirectoryInput, "*.pdf").ToList();
                 }
                 else
                 {
-                    for (int z = 0; z < b.Applicazione.Campi.Count; z++)
-                    {
-                        string colName = b.Applicazione.Campi.ElementAt(z).Nome;
-                        string valore = (string.IsNullOrEmpty(b.Applicazione.Campi.ElementAt(z).ValorePredefinito))
-                            ? ""
-                            : b.Applicazione.Campi.ElementAt(z).ValorePredefinito;
-                        doc.Voci.Add(new Voce(colName, valore));
-                    }
+                    files = Directory.GetDirectories(b.DirectoryInput).ToList();
                 }
-                db.InsertRecordDocumento(b, doc);
-                backgroundWorker.ReportProgress(i);
+
+                if (files.Count == 0)
+                    return false;
+
+                MaxValue = files.Count;
+
+                // adesso per ogni file in files aggiungere un record fileName, path, false
+                for (int i = 0; i < files.Count - 1; i++)
+                {
+                    Document doc = new Document();
+                    doc.Id = i + 1;
+                    doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
+                    doc.Path = files[i];
+                    doc.IsIndexed = false;
+
+                    if (b.Applicazione.OrigineCsv)
+                    {
+                        try
+                        {
+                            if (srcCsvRows > 0 && (srcCsvRows < MaxValue))
+                            {
+                                string[] cells = sourceCsv.ElementAt(i).Split(b.Applicazione.Separatore[0]);
+
+                                if (cells.Length == 1) // viene restituita la riga di partenza
+                                {
+                                    MessageBox.Show(
+                                        "Non è possibile leggere correttamente le righe del file csv di origine, sicuro di aver inserito il delimitatore di campo giusto?");
+                                    return false;
+                                }
+
+                                // il numero di campi non corrisponde tra il modello e il file csv
+                                if (cells.Length != CurrentBatch.Applicazione.Campi.Count)
+                                {
+                                    MessageBox.Show("Il numero di campi tra il file Csv e il modello non coincide!");
+                                    return false;
+                                }
+
+                                for (int z = 0; z < b.Applicazione.Campi.Count; z++)
+                                {
+                                    string colName = b.Applicazione.Campi.ElementAt(z).Nome;
+                                    string celValue = (!string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
+                                    doc.Voci.Add(new Voce(colName, celValue));
+                                }
+                            }
+                        }
+                        catch (Exception er)
+                        {
+                            logger.Error(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message));
+                            throw;
+                        }
+
+                    }
+                    else
+                    {
+                        for (int z = 0; z < b.Applicazione.Campi.Count; z++)
+                        {
+                            string colName = b.Applicazione.Campi.ElementAt(z).Nome;
+                            string valore = (string.IsNullOrEmpty(b.Applicazione.Campi.ElementAt(z).ValorePredefinito))
+                                ? ""
+                                : b.Applicazione.Campi.ElementAt(z).ValorePredefinito;
+                            doc.Voci.Add(new Voce(colName, valore));
+                        }
+                    }
+                    db.InsertRecordDocumento(b, doc);
+                    backgroundWorker.ReportProgress(i);
+                }
             }
+    
             return true;
         }
 
