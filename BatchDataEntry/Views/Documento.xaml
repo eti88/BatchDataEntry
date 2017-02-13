@@ -45,6 +45,7 @@
                                     <Label Content="{Binding Key, Mode=OneTime}"/>
                                     <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                              helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}"
+                                             IsEnabled="{Binding Path=IsDisabled}"
                                              wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding Suggestions, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
                             </DataTemplate>

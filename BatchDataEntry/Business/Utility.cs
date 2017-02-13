@@ -41,23 +41,18 @@ namespace BatchDataEntry.Business
                     case "BY":
                         //convert to bytes (default)
                         return bytes;
-                        break;
                     case "KB":
                         //convert to kilobytes
                         return (bytes / CONVERSION_VALUE);
-                        break;
                     case "MB":
                         //convert to megabytes
                         return (bytes / CalculateSquare(CONVERSION_VALUE));
-                        break;
                     case "GB":
                         //convert to gigabytes
                         return (bytes / CalculateCube(CONVERSION_VALUE));
-                        break;
                     default:
                         //default
                         return bytes;
-                        break;
                 }
             }
             catch (Exception ex)

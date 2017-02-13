@@ -16,6 +16,7 @@ namespace BatchDataEntry.Models
         private int _tipo;
         private int _idModello;
         private bool _riproponi;
+        private bool _isDisabled;
 
         public int Id {
             get { return _id; }
@@ -119,6 +120,17 @@ namespace BatchDataEntry.Models
             }
         }
 
+        public bool IsDisabled
+        {
+            get { return _isDisabled; }
+            set {
+                if (value != IsDisabled)
+                {
+                    _isDisabled = value;
+                    OnPropertyChanged("IsDisabled");
+                } }
+        }
+
         /*
          SalvaValori permette di tenere traccia dei dati nel medesimo campo velocizzando
          futuri inserimenti.
@@ -136,7 +148,7 @@ namespace BatchDataEntry.Models
             this.Riproponi = false;
         }
 
-        public Campo(string nome, bool sv, string vp, bool ip, bool rip)
+        public Campo(string nome, bool sv, string vp, bool ip, bool rip, bool disab)
         {
             this.Nome = nome;
             this.SalvaValori = sv;
@@ -144,9 +156,10 @@ namespace BatchDataEntry.Models
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
             this.Riproponi = rip;
+            this.IsDisabled = disab;
         }
 
-        public Campo(int id, string nome, bool sv, string vp, bool ip, bool rip)
+        public Campo(int id, string nome, bool sv, string vp, bool ip, bool rip, bool disab)
         {
             this.Id = id;
             this.Nome = nome;
@@ -155,9 +168,10 @@ namespace BatchDataEntry.Models
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
             this.Riproponi = rip;
+            this.IsDisabled = disab;
         }
 
-        public Campo(int id, string nome, int po, bool sv, string vp, bool ip, int fk)
+        public Campo(int id, string nome, int po, bool sv, string vp, bool ip, bool disab, int fk)
         {
             this.Id = id;
             this.Nome = nome;
@@ -167,6 +181,7 @@ namespace BatchDataEntry.Models
             this.IndicePrimario = ip;
             this.TipoCampo = 0;
             this.IdModello = fk;
+            this.IsDisabled = disab;
             this.MyMemento = new MementoCampo(nome, po, sv, vp, ip);
         }
 
@@ -181,6 +196,7 @@ namespace BatchDataEntry.Models
             this.TipoCampo = _campo.TipoCampo;
             this.IdModello = _campo.IdModello;
             this.Riproponi = _campo.Riproponi;
+            this.IsDisabled = _campo.IsDisabled;
             this.MyMemento = new MementoCampo(_campo.Nome, _campo.Posizione, _campo.SalvaValori, _campo.ValorePredefinito, _campo.IndicePrimario);
         }
 

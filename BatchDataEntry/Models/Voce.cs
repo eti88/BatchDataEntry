@@ -90,38 +90,56 @@ namespace BatchDataEntry.Models
             }
         }
 
+        private bool _isDisabled;
+        public bool IsDisabled
+        {
+            get { return _isDisabled; }
+            set
+            {
+                if (value != IsDisabled)
+                {
+                    _isDisabled = value;
+                    OnPropertyChanged("IsDisabled");
+                }
+            }
+        }
+
         public Voce()
         {
             Suggestions = new List<string>();
             IsFocused = "False";
+            IsDisabled = false;
         }
 
-        public Voce(int id, string key)
+        public Voce(int id, string key, bool enabled = true)
         {
             this.Id = id;
             this.Key = key;
             Suggestions = new List<string>();
             IsFocused = "False";
+            IsDisabled = !enabled;
         }
 
-        public Voce(string key, string value)
+        public Voce(string key, string value, bool enabled = true)
         {
             this.Key = key;
             this.Value = value;
             Suggestions = new List<string>();
             IsFocused = "False";
+            IsDisabled = !enabled;
         }
 
-        public Voce(int id, string key, string value)
+        public Voce(int id, string key, string value, bool enabled = true)
         {
             this.Id = id;
             this.Key = key;
             this.Value = value;
             Suggestions = new List<string>();
             IsFocused = "False";
+            IsDisabled = !enabled;
         }
 
-        public Voce(int id, string key, bool autocomp, DatabaseHelper db)
+        public Voce(int id, string key, bool autocomp, DatabaseHelper db, bool enabled = true)
         {
             this.Id = id;
             this.Key = key;
@@ -152,6 +170,7 @@ namespace BatchDataEntry.Models
                 }
             }
             IsFocused = "False";
+            IsDisabled = !enabled;
         }
       
         public override string ToString()

@@ -498,7 +498,6 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.DoWork += DoWork;
             // not required for this question, but is a helpful event to handle
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
-            //TODO: perché non carica il numero docs e ultimo indicizzato?
 
             MaxProgressBarValue = 100;
             ValueProgressBar = 0;

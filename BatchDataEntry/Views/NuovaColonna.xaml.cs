@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace BatchDataEntry.Views
 {
@@ -16,6 +17,18 @@ namespace BatchDataEntry.Views
         {
             this.DialogResult = true;
             this.Close();
+        }
+
+        private void checkBoxDisableColumn_Checked(object sender, RoutedEventArgs e)
+        {
+            checkBoxSalvaValori.IsEnabled = false;
+            checkBoxPartialSave.IsEnabled = false;
+        }
+
+        private void checkBoxDisableColumn_Unchecked(object sender, RoutedEventArgs e)
+        {
+            checkBoxSalvaValori.IsEnabled = true;
+            checkBoxPartialSave.IsEnabled = true;
         }
     }
 }

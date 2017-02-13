@@ -267,7 +267,7 @@ namespace BatchDataEntry.ViewModels
                     }
                     catch (Exception er)
                     {   
-                        logger.Error(string.Format("Error into string[] cells (Source Csv) [{er.Source}] {er.Message}"));
+                        logger.Error(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message));
                         throw;
                     }
                     

@@ -102,11 +102,11 @@ namespace BatchDataEntry.Models
                 if (i == 3)
                     this.IsIndexed = GetBool(row.Value);
                 if (i > 3)
-                {         
-                    if(!string.IsNullOrEmpty(row.Value))
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value));
+                {
+                    if (!string.IsNullOrEmpty(row.Value))
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).IsDisabled));
                     else
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome));
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).IsDisabled));
                     h++;
                 }       
             }
@@ -136,9 +136,9 @@ namespace BatchDataEntry.Models
             foreach (Campo campo in b.Applicazione.Campi)
             {
                 if (campo.SalvaValori)
-                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, db));
+                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, db, campo.IsDisabled));
                 else
-                    voci.Add(new Voce(campo.Posizione, campo.Nome));
+                    voci.Add(new Voce(campo.Posizione, campo.Nome, campo.IsDisabled));
             }
             
             this.Voci = voci;

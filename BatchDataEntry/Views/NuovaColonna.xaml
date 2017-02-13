@@ -38,10 +38,11 @@
                     </TextBox.Text>
                 </TextBox>
 
-                <WrapPanel Orientation="Horizontal" Height="122" Margin="10, 0, 10, 0">
+                <WrapPanel Orientation="Horizontal" Height="141" Margin="10, 0, 10, 0">
                     <CheckBox x:Name="checkBoxIsPrimary" IsChecked="{Binding Path=SelectedCampo.IndicePrimario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Chiave primaria" Foreground="OrangeRed" Margin="10, 0" Height="35" VerticalContentAlignment="Center"/>
                     <CheckBox x:Name="checkBoxSalvaValori" IsChecked="{Binding Path=SelectedCampo.SalvaValori, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo Autocompletante" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"/>
-                    <CheckBox x:Name="checkBoxPartialSave" IsChecked="{Binding Path=SelectedCampo.Riproponi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Riproponi valore inserito" Margin="10, 0" Height="35" VerticalContentAlignment="Center"/>
+                    <CheckBox x:Name="checkBoxPartialSave" IsChecked="{Binding Path=SelectedCampo.Riproponi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Riproponi valore precedente" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221"/>
+                    <CheckBox x:Name="checkBoxDisableColumn" IsChecked="{Binding Path=SelectedCampo.IsDisabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo non modificabile" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" Checked="checkBoxDisableColumn_Checked" Unchecked="checkBoxDisableColumn_Unchecked"/>
                 </WrapPanel>
                 <Label x:Name="labelValPredefinito" Content="Valore predefinito" Margin="0,5,0,0"/>
                 <TextBox x:Name="textBoxValPre" Text="{Binding SelectedCampo.ValorePredefinito}" Margin="10,0,10,20" Style="{StaticResource generalTextbox}" FontSize="12"/>

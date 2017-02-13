@@ -63,7 +63,7 @@ namespace BatchDataEntry.ViewModels
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasNext; }
         }
 
-        private bool CanFocused {  get { return _selectElementFocus != null && _selectElementFocus >= 0; } }
+        private bool CanFocused {  get { return _selectElementFocus >= 0; } }
 
         private bool CanMovePrevious
         {

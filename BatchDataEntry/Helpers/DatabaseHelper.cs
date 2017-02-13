@@ -349,6 +349,8 @@ namespace BatchDataEntry.Helpers
             values.Add("IdModello", c.IdModello.ToString());
             int rip = Convert.ToInt32(c.Riproponi);
             values.Add("Riproponi", rip.ToString());
+            int ds = Convert.ToInt32(c.IsDisabled);
+            values.Add("Disabilitato", ds.ToString());
 
             bool r = Insert("Campo", values);
             if (r)
@@ -452,6 +454,8 @@ namespace BatchDataEntry.Helpers
             values.Add("IdModello", c.IdModello.ToString());
             int rip = Convert.ToInt32(c.Riproponi);
             values.Add("Riproponi", rip.ToString());
+            int ds = Convert.ToInt32(c.IsDisabled);
+            values.Add("Disabilitato", ds.ToString());
 
             Update("Campo", values, string.Format("Id={0}", c.Id));
         }
@@ -558,7 +562,8 @@ namespace BatchDataEntry.Helpers
                             "IndicePrimario INTEGER," +
                             "TipoCampo INTEGER," +
                             "IdModello INTEGER," +
-                            "Riproponi INTEGER)";                
+                            "Riproponi INTEGER," +
+                            "Disabilitato INTEGER)";                
             try
             {
                 this.ExecuteNonQuery(SQLCmd);
@@ -763,6 +768,7 @@ namespace BatchDataEntry.Helpers
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
                 }
                 reader.Close();
                 return c;
@@ -1040,6 +1046,7 @@ namespace BatchDataEntry.Helpers
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
                     campi.Add(c);
                 }
 
@@ -1157,6 +1164,7 @@ namespace BatchDataEntry.Helpers
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
                     campi.Add(c);
                 }
 
