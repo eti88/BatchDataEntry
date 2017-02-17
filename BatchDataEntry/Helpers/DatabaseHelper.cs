@@ -405,6 +405,7 @@ namespace BatchDataEntry.Helpers
             values.Add("PathFileCsv", m.PathFileCsv);
             values.Add("Separatore", m.Separatore);
             values.Add("FocusColumn", m.StartFocusColumn.ToString());
+            values.Add("CsvColumn", m.CsvColumn.ToString());
             bool r = Insert("Modello", values);
             if (r)
                 return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Modello"));
@@ -499,6 +500,7 @@ namespace BatchDataEntry.Helpers
             values.Add("PathFileCsv", m.PathFileCsv);
             values.Add("Separatore", m.Separatore);
             values.Add("FocusColumn", m.StartFocusColumn.ToString());
+            values.Add("CsvColumn", m.CsvColumn.ToString());
 
             Update("Modello", values, string.Format("Id={0}", m.Id));
         }
@@ -602,7 +604,8 @@ namespace BatchDataEntry.Helpers
                             "OrigineCsv INTEGER," +
                             "PathFileCsv TEXT," +
                             "Separatore VARCHAR(1)," +
-                            "FocusColumn INTEGER)";
+                            "FocusColumn INTEGER DEFAULT 0," +
+                            "CsvColumn INTEGER DEFAULT 0)";
             try
             {
                 this.ExecuteNonQuery(SQLCmd);
@@ -822,6 +825,7 @@ namespace BatchDataEntry.Helpers
                     m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
                     m.Separatore = Convert.ToString(reader["Separatore"]);
                     m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
                 }
                 reader.Close();
                 return m;
@@ -1103,6 +1107,7 @@ namespace BatchDataEntry.Helpers
                     m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
                     m.Separatore = Convert.ToString(reader["Separatore"]);
                     m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
                     models.Add(m);
                 }
 
@@ -1221,7 +1226,7 @@ namespace BatchDataEntry.Helpers
                     m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
                     m.Separatore = Convert.ToString(reader["Separatore"]);
                     m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
-                        
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
                     models.Add(m);
                 }
 
@@ -1259,6 +1264,7 @@ namespace BatchDataEntry.Helpers
                     m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
                     m.Separatore = Convert.ToString(reader["Separatore"]);
                     m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
                     models.Add(m);
                 }
 

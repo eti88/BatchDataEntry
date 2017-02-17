@@ -6,13 +6,13 @@
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         mc:Ignorable="d"
-        Title="Nuovo Modello" Height="500" Width="400" MinHeight="500" MaxHeight="500" MinWidth="400" MaxWidth="500">
+        Title="Nuovo Modello" Height="570" Width="400" MinHeight="570" MaxHeight="570" MinWidth="400" MaxWidth="500">
 
     <Grid>
         <DockPanel>
-            <StackPanel DockPanel.Dock="Top" Height="410">
+            <StackPanel DockPanel.Dock="Top" Height="471">
                 <Label x:Name="labelNome" Content="Nome"/>
-                <TextBox x:Name="textBoxNome" Margin="10,0,10,20" Style="{StaticResource generalTextbox}" FontSize="12">
+                <TextBox x:Name="textBoxNome" Margin="10,0,10,10" Style="{StaticResource generalTextbox}" FontSize="12">
                     <TextBox.Text>
                         <Binding Path="SelectedModel.Nome" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
@@ -35,11 +35,22 @@
                     </TextBox>
                     <Button x:Name="buttonChooseFile" Click="ButtonChooseFile_OnClick" Content="..." Style="{StaticResource OpenDirDialogButton}"/>
                 </WrapPanel>
+                <Label x:Name="labelCsvSuggestion" Content="Colonna Autocompletamento (indicizz. normale) *" Margin="0,10,0,0"/>
+                <TextBox x:Name="textBoxCsvSuggestion" TextWrapping="Wrap" Margin="10,0,320,5" Style="{StaticResource generalTextbox}" Padding="10,3,10,3" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" FontSize="12">
+                    <TextBox.Text>
+                        <Binding Path="SelectedModel.CsvColumn" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <validators:NumValidator></validators:NumValidator>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                
                 <Label x:Name="labelSep" Content="Carattere separatore" Margin="0,10,0,0"/>
-                <TextBox x:Name="textBoxSeparator" Text="{Binding Path=SelectedModel.Separatore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,336,20" Style="{StaticResource generalTextbox}" Padding="10,3,10,3" FontSize="12"/>
+                <TextBox x:Name="textBoxSeparator" Text="{Binding Path=SelectedModel.Separatore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,320,5" Style="{StaticResource generalTextbox}" Padding="10,3,10,3" FontSize="12"/>
 
                 <Label x:Name="labelFocus" Content="Colonna di partenza indicizzazione" Margin="0,10,0,0"/>
-                <TextBox x:Name="textBoxFocus" TextWrapping="Wrap" Margin="10,0,336,20" Style="{StaticResource generalTextbox}" Padding="10,3,10,3" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" FontSize="12">
+                <TextBox x:Name="textBoxFocus" TextWrapping="Wrap" Margin="10,0,320,20" Style="{StaticResource generalTextbox}" Padding="10,3,10,3" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" FontSize="12">
                     <TextBox.Text>
                         <Binding Path="SelectedModel.StartFocusColumn" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>

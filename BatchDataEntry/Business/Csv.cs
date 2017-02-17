@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace BatchDataEntry.Business
@@ -38,12 +39,12 @@ namespace BatchDataEntry.Business
             }
         }
 
-        public static List<string> ReadRows(string fullPath)
+        public static List<string> ReadRows(string fullPath, char separator)
         {
             List < string > result = new List<string>();
             using (CsvFileReader reader = new CsvFileReader(fullPath))
             {
-                reader._separator = ';';
+                reader._separator = separator;
                 CsvRow row = new CsvRow();
                 while (reader.ReadRow(row))
                 {
@@ -160,7 +161,7 @@ namespace BatchDataEntry.Business
         {
             try
             {
-                List<string> rows = ReadRows(file);
+                List<string> rows = ReadRows(file, ';');
                 using (CsvFileWriter writer = new CsvFileWriter(file))
                 {
                     writer._separator = ';';
@@ -192,7 +193,7 @@ namespace BatchDataEntry.Business
         {
             try
             {
-                List<string> rows = ReadRows(file);
+                List<string> rows = ReadRows(file, ';');
                 using (CsvFileWriter writer = new CsvFileWriter(file))
                 {
                     writer._separator = ';';
@@ -218,6 +219,33 @@ namespace BatchDataEntry.Business
             {
                 return false;
             }
+        }
+
+        public static List<string> SearchRow(string file, string searchText, int col, char separator = ';')
+        {
+            List<string> row = new List<string>();
+
+            using (CsvFileReader reader = new CsvFileReader(file))
+            {
+                reader._separator = separator;
+                CsvRow r = new CsvRow();
+                while (reader.ReadRow(r))
+                {
+                    if (r.Contains(searchText))
+                    {
+                        if (col < r.Count)
+                        {
+                            if (r[col].Equals(searchText))
+                            {
+                                row = r.ToList();
+                                return row;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return row;
         }
 
         public static string[] CSVRowToStringArray(string r, char fieldSep = ';', char stringSep = '\"')

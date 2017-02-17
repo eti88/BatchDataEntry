@@ -14,6 +14,7 @@ namespace BatchDataEntry.Views
             textBoxFileCsv.IsEnabled = false;
             buttonChooseFile.IsEnabled = false;
             textBoxSeparator.IsEnabled = false;
+            textBoxCsvSuggestion.IsEnabled = false;
         }
 
         private void ButtonChooseFile_OnClick(object sender, RoutedEventArgs e)
@@ -35,12 +36,14 @@ namespace BatchDataEntry.Views
                 textBoxFileCsv.IsEnabled = true;
                 buttonChooseFile.IsEnabled = true;
                 textBoxSeparator.IsEnabled = true;
+                textBoxCsvSuggestion.IsEnabled = true;
             }
             else
             {
                 textBoxFileCsv.IsEnabled = false;
                 buttonChooseFile.IsEnabled = false;
                 textBoxSeparator.IsEnabled = false;
+                textBoxCsvSuggestion.IsEnabled = false;
             }
         }
 
@@ -49,6 +52,7 @@ namespace BatchDataEntry.Views
             textBoxFileCsv.IsEnabled = false;
             buttonChooseFile.IsEnabled = false;
             textBoxSeparator.IsEnabled = false;
+            textBoxCsvSuggestion.IsEnabled = false;
         }
 
         private void ButtonSalvaModel_OnClick(object sender, RoutedEventArgs e)

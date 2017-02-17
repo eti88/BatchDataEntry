@@ -22,6 +22,7 @@ namespace BatchDataEntry.Models
         private string _filecsv;
         private string _separatore;
         private int _startFocusColumn;
+        private int _csvColumn;
 
         public int Id
         {
@@ -106,6 +107,18 @@ namespace BatchDataEntry.Models
                 }
             }
         }
+        public int CsvColumn
+        {
+            get { return _csvColumn; }
+            set
+            {
+                if (value != _csvColumn)
+                {
+                    _csvColumn = value;
+                    OnPropertyChanged("CsvColumn");
+                }
+            }
+        }
 
         public Modello()
         {
@@ -148,6 +161,7 @@ namespace BatchDataEntry.Models
             this.PathFileCsv = m.PathFileCsv;
             this.Separatore = m.Separatore;
             this.StartFocusColumn = m.StartFocusColumn;
+            this.CsvColumn = m.CsvColumn;
             this.MyMemento = new MementoModello(m.Nome, m.OrigineCsv, m.Campi, m.PathFileCsv, m.Separatore, m.StartFocusColumn);
         }
 

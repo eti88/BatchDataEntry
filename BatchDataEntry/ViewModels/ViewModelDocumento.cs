@@ -19,9 +19,9 @@ namespace BatchDataEntry.ViewModels
     internal class ViewModelDocumento : ViewModelBase
     {
         private static DatabaseHelper _db;
-        private Batch _batch;
+        private static Batch _batch;
         private NavigationList<Dictionary<int, string>> _dc;
-        private Document _doc;
+        private  Document _doc;
         private int _selectElementFocus;
         private string[] repeatValues;
 
@@ -267,6 +267,36 @@ namespace BatchDataEntry.ViewModels
             });           
         }
 
+        public void EnterActionFunction(object parameter)
+        {
+            var txt = (string)parameter;
+
+            if (string.IsNullOrEmpty(txt))
+                return;
+
+            #if DEBUG
+            Console.WriteLine("### Premuto btn Enter ###");
+            Console.WriteLine("###" + txt + "###");
+            #endif
+            int indexCol = Batch.Applicazione.Campi.Where(x => x.IndicePrimario == true).Select(x => x.Posizione).FirstOrDefault();
+
+
+            List<string> record = Csv.SearchRow(_batch.Applicazione.PathFileCsv, txt, indexCol, Convert.ToChar(_batch.Applicazione.Separatore));
+
+            if (record.Count == 0)
+                return;
+
+            int countVoci = DocFile.Voci.Count;
+            for (int i = 0; i < record.Count; i++)
+            {
+                if (i < countVoci)
+                {
+                    DocFile.Voci[i].Value = record[i];
+                }
+            }
+
+        }
+
         #region Command
         private RelayCommand _cmdWindowLoaded;
         public ICommand CmdWindowLoaded
@@ -296,7 +326,6 @@ namespace BatchDataEntry.ViewModels
         }
 
         private RelayCommand _cmdNext;
-
         public ICommand CmdNext
         {
             get
@@ -310,7 +339,6 @@ namespace BatchDataEntry.ViewModels
         }
 
         private RelayCommand _cmdIndex;
-
         public ICommand CmdIndex
         {
             get
@@ -324,7 +352,6 @@ namespace BatchDataEntry.ViewModels
         }
 
         private RelayCommand _cmdStop;
-
         public ICommand CmdStop
         {
             get
@@ -334,6 +361,19 @@ namespace BatchDataEntry.ViewModels
                     _cmdStop = new RelayCommand(param => Interrompi());
                 }
                 return _cmdStop;
+            }
+        }
+
+        private RelayCommand _textboxCmd;
+        public ICommand TextboxCmd
+        {
+            get
+            {
+                if (_textboxCmd == null)
+                {
+                    _textboxCmd = new RelayCommand((param) => EnterActionFunction(param));
+                }
+                return _textboxCmd;
             }
         }
 

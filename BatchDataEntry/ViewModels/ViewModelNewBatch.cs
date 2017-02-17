@@ -262,7 +262,7 @@ namespace BatchDataEntry.ViewModels
                     }                       
                 }
                 
-                List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv);
+                List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
                 MaxValue = lines.Count;
 
                 for (int i = 0; i < lines.Count; i++)
@@ -327,7 +327,7 @@ namespace BatchDataEntry.ViewModels
 
                 if (b.Applicazione.OrigineCsv)
                 {
-                    lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv);
+                    lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
                 }
                 else
                 {
@@ -335,36 +335,6 @@ namespace BatchDataEntry.ViewModels
                 }
 
                 MaxValue = files.Count + lines.Count;
-                #if DEBUG
-                Console.WriteLine(@"### Aggiunta elementi di autocompletamento ###");
-                #endif
-                try
-                {
-                    for (int i = 0; i < lines.Count; i++)
-                    {
-                        string[] cells = lines.ElementAt(i).Split(b.Applicazione.Separatore[0]);
-                        if (cells.Length > 1)
-                        {
-                            for (int z = 0; z < b.Applicazione.Campi.Count; z++)
-                            {
-                                int colNumber = b.Applicazione.Campi[z].Posizione;
-                                string celValue = (z < cells.Length && !string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
-
-                                if (!string.IsNullOrEmpty(celValue))
-                                {
-                                    if (!(db.Count(String.Format("SELECT COUNT(Id) FROM Autocompletamento WHERE Valore='{0}'", convertQuotes(celValue))) > 0))
-                                        db.InsertRecordAutocompletamento(new Autocompletamento(colNumber, celValue));
-                                }
-                                backgroundWorker.ReportProgress(i);
-                            }
-                        }
-                    }
-                }
-                catch (Exception er)
-                {
-                    logger.Error(string.Format("Error populate Autocomp. Table {1}", er.Source, er.Message));
-                    throw;
-                }
 
                 #if DEBUG
                 Console.WriteLine(@"### Inizio indicizzazione files ###");
@@ -373,11 +343,13 @@ namespace BatchDataEntry.ViewModels
                 // adesso per ogni file in files aggiungere un record fileName, path, false
                 for (int i = 0; i < files.Count - 1; i++)
                 {
-                    Document doc = new Document();
-                    doc.Id = i + 1;
-                    doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
-                    doc.Path = files[i];
-                    doc.IsIndexed = false;
+                    Document doc = new Document
+                    {
+                        Id = i + 1,
+                        FileName = Path.GetFileNameWithoutExtension(files[i]),
+                        Path = files[i],
+                        IsIndexed = false
+                    };
 
                     if (!b.Applicazione.OrigineCsv)
                     {                     

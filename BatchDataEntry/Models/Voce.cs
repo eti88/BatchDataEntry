@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
 
 namespace BatchDataEntry.Models
@@ -173,6 +175,41 @@ namespace BatchDataEntry.Models
             IsDisabled = !enabled;
         }
 
+        // Carica una lista di valori (appartenenti a una colonna)
+        public Voce(int id, string key, bool autocomp, string csv_file, int colIndexed, bool enabled = true)
+        {
+            this.Id = id;
+            this.Key = key;
+            this.IsAutocomplete = autocomp;
+            if (this.IsAutocomplete)
+            {
+                try
+                {
+                    if (File.Exists(csv_file))
+                    {
+                        var lst = new List<string>();
+                        lst = Csv.ReadColumn(csv_file, colIndexed);
+                        if (lst != null)
+                            Suggestions = lst;
+                        else
+                            Suggestions = new List<string>();
+                    }
+                    else
+                        Suggestions = new List<string>();
+                }
+                catch (Exception e)
+                {
+                    #if DEBUG
+                    Console.WriteLine(@"[CSVAutocomp]" + e.ToString());
+                    #endif
+                    this.IsAutocomplete = false;
+                    Suggestions = new List<string>();
+                }
+            }
+            IsFocused = "False";
+            IsDisabled = !enabled;
+        }
+
         public Voce(int id, string key, string valu, bool autocomp, DatabaseHelper db, bool enabled = true)
         {
             this.Id = id;
@@ -212,5 +249,6 @@ namespace BatchDataEntry.Models
         {
             return string.Format("[Key: {0}, Value: {1}, AutocompleteList: {2}]", this.Id, this.Key, this.Value);
         }
+
     }
 }
