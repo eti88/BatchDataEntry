@@ -28,7 +28,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>20</ApplicationRevision>
+    <ApplicationRevision>21</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -179,10 +179,6 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="WPFTextBoxAutoComplete, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WPFTextBoxAutoComplete.1.0.2\lib\net40\WPFTextBoxAutoComplete.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -196,20 +192,23 @@
     <Compile Include="Business\Utility.cs" />
     <Compile Include="Components\NavigationList.cs" />
     <Compile Include="Components\PdfViewerHost.cs" />
-    <Compile Include="Components\WebBrowserUtility.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Helpers\DialogCloser.cs" />
     <Compile Include="Helpers\DatabaseHelper.cs" />
     <Compile Include="Helpers\FocusExtension.cs" />
     <Compile Include="Helpers\IClosableViewModel.cs" />
+    <Compile Include="Helpers\ListControlTemplateSelector.cs" />
     <Compile Include="Helpers\MyAttachedBehaviors.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Models\Autocompletamento.cs" />
     <Compile Include="Models\BaseModel.cs" />
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\ExportColumn.cs" />
+    <Compile Include="Models\Suggestion.cs" />
     <Compile Include="Models\TipoFileProcessato.cs" />
     <Compile Include="Models\Voce.cs" />
+    <Compile Include="Providers\CsvSuggestionProvider.cs" />
+    <Compile Include="Providers\DbSuggestionProvider.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Validators\ColumnValidator.cs" />
     <Compile Include="Validators\NameValidator.cs" />
@@ -340,7 +339,7 @@
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
@@ -375,6 +374,7 @@
       <Isolated>False</Isolated>
     </COMReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

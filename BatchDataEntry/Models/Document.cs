@@ -106,17 +106,16 @@ namespace BatchDataEntry.Models
 
                     //TODO: da aggiungere controllo addizionale altrimenti nel caso il campo abbia anche l'altro tipo di autocompletamento fa casini (probabilmente)
                     // provare aggiungenod sempilice checkbox che abilita 
-                    if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn) {
-                        int indexCol = b.Applicazione.Campi.Where(x => x.IndicePrimario == true).Select(x => x.Posizione).FirstOrDefault();                    
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true,b.Applicazione.PathFileCsv, indexCol, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn) {                   
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true,"CSV", b.Applicazione.Campi.ElementAt(h).IsDisabled));
                     }
                     else if(!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
                     {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).SalvaValori, db, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).SalvaValori, "DB",b.Applicazione.Campi.ElementAt(h).IsDisabled));
                     }
                     else if(string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
                     {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).SalvaValori, db, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).SalvaValori, "DB", b.Applicazione.Campi.ElementAt(h).IsDisabled));
                     }
                     else if (!string.IsNullOrEmpty(row.Value))
                     {
@@ -155,7 +154,7 @@ namespace BatchDataEntry.Models
             foreach (Campo campo in b.Applicazione.Campi)
             {
                 if (campo.SalvaValori)
-                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, db, campo.IsDisabled));
+                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, "DB", campo.IsDisabled));
                 else
                     voci.Add(new Voce(campo.Posizione, campo.Nome, campo.IsDisabled));
             }

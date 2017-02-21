@@ -21,6 +21,8 @@ namespace BatchDataEntry.ViewModels
 
         private RelayCommand _updateModel;
 
+        private RelayCommand _buttonCopyCommand;
+
         public ViewModelApplicazione()
         {
             Modelli = new ObservableCollection<Modello>();
@@ -60,6 +62,16 @@ namespace BatchDataEntry.ViewModels
                 if (_addNewModel == null)
                     _addNewModel = new RelayCommand(param => AddNewModelItem());
                 return _addNewModel;
+            }
+        }
+
+        public ICommand ButtonCopyCommand
+        {
+            get
+            {
+                if(_buttonCopyCommand == null)
+                    _buttonCopyCommand = new RelayCommand(param => CopyModel(), param => CanModify);
+                return _buttonCopyCommand;
             }
         }
 
@@ -146,6 +158,33 @@ namespace BatchDataEntry.ViewModels
                 campiView.DataContext = new ViewModelCampi(SelectedModel.Id);
                 campiView.ShowDialog();
             }
+        }
+
+        private void CopyModel()
+        {
+            if(SelectedModel == null)
+                return;
+            
+            if(SelectedModel.Id == 0)
+                return;
+
+            var copy = new Modello(SelectedModel);
+            copy.Id = 0;
+            var db = new DatabaseHelper();
+            copy.Nome = String.Format("{0} - Copia", copy.Nome);
+            int newId = db.InsertRecordModello(copy);
+
+            ObservableCollection<Campo>  _campi = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + SelectedModel.Id);
+
+            foreach (var campo in _campi)
+            {
+                campo.IdModello = newId;
+                campo.Id = 0;
+                db.InsertRecordCampo(campo);
+            }
+            copy.Id = newId;
+            Modelli.Add(copy);
+            RaisePropertyChanged("Modelli");
         }
     }
 }

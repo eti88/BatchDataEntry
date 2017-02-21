@@ -13,6 +13,7 @@ namespace BatchDataEntry.Models
         private bool _salva;
         private string _val;
         private bool _primary;
+        private bool _secondary;
         private int _tipo;
         private int _idModello;
         private bool _riproponi;
@@ -84,6 +85,20 @@ namespace BatchDataEntry.Models
                 }
             }
         }
+
+        public bool IndiceSecondario
+        {
+            get { return _secondary; }
+            set
+            {
+                if (value != _secondary)
+                {
+                    _secondary = value;
+                    OnPropertyChanged("IndiceSecondario");
+                }
+            }
+        }
+
         public int TipoCampo
         { // Utilizzato per future implementazioni (es textbox[0], combobox[1], checkbox[2])
             get { return _tipo; }
@@ -144,6 +159,7 @@ namespace BatchDataEntry.Models
             this.SalvaValori = sv;
             this.ValorePredefinito = vp;
             this.IndicePrimario = ip;
+            this.IndiceSecondario = false;
             this.TipoCampo = 0;
             this.Riproponi = false;
         }
@@ -171,7 +187,7 @@ namespace BatchDataEntry.Models
             this.IsDisabled = disab;
         }
 
-        public Campo(int id, string nome, int po, bool sv, string vp, bool ip, bool disab, int fk)
+        public Campo(int id, string nome, int po, bool sv, string vp, bool ip, bool sc, bool disab, int fk)
         {
             this.Id = id;
             this.Nome = nome;
@@ -182,7 +198,8 @@ namespace BatchDataEntry.Models
             this.TipoCampo = 0;
             this.IdModello = fk;
             this.IsDisabled = disab;
-            this.MyMemento = new MementoCampo(nome, po, sv, vp, ip);
+            this.IndiceSecondario = sc;
+            this.MyMemento = new MementoCampo(nome, po, sv, vp, ip, sc);
         }
 
         public Campo(Campo _campo)
@@ -193,11 +210,12 @@ namespace BatchDataEntry.Models
             this.SalvaValori = _campo.SalvaValori;
             this.ValorePredefinito = _campo.ValorePredefinito;
             this.IndicePrimario = _campo.IndicePrimario;
+            this.IndiceSecondario = _campo.IndiceSecondario;
             this.TipoCampo = _campo.TipoCampo;
             this.IdModello = _campo.IdModello;
             this.Riproponi = _campo.Riproponi;
             this.IsDisabled = _campo.IsDisabled;
-            this.MyMemento = new MementoCampo(_campo.Nome, _campo.Posizione, _campo.SalvaValori, _campo.ValorePredefinito, _campo.IndicePrimario);
+            this.MyMemento = new MementoCampo(_campo.Nome, _campo.Posizione, _campo.SalvaValori, _campo.ValorePredefinito, _campo.IndicePrimario, _campo.IndiceSecondario);
         }
 
         public void Revert()
@@ -207,6 +225,7 @@ namespace BatchDataEntry.Models
             this.SalvaValori = this.MyMemento.salvaValori;
             this.ValorePredefinito = this.MyMemento.valPredefinito;
             this.IndicePrimario = this.MyMemento.isPrimary;
+            this.IndiceSecondario = this.MyMemento.isSecondary;
         }
 
         public override bool Equals(object obj)
@@ -228,6 +247,8 @@ namespace BatchDataEntry.Models
                 return false;
             if (this.ValorePredefinito != campo.ValorePredefinito)
                 return false;
+            if (this.IndiceSecondario != campo.IndiceSecondario)
+                return false;
             if (this.IndicePrimario != campo.IndicePrimario)
                 return false;
             if (this.TipoCampo != campo.TipoCampo)
@@ -246,6 +267,7 @@ namespace BatchDataEntry.Models
             resutl += this.SalvaValori.GetHashCode();
             resutl += string.IsNullOrEmpty(this.ValorePredefinito) ? 0 : this.ValorePredefinito.GetHashCode();
             resutl += this.IndicePrimario.GetHashCode();
+            resutl += this.IndiceSecondario.GetHashCode();
             resutl += this.TipoCampo.GetHashCode();
             resutl += this.IdModello.GetHashCode();
             return resutl;
@@ -267,14 +289,16 @@ namespace BatchDataEntry.Models
         public readonly bool salvaValori;
         public readonly string valPredefinito;
         public readonly bool isPrimary;
+        public readonly bool isSecondary;
 
-        public MementoCampo(string _nome, int _pos, bool _salva, string _valp, bool _isp)
+        public MementoCampo(string _nome, int _pos, bool _salva, string _valp, bool _isp, bool sc)
         {
             this.nome = _nome;
             this.posizione = _pos;
             this.salvaValori = _salva;
             this.valPredefinito = _valp;
             this.isPrimary = _isp;
+            this.isSecondary = sc;
         }
     }
 }

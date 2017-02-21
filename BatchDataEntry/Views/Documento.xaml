@@ -5,20 +5,96 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         xmlns:customComponents="clr-namespace:BatchDataEntry.Components"
-        xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
         xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
+        xmlns:providers="clr-namespace:BatchDataEntry.Providers"
+        xmlns:views="clr-namespace:BatchDataEntry.Views"
         helpers:MyAttachedBehaviors.LoadedCommand="{Binding Path=CmdWindowLoaded}"
         mc:Ignorable="d"
-        x:Name="DocumentWindow"
-        
+        x:Name="DocumentWindow"        
         Title="{Binding Path=DocFile.FileName}" Height="650" Width="800">
     <Window.DataContext>
         <viewModels:ViewModelDocumento></viewModels:ViewModelDocumento>
     </Window.DataContext>
+    <!--
     <Window.InputBindings>
         <KeyBinding Command="{Binding Path=CmdIndex}" Key="Enter"></KeyBinding>
     </Window.InputBindings>
-
+    -->
+    <Window.Resources>
+        <!-- normal template -->
+        <DataTemplate x:Key="TextBoxDataTemplate">
+            <StackPanel Margin="5,0,5,0">
+            <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
+            <TextBox
+                Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
+                IsEnabled="{Binding Path=IsDisabled}"
+                VerticalAlignment="Center"
+                Height="30"/>
+            </StackPanel>
+        </DataTemplate>
+        <!-- db template -->
+        <DataTemplate x:Key="AutocompleteDbDataTemplate">
+            <StackPanel Margin="5,0,5,0">
+                <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
+                <views:FilteredComboBox
+                    helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
+                    IsEnabled="{Binding Path=IsDisabled}"
+                    VerticalAlignment="Center"
+                    Height="30"
+                    Width="352"
+                    ItemsSource="{Binding QueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsSynchronizedWithCurrentItem="False"
+                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedItem="{Binding AutoSelectedItem}"
+                    SelectedValue="{Binding AutoSelectedValue}"
+                    IsEditable="True"
+                    IsTextSearchEnabled="False"
+                    StaysOpenOnEdit="True">
+                    <views:FilteredComboBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel VirtualizationMode="Recycling" />
+                        </ItemsPanelTemplate>
+                    </views:FilteredComboBox.ItemsPanel>
+                    <views:FilteredComboBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.TextboxCmd}" CommandParameter="{Binding Value}"></KeyBinding>
+                    </views:FilteredComboBox.InputBindings>
+                </views:FilteredComboBox>
+            </StackPanel>
+        </DataTemplate>
+        <!-- csv template -->
+        <DataTemplate x:Key="AutocompleteCsvDataTemplate">
+            <StackPanel Margin="5,0,5,0">
+                <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
+                <views:FilteredComboBox
+                    helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
+                    IsEnabled="{Binding Path=IsDisabled}"
+                    VerticalAlignment="Center"
+                    Height="30"
+                    Width="352"
+                    ItemsSource="{Binding QueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsSynchronizedWithCurrentItem="False"
+                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedItem="{Binding AutoSelectedItem}"
+                    SelectedValue="{Binding AutoSelectedValue}"
+                    DisplayMemberPath="FullSuggestion"
+                    IsEditable="True"                  
+                    IsTextSearchEnabled="False"
+                    StaysOpenOnEdit="True">
+                    <views:FilteredComboBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel VirtualizationMode="Recycling">
+                            </VirtualizingStackPanel>
+                        </ItemsPanelTemplate>
+                    </views:FilteredComboBox.ItemsPanel>
+                    <views:FilteredComboBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.TextboxCmd}" CommandParameter="{Binding AutoSelectedItem}"></KeyBinding>
+                    </views:FilteredComboBox.InputBindings>
+                </views:FilteredComboBox>
+            </StackPanel>
+        </DataTemplate>
+        <helpers:ListControlTemplateSelector x:Key="ListControlTemplateSelector"/>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -40,32 +116,17 @@
             </Grid.RowDefinitions>
             <ScrollViewer Grid.Row="0">
                 <StackPanel x:Name="dataEntryElements" Margin="10,0">
-                    <ItemsControl ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="5,0,5,0">
-                                    <Label Content="{Binding Key, Mode=OneTime}"/>
-                                    <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                             helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}"
-                                             IsEnabled="{Binding Path=IsDisabled}"
-                                             wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding Suggestions, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                             wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteStringComparison="InvariantCultureIgnoreCase">
-                                        <TextBox.InputBindings>
-                                            <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.TextboxCmd}" CommandParameter="{Binding Value}"></KeyBinding>
-                                        </TextBox.InputBindings>
-                                    </TextBox>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
+                    <ItemsControl ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemTemplateSelector="{StaticResource ListControlTemplateSelector}">
                     </ItemsControl>
                 </StackPanel>
             </ScrollViewer>
             <StackPanel Grid.Row="1" Height="40" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
                 <Button x:Name="buttonIndexes" Command="{Binding Path=CmdIndex}" Content="Indicizza" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
+                <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
                 <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
                 <Button x:Name="buttonStop" Click="ButtonStop_OnClick" Command="{Binding Path=CmdStop}" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
             </StackPanel>
         </Grid>
     </Grid>
 </Window>
+

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using BatchDataEntry.Business;
-using BatchDataEntry.Helpers;
+﻿using System.Collections.ObjectModel;
+using BatchDataEntry.Providers;
 
 namespace BatchDataEntry.Models
 {
@@ -80,18 +77,6 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private IEnumerable<string> _suggestion;
-        public IEnumerable<string> Suggestions
-        {
-            get { return _suggestion; }
-            set
-            {
-                if (_suggestion != value && IsAutocomplete)
-                    _suggestion = value;
-                OnPropertyChanged("Suggestions");
-            }
-        }
-
         private bool _isDisabled;
         public bool IsDisabled
         {
@@ -106,9 +91,33 @@ namespace BatchDataEntry.Models
             }
         }
 
+        public string AUTOCOMPLETETYPE;
+
+        private object _selectedItem;
+        public object AutoSelectedItem { get { return _selectedItem; } set { if (value != _selectedItem) { _selectedItem = value;
+                    OnPropertyChanged("AutoSelectedItem");
+                } } }
+
+        private string _selectedValue;
+        public string AutoSelectedValue { get { return _selectedValue; } set { if (value != _selectedValue) { _selectedValue = value; OnPropertyChanged("AutoSelectedValue"); } } }
+
+        private ObservableCollection<Suggestion> _queryProvider;
+        public ObservableCollection<Suggestion> QueryProvider
+        {
+            get { return _queryProvider; }
+            private set
+            {
+                if (value != _queryProvider)
+                {
+                    _queryProvider = value;
+                    OnPropertyChanged("QueryProvider");
+                }
+            }
+        }
+
         public Voce()
         {
-            Suggestions = new List<string>();
+            AUTOCOMPLETETYPE = "NULL";
             IsFocused = "False";
             IsDisabled = false;
         }
@@ -117,7 +126,7 @@ namespace BatchDataEntry.Models
         {
             this.Id = id;
             this.Key = key;
-            Suggestions = new List<string>();
+            AUTOCOMPLETETYPE = "NULL";
             IsFocused = "False";
             IsDisabled = !enabled;
         }
@@ -126,7 +135,7 @@ namespace BatchDataEntry.Models
         {
             this.Key = key;
             this.Value = value;
-            Suggestions = new List<string>();
+            AUTOCOMPLETETYPE = "NULL";
             IsFocused = "False";
             IsDisabled = !enabled;
         }
@@ -136,113 +145,44 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Key = key;
             this.Value = value;
-            Suggestions = new List<string>();
+            AUTOCOMPLETETYPE = "NULL";
             IsFocused = "False";
             IsDisabled = !enabled;
         }
 
-        public Voce(int id, string key, bool autocomp, DatabaseHelper db, bool enabled = true)
+        public Voce(int id, string key, bool autocomp, string autoType, bool enabled = true)
         {
             this.Id = id;
             this.Key = key;
             this.IsAutocomplete = autocomp;
-            if (this.IsAutocomplete)
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(key) && db != null)
-                    {
-                        var lst = new List<string>();
-                        lst = db.GetAutocompleteList(id);
-                        if (lst != null)
-                            Suggestions = lst;
-                        else
-                            Suggestions = new List<string>();
-                    }
-                    else
-                        Suggestions = new List<string>();
-                }
-                catch (Exception e)
-                {
-                    #if DEBUG
-                    Console.WriteLine(@"[VOCEEXCEPTION]" + e.ToString());
-                    #endif
-                    this.IsAutocomplete = false;
-                    Suggestions = new List<string>();
-                }
-            }
+            AUTOCOMPLETETYPE = autoType;
             IsFocused = "False";
             IsDisabled = !enabled;
+            QueryProviderSelector(autoType, id);
         }
 
-        // Carica una lista di valori (appartenenti a una colonna)
-        public Voce(int id, string key, bool autocomp, string csv_file, int colIndexed, bool enabled = true)
+        public Voce(int id, string key, string valu, bool autocomp, string autoType, bool enabled = true)
         {
             this.Id = id;
             this.Key = key;
             this.IsAutocomplete = autocomp;
-            if (this.IsAutocomplete)
-            {
-                try
-                {
-                    if (File.Exists(csv_file))
-                    {
-                        var lst = new List<string>();
-                        lst = Csv.ReadColumn(csv_file, colIndexed);
-                        if (lst != null)
-                            Suggestions = lst;
-                        else
-                            Suggestions = new List<string>();
-                    }
-                    else
-                        Suggestions = new List<string>();
-                }
-                catch (Exception e)
-                {
-                    #if DEBUG
-                    Console.WriteLine(@"[CSVAutocomp]" + e.ToString());
-                    #endif
-                    this.IsAutocomplete = false;
-                    Suggestions = new List<string>();
-                }
-            }
-            IsFocused = "False";
-            IsDisabled = !enabled;
-        }
-
-        public Voce(int id, string key, string valu, bool autocomp, DatabaseHelper db, bool enabled = true)
-        {
-            this.Id = id;
-            this.Key = key;
-            this.IsAutocomplete = autocomp;
-            if (this.IsAutocomplete)
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(key) && db != null)
-                    {
-                        var lst = new List<string>();
-                        lst = db.GetAutocompleteList(id);
-                        if (lst != null)
-                            Suggestions = lst;
-                        else
-                            Suggestions = new List<string>();
-                    }
-                    else
-                        Suggestions = new List<string>();
-                }
-                catch (Exception e)
-                {
-                    #if DEBUG
-                    Console.WriteLine(@"[VOCEEXCEPTION]" + e.ToString());
-                    #endif
-                    this.IsAutocomplete = false;
-                    Suggestions = new List<string>();
-                }
-            }
+            AUTOCOMPLETETYPE = autoType;
             IsFocused = "False";
             IsDisabled = !enabled;
             this.Value = valu;
+            QueryProviderSelector(autoType, id);
+        }
+
+        private async void QueryProviderSelector(string tp, int id)
+        {
+            if (tp.Equals("CSV"))
+            {
+                QueryProvider = await CsvSuggestionProvider.GetCsvRecords();
+            }
+            else if (tp.Equals("DB"))
+            {
+                //QueryProvider = await DbSuggestionProvider.GetRecords(id);
+            }       
         }
 
         public override string ToString()

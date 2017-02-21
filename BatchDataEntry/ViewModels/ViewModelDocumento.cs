@@ -13,6 +13,7 @@ using BatchDataEntry.Business;
 using BatchDataEntry.Components;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using BatchDataEntry.Providers;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -99,6 +100,8 @@ namespace BatchDataEntry.ViewModels
             DocFile = new Document(Batch, DocFiles.Current, _db);
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
+            Properties.Settings.Default.CurrentBatch = Batch.Id;
+            Properties.Settings.Default.Save();
         }
 
         public ViewModelDocumento(Batch _currentBatch)
@@ -113,10 +116,11 @@ namespace BatchDataEntry.ViewModels
 
             LoadDocsList();
             DocFiles.CurrentIndex = GetId();
-            //Document tmp = new Document(Batch, DocFiles.Current);
             DocFile = new Document(Batch, DocFiles.Current, _db);
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
+            Properties.Settings.Default.CurrentBatch = Batch.Id;
+            Properties.Settings.Default.Save();           
         }
 
         
@@ -177,7 +181,10 @@ namespace BatchDataEntry.ViewModels
                     {
                         if (Batch.Applicazione.Campi[z].Riproponi)
                             repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Value);                     
-                    }                  
+                    }
+                    DatabaseHelper maindb = new DatabaseHelper();
+                    Batch.UltimoIndicizzato = DocFiles.CurrentIndex + 1;
+                    maindb.UpdateRecordBatch(Batch);
                 }).Wait();
 
                 // controllare se bisogna salvare il valore inserito per l'autocomletamento
@@ -191,12 +198,6 @@ namespace BatchDataEntry.ViewModels
                         _db.InsertRecordAutocompletamento(auto);
                     }
                 }
-                Task.Factory.StartNew(() =>
-                {
-                    DatabaseHelper maindb = new DatabaseHelper();
-                    Batch.UltimoIndicizzato = DocFiles.CurrentIndex;
-                    maindb.UpdateRecordBatch(Batch);
-                });
 
                 if (!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
                     Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
@@ -243,7 +244,7 @@ namespace BatchDataEntry.ViewModels
         
         public void Interrompi()
         {
-            Batch.DocCorrente = DocFiles.CurrentIndex;
+            Batch.DocCorrente = DocFiles.CurrentIndex + 1;
 
             #if DEBUG
             Console.WriteLine("Documento corrente: " + Batch.DocCorrente);
@@ -260,7 +261,7 @@ namespace BatchDataEntry.ViewModels
         {
             Task.Factory.StartNew(() =>
             {
-                System.Threading.Thread.Sleep(500);
+                System.Threading.Thread.Sleep(1500); // TODO: Approccio migliore per Focus Gain ?
 
                 if (_selectElementFocus > 0 && _selectElementFocus < (DocFile.Voci.Count - 1))
                     DocFile.Voci[_selectElementFocus].IsFocused = "True";
@@ -269,22 +270,21 @@ namespace BatchDataEntry.ViewModels
 
         public void EnterActionFunction(object parameter)
         {
-            var txt = (string)parameter;
+            var sugg = parameter as Suggestion;
 
-            if (string.IsNullOrEmpty(txt))
-                return;
+            if (sugg == null) return;
 
             #if DEBUG
-            Console.WriteLine("### Premuto btn Enter ###");
-            Console.WriteLine("###" + txt + "###");
+            Console.WriteLine("Passato parametro per autocompletamento:\t" + sugg.ColumnA + " : " + sugg.ColumnB);
             #endif
-            int indexCol = Batch.Applicazione.Campi.Where(x => x.IndicePrimario == true).Select(x => x.Posizione).FirstOrDefault();
 
+            if (string.IsNullOrEmpty(sugg.ColumnA)) return;
+            int col1 = Batch.Applicazione.Campi.Where(x => x.IndicePrimario == true).Select(x => x.Posizione).FirstOrDefault();
+            int col2 = Batch.Applicazione.Campi.Where(x => x.IndiceSecondario == true).Select(x => x.Posizione).FirstOrDefault();
 
-            List<string> record = Csv.SearchRow(_batch.Applicazione.PathFileCsv, txt, indexCol, Convert.ToChar(_batch.Applicazione.Separatore));
+            List<string> record = Csv.SearchRow(_batch.Applicazione.PathFileCsv, sugg.ColumnA, sugg.ColumnB, col1, col2, Convert.ToChar(_batch.Applicazione.Separatore));
 
-            if (record.Count == 0)
-                return;
+            if (record.Count == 0) return;
 
             int countVoci = DocFile.Voci.Count;
             for (int i = 0; i < record.Count; i++)
@@ -294,7 +294,7 @@ namespace BatchDataEntry.ViewModels
                     DocFile.Voci[i].Value = record[i];
                 }
             }
-
+            RaisePropertyChanged("ViewModelDocumento");
         }
 
         #region Command

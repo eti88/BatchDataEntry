@@ -30,5 +30,29 @@ namespace BatchDataEntry.Views
             checkBoxSalvaValori.IsEnabled = true;
             checkBoxPartialSave.IsEnabled = true;
         }
+
+        private void checkBoxIsPrimary_Checked(object sender, RoutedEventArgs e)
+        {
+            checkBoxIsPrimary.IsEnabled = true;
+            checkBoxIsSecondary.IsEnabled = false;
+        }
+
+        private void checkBoxIsPrimary_Unchecked(object sender, RoutedEventArgs e)
+        {
+            checkBoxIsPrimary.IsEnabled = true;
+            checkBoxIsSecondary.IsEnabled = true;
+        }
+
+        private void checkBoxIsSecondary_Unchecked(object sender, RoutedEventArgs e)
+        {
+            checkBoxIsPrimary.IsEnabled = true;
+            checkBoxIsSecondary.IsEnabled = true;
+        }
+
+        private void checkBoxIsSecondary_Checked(object sender, RoutedEventArgs e)
+        {
+            checkBoxIsPrimary.IsEnabled = false;
+            checkBoxIsSecondary.IsEnabled = true;
+        }
     }
 }

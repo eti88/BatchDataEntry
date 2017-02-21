@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace BatchDataEntry.Views
 {
-    public partial class AdobeViewer : UserControl
+    public partial class AdobeViewer : System.Windows.Forms.UserControl
     {
         private string pdfFilePath;
         //public AxAcroPDF acrobatViewer;

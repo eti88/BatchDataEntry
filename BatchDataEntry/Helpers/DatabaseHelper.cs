@@ -364,6 +364,8 @@ namespace BatchDataEntry.Helpers
             values.Add("ValorePredefinito", c.ValorePredefinito);
             int tmp2 = Convert.ToInt32(c.IndicePrimario);
             values.Add("IndicePrimario", tmp2.ToString());
+            int tmpS = Convert.ToInt32(c.IndiceSecondario);
+            values.Add("IndiceSecondario", tmpS.ToString());
             values.Add("TipoCampo", c.TipoCampo.ToString());
             values.Add("IdModello", c.IdModello.ToString());
             int rip = Convert.ToInt32(c.Riproponi);
@@ -470,6 +472,8 @@ namespace BatchDataEntry.Helpers
             values.Add("ValorePredefinito", c.ValorePredefinito);
             int tmp2 = Convert.ToInt32(c.IndicePrimario);
             values.Add("IndicePrimario", tmp2.ToString());
+            int tmpS = Convert.ToInt32(c.IndiceSecondario);
+            values.Add("IndiceSecondario", tmpS.ToString());
             values.Add("TipoCampo", c.TipoCampo.ToString());
             values.Add("IdModello", c.IdModello.ToString());
             int rip = Convert.ToInt32(c.Riproponi);
@@ -511,7 +515,8 @@ namespace BatchDataEntry.Helpers
             values.Add("Id", d.Id.ToString());
             values.Add("FileName", d.FileName);
             values.Add("Path", d.Path);
-            values.Add("isIndicizzato", d.IsIndexed.ToString());
+            int b = Convert.ToInt32(d.IsIndexed);
+            values.Add("isIndicizzato", b.ToString());
 
             foreach (Voce col in d.Voci)
             {
@@ -584,7 +589,8 @@ namespace BatchDataEntry.Helpers
                             "TipoCampo INTEGER," +
                             "IdModello INTEGER," +
                             "Riproponi INTEGER," +
-                            "Disabilitato INTEGER)";                
+                            "Disabilitato INTEGER," +
+                            "IndiceSecondario INTEGER)";                
             try
             {
                 this.ExecuteNonQuery(SQLCmd);
@@ -787,6 +793,7 @@ namespace BatchDataEntry.Helpers
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
@@ -1005,6 +1012,34 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
+        public ObservableCollection<Suggestion> GetAutocompleteListOb(int column)
+        {
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = string.Format("SELECT Valore FROM Autocompletamento WHERE Colonna = {0}", column);
+            try
+            {
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                var suggestions = new ObservableCollection<Suggestion>();
+
+                while (reader.Read())
+                    suggestions.Add(new Suggestion(Convert.ToString(reader["Valore"]), string.Empty));
+
+                reader.Close();
+                return suggestions;
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
         public ObservableCollection<Batch> GetBatchRecords()
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
@@ -1066,6 +1101,7 @@ namespace BatchDataEntry.Helpers
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
@@ -1185,6 +1221,7 @@ namespace BatchDataEntry.Helpers
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);

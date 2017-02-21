@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BatchDataEntry.Views"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         mc:Ignorable="d"
         Title="Modelli"
@@ -23,6 +22,7 @@
                     <Button x:Name="btnAdd" Command="{Binding Path=addNewItemCommand}" Content="Aggiungi" Style="{StaticResource 'ButtonMenu'}"></Button>
                     <Button x:Name="btnUpdate" Command="{Binding Path=updateItemCommand}" Content="Modifica" Style="{StaticResource 'ButtonMenu'}"></Button>
                     <Button x:Name="btnColonne" Command="{Binding Path=ButtonColonneCommand}" CommandParameter="{Binding SelectedModel.Campi}" Content="Colonne" Style="{StaticResource 'ButtonMenu'}"></Button>
+                    <Button x:Name="btnCopy" Command="{Binding Path=ButtonCopyCommand}" CommandParameter="{Binding SelectedModel}" Content="Copia Modello" Width="110" Style="{StaticResource 'ButtonMenu'}"></Button>
                     <Button x:Name="btnDelete" Command="{Binding Path=deleteItemCommand}" Content="Elimina" Style="{StaticResource 'ButtonMenu'}"></Button>
                 </StackPanel>
             </StackPanel>

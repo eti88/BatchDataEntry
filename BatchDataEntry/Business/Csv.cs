@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CsvHelper;
 
 namespace BatchDataEntry.Business
 {
@@ -72,6 +73,27 @@ namespace BatchDataEntry.Business
                 while (reader.ReadRow(row))
                 {
                     result.Add(row[columnNumber]);
+                }
+            }
+            return result;
+        }
+
+        public static string[,] ReadColumn(string fullPath, int col1, int col2)
+        {
+            if (!File.Exists(fullPath))
+                return null;
+
+            string[,] result = new string[File.ReadAllLines(fullPath).Length, 2];
+            using (var sr = new StreamReader(fullPath))
+            {
+                var csv = new CsvReader(sr);
+                csv.Configuration.Delimiter = ";";
+                int i = 0;
+                while (csv.Read())
+                {
+                    result[i, 0] = String.Format("{0}", csv.GetField<string>(col1));
+                    result[i, 1] = String.Format("{0}", csv.GetField<string>(col2));
+                    i++;
                 }
             }
             return result;
@@ -240,6 +262,30 @@ namespace BatchDataEntry.Business
                                 row = r.ToList();
                                 return row;
                             }
+                        }
+                    }
+                }
+            }
+
+            return row;
+        }
+
+        public static List<string> SearchRow(string file, string searchTextCol1, string searchTextCol2, int col1, int col2, char separator = ';')
+        {
+            List<string> row = new List<string>();
+
+            using (CsvFileReader reader = new CsvFileReader(file))
+            {
+                reader._separator = separator;
+                CsvRow r = new CsvRow();
+                while (reader.ReadRow(r))
+                {
+                    if (r.Contains(searchTextCol1) && r.Contains(searchTextCol2))
+                    {
+                        if (r[col1].Equals(searchTextCol1) && r[col2].Equals(searchTextCol2))
+                        {
+                            row = r.ToList();
+                            return row;
                         }
                     }
                 }
