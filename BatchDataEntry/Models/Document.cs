@@ -103,9 +103,6 @@ namespace BatchDataEntry.Models
                     this.IsIndexed = GetBool(row.Value);
                 if (i > 3)
                 {
-
-                    //TODO: da aggiungere controllo addizionale altrimenti nel caso il campo abbia anche l'altro tipo di autocompletamento fa casini (probabilmente)
-                    // provare aggiungenod sempilice checkbox che abilita 
                     if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn) {                   
                         this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true,"CSV", b.Applicazione.Campi.ElementAt(h).IsDisabled));
                     }

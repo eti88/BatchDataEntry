@@ -181,7 +181,7 @@ namespace BatchDataEntry.Models
             }
             else if (tp.Equals("DB"))
             {
-                //QueryProvider = await DbSuggestionProvider.GetRecords(id);
+                QueryProvider = await DbSuggestionProvider.GetRecords(id);
             }       
         }
 

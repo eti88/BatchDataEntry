@@ -190,7 +190,7 @@ namespace BatchDataEntry.ViewModels
                 // controllare se bisogna salvare il valore inserito per l'autocomletamento
                 foreach (var col in DocFile.Voci)
                 {
-                    if (col.IsAutocomplete)
+                    if (col.IsAutocomplete == true && col.AUTOCOMPLETETYPE.Equals("DB"))
                     {
                         var auto = new Autocompletamento();
                         auto.Colonna = col.Id;
@@ -261,7 +261,7 @@ namespace BatchDataEntry.ViewModels
         {
             Task.Factory.StartNew(() =>
             {
-                System.Threading.Thread.Sleep(1500); // TODO: Approccio migliore per Focus Gain ?
+                System.Threading.Thread.Sleep(800);
 
                 if (_selectElementFocus > 0 && _selectElementFocus < (DocFile.Voci.Count - 1))
                     DocFile.Voci[_selectElementFocus].IsFocused = "True";
