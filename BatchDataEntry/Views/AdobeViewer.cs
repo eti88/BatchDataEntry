@@ -1,5 +1,8 @@
 ﻿
+using System;
+using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Input;
 
 
 namespace BatchDataEntry.Views
@@ -43,6 +46,28 @@ namespace BatchDataEntry.Views
             PdfViewer.LoadFile(PdfFilePath);
             PdfViewer.src = PdfFilePath;
             PdfViewer.setViewScroll("FitH", 0);
+        }
+
+        public void ScrollPdfDown()
+        {
+            PdfViewer.gotoNextPage();
+        }
+
+        public void ScrollPdfUp()
+        {
+            PdfViewer.gotoPreviousPage();
+        }
+
+        private void AdobeViewer_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.PageUp)
+            {
+                ScrollPdfUp();
+            }
+            else if (e.KeyCode == Keys.PageDown)
+            {
+                ScrollPdfDown();
+            }
         }
     }
 }

@@ -345,6 +345,7 @@ namespace BatchDataEntry.Helpers
             values.Add("NumPages", b.NumPages.ToString());
             values.Add("DocCorrente", b.DocCorrente.ToString());
             values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
+            values.Add("PatternNome", b.PatternNome);
 
             bool r = Insert("Batch", values);
             if (r)
@@ -457,6 +458,7 @@ namespace BatchDataEntry.Helpers
             values.Add("NumPages", b.NumPages.ToString());
             values.Add("DocCorrente", b.DocCorrente.ToString());
             values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
+            values.Add("PatternNome", b.PatternNome);
 
             Update("Batch", values, string.Format("Id={0}", b.Id));
         }
@@ -634,7 +636,8 @@ namespace BatchDataEntry.Helpers
                             "NumDoc INTEGER," +
                             "NumPages INTEGER," +
                             "DocCorrente INTEGER," +
-                            "UltimoIndicizzato INTEGER)";
+                            "UltimoIndicizzato INTEGER," +
+                            "PatternNome TEXT)";
             try
             {
                 this.ExecuteNonQuery(SQLCmd);
@@ -759,6 +762,7 @@ namespace BatchDataEntry.Helpers
                     b.NumPages = Convert.ToInt32(reader["NumPages"]);
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
                 }
                 reader.Close();
                 return b;
@@ -1064,6 +1068,7 @@ namespace BatchDataEntry.Helpers
                     b.NumPages = Convert.ToInt32(reader["NumPages"]);
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
                     batches.Add(b);
                 }
 
@@ -1185,6 +1190,7 @@ namespace BatchDataEntry.Helpers
                     b.NumPages = Convert.ToInt32(reader["NumPages"]);
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
                     batches.Add(b);
                 }
 

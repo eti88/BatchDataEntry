@@ -163,7 +163,6 @@ namespace BatchDataEntry.ViewModels
         {
             DatabaseHelper dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], CurrentBatch.DirectoryOutput);
             Generate(CurrentBatch, dbc);
-
             //backgroundWorker.ReportProgress(i);
         }
 
@@ -264,6 +263,7 @@ namespace BatchDataEntry.ViewModels
                 
                 List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
                 MaxValue = lines.Count;
+                List<Document> documents = new List<Document>();
 
                 for (int i = 0; i < lines.Count; i++)
                 {
@@ -300,12 +300,17 @@ namespace BatchDataEntry.ViewModels
                         logger.Error(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message));
                         throw;
                     }
-
-                    db.InsertRecordDocumento(b, doc);
+                    documents.Add(doc);
+                }
+                documents = documents.OrderBy(o => o.FileName).ToList();
+                for (int i = 0; i < documents.Count; i++)
+                {
+                    db.InsertRecordDocumento(b, documents[i]);
                     backgroundWorker.ReportProgress(i);
                 }
-
-            }else if (IndexType.Contains("Manuale"))
+                //db.InsertRecordDocumento(b, doc);
+            }
+            else if (IndexType.Contains("Manuale"))
             {
                 #if DEBUG
                 Console.WriteLine(@"### USO GENERAZIONE Manuale ###");
@@ -335,6 +340,7 @@ namespace BatchDataEntry.ViewModels
                 }
 
                 MaxValue = files.Count + lines.Count;
+                List<Document> documents = new List<Document>();
 
                 #if DEBUG
                 Console.WriteLine(@"### Inizio indicizzazione files ###");
@@ -362,7 +368,12 @@ namespace BatchDataEntry.ViewModels
                             doc.Voci.Add(new Voce(colName, valore));
                         }
                     }
-                    db.InsertRecordDocumento(b, doc);
+                    documents.Add(doc); 
+                }
+                documents = documents.OrderBy(o => o.FileName).ToList();
+                for (int i = 0; i < documents.Count; i++)
+                {
+                    db.InsertRecordDocumento(b, documents[i]);
                     backgroundWorker.ReportProgress(i);
                 }
             }

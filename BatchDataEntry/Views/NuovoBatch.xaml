@@ -7,7 +7,7 @@
         xmlns:models="clr-namespace:BatchDataEntry.Models"
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
-        Title="Nuovo Batch" Height="640" Width="450" MinHeight="640">
+        Title="Nuovo Batch" Height="730" Width="450" MinHeight="730">
     <Window.Resources>
         <viewModels:ViewModelNewBatch x:Key="ViewModelNewBatch"/>
         <ObjectDataProvider x:Key="fileTypeEnum" MethodName="GetValues" ObjectType="{x:Type models:TipoFileProcessato}">
@@ -20,8 +20,8 @@
 
     <Grid>
         <DockPanel>
-            <StackPanel DockPanel.Dock="Top" Height="553">
-                <StackPanel Orientation="Vertical" Height="508">
+            <StackPanel DockPanel.Dock="Top" Height="621">
+                <StackPanel Orientation="Vertical" Height="536">
                     <Label Content="Nome" />
                     <TextBox Margin="10,10,10,0" VerticalContentAlignment="Center" Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" Height="30" FontSize="12">
                         <TextBox.Text>
@@ -68,17 +68,31 @@
                             </Button.DataContext>
                         </Button>
                     </WrapPanel>
-                    <!-- <CheckBox x:Name="checkBoxUseFile" IsChecked="{Binding Path=AlternativeInit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Usa il file Csv esterno per generare la lista di file" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"></CheckBox> -->
-                    <Label Content="Tipo Indicizzazione" />
-                    <ComboBox x:Name="comboBoxProcessingType" SelectedValue="{Binding IndexType, Mode=TwoWay}" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center">
-                        <ComboBoxItem IsSelected="True">Automatica</ComboBoxItem>
-                        <ComboBoxItem>Manuale</ComboBoxItem>
-                    </ComboBox>
-
-                    <Label Content="Modello" />
-                    <ComboBox x:Name="comboBoxModello" VerticalContentAlignment="Center" ItemsSource="{Binding Path=Models}" SelectedValue="{Binding CurrentBatch.IdModello, Mode=TwoWay}" IsSynchronizedWithCurrentItem="True"
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <WrapPanel Grid.Column="0" Orientation="Vertical">
+                            <Label Content="Tipo Indicizzazione" />
+                            <ComboBox x:Name="comboBoxProcessingType" SelectedValue="{Binding IndexType, Mode=TwoWay}" Margin="10,0,10,10" Height="35" Width="180" VerticalAlignment="Top" VerticalContentAlignment="Center">
+                                <ComboBoxItem IsSelected="True">Automatica</ComboBoxItem>
+                                <ComboBoxItem>Manuale</ComboBoxItem>
+                            </ComboBox>
+                        </WrapPanel>
+                        <WrapPanel Grid.Column="1" Orientation="Vertical">
+                            <Label Content="Modello" />
+                            <ComboBox x:Name="comboBoxModello" VerticalContentAlignment="Center" ItemsSource="{Binding Path=Models}" SelectedValue="{Binding CurrentBatch.IdModello, Mode=TwoWay}" IsSynchronizedWithCurrentItem="True"
                               SelectedValuePath="Id" 
-                              DisplayMemberPath="Nome" Margin="10" FontSize="12"/>
+                              DisplayMemberPath="Nome" Margin="10,0,10,10" FontSize="12" Height="35" Width="180"/>
+                        </WrapPanel>
+                    </Grid>
+                    <!-- <CheckBox x:Name="checkBoxUseFile" IsChecked="{Binding Path=AlternativeInit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Usa il file Csv esterno per generare la lista di file" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"></CheckBox> -->
+                   
+
+                    
+                    <Label Content="Anteponi stringa a nome file " />
+                    <TextBox Text="{Binding Path=PatternNome}" Margin="10,10,10,0" VerticalContentAlignment="Center" Height="30" FontSize="12"/>
                 </StackPanel>
                 <ProgressBar x:Name="ProgressBarInit" Visibility="{Binding Path=isVisible, Converter={StaticResource BoolToVis}}" Minimum="0" Value="{Binding Path=Progress}" Maximum="{Binding Path=MaxValue}" Height="30" VerticalAlignment="Bottom" Margin="10,5,10,0"/>
             </StackPanel>

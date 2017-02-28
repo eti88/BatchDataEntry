@@ -15,11 +15,11 @@
     <Window.DataContext>
         <viewModels:ViewModelDocumento></viewModels:ViewModelDocumento>
     </Window.DataContext>
-    <!--
-    <Window.InputBindings>
-        <KeyBinding Command="{Binding Path=CmdIndex}" Key="Enter"></KeyBinding>
-    </Window.InputBindings>
-    -->
+
+    <!--  <Window.InputBindings>
+        <KeyBinding Command="{Binding Path=CmdIndex}" Key="Enter"></KeyBinding> 
+    </Window.InputBindings> -->
+    
     <Window.Resources>
         <!-- normal template -->
         <DataTemplate x:Key="TextBoxDataTemplate">
@@ -66,6 +66,7 @@
         <DataTemplate x:Key="AutocompleteCsvDataTemplate">
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
+                
                 <views:FilteredComboBox
                     helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
                     IsEnabled="{Binding Path=IsDisabled}"
@@ -103,9 +104,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Border BorderThickness="1" BorderBrush="Black" Focusable="False">
-            <customComponents:PdfViewerHost x:Name="PdfViewerUc" PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False" helpers:FocusExtension.IsFocused="False"/>
-        </Border>
+        <customComponents:PdfViewerHost x:Name="PdfViewerUc" PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False" helpers:FocusExtension.IsFocused="False"/>
         <Grid Grid.Column="1" Margin="0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>

@@ -51,6 +51,7 @@
             this.Controls.Add(this.PdfViewer);
             this.Name = "AdobeViewer";
             this.Size = new System.Drawing.Size(367, 386);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.AdobeViewer_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.PdfViewer)).EndInit();
             this.ResumeLayout(false);
 
