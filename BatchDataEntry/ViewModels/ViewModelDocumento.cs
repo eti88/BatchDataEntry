@@ -200,7 +200,13 @@ namespace BatchDataEntry.ViewModels
                 }
 
                 if (!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
-                    Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
+                {
+                    if(!string.IsNullOrEmpty(Batch.PatternNome))
+                        Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome,DocFile.FileName + ".pdf"));
+                    else
+                        Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
+                }
+                    
                 MoveNextItem();
             }
         }

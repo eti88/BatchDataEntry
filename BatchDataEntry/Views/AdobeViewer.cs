@@ -58,7 +58,7 @@ namespace BatchDataEntry.Views
             PdfViewer.gotoPreviousPage();
         }
 
-        private void AdobeViewer_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        public void AdobeViewer_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             if (e.KeyCode == Keys.PageUp)
             {

@@ -152,7 +152,6 @@ namespace BatchDataEntry.Models
                 }
             }
         }
-
         public string PatternNome
         {
             get { return _patternNome; }
@@ -172,6 +171,7 @@ namespace BatchDataEntry.Models
             Dimensioni = 0L;
             DocCorrente = 0;
             UltimoIndicizzato = 0;
+            PatternNome = string.Empty;
         }
 
         public Batch(string nome, TipoFileProcessato t, string input, string output)
@@ -186,6 +186,7 @@ namespace BatchDataEntry.Models
             this.Dimensioni = 0;
             this.DocCorrente = 0;
             this.UltimoIndicizzato = 0;
+            this.PatternNome = string.Empty;
         }
 
         public Batch(string nome, TipoFileProcessato t, string input, string output, Modello m)
@@ -218,20 +219,6 @@ namespace BatchDataEntry.Models
             this.PatternNome = pat;
         }
 
-        //public Batch(string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, int fk)
-        //{
-        //    this.Nome = nome;
-        //    this.TipoFile = t;
-        //    this.DirectoryInput = input;
-        //    this.DirectoryOutput = output;
-        //    this.Applicazione = m;
-        //    this.NumDoc = nd;
-        //    this.NumPages = np;
-        //    this.Dimensioni = dim;
-        //    this.DocCorrente = dc;
-        //    this.UltimoIndicizzato = ui;
-        //}
-
         public Batch(int id, string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, string pat)
         {
             this.Id = id;
@@ -247,21 +234,6 @@ namespace BatchDataEntry.Models
             this.UltimoIndicizzato = ui;
             this.PatternNome = pat;
         }
-
-        //public Batch(int id, string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, int fk)
-        //{
-        //    this.Id = id;
-        //    this.Nome = nome;
-        //    this.TipoFile = t;
-        //    this.DirectoryInput = input;
-        //    this.DirectoryOutput = output;
-        //    this.Applicazione = m;
-        //    this.NumDoc = nd;
-        //    this.NumPages = np;
-        //    this.Dimensioni = dim;
-        //    this.DocCorrente = dc;
-        //    this.UltimoIndicizzato = ui;
-        //}
 
         public Batch(Batch b)
         {

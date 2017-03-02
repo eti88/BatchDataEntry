@@ -12,7 +12,7 @@ namespace BatchDataEntry.Providers
 {
     public static class DbSuggestionProvider
     {
-        public static async Task<ObservableCollection<Suggestion>> GetRecords(int idCol)
+        public static async Task<List<string>> GetRecords(int idCol)
         {
             Batch b;
             // Carica il batch corrente dalle impostazioni (controllare se presente)  
@@ -32,7 +32,7 @@ namespace BatchDataEntry.Providers
                 
 
                 DatabaseHelper _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], b.DirectoryOutput);
-                ObservableCollection<Suggestion> task = await GetList(_db, z);
+                List<string> task = await GetList(_db, z);
                 return task;
             }
             catch (Exception e)
@@ -44,12 +44,12 @@ namespace BatchDataEntry.Providers
             }
         }
 
-        private static async Task<ObservableCollection<Suggestion>> GetList(DatabaseHelper db, int column)
+        private static async Task<List<string>> GetList(DatabaseHelper db, int column)
         {
-            var lst = new ObservableCollection<Suggestion>();
+            var lst = new List<string>();
             await Task.Factory.StartNew(() =>
             {
-                lst = db.GetAutocompleteListOb(column);
+                lst = db.GetAutocompleteList(column).ToList();
             });
             return lst;
         }

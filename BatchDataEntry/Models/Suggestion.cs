@@ -11,11 +11,6 @@ namespace BatchDataEntry.Models
         public string ColumnA { get; set; }
         public string ColumnB { get; set; }
 
-        public string FullSuggestion
-        {
-            get { return string.Format("{0} - {1}", ColumnA, ColumnB); }
-        }
-
         public Suggestion() { }
 
         public Suggestion(string a, string b)

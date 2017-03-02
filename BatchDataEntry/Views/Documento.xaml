@@ -7,7 +7,8 @@
         xmlns:customComponents="clr-namespace:BatchDataEntry.Components"
         xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
         xmlns:providers="clr-namespace:BatchDataEntry.Providers"
-        xmlns:views="clr-namespace:BatchDataEntry.Views"
+        xmlns:editors="http://wpfcontrols.com/"
+        xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
         helpers:MyAttachedBehaviors.LoadedCommand="{Binding Path=CmdWindowLoaded}"
         mc:Ignorable="d"
         x:Name="DocumentWindow"        
@@ -16,11 +17,16 @@
         <viewModels:ViewModelDocumento></viewModels:ViewModelDocumento>
     </Window.DataContext>
 
-    <!--  <Window.InputBindings>
-        <KeyBinding Command="{Binding Path=CmdIndex}" Key="Enter"></KeyBinding> 
-    </Window.InputBindings> -->
-    
     <Window.Resources>
+        <providers:CsvSuggestionProvider x:Key="CsvSuggestionProvider"/>
+        <DataTemplate x:Key="SuggestionTemplate">
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Path=ColumnA}"/>
+                    <TextBlock Text="{Binding Path=ColumnB}" FontSize="10" Foreground="Gray"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
         <!-- normal template -->
         <DataTemplate x:Key="TextBoxDataTemplate">
             <StackPanel Margin="5,0,5,0">
@@ -37,61 +43,43 @@
         <DataTemplate x:Key="AutocompleteDbDataTemplate">
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
-                <views:FilteredComboBox
+                <TextBox 
                     helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
                     IsEnabled="{Binding Path=IsDisabled}"
                     VerticalAlignment="Center"
                     Height="30"
                     Width="352"
-                    ItemsSource="{Binding QueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                    IsSynchronizedWithCurrentItem="False"
                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    SelectedItem="{Binding AutoSelectedItem}"
-                    SelectedValue="{Binding AutoSelectedValue}"
-                    IsEditable="True"
-                    IsTextSearchEnabled="False"
-                    StaysOpenOnEdit="True">
-                    <views:FilteredComboBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel VirtualizationMode="Recycling" />
-                        </ItemsPanelTemplate>
-                    </views:FilteredComboBox.ItemsPanel>
-                    <views:FilteredComboBox.InputBindings>
-                        <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.TextboxCmd}" CommandParameter="{Binding Value}"></KeyBinding>
-                    </views:FilteredComboBox.InputBindings>
-                </views:FilteredComboBox>
+                    wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding dbQueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
+                    wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteStringComparison="InvariantCultureIgnoreCase">
+                </TextBox>
             </StackPanel>
         </DataTemplate>
         <!-- csv template -->
         <DataTemplate x:Key="AutocompleteCsvDataTemplate">
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
-                
-                <views:FilteredComboBox
+                <!-- autocompletetextbox -->
+                <editors:AutoCompleteTextBox
                     helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
                     IsEnabled="{Binding Path=IsDisabled}"
-                    VerticalAlignment="Center"
+                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    DisplayMember="ColumnA"
                     Height="30"
                     Width="352"
-                    ItemsSource="{Binding QueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                    IsSynchronizedWithCurrentItem="False"
-                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    SelectedItem="{Binding AutoSelectedItem}"
-                    SelectedValue="{Binding AutoSelectedValue}"
-                    DisplayMemberPath="FullSuggestion"
-                    IsEditable="True"                  
-                    IsTextSearchEnabled="False"
-                    StaysOpenOnEdit="True">
-                    <views:FilteredComboBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel VirtualizationMode="Recycling">
-                            </VirtualizingStackPanel>
-                        </ItemsPanelTemplate>
-                    </views:FilteredComboBox.ItemsPanel>
-                    <views:FilteredComboBox.InputBindings>
+                    Provider="{StaticResource ResourceKey=CsvSuggestionProvider}"
+                    ItemTemplate="{StaticResource ResourceKey=SuggestionTemplate}">
+                    <editors:AutoCompleteTextBox.SelectedItem>
+                        <Binding Path="AutoSelectedItem" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"></Binding>
+                    </editors:AutoCompleteTextBox.SelectedItem>
+                    <editors:AutoCompleteTextBox.LoadingContent>
+                        <TextBox Text="Loading..." Margin="5" FontSize="14"></TextBox>
+                    </editors:AutoCompleteTextBox.LoadingContent>
+                    <editors:AutoCompleteTextBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.TextboxCmd}" CommandParameter="{Binding AutoSelectedItem}"></KeyBinding>
-                    </views:FilteredComboBox.InputBindings>
-                </views:FilteredComboBox>
+                    </editors:AutoCompleteTextBox.InputBindings>
+                </editors:AutoCompleteTextBox>
+                <!-- end -->
             </StackPanel>
         </DataTemplate>
         <helpers:ListControlTemplateSelector x:Key="ListControlTemplateSelector"/>
@@ -128,4 +116,6 @@
         </Grid>
     </Grid>
 </Window>
+
+
 

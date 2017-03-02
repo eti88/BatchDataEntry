@@ -14,12 +14,15 @@ namespace BatchDataEntry.Components
         public static readonly DependencyProperty PdfPathProperty = DependencyProperty.Register(
   "PdfPath", typeof(string), typeof(PdfViewerHost), new PropertyMetadata(PdfPathPropertyChanged));
 
+       // public static readonly DependencyProperty PdfScrollUpProperty = DependencyProperty.Register("PdfScrlUp", typeof());
+
         private readonly AdobeViewer wrappedControl;
 
         public PdfViewerHost()
         {
             wrappedControl = new AdobeViewer();
             Child = wrappedControl;
+            wrappedControl.TabStop = false;
         }
 
         public string PdfPath

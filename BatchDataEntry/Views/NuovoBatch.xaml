@@ -88,11 +88,9 @@
                         </WrapPanel>
                     </Grid>
                     <!-- <CheckBox x:Name="checkBoxUseFile" IsChecked="{Binding Path=AlternativeInit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Usa il file Csv esterno per generare la lista di file" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"></CheckBox> -->
-                   
-
-                    
+                      
                     <Label Content="Anteponi stringa a nome file " />
-                    <TextBox Text="{Binding Path=PatternNome}" Margin="10,10,10,0" VerticalContentAlignment="Center" Height="30" FontSize="12"/>
+                    <TextBox Text="{Binding Path=CurrentBatch.PatternNome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" VerticalContentAlignment="Center" Height="30" FontSize="12"/>
                 </StackPanel>
                 <ProgressBar x:Name="ProgressBarInit" Visibility="{Binding Path=isVisible, Converter={StaticResource BoolToVis}}" Minimum="0" Value="{Binding Path=Progress}" Maximum="{Binding Path=MaxValue}" Height="30" VerticalAlignment="Bottom" Margin="10,5,10,0"/>
             </StackPanel>

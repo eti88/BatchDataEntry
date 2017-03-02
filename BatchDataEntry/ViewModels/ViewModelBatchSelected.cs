@@ -289,6 +289,18 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private RelayCommand _genLstCmd;
+        public ICommand GeneraListCmd
+        {
+            get
+            {
+                if (_genLstCmd == null)
+                {
+                    _genLstCmd = new RelayCommand(param => GenerateListTxt());
+                }
+                return _genLstCmd;
+            }
+        }
         #endregion
 
         #region BackGroundWorker
@@ -602,6 +614,32 @@ namespace BatchDataEntry.ViewModels
             {
                 logger.Error(string.Format("[{0}] {1}", path_output_file, e.ToString()));
             }
+        }
+
+        public void GenerateListTxt()
+        {
+            List<string> files =
+                Directory.GetFiles(CurrentBatch.DirectoryOutput, "*.*")
+                    .Where(x => x.ToLower().EndsWith(".pdf"))
+                    .ToList();
+
+            if (files == null || files.Count == 0)
+            {
+                MessageBox.Show(string.Format("{0} non contiene pdf per generare LISTA.txt", CurrentBatch.DirectoryOutput));
+                return;
+            }
+            string outpuFile = Path.Combine(CurrentBatch.DirectoryOutput, @"LISTA.txt");
+            Task.Factory.StartNew(() =>
+            {                            
+                for (int i = 0; i < files.Count; i++)
+                    files[i] = new FileInfo(files[i]).Name;
+
+                files = files.CustomSort().ToList();
+
+                File.WriteAllLines(outpuFile, files);
+                MessageBox.Show("Scrittura terminata LISTA.txt");
+            });
+            
         }
     }
 }

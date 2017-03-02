@@ -302,7 +302,7 @@ namespace BatchDataEntry.ViewModels
                     }
                     documents.Add(doc);
                 }
-                documents = documents.OrderBy(o => o.FileName).ToList();
+
                 for (int i = 0; i < documents.Count; i++)
                 {
                     db.InsertRecordDocumento(b, documents[i]);
@@ -342,12 +342,13 @@ namespace BatchDataEntry.ViewModels
                 MaxValue = files.Count + lines.Count;
                 List<Document> documents = new List<Document>();
 
+                files = files.CustomSort().ToList();
                 #if DEBUG
                 Console.WriteLine(@"### Inizio indicizzazione files ###");
                 #endif
 
                 // adesso per ogni file in files aggiungere un record fileName, path, false
-                for (int i = 0; i < files.Count - 1; i++)
+                for (int i = 0; i < files.Count; i++)
                 {
                     Document doc = new Document
                     {
@@ -370,7 +371,7 @@ namespace BatchDataEntry.ViewModels
                     }
                     documents.Add(doc); 
                 }
-                documents = documents.OrderBy(o => o.FileName).ToList();
+                
                 for (int i = 0; i < documents.Count; i++)
                 {
                     db.InsertRecordDocumento(b, documents[i]);

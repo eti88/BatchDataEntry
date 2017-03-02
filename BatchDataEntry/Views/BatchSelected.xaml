@@ -38,6 +38,7 @@
                 <RowDefinition Height="70"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" Orientation="Horizontal">
+                <Button Content="LISTA.txt" Width="90" Height="30" VerticalAlignment="Center" Command="{Binding Path=GeneraListCmd}" Margin="0,0,20,0"></Button>
                 <Button Content="Converti Tiff" Width="90" Height="30" VerticalAlignment="Center" Command="{Binding Path=GeneraTiffCmd}" Margin="0,0,20,0"></Button>
                 <Button Content="Genera CSV" Width="90" Height="30" VerticalAlignment="Center" Command="{Binding Path=GeneraCsvCmd}"></Button> 
             </StackPanel>

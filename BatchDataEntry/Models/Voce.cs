@@ -1,4 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Transactions;
 using BatchDataEntry.Providers;
 
 namespace BatchDataEntry.Models
@@ -93,16 +96,30 @@ namespace BatchDataEntry.Models
 
         public string AUTOCOMPLETETYPE;
 
-        private object _selectedItem;
-        public object AutoSelectedItem { get { return _selectedItem; } set { if (value != _selectedItem) { _selectedItem = value;
+        private Suggestion _selectedItem;
+        public Suggestion AutoSelectedItem { get { return _selectedItem; } set { if (value != _selectedItem) { _selectedItem = value;
                     OnPropertyChanged("AutoSelectedItem");
                 } } }
 
         private string _selectedValue;
         public string AutoSelectedValue { get { return _selectedValue; } set { if (value != _selectedValue) { _selectedValue = value; OnPropertyChanged("AutoSelectedValue"); } } }
 
-        private ObservableCollection<Suggestion> _queryProvider;
-        public ObservableCollection<Suggestion> QueryProvider
+        private List<string> _dbqueryProvider;
+        public List<string> dbQueryProvider
+        {
+            get { return _dbqueryProvider; }
+            private set
+            {
+                if (value != _dbqueryProvider)
+                {
+                    _dbqueryProvider = value;
+                    OnPropertyChanged("dbQueryProvider");
+                }
+            }
+        }
+
+        private List<Suggestion> _queryProvider;
+        public List<Suggestion> QueryProvider
         {
             get { return _queryProvider; }
             private set
@@ -177,11 +194,12 @@ namespace BatchDataEntry.Models
         {
             if (tp.Equals("CSV"))
             {
-                QueryProvider = await CsvSuggestionProvider.GetCsvRecords();
+                var csv = new CsvSuggestionProvider();
+                QueryProvider = csv.ListOfSuggestions.ToList();
             }
             else if (tp.Equals("DB"))
             {
-                QueryProvider = await DbSuggestionProvider.GetRecords(id);
+                dbQueryProvider = await DbSuggestionProvider.GetRecords(id);
             }       
         }
 
