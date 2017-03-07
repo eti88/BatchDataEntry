@@ -34,5 +34,17 @@ namespace BatchDataEntry.Properties {
                 this["CurrentBatch"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int StartFocusCol {
+            get {
+                return ((int)(this["StartFocusCol"]));
+            }
+            set {
+                this["StartFocusCol"] = value;
+            }
+        }
     }
 }

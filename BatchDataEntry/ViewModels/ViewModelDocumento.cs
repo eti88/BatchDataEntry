@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
 using System.IO;
@@ -123,8 +124,6 @@ namespace BatchDataEntry.ViewModels
             Properties.Settings.Default.Save();           
         }
 
-        
-
         private void LoadDocsList()
         {
             var dbCache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
@@ -226,7 +225,6 @@ namespace BatchDataEntry.ViewModels
             }
 
             RaisePropertyChanged("DocFile");
-            SetFocusOnElement();
         }
 
         public void MoveNextItem()
@@ -245,7 +243,6 @@ namespace BatchDataEntry.ViewModels
             }
             
             RaisePropertyChanged("DocFile");
-            SetFocusOnElement();
         }
         
         public void Interrompi()
@@ -259,19 +256,6 @@ namespace BatchDataEntry.ViewModels
             DatabaseHelper maindb = new DatabaseHelper();
             maindb.UpdateRecordBatch(Batch);
             CloseWindow(true);
-        }
-
-        // Setta il focus con un piccolo ritardo su un elemento definito nel modello 
-        // (il ritardo è necessario per impedire al controller pdf di rubarlo)
-        public void SetFocusOnElement()
-        {
-            Task.Factory.StartNew(() =>
-            {
-                System.Threading.Thread.Sleep(800);
-
-                if (_selectElementFocus > 0 && _selectElementFocus < (DocFile.Voci.Count - 1))
-                    DocFile.Voci[_selectElementFocus].IsFocused = "True";
-            });           
         }
 
         public void EnterActionFunction(object parameter)
@@ -304,20 +288,6 @@ namespace BatchDataEntry.ViewModels
         }
 
         #region Command
-        private RelayCommand _cmdWindowLoaded;
-        public ICommand CmdWindowLoaded
-        {
-            get
-            {
-                if (_cmdWindowLoaded == null)
-                {
-                    _cmdWindowLoaded = new RelayCommand(param => SetFocusOnElement(), param => CanFocused);
-                }
-                return _cmdPrev;
-            }
-        }
-
-
         private RelayCommand _cmdPrev;
         public ICommand CmdPrev
         {

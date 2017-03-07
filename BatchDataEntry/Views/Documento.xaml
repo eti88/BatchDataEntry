@@ -9,10 +9,9 @@
         xmlns:providers="clr-namespace:BatchDataEntry.Providers"
         xmlns:editors="http://wpfcontrols.com/"
         xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
-        helpers:MyAttachedBehaviors.LoadedCommand="{Binding Path=CmdWindowLoaded}"
         mc:Ignorable="d"
         x:Name="DocumentWindow"        
-        Title="{Binding Path=DocFile.FileName}" Height="650" Width="800">
+        Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" KeyDown="DocumentWindow_KeyDown" WindowState="Maximized">
     <Window.DataContext>
         <viewModels:ViewModelDocumento></viewModels:ViewModelDocumento>
     </Window.DataContext>
@@ -43,7 +42,7 @@
         <DataTemplate x:Key="AutocompleteDbDataTemplate">
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
-                <TextBox 
+                <TextBox
                     helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
                     IsEnabled="{Binding Path=IsDisabled}"
                     VerticalAlignment="Center"
@@ -92,8 +91,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <customComponents:PdfViewerHost x:Name="PdfViewerUc" PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False" helpers:FocusExtension.IsFocused="False"/>
-        <Grid Grid.Column="1" Margin="0,10">
+        <customComponents:PdfViewerHost x:Name="PdfViewerUc" IsEnabled="False" PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False" helpers:FocusExtension.IsFocused="False"/>
+
+            <Grid Grid.Column="1" Margin="0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -103,14 +103,13 @@
             </Grid.RowDefinitions>
             <ScrollViewer Grid.Row="0">
                 <StackPanel x:Name="dataEntryElements" Margin="10,0">
-                    <ItemsControl ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemTemplateSelector="{StaticResource ListControlTemplateSelector}">
-                    </ItemsControl>
+                    <ItemsControl x:Name="FieldItems"  ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemTemplateSelector="{StaticResource ListControlTemplateSelector}" Loaded="FieldItems_Loaded"/>
                 </StackPanel>
             </ScrollViewer>
             <StackPanel Grid.Row="1" Height="40" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="buttonIndexes" Command="{Binding Path=CmdIndex}" Content="Indicizza" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
-                <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
-                <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
+                <Button x:Name="buttonIndexes" Command="{Binding Path=CmdIndex}" Content="Indicizza" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" Click="buttonIndexes_Click"/>
+                <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold" Click="buttonPrevious_Click"/>
+                <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold" Click="buttonNext_Click"/>
                 <Button x:Name="buttonStop" Click="ButtonStop_OnClick" Command="{Binding Path=CmdStop}" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
             </StackPanel>
         </Grid>

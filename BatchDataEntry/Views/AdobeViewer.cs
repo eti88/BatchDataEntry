@@ -17,6 +17,7 @@ namespace BatchDataEntry.Views
             InitializeComponent();
             PdfViewer.setShowToolbar(false);
             PdfViewer.setView("FitH");
+            PdfViewer.TabStop = false;            
         }
 
         public string PdfFilePath

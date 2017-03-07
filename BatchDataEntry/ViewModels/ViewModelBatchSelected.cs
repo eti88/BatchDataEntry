@@ -499,7 +499,7 @@ namespace BatchDataEntry.ViewModels
         public ViewModelBatchSelected(Batch batch)
         {
             CurrentBatch = batch;
-
+            CurrentBatch.LoadModel();
             var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
             Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
             LoadGrid();           
@@ -508,14 +508,19 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
-            // not required for this question, but is a helpful event to handle
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
-
+            Properties.Settings.Default.StartFocusCol = GetInitialTextBoxPosition(CurrentBatch.Applicazione);
+            Properties.Settings.Default.Save();
             MaxProgressBarValue = 100;
             ValueProgressBar = 0;
         }
 
         #endregion
+
+        private int GetInitialTextBoxPosition(Modello mod)
+        {
+            return mod.StartFocusColumn;
+        }
 
         public void GenerateCsv()
         {
