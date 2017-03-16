@@ -8,9 +8,9 @@ using System.Windows;
 // set di attributi. Modificare i valori di questi attributi per modificare le informazioni
 // associate a un assembly.
 [assembly: AssemblyTitle("BatchDataEntry")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Soluzione per il dataentry")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Modservice")]
 [assembly: AssemblyProduct("BatchDataEntry")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]

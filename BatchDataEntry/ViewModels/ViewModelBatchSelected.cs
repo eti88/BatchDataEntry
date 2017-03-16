@@ -351,7 +351,7 @@ namespace BatchDataEntry.ViewModels
             if (SelectedRowIndex > 0 && _currentBatch != null)
             {
                 var continua = new Documento();
-                var indexFile = SelectedRowIndex;
+                var indexFile = SelectedRowIndex - 1;
                 continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
                 continua.ShowDialog();
                 LoadGrid();
@@ -534,15 +534,8 @@ namespace BatchDataEntry.ViewModels
             
             var export = new Views.Export();          
             export.DataContext = new ViewModelExport(DataSource, Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
-            bool dr = (bool)export.ShowDialog();
-            if (dr)
-            {
-                StatusBarCol1 = String.Format("Generazione del file Csv completato!");
-            }
-            else
-            {
-                StatusBarCol1 = String.Format("Generazione del file Csv Fallita! Controlla il file di log");
-            }
+            export.ShowDialog();
+            StatusBarCol1 = String.Format("Csv generato...");
         }
 
         private void LoadGrid()

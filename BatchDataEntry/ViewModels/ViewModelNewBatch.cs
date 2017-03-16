@@ -282,7 +282,14 @@ namespace BatchDataEntry.ViewModels
                         }
 
                         doc.FileName = cells[indexColumn];
-                        doc.Path = Path.Combine(CurrentBatch.DirectoryInput, cells[indexColumn].Contains(".pdf") ? cells[indexColumn] : String.Format("{0}.pdf", cells[indexColumn]));
+                        string absPath = Path.Combine(CurrentBatch.DirectoryInput, cells[indexColumn].Contains(".pdf") ? cells[indexColumn] : String.Format("{0}.pdf", cells[indexColumn]));
+                        //doc.Path = Utility.MakeRelative(absPath, CurrentBatch.DiskLetter)
+                        /*
+                         Aggiungere al database, modello e view la gestione della lettera del disco.
+                         Basta prenderlo dal programma di ricerca delle pratiche comunali
+
+                         */
+
                         doc.IsIndexed = false;
 
                         for (int z = 0; z < b.Applicazione.Campi.Count; z++)
@@ -308,7 +315,6 @@ namespace BatchDataEntry.ViewModels
                     db.InsertRecordDocumento(b, documents[i]);
                     backgroundWorker.ReportProgress(i);
                 }
-                //db.InsertRecordDocumento(b, doc);
             }
             else if (IndexType.Contains("Manuale"))
             {

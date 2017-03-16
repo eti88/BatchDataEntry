@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Configuration;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using BatchDataEntry.Business;
 using BatchDataEntry.Helpers;
@@ -85,6 +82,8 @@ namespace BatchDataEntry.ViewModels
             {
                 for (int i = 0; i < _dtSource.Rows.Count; i++)
                 {
+                    if(Convert.ToBoolean(_dtSource.Rows[i][3]) != true) continue;
+
                     StringBuilder record = new StringBuilder();
                     for (int z = 0; z < _dtSource.Columns.Count; z++)
                     {

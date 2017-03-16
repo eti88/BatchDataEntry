@@ -9,6 +9,13 @@ namespace BatchDataEntry.Business
 {
     public static class Utility
     {
+        public static string MakeRelative(string filePath, string referencePath)
+        {
+            var fileUri = new Uri(filePath);
+            var referenceUri = new Uri(referencePath);
+            return referenceUri.MakeRelativeUri(fileUri).ToString();
+        }
+
         public static IEnumerable<string> CustomSort(this IEnumerable<string> list)
         {
             int maxLen = list.Select(s => s.Length).Max();

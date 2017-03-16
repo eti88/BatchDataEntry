@@ -3,6 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
+using BatchDataEntry.Components;
 
 
 namespace BatchDataEntry.Views
@@ -15,17 +16,17 @@ namespace BatchDataEntry.Views
         public AdobeViewer()
         {
             InitializeComponent();
-            PdfViewer.setShowToolbar(false);
-            PdfViewer.setView("FitH");
-            PdfViewer.TabStop = false;            
+            PdfViewer.setShowToolbar(true);
+            PdfViewer.setPageMode("none");
+            PdfViewer.setLayoutMode("SinglePage");
+            PdfViewer.setView("Fit");
+            PdfViewer.TabStop = false;
+            //PdfViewer.SuspendStealFocus();
         }
 
         public string PdfFilePath
         {
-            get
-            {
-                return pdfFilePath;
-            }
+            get { return pdfFilePath; }
 
             set
             {
@@ -44,9 +45,15 @@ namespace BatchDataEntry.Views
 
         private void ChangeCurrentDisplayedPdf()
         {
-            PdfViewer.LoadFile(PdfFilePath);
+            PdfViewer.setShowToolbar(true);
             PdfViewer.src = PdfFilePath;
-            PdfViewer.setViewScroll("FitH", 0);
+            PdfViewer.SuspendStealFocus();
+            PdfViewer.LoadFile(PdfFilePath);
+
+            PdfViewer.setPageMode("none");
+            PdfViewer.setLayoutMode("SinglePage");
+            PdfViewer.setView("Fit");
+            //PdfViewer.setViewScroll("FitH", 0);
         }
 
         public void ScrollPdfDown()

@@ -1,26 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using BatchDataEntry.Models;
-using ComboBox = System.Windows.Controls.ComboBox;
-using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using Label = System.Windows.Controls.Label;
 using TextBox = System.Windows.Controls.TextBox;
 
 namespace BatchDataEntry.Views
@@ -66,14 +50,26 @@ namespace BatchDataEntry.Views
         private void DocumentWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.F2)
+            {
+                #if DEBUG
+                Console.WriteLine(@"Premuta shortcut per Focus Pdf control");
+                #endif
                 SetFocusOnPdfControl();
+            }
             else if (e.Key == Key.F3)
             {
+                #if DEBUG
+                Console.WriteLine(@"Premuta shortcut per Textbox focus");
+                #endif
                 int startCol = Properties.Settings.Default.StartFocusCol;
                 SetFocusOnSelectedTextBox(startCol);
             }else if (e.Key == Key.F5)
+            {
+                #if DEBUG
+                Console.WriteLine(@"Premuta shortcut Pdf Control Enabled: " + !PdfViewerUc.IsEnabled);
+                #endif
                 this.PdfViewerUc.IsEnabled = !PdfViewerUc.IsEnabled;
-                
+            }
         }
 
         public T GetChild<T>(DependencyObject obj) where T : DependencyObject

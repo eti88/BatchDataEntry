@@ -28,6 +28,10 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <ProductName>Batch Data Entry</ProductName>
+    <PublisherName>Modservice</PublisherName>
+    <SuiteName>BDE</SuiteName>
+    <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <ApplicationRevision>24</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
@@ -102,7 +106,7 @@
     <ManifestKeyFile>BatchDataEntry_ChiaveTemporanea.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
@@ -113,6 +117,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Mesh-100.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CsvHelper, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
@@ -197,6 +204,7 @@
     <Compile Include="Business\CsvFileWriter.cs" />
     <Compile Include="Business\CsvRow.cs" />
     <Compile Include="Business\Utility.cs" />
+    <Compile Include="Components\AxAcroPDFFocusExtensions.cs" />
     <Compile Include="Components\NavigationList.cs" />
     <Compile Include="Components\PdfViewerHost.cs" />
     <Compile Include="Helpers\Converters.cs" />
@@ -327,6 +335,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Mesh-100.ico" />
     <Content Include="x64\SQLite.Interop.dll" />
     <Content Include="x86\SQLite.Interop.dll" />
     <EmbeddedResource Include="Properties\Resources.resx">
