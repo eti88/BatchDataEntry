@@ -399,7 +399,7 @@ namespace BatchDataEntry.ViewModels
                     Console.WriteLine("SelectedRowIndex: " + SelectedRowIndex);
                     #endif
 
-                    Document current = new Document(_currentBatch, db.GetDocumento(SelectedRowIndex), db);
+                    Document current = new Document(_currentBatch, db.GetDocumento(SelectedRowIndex));
                     db.Delete("Documenti", string.Format("Id= {0}", current.Id));
 
                     try
@@ -510,6 +510,7 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.DoWork += DoWork;
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
             Properties.Settings.Default.StartFocusCol = GetInitialTextBoxPosition(CurrentBatch.Applicazione);
+            Properties.Settings.Default.CurrentBatch = CurrentBatch.Id;
             Properties.Settings.Default.Save();
             MaxProgressBarValue = 100;
             ValueProgressBar = 0;
@@ -561,7 +562,7 @@ namespace BatchDataEntry.ViewModels
 
             foreach (var doc in docs)
             {
-                Document dc = new Document(_currentBatch, doc, db);
+                Document dc = new Document(_currentBatch, doc);
                 string new_path = String.Empty;
                 var fileName = Path.GetFileName(dc.Path);
                 if (!Utility.ContainsOnlyNumbers(fileName))

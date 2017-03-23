@@ -6,7 +6,7 @@
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
-        Title="Nuovo Campo" Height="500" Width="400" MinHeight="500" MaxHeight="500" MinWidth="400" MaxWidth="500">
+        Title="Nuovo Campo" Height="500" Width="400" MinHeight="500" MaxHeight="500" MinWidth="400" MaxWidth="500" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.Resources>
         <viewModels:ViewModelNuovaColonna x:Key="ViewModelNuovaColonna"/>
     </Window.Resources>

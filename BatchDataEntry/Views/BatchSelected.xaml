@@ -11,7 +11,7 @@
         Height="520" 
         Width="785"
         MinWidth="785"
-        MinHeight="520">
+        MinHeight="520" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.Resources>
         <viewModels:ViewModelBatchSelected x:Key="ViewModelBatchSelected"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />

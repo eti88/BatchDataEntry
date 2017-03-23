@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         mc:Ignorable="d"
-        Title="Esporta Csv" Height="420" Width="340" Closed="Window_Closed">
+        Title="Esporta Csv" Height="420" Width="340" Closed="Window_Closed" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.DataContext>
         <viewModels:ViewModelExport></viewModels:ViewModelExport>
     </Window.DataContext>

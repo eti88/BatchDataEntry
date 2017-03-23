@@ -6,7 +6,7 @@
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         mc:Ignorable="d"
-        Title="Nuovo Modello" Height="570" Width="400" MinHeight="570" MaxHeight="570" MinWidth="400" MaxWidth="500">
+        Title="Nuovo Modello" Height="570" Width="400" MinHeight="570" MaxHeight="570" MinWidth="400" MaxWidth="500" Icon="/BatchDataEntry;component/Mesh-100.ico">
 
     <Grid>
         <DockPanel>

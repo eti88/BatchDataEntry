@@ -281,15 +281,14 @@ namespace BatchDataEntry.ViewModels
                             return false;
                         }
 
+                        string cleanValue = cells[indexColumn].Replace("'", "");
+                        string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(cleanValue));
+                        if (db.Count(queryCheck) > 0) continue;
+                        doc.FileName = cleanValue;
+
                         doc.FileName = cells[indexColumn];
-                        string absPath = Path.Combine(CurrentBatch.DirectoryInput, cells[indexColumn].Contains(".pdf") ? cells[indexColumn] : String.Format("{0}.pdf", cells[indexColumn]));
-                        //doc.Path = Utility.MakeRelative(absPath, CurrentBatch.DiskLetter)
-                        /*
-                         Aggiungere al database, modello e view la gestione della lettera del disco.
-                         Basta prenderlo dal programma di ricerca delle pratiche comunali
-
-                         */
-
+                        string absPath = Path.Combine(CurrentBatch.DirectoryInput, cleanValue.Contains(".pdf") ? cleanValue : String.Format("{0}.pdf", cleanValue));
+                        doc.Path = absPath;
                         doc.IsIndexed = false;
 
                         for (int z = 0; z < b.Applicazione.Campi.Count; z++)
@@ -323,30 +322,11 @@ namespace BatchDataEntry.ViewModels
                 #endif
 
                 if (b.TipoFile == TipoFileProcessato.Pdf)
-                {
                     files = Directory.GetFiles(b.DirectoryInput, "*.pdf").ToList();
-                }
                 else
-                {
                     files = Directory.GetDirectories(b.DirectoryInput).ToList();
-                }
 
-                if (files.Count == 0)
-                    return false;
-
-                List<string> lines;
-
-                if (b.Applicazione.OrigineCsv)
-                {
-                    lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
-                }
-                else
-                {
-                    lines = new List<string>();
-                }
-
-                MaxValue = files.Count + lines.Count;
-                List<Document> documents = new List<Document>();
+                if (files.Count == 0) return false;
 
                 files = files.CustomSort().ToList();
                 #if DEBUG
@@ -354,16 +334,28 @@ namespace BatchDataEntry.ViewModels
                 #endif
 
                 // adesso per ogni file in files aggiungere un record fileName, path, false
+                int lastId = 0;
+                try
+                {
+                    lastId = db.Count(@"SELECT seq FROM SQLITE_SEQUENCE WHERE name='Documenti'");                    
+                }
+                catch (Exception)
+                {
+                    logger.Warn("Query fallita per il recuper del lastId");
+                    throw;
+                }
+
                 for (int i = 0; i < files.Count; i++)
                 {
-                    Document doc = new Document
-                    {
-                        Id = i + 1,
-                        FileName = Path.GetFileNameWithoutExtension(files[i]),
-                        Path = files[i],
-                        IsIndexed = false
-                    };
-
+                    string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(files[i]));
+                    if (db.Count(queryCheck) > 0) continue;
+                    
+                    Document doc = new Document();
+                    doc.Id = lastId + 1;
+                    doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
+                    doc.Path = files[i];
+                    doc.IsIndexed = false;
+                
                     if (!b.Applicazione.OrigineCsv)
                     {                     
                         for (int z = 0; z < b.Applicazione.Campi.Count; z++)
@@ -374,14 +366,10 @@ namespace BatchDataEntry.ViewModels
                                 : b.Applicazione.Campi.ElementAt(z).ValorePredefinito;
                             doc.Voci.Add(new Voce(colName, valore));
                         }
-                    }
-                    documents.Add(doc); 
-                }
-                
-                for (int i = 0; i < documents.Count; i++)
-                {
-                    db.InsertRecordDocumento(b, documents[i]);
+                    } 
+                    db.InsertRecordDocumento(b, doc);
                     backgroundWorker.ReportProgress(i);
+                    lastId++;
                 }
             }
             else
@@ -395,24 +383,22 @@ namespace BatchDataEntry.ViewModels
 
         public void Generate(Batch batch, DatabaseHelper dbc)
         {
-            
-
             try
             {
-                if (!File.Exists(Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"])))
-                {
-                    if (batch.Applicazione == null || batch.Applicazione.Id == 0)
-                        batch.LoadModel();
+                if (batch.Applicazione == null || batch.Applicazione.Id == 0)
+                    batch.LoadModel();
 
-                    if (batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0)
-                        batch.Applicazione.LoadCampi();
+                if (batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0)
+                    batch.Applicazione.LoadCampi();
 
-                    List<string> campi = new List<string>();
-                    for (int i = 0; i < batch.Applicazione.Campi.Count; i++)
-                    {
-                        campi.Add(batch.Applicazione.Campi[i].Nome);
-                    }
+                List<string> campi = new List<string>();
+                for (int i = 0; i < batch.Applicazione.Campi.Count; i++)
+                    campi.Add(batch.Applicazione.Campi[i].Nome);
 
+                string pathCacheDb = Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"]);
+
+                if (!File.Exists(pathCacheDb))
+                {                              
                     bool res = false;
 
                     dbc.CreateCacheDb(campi);
@@ -421,7 +407,7 @@ namespace BatchDataEntry.ViewModels
                     {
                         Task.Factory.StartNew(() =>
                         {
-                            if (!File.Exists(Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"])))
+                            if (!File.Exists(pathCacheDb))
                                 return;
                             
                             bool isLocked = true;
@@ -430,23 +416,22 @@ namespace BatchDataEntry.ViewModels
                             {
                                 try
                                 {
-                                    File.Delete(Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"]));
+                                    File.Delete(pathCacheDb);
                                     Thread.Sleep(5000);
                                     isLocked = false;
                                 }
-                                catch (System.IO.IOException) { }
-                                
+                                catch (System.IO.IOException) { }                          
                             }
-
-                            
-
-                            
-                                File.Delete(Path.Combine(batch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"]));
+                                File.Delete(pathCacheDb);
                         });
                         logger.Error("Creazione batch interrotta funzione FillCacheDb fallita." );
                         return;
                     }
 
+                }else if (File.Exists(pathCacheDb))
+                {
+                    // Appende al db cache i nuovi pdf
+                    fillCacheDb(dbc, batch);
                 }
 
                 if (CheckOutputDirFiles(batch.DirectoryOutput))

@@ -11,7 +11,7 @@
         MinWidth="700"
         MinHeight="550"
         MaxWidth="700"
-        MaxHeight="550">
+        MaxHeight="550" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.DataContext>
         <viewModels:ViewModelApplicazione></viewModels:ViewModelApplicazione>
     </Window.DataContext>

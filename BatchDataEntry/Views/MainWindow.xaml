@@ -12,7 +12,7 @@
         Width="566.15"
         MinWidth="560"
         MaxWidth="560"
-        DataContext="{DynamicResource ViewModelMain }" Loaded="Window_Loaded">
+        DataContext="{DynamicResource ViewModelMain }" Loaded="Window_Loaded" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.Resources>
         <vm:ViewModelMain x:Key="ViewModelMain"/>
     </Window.Resources>

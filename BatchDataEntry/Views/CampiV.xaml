@@ -6,7 +6,7 @@
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
-        Title="Campi" Height="580" Width="460" MinWidth="460"
+        Title="Campi" Height="580" Width="460" MinWidth="460" Icon="/BatchDataEntry;component/Mesh-100.ico"
         >
     <Window.Resources>
         <viewModels:ViewModelCampi x:Key="ViewModelCampi"/>

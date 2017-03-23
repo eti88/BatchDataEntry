@@ -88,6 +88,7 @@ namespace BatchDataEntry.Business
             {
                 var csv = new CsvReader(sr);
                 csv.Configuration.Delimiter = ";";
+                csv.Configuration.HasHeaderRecord = false;
                 int i = 0;
                 while (csv.Read())
                 {

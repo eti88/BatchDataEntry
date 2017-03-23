@@ -255,7 +255,6 @@ namespace BatchDataEntry.Models
             this.DocCorrente = b.DocCorrente;
             this.UltimoIndicizzato = b.UltimoIndicizzato;
             this.PatternNome = b.PatternNome;
-
         }
 
         public void LoadModel()

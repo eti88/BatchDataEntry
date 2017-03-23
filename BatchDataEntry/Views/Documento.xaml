@@ -11,7 +11,7 @@
         xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
         mc:Ignorable="d"
         x:Name="DocumentWindow"        
-        Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" KeyDown="DocumentWindow_KeyDown" WindowState="Maximized">
+        Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" KeyDown="DocumentWindow_KeyDown" WindowState="Maximized" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.DataContext>
         <viewModels:ViewModelDocumento></viewModels:ViewModelDocumento>
     </Window.DataContext>
@@ -91,7 +91,10 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <customComponents:PdfViewerHost x:Name="PdfViewerUc" IsEnabled="False" PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False" helpers:FocusExtension.IsFocused="False"/>
+        <customComponents:PdfViewerHost x:Name="PdfViewerUc" 
+                                        IsEnabled="False" 
+                                        PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
+                                        Focusable="False" helpers:FocusExtension.IsFocused="False"/>
 
             <Grid Grid.Column="1" Margin="0,10">
             <Grid.ColumnDefinitions>

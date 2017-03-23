@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
 using System.IO;
@@ -14,7 +13,6 @@ using BatchDataEntry.Business;
 using BatchDataEntry.Components;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
-using BatchDataEntry.Providers;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -84,10 +82,10 @@ namespace BatchDataEntry.ViewModels
 
         public ViewModelDocumento(Batch _currentBatch, int indexRowVal)
         {
-            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
-            {
-                return;
-            }
+            //if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+            //{
+            //    return;
+            //}
 
             if (_currentBatch != null)
                 Batch = _currentBatch;
@@ -98,7 +96,7 @@ namespace BatchDataEntry.ViewModels
                 Batch.Applicazione.LoadCampi();
             LoadDocsList();
             DocFiles.CurrentIndex = indexRowVal;
-            DocFile = new Document(Batch, DocFiles.Current, _db);
+            DocFile = new Document(Batch, DocFiles.Current);
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;
@@ -117,7 +115,7 @@ namespace BatchDataEntry.ViewModels
 
             LoadDocsList();
             DocFiles.CurrentIndex = GetId();
-            DocFile = new Document(Batch, DocFiles.Current, _db);
+            DocFile = new Document(Batch, DocFiles.Current);
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;
@@ -214,7 +212,7 @@ namespace BatchDataEntry.ViewModels
         {
             if (DocFiles.hasPrevious)
             {
-                DocFile = new Document(Batch, DocFiles.MovePrevious, _db);
+                DocFile = new Document(Batch, DocFiles.MovePrevious);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, _db);
                 for (int i = 0; i < repeatValues.Length; i++)
@@ -232,7 +230,7 @@ namespace BatchDataEntry.ViewModels
             
             if (DocFiles.hasNext)
             {
-                DocFile = new Document(Batch, DocFiles.MoveNext, _db);
+                DocFile = new Document(Batch, DocFiles.MoveNext);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, _db);
                 for (int i = 0; i < repeatValues.Length; i++)
