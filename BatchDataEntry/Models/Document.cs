@@ -122,53 +122,6 @@ namespace BatchDataEntry.Models
             }
         }
 
-        //public Document(Batch b, Dictionary<int, string> dictionary, DatabaseHelper db)
-        //{
-        //    this.Voci = new ObservableCollection<Voce>();
-
-        //    if (b.Applicazione.Id == 0)
-        //        b.Applicazione.LoadCampi();
-        //    if (b.Applicazione.Campi.Count == 0)
-        //        b.Applicazione.LoadCampi();
-        //    int h = 0;
-        //    for (int i = 0; i < dictionary.Count; i++)
-        //    {
-        //        KeyValuePair<int, string> row = dictionary.ElementAt(i);
-        //        if (i == 0)
-        //            this.Id = Convert.ToInt32(row.Value);
-        //        if (i == 1)
-        //            this.FileName = row.Value;
-        //        if (i == 2)
-        //            this.Path = System.IO.Path.Combine(string.Format(@"{0}:\\", driveLetter), row.Value);
-        //        if (i == 3)
-        //            this.IsIndexed = GetBool(row.Value);
-        //        if (i > 3)
-        //        {
-        //            if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn)
-        //            {
-        //                this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true, "CSV", b.Applicazione.Campi.ElementAt(h).IsDisabled));
-        //            }
-        //            else if (!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
-        //            {
-        //                this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).SalvaValori, "DB", b.Applicazione.Campi.ElementAt(h).IsDisabled));
-        //            }
-        //            else if (string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
-        //            {
-        //                this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).SalvaValori, "DB", b.Applicazione.Campi.ElementAt(h).IsDisabled));
-        //            }
-        //            else if (!string.IsNullOrEmpty(row.Value))
-        //            {
-        //                this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).IsDisabled));
-        //            }
-        //            else
-        //            {
-        //                this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).IsDisabled));
-        //            }
-        //            h++;
-        //        }
-        //    }
-        //}
-
         public Document(int id, string name, string path, bool indexed)
         {
             this.Id = id;

@@ -23,39 +23,52 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="130"/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
 
-        <DataGrid x:Name="dataGridRecords" Grid.Column="0" Margin="10" ColumnHeaderHeight="29" ItemsSource="{Binding Path=DataSource, IsAsync=True, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" CanUserDeleteRows="True" SelectedIndex="{Binding Path=SelectedRowIndex, Mode=OneWayToSource}"/>
-
-        <Grid Grid.Column="1">
+        <DataGrid x:Name="dataGridRecords" 
+                  Grid.Column="0" 
+                  Grid.ColumnSpan="2" 
+                  Margin="10"
+                  AlternationCount="2"
+                  AlternatingRowBackground="#FFF1F1F1"
+                  ColumnHeaderHeight="29" 
+                  ItemsSource="{Binding Path=DataSource, IsAsync=True, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
+                  IsReadOnly="True" 
+                  CanUserDeleteRows="True"
+                  SelectedIndex="{Binding Path=SelectedRowIndex, Mode=OneWayToSource}" Background="White"/>
+        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="70"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" Orientation="Horizontal">
+            <StackPanel Grid.Column="0" Grid.Row="0" Margin="10,5" Orientation="Horizontal">
                 <Button Content="LISTA.txt" Width="90" Height="30" VerticalAlignment="Center" Command="{Binding Path=GeneraListCmd}" Margin="0,0,20,0"></Button>
                 <Button Content="Converti Tiff" Width="90" Height="30" VerticalAlignment="Center" Command="{Binding Path=GeneraTiffCmd}" Margin="0,0,20,0"></Button>
-                <Button Content="Genera CSV" Width="90" Height="30" VerticalAlignment="Center" Command="{Binding Path=GeneraCsvCmd}"></Button> 
+                <Button Content="Genera CSV" Width="90" Height="30" VerticalAlignment="Center" Command="{Binding Path=GeneraCsvCmd}"></Button>
             </StackPanel>
-            <StackPanel Grid.Row="1">
-                <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="{Binding Path=NumeroDocumenti, StringFormat='Numero documenti:    {0}'}" Margin="5"/>
-                <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="{Binding Path=Dimensioni,StringFormat='Dimensione:    {0} MB'}" Margin="5"/>
-                <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.DocCorrente, StringFormat='Documento corrente:    {0}'}" Margin="5"/>
-                <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.UltimoIndicizzato,StringFormat='Ultimo inserimento:    {0}'}" Margin="5"/>
-            </StackPanel>
-            <StackPanel Height="50" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <StackPanel Grid.Column="1" Grid.Row="0" Margin="10,5" Orientation="Horizontal">
                 <Button x:Name="buttonEliminaSelezione" Content="Elimina Selez." Command="{Binding Path=EliminaSelezCmd}" Height="30" Width="100" Margin="5" Background="#FFFF5656" FontSize="11"/>
                 <Button x:Name="buttonContiunaDaSelezione" Content="Apri Selez." Command="{Binding Path=ContinuaDaSelezioneCmd}" Height="30" Width="100" Margin="5" FontSize="11"/>
                 <Button x:Name="buttonContiunaInserimento" Content="Continua" Command="{Binding Path=ContinuaCmd}" Height="30" Width="75" Margin="5" FontSize="11"/>
                 <Button x:Name="buttonCheck" Content="Check" Command="{Binding Path=CheckCmd}" Height="30" Width="75" Margin="5" Background="#FFFFF272" FontSize="11"/>
             </StackPanel>
+            <!-- info batch -->
+            <StackPanel Grid.Row="1" Grid.Column="0" >
+                <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="{Binding Path=NumeroDocumenti, StringFormat='Numero documenti:    {0}'}" Margin="5,0"/>
+                <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="{Binding Path=Dimensioni,StringFormat='Dimensione:    {0} MB'}" Margin="5,0"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.DocCorrente, StringFormat='Documento corrente:    {0}'}" Margin="5,0"/>
+                <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.UltimoIndicizzato,StringFormat='Ultimo inserimento:    {0}'}" Margin="5,0"/>
+            </StackPanel>
         </Grid>
-        <StatusBar Grid.Row="1" Grid.ColumnSpan="2" Height="22" VerticalContentAlignment="Center">
+        <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Height="22" VerticalContentAlignment="Center">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
