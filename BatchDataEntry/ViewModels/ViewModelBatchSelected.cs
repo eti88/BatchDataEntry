@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Data;
+using System.Data.Entity.Core.Mapping;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 using BatchDataEntry.Business;
+using BatchDataEntry.Components;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Views;
@@ -209,7 +212,7 @@ namespace BatchDataEntry.ViewModels
 
         #endregion
 
-        #region Cmd
+        #region commands
 
         private RelayCommand _continuaCmd;
         public ICommand ContinuaCmd
@@ -236,6 +239,8 @@ namespace BatchDataEntry.ViewModels
                 return _checkCmd;
             }
         }
+
+        
 
         private RelayCommand _daSelezCmd;
         public ICommand ContinuaDaSelezioneCmd
@@ -301,6 +306,33 @@ namespace BatchDataEntry.ViewModels
                 return _genLstCmd;
             }
         }
+
+        private RelayCommand _changePathsCmd;
+        public ICommand ChangePathsCmd
+        {
+            get
+            {
+                if (_changePathsCmd == null)
+                {
+                    _changePathsCmd = new RelayCommand(param => ChangePhatsIntoCacheDb());
+                }
+                return _changePathsCmd;
+            }
+        }
+
+        private RelayCommand _changeNumerationCmd;
+        public ICommand ChangeNumerationCmd
+        {
+            get
+            {
+                if (_changeNumerationCmd == null)
+                {
+                    _changeNumerationCmd = new RelayCommand(param => ChangeNumerationPdf());
+                }
+                return _changeNumerationCmd;
+            }
+        }
+
         #endregion
 
         #region BackGroundWorker
@@ -484,7 +516,6 @@ namespace BatchDataEntry.ViewModels
 
         }
 
-
         #region Constructors
 
         public ViewModelBatchSelected()
@@ -492,7 +523,6 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
-            // not required for this question, but is a helpful event to handle
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
         }
 
@@ -514,6 +544,7 @@ namespace BatchDataEntry.ViewModels
             Properties.Settings.Default.Save();
             MaxProgressBarValue = 100;
             ValueProgressBar = 0;
+            //SelectedRowIndex = 12; // per selezionare la riga x (es: index: 5, (rappresenta la row 6), se selezioni la riga 6, si posiziona alla 7
         }
 
         #endregion
@@ -637,8 +668,131 @@ namespace BatchDataEntry.ViewModels
 
                 File.WriteAllLines(outpuFile, files);
                 MessageBox.Show("Scrittura terminata LISTA.txt");
-            });
-            
+            });         
+        }
+
+        private void ChangePhatsIntoCacheDb()
+        {
+            string newPdfDirctory = "";
+            DialogText dlgTxt = new DialogText();
+            if (dlgTxt.ShowDialog() == true)
+            {
+                newPdfDirctory = dlgTxt.FullPath;
+                if (!Directory.Exists(newPdfDirctory))
+                {
+                    MessageBox.Show("Path non valido!");
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(newPdfDirctory)) return;
+
+            DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+            List<Document> documents = new List<Document>();
+            try
+            {
+                documents = db.GetDocumentsListPartial();
+                string originalPath = Path.GetDirectoryName(documents.ElementAt(0).Path);
+               
+                foreach (var doc in documents)
+                {
+                    doc.Path = doc.Path.Replace(originalPath, newPdfDirctory);
+                    db.UpdateRecordDocumento(doc);
+                }
+                MessageBox.Show("Percorsi aggiornati");
+            }
+            catch (Exception e)
+            {
+                #if DEBUG
+                Console.WriteLine(e.ToString());
+                #endif
+                logger.Warn("Modifica del percoso dei pdf nel cache db fallita");
+            }
+        }
+
+        private void ChangeNumerationPdf()
+        {
+            DialogNumeration dlgNums = new DialogNumeration();
+            if (dlgNums.ShowDialog() == true)
+            {
+                Console.WriteLine("GetZeri: " + dlgNums.GetZeri);
+                Console.WriteLine("GetStartNum: " + dlgNums.GetStartNumber);
+                Console.WriteLine("GetIndexS: " + dlgNums.GetIndexStart);
+                Console.WriteLine("GetIndexE: " + dlgNums.GetIndexStop);
+
+                int idxStart = Convert.ToInt32(dlgNums.GetIndexStart);
+                int idxStop = Convert.ToInt32(dlgNums.GetIndexStop) - 1;
+                int zeroNum = Convert.ToInt32(dlgNums.GetZeri);
+                int startNum = Convert.ToInt32(dlgNums.GetStartNumber);
+
+                if(idxStop < idxStart) return;
+
+                List<string> files =
+                Directory.GetFiles(CurrentBatch.DirectoryOutput, "*.*")
+                    .Where(x => x.ToLower().EndsWith(".pdf"))
+                    .ToList();
+
+                if (files.Count == 0) return;
+                files = files.CustomSort().ToList();
+
+                try
+                {
+                    var dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
+                        _currentBatch.DirectoryOutput);
+                    var docs = dbc.GetDocumentsListPartial("SELECT * FROM Documenti WHERE isIndicizzato = 1");
+                    for (int i = 0; i < docs.Count; i++)
+                    {
+                        if (string.IsNullOrEmpty(CurrentBatch.PatternNome))
+                        {
+                            if (docs[i].FileName.Equals(Path.GetFileNameWithoutExtension(files[i])))
+                            {
+                                File.Move(files[i], Path.Combine(Path.GetDirectoryName(files[i]), string.Format("{0}", startNum.ToString("D" + zeroNum))));
+                            }
+                        }
+                        else if (docs[i].FileName.Replace(CurrentBatch.PatternNome, "")
+                            .Equals(Path.GetFileNameWithoutExtension(files[i]).Replace(CurrentBatch.PatternNome, "")))
+                        {
+                            File.Move(files[i], Path.Combine(Path.GetDirectoryName(files[i]), string.Format("{0}", startNum.ToString("D" + zeroNum))));
+                        }
+                        else
+                        {
+                            logger.Warn(string.Format("File {0} non rinominato che dovrebbe corrispondere al documento {1}", Path.GetFileNameWithoutExtension(files[i]), docs[i].FileName));
+                        }
+                        startNum++;
+                        // Bisogna generare anche il file csv e la Lista.txt
+                        // Attualmente non aggiorna il record del documento nel cache db! Bisogna inserirlo?
+                        // Inserire aggiornamento del record esportato
+                        // Inserire sistem aper tenere traccia dell'ultimo record
+                    }
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    logger.Warn("Rinumerazione pdf ha generato un Exception in quanto sono stati richiesti di elaborare più elementi di quelli effettivamente disponibili");
+                }
+                catch (Exception e)
+                {
+                    logger.Error(e.ToString());
+                }
+                 
+
+            }
+
+
+            /*
+             aggiungere nel selected batch metodo che richiede da che numerazione partire (non toccando i pdf originali) ma
+	         quando vengono copiati nella directory di output oltre all'aggiunta del prefisso si modifica anche la numerazione (incrementale)
+	         es: 0000001 -> 0027051, 0000002 -> 0027052, etc..
+             Apri una piccolo dialogo dove bisogna inserire la stringa numerica e con ok la passa alla vm
+             */
+
+
+            // in modo da creare un ciclo for 
+            // skip dei file non indicizzati
+
         }
     }
 }

@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using BatchDataEntry.Helpers;
+using BatchDataEntry.Models;
 
 namespace BatchDataEntry.Views
 {
@@ -22,6 +13,30 @@ namespace BatchDataEntry.Views
         public BatchSelected()
         {
             InitializeComponent();
+        }
+
+        private void dataGridRecords_Loaded(object sender, RoutedEventArgs e)
+        {
+            Batch b;
+            if (Properties.Settings.Default.CurrentBatch == 0) return;
+
+            DatabaseHelper db = new DatabaseHelper();
+            try
+            {
+                b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
+                if (b == null) return;
+                if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel();
+                if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi();
+
+                dataGridRecords.SelectedIndex = (b.UltimoIndicizzato > 1) ? b.UltimoIndicizzato - 1 : b.UltimoIndicizzato;
+            }
+            catch (Exception ex)
+            {
+                #if DEBUG
+                Console.WriteLine(ex.ToString());
+                #endif
+                return;
+            }
         }
     }
 }

@@ -507,7 +507,6 @@ namespace BatchDataEntry.Helpers
             values.Add("Separatore", m.Separatore);
             values.Add("FocusColumn", m.StartFocusColumn.ToString());
             values.Add("CsvColumn", m.CsvColumn.ToString());
-
             Update("Modello", values, string.Format("Id={0}", m.Id));
         }
 
@@ -1074,6 +1073,76 @@ namespace BatchDataEntry.Helpers
 
                 reader.Close();
                 return batches;
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public List<Document> GetDocumentsListPartial()
+        {
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            string sql = "SELECT * FROM Documenti";
+            try
+            {
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                List<Document> docs = new List<Document>();
+
+                while (reader.Read())
+                {
+                    Document doc = new Document();
+                    doc.Id = Convert.ToInt32(reader["Id"]);
+                    doc.FileName = Convert.ToString(reader["FileName"]);
+                    doc.Path = Convert.ToString(reader["Path"]);
+                    doc.IsIndexed = Convert.ToBoolean(reader["isIndicizzato"]);
+                    docs.Add(doc);
+                }
+
+                reader.Close();
+                return docs;
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public List<Document> GetDocumentsListPartial(string query)
+        {
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            
+            try
+            {
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(query, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+                List<Document> docs = new List<Document>();
+
+                while (reader.Read())
+                {
+                    Document doc = new Document();
+                    doc.Id = Convert.ToInt32(reader["Id"]);
+                    doc.FileName = Convert.ToString(reader["FileName"]);
+                    doc.Path = Convert.ToString(reader["Path"]);
+                    doc.IsIndexed = Convert.ToBoolean(reader["isIndicizzato"]);
+                    docs.Add(doc);
+                }
+
+                reader.Close();
+                return docs;
             }
             catch (Exception e)
             {
