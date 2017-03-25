@@ -44,9 +44,12 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private int LastExportedIndex { get; set; }
+
         public ViewModelExport()
         {
             ColumnList = new ObservableCollection<ExportColumn>();
+            LastExportedIndex = -1;
         }
 
         public ViewModelExport(DataTable dt, string output_path)
@@ -66,6 +69,7 @@ namespace BatchDataEntry.ViewModels
                     ColumnList.Add(new ExportColumn(columnNames[i]));
             }
             RaisePropertyChanged("Columns");
+            LastExportedIndex = -1;
         }
 
         public void GenerateCsv()
@@ -83,6 +87,8 @@ namespace BatchDataEntry.ViewModels
                 for (int i = 0; i < _dtSource.Rows.Count; i++)
                 {
                     if(Convert.ToBoolean(_dtSource.Rows[i][3]) != true) continue;
+                    if (i == _dtSource.Rows.Count - 1)
+                        LastExportedIndex = Convert.ToInt32(_dtSource.Rows[i][0]);
 
                     StringBuilder record = new StringBuilder();
                     for (int z = 0; z < _dtSource.Columns.Count; z++)
@@ -103,8 +109,11 @@ namespace BatchDataEntry.ViewModels
             }
             catch (Exception e)
             {
-                logger.Error(e);            
+                logger.Error(e);
+                LastExportedIndex = -1;
             }
+            if (LastExportedIndex != -1)
+                Properties.Settings.Default.LastExportIndex = LastExportedIndex;
         }
     }
 }

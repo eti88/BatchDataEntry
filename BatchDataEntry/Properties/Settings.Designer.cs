@@ -46,5 +46,17 @@ namespace BatchDataEntry.Properties {
                 this["StartFocusCol"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int LastExportIndex {
+            get {
+                return ((int)(this["LastExportIndex"]));
+            }
+            set {
+                this["LastExportIndex"] = value;
+            }
+        }
     }
 }

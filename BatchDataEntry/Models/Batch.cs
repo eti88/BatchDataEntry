@@ -19,6 +19,7 @@ namespace BatchDataEntry.Models
         private int _corrente;
         private int _utlimo;
         private string _patternNome;
+        private string _ultimoDocumentoEsportato;
 
         public int Id {
             get { return _id; }
@@ -162,6 +163,18 @@ namespace BatchDataEntry.Models
                     OnPropertyChanged("PatternNome");
                 } }
         }
+        public string UltimoDocumentoEsportato
+        {
+            get { return _ultimoDocumentoEsportato; }
+            set
+            {
+                if (value != _ultimoDocumentoEsportato)
+                {
+                    _ultimoDocumentoEsportato = value;
+                    OnPropertyChanged("UltimoDocumentoEsportato");
+                }
+            }
+        }
 
         public Batch()
         {
@@ -172,6 +185,7 @@ namespace BatchDataEntry.Models
             DocCorrente = 0;
             UltimoIndicizzato = 0;
             PatternNome = string.Empty;
+            UltimoDocumentoEsportato = "0";
         }
 
         public Batch(string nome, TipoFileProcessato t, string input, string output)
@@ -187,6 +201,7 @@ namespace BatchDataEntry.Models
             this.DocCorrente = 0;
             this.UltimoIndicizzato = 0;
             this.PatternNome = string.Empty;
+            UltimoDocumentoEsportato = "0";
         }
 
         public Batch(string nome, TipoFileProcessato t, string input, string output, Modello m)
@@ -202,6 +217,7 @@ namespace BatchDataEntry.Models
             this.DocCorrente = 0;
             this.UltimoIndicizzato = 0;
             this.PatternNome = string.Empty;
+            UltimoDocumentoEsportato = "0";
         }
 
         public Batch(string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, string pat)
@@ -217,6 +233,7 @@ namespace BatchDataEntry.Models
             this.DocCorrente = dc;
             this.UltimoIndicizzato = ui;
             this.PatternNome = pat;
+            UltimoDocumentoEsportato = "0";
         }
 
         public Batch(int id, string nome, TipoFileProcessato t, string input, string output, Modello m, int nd, int np, long dim, int dc, int ui, string pat)
@@ -233,6 +250,7 @@ namespace BatchDataEntry.Models
             this.DocCorrente = dc;
             this.UltimoIndicizzato = ui;
             this.PatternNome = pat;
+            UltimoDocumentoEsportato = "0";
         }
 
         public Batch(Batch b)
@@ -255,6 +273,7 @@ namespace BatchDataEntry.Models
             this.DocCorrente = b.DocCorrente;
             this.UltimoIndicizzato = b.UltimoIndicizzato;
             this.PatternNome = b.PatternNome;
+            this.UltimoDocumentoEsportato = b.UltimoDocumentoEsportato;
         }
 
         public void LoadModel()

@@ -26,7 +26,7 @@ namespace BatchDataEntry.Views
 
         private void BtnGenerate_OnClick(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            this.DialogResult = true;
         }
 
         private void Window_Closed(object sender, EventArgs e)

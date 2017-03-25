@@ -564,9 +564,42 @@ namespace BatchDataEntry.ViewModels
                 File.Create(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
             }
             
-            var export = new Views.Export();          
-            export.DataContext = new ViewModelExport(DataSource, Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
-            export.ShowDialog();
+            var export = new Views.Export();
+            DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+            DataTable insertedDocs = db.GetDataTableWithQuery("SELECT * FROM Documenti WHERE isIndicizzato = 1");
+            export.DataContext = new ViewModelExport(insertedDocs, Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
+            if (export.ShowDialog() == true)
+            {
+                int idx = (Properties.Settings.Default.LastExportIndex > 0)
+                    ? Properties.Settings.Default.LastExportIndex
+                    : 0;
+
+                Dictionary<int, string> doc = new Dictionary<int, string>();
+
+                if (idx > 0)
+                {
+                    try
+                    {
+                        doc = db.GetDocumento(idx);
+                        foreach (var item in doc)
+                        {
+                            if (item.Key == 1)
+                            {
+                                CurrentBatch.UltimoDocumentoEsportato = item.Value;
+                                DatabaseHelper dbmain = new DatabaseHelper();
+                                dbmain.UpdateRecordBatch(CurrentBatch);
+                                break;
+                            }                              
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error("[GenerateCsv] " + ex.ToString());
+                    }
+
+                }
+                    
+            }
             StatusBarCol1 = String.Format("Csv generato...");
         }
 
@@ -719,10 +752,12 @@ namespace BatchDataEntry.ViewModels
             DialogNumeration dlgNums = new DialogNumeration();
             if (dlgNums.ShowDialog() == true)
             {
+                #if DEBUG
                 Console.WriteLine("GetZeri: " + dlgNums.GetZeri);
                 Console.WriteLine("GetStartNum: " + dlgNums.GetStartNumber);
-                Console.WriteLine("GetIndexS: " + dlgNums.GetIndexStart);
-                Console.WriteLine("GetIndexE: " + dlgNums.GetIndexStop);
+                Console.WriteLine("GetIndexSart: " + dlgNums.GetIndexStart);
+                Console.WriteLine("GetIndexEnd: " + dlgNums.GetIndexStop);
+                #endif
 
                 int idxStart = Convert.ToInt32(dlgNums.GetIndexStart);
                 int idxStop = Convert.ToInt32(dlgNums.GetIndexStop) - 1;
@@ -738,6 +773,7 @@ namespace BatchDataEntry.ViewModels
 
                 if (files.Count == 0) return;
                 files = files.CustomSort().ToList();
+                Dictionary<int, string> modifiedRecords = new Dictionary<int, string>();
 
                 try
                 {
@@ -746,28 +782,105 @@ namespace BatchDataEntry.ViewModels
                     var docs = dbc.GetDocumentsListPartial("SELECT * FROM Documenti WHERE isIndicizzato = 1");
                     for (int i = 0; i < docs.Count; i++)
                     {
+                        string fileName = "";
                         if (string.IsNullOrEmpty(CurrentBatch.PatternNome))
                         {
                             if (docs[i].FileName.Equals(Path.GetFileNameWithoutExtension(files[i])))
                             {
-                                File.Move(files[i], Path.Combine(Path.GetDirectoryName(files[i]), string.Format("{0}", startNum.ToString("D" + zeroNum))));
+                                fileName = string.Format("{0}.pdf", startNum.ToString("D" + zeroNum));
+                                File.Move(files[i],
+                                    Path.Combine(Path.GetDirectoryName(files[i]),
+                                        string.Format("{0}.pdf", startNum.ToString("D" + zeroNum))));
                             }
-                        }
-                        else if (docs[i].FileName.Replace(CurrentBatch.PatternNome, "")
-                            .Equals(Path.GetFileNameWithoutExtension(files[i]).Replace(CurrentBatch.PatternNome, "")))
-                        {
-                            File.Move(files[i], Path.Combine(Path.GetDirectoryName(files[i]), string.Format("{0}", startNum.ToString("D" + zeroNum))));
                         }
                         else
                         {
-                            logger.Warn(string.Format("File {0} non rinominato che dovrebbe corrispondere al documento {1}", Path.GetFileNameWithoutExtension(files[i]), docs[i].FileName));
+                            string vanillaFileName = Path.GetFileNameWithoutExtension(files[i]);
+                            vanillaFileName.Replace(CurrentBatch.PatternNome, "");
+                            if (docs[i].FileName.Replace(CurrentBatch.PatternNome, "") ==
+                                (Path.GetFileNameWithoutExtension(files[i]).Replace(CurrentBatch.PatternNome, "")))
+                            {
+                                fileName = string.Format("{0}{1}.pdf",
+                                            (string.IsNullOrEmpty(CurrentBatch.PatternNome))
+                                                ? ""
+                                                : CurrentBatch.PatternNome, startNum.ToString("D" + zeroNum));
+                                File.Move(files[i],
+                                    Path.Combine(Path.GetDirectoryName(files[i]),
+                                        string.Format("{0}{1}.pdf",
+                                            (string.IsNullOrEmpty(CurrentBatch.PatternNome))
+                                                ? ""
+                                                : CurrentBatch.PatternNome, startNum.ToString("D" + zeroNum))));
+                            }
+                            else
+                            {
+                                #if DEBUG
+                                Console.WriteLine("{0} == {1}", docs[i].FileName.Replace(CurrentBatch.PatternNome, ""),
+                                    vanillaFileName);
+                                #endif
+                                logger.Warn(
+                                    string.Format(
+                                        "File {0} non rinominato che dovrebbe corrispondere al documento {1}",
+                                        Path.GetFileNameWithoutExtension(files[i]), vanillaFileName));
+                                continue;
+                            }
                         }
+                        modifiedRecords.Add(i, Path.GetFileNameWithoutExtension(fileName));
                         startNum++;
-                        // Bisogna generare anche il file csv e la Lista.txt
-                        // Attualmente non aggiorna il record del documento nel cache db! Bisogna inserirlo?
-                        // Inserire aggiornamento del record esportato
-                        // Inserire sistem aper tenere traccia dell'ultimo record
                     }
+                    // Genera csv
+                    DataTable dt = new DataTable();
+                    string sqlQuery = String.Format("SELECT * FROM Documenti WHERE (Id BETWEEN {0} AND {1}) AND (isIndicizzato = 1)", idxStart, idxStop + 1);
+                    dt = dbc.GetDataTableWithQuery(sqlQuery);
+                    if (dt.Rows.Count == 0) return;
+
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        if(modifiedRecords.ElementAt(i).Key == i)
+                            dt.Rows[i]["FileName"] = modifiedRecords.ElementAt(i).Value;
+                    }
+
+                    if (!File.Exists(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"])))
+                        File.Create(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
+
+                    var export = new Views.Export();
+                    export.DataContext = new ViewModelExport(dt, Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
+                    if (export.ShowDialog() == true)
+                    {
+                        int idx = (Properties.Settings.Default.LastExportIndex > 0)
+                            ? Properties.Settings.Default.LastExportIndex
+                            : 0;
+
+                        Dictionary<int, string> doc = new Dictionary<int, string>();
+
+                        if (idx > 0)
+                        {
+                            try
+                            {
+                                DatabaseHelper db = new DatabaseHelper(
+                                    ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+                                doc = db.GetDocumento(idx);
+                                foreach (var item in doc)
+                                {
+                                    if (item.Key == 1)
+                                    {
+                                        CurrentBatch.UltimoDocumentoEsportato = item.Value;
+                                        DatabaseHelper dbmain = new DatabaseHelper();
+                                        dbmain.UpdateRecordBatch(CurrentBatch);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.Error("[ChangeNumerationPdf] " + ex.ToString());
+                            }
+
+                        }
+                    }
+                    StatusBarCol1 = String.Format("Csv generato...");
+                    //General lista
+                    GenerateListTxt();
+                    StatusBarCol1 = String.Format("LIST.txt generato...");
                 }
                 catch (ArgumentOutOfRangeException)
                 {
@@ -777,22 +890,7 @@ namespace BatchDataEntry.ViewModels
                 {
                     logger.Error(e.ToString());
                 }
-                 
-
             }
-
-
-            /*
-             aggiungere nel selected batch metodo che richiede da che numerazione partire (non toccando i pdf originali) ma
-	         quando vengono copiati nella directory di output oltre all'aggiunta del prefisso si modifica anche la numerazione (incrementale)
-	         es: 0000001 -> 0027051, 0000002 -> 0027052, etc..
-             Apri una piccolo dialogo dove bisogna inserire la stringa numerica e con ok la passa alla vm
-             */
-
-
-            // in modo da creare un ciclo for 
-            // skip dei file non indicizzati
-
         }
     }
 }

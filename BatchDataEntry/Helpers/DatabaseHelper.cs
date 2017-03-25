@@ -21,6 +21,8 @@ namespace BatchDataEntry.Helpers
         private static Logger logger = LogManager.GetCurrentClassLogger();
         public string dbConnection;
 
+        #region Constructors
+
         public DatabaseHelper()
         {
            dbConnection = string.Format("Data Source={0}", Path.Combine(Directory.GetCurrentDirectory(), @"database.db3"));
@@ -46,6 +48,10 @@ namespace BatchDataEntry.Helpers
             str = str.Trim().Substring(0, str.Length - 1);
             dbConnection = str;
         }
+
+        #endregion
+
+        #region DataTables
 
         /// <summary>
         /// Permette di recuperare sottoforma di Datatable una tabella dal database
@@ -129,6 +135,10 @@ namespace BatchDataEntry.Helpers
             }
             return dt;
         }
+
+        #endregion
+
+        #region AzioniGeneriche
 
         /// <summary>
         /// Permette di eseguire una query che ritorna un intero
@@ -332,6 +342,223 @@ namespace BatchDataEntry.Helpers
             return returnCode;
         }
 
+        /// <summary>
+        ///     Allows the programmer to easily delete all data from the DB.
+        /// </summary>
+        /// <returns>A boolean true or false to signify success or failure.</returns>
+        public bool ClearDB()
+        {
+            DataTable tables;
+            try
+            {
+                tables = this.GetDataTable("select NAME from SQLITE_MASTER where type='table' order by NAME;");
+                foreach (DataRow table in tables.Rows)
+                {
+                    this.ClearTable(table["NAME"].ToString());
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///     Allows the user to easily clear all data from a specific table.
+        /// </summary>
+        /// <param name="table">The name of the table to clear.</param>
+        /// <returns>A boolean true or false to signify success or failure.</returns>
+        public bool ClearTable(String table)
+        {
+            try
+            {
+                this.ExecuteNonQuery(String.Format("delete from {0};", table));
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+
+        }
+
+        private void ErrorCatch(Exception e)
+        {
+            logger.Error(e.ToString);
+#if DEBUG
+            Console.WriteLine(e.ToString());
+#endif
+        }
+
+        #endregion
+
+        #region TableCreation
+
+        public void InitTabs()
+        {
+            try
+            {
+#if DEBUG
+                Console.WriteLine(@"Init tabelle...");
+#endif
+                CreateTableModello();
+                CreateTableCampo();
+                CreateTableBatch();
+#if DEBUG
+                Console.WriteLine(@"Init tabelle completato.");
+#endif
+            }
+            catch (Exception e)
+            {
+                logger.Error(string.Format("{0} | {1}", e.Source, e.Message));
+#if DEBUG
+                Console.WriteLine(e.ToString());
+#endif
+            }
+        }
+
+        public void CreateCacheDb(List<string> columns)
+        {
+#if DEBUG
+            Console.WriteLine(@"Create cache database...");
+#endif
+            CreateTableAutocompletamento();
+            CreateTableDocumenti(columns);
+#if DEBUG
+            Console.WriteLine(@"Cache db creato....");
+#endif
+
+        }
+
+        public bool CreateTableCampo()
+        {
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Campo (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            "Nome VARCHAR(254)," +
+                            "Posizione INTEGER," +
+                            "SalvaValori INTEGER," +
+                            "ValorePredefinito VARCHAR(254)," +
+                            "IndicePrimario INTEGER," +
+                            "TipoCampo INTEGER," +
+                            "IdModello INTEGER," +
+                            "Riproponi INTEGER," +
+                            "Disabilitato INTEGER," +
+                            "IndiceSecondario INTEGER)";
+            try
+            {
+                this.ExecuteNonQuery(SQLCmd);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+        }
+
+        public bool CreateTableModello()
+        {
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Modello (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            "Nome VARCHAR(254)," +
+                            "OrigineCsv INTEGER," +
+                            "PathFileCsv TEXT," +
+                            "Separatore VARCHAR(1)," +
+                            "FocusColumn INTEGER DEFAULT 0," +
+                            "CsvColumn INTEGER DEFAULT 0)";
+            try
+            {
+                this.ExecuteNonQuery(SQLCmd);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool CreateTableBatch()
+        {
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            "Nome VARCHAR(254)," +
+                            "TipoFile INTEGER," +
+                            "DirectoryInput TEXT," +
+                            "DirectoryOutput TEXT," +
+                            "IdModello INTEGER," +
+                            "NumDoc INTEGER," +
+                            "NumPages INTEGER," +
+                            "DocCorrente INTEGER," +
+                            "UltimoIndicizzato INTEGER," +
+                            "PatternNome TEXT," +
+                            "UltimoDocumentoEsportato TEXT)";
+            try
+            {
+                this.ExecuteNonQuery(SQLCmd);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Crea la tabella dei documenti con alcune colonne predefinite e inoltre aggiunge le colonne per il salvataggio dei valori
+        /// </summary>
+        /// <param name="columns">Lista dei nomi delle colonne</param>
+        /// <returns></returns>
+        public bool CreateTableDocumenti(List<string> columns)
+        {
+            // Nel caso si voglia aggiungere il supporto per più tipi di file va modificato in dictionary il parametro columns
+            // per passare anche il tipo di campo (adesso si assume che sia sempre string)
+            StringBuilder sqlCmd = new StringBuilder();
+            sqlCmd.Append(@"CREATE TABLE IF NOT EXISTS Documenti (Id INTEGER PRIMARY KEY AUTOINCREMENT,FileName VARCHAR(254),Path TEXT,isIndicizzato INTEGER");
+
+            if (columns.Count > 0)
+            {
+                sqlCmd.Append(",");
+                for (int i = 0; i < columns.Count; i++)
+                {
+                    if (i == columns.Count - 1)
+                        sqlCmd.Append(string.Format("{0} VARCHAR(254)", columns[i]));
+                    else
+                        sqlCmd.Append(string.Format("{0} VARCHAR(254),", columns[i]));
+                }
+
+            }
+            sqlCmd.Append(")");
+#if DEBUG
+            Console.WriteLine(sqlCmd);
+#endif
+            try
+            {
+                this.ExecuteNonQuery(sqlCmd.ToString());
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool CreateTableAutocompletamento()
+        {
+            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Autocompletamento (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            "Colonna INTEGER, Valore VARCHAR(254))";
+            try
+            {
+                this.ExecuteNonQuery(SQLCmd);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region InsertTables
+
         public int InsertRecordBatch(Batch b)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
@@ -346,6 +573,7 @@ namespace BatchDataEntry.Helpers
             values.Add("DocCorrente", b.DocCorrente.ToString());
             values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
             values.Add("PatternNome", b.PatternNome);
+            values.Add("UltimoDocumentoEsportato", b.UltimoDocumentoEsportato);
 
             bool r = Insert("Batch", values);
             if (r)
@@ -445,6 +673,10 @@ namespace BatchDataEntry.Helpers
             return -1;
         }
 
+        #endregion
+
+        #region UpdateTables
+
         public void UpdateRecordBatch(Batch b)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
@@ -459,7 +691,7 @@ namespace BatchDataEntry.Helpers
             values.Add("DocCorrente", b.DocCorrente.ToString());
             values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
             values.Add("PatternNome", b.PatternNome);
-
+            values.Add("UltimoDocumentoEsportato", b.UltimoDocumentoEsportato);
             Update("Batch", values, string.Format("Id={0}", b.Id));
         }
 
@@ -530,213 +762,7 @@ namespace BatchDataEntry.Helpers
             Update("Documenti", values, string.Format("Id={0}", d.Id));
         }
 
-        /// <summary>
-        ///     Allows the programmer to easily delete all data from the DB.
-        /// </summary>
-        /// <returns>A boolean true or false to signify success or failure.</returns>
-        public bool ClearDB()
-        {
-            DataTable tables;
-            try
-            {
-                tables = this.GetDataTable("select NAME from SQLITE_MASTER where type='table' order by NAME;");
-                foreach (DataRow table in tables.Rows)
-                {
-                    this.ClearTable(table["NAME"].ToString());
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        ///     Allows the user to easily clear all data from a specific table.
-        /// </summary>
-        /// <param name="table">The name of the table to clear.</param>
-        /// <returns>A boolean true or false to signify success or failure.</returns>
-        public bool ClearTable(String table)
-        {
-            try
-            {
-                this.ExecuteNonQuery(String.Format("delete from {0};", table));
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-
-        }
-
-        private void ErrorCatch(Exception e)
-        {
-            logger.Error(e.ToString);
-            #if DEBUG
-            Console.WriteLine(e.ToString()); 
-            #endif
-        }
-
-        public bool CreateTableCampo()
-        {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Campo (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "Nome VARCHAR(254)," +
-                            "Posizione INTEGER," +
-                            "SalvaValori INTEGER," +
-                            "ValorePredefinito VARCHAR(254)," +
-                            "IndicePrimario INTEGER," +
-                            "TipoCampo INTEGER," +
-                            "IdModello INTEGER," +
-                            "Riproponi INTEGER," +
-                            "Disabilitato INTEGER," +
-                            "IndiceSecondario INTEGER)";                
-            try
-            {
-                this.ExecuteNonQuery(SQLCmd);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-
-        }
-
-        public bool CreateTableModello()
-        {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Modello (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "Nome VARCHAR(254)," +
-                            "OrigineCsv INTEGER," +
-                            "PathFileCsv TEXT," +
-                            "Separatore VARCHAR(1)," +
-                            "FocusColumn INTEGER DEFAULT 0," +
-                            "CsvColumn INTEGER DEFAULT 0)";
-            try
-            {
-                this.ExecuteNonQuery(SQLCmd);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public bool CreateTableBatch()
-        {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Batch (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "Nome VARCHAR(254)," +
-                            "TipoFile INTEGER," +
-                            "DirectoryInput TEXT," +
-                            "DirectoryOutput TEXT," +
-                            "IdModello INTEGER," +
-                            "NumDoc INTEGER," +
-                            "NumPages INTEGER," +
-                            "DocCorrente INTEGER," +
-                            "UltimoIndicizzato INTEGER," +
-                            "PatternNome TEXT)";
-            try
-            {
-                this.ExecuteNonQuery(SQLCmd);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Crea la tabella dei documenti con alcune colonne predefinite e inoltre aggiunge le colonne per il salvataggio dei valori
-        /// </summary>
-        /// <param name="columns">Lista dei nomi delle colonne</param>
-        /// <returns></returns>
-        public bool CreateTableDocumenti(List<string> columns)
-        {
-            // Nel caso si voglia aggiungere il supporto per più tipi di file va modificato in dictionary il parametro columns
-            // per passare anche il tipo di campo (adesso si assume che sia sempre string)
-            StringBuilder sqlCmd = new StringBuilder();
-            sqlCmd.Append(@"CREATE TABLE IF NOT EXISTS Documenti (Id INTEGER PRIMARY KEY AUTOINCREMENT,FileName VARCHAR(254),Path TEXT,isIndicizzato INTEGER");
-
-            if (columns.Count > 0)
-            {
-                sqlCmd.Append(",");
-                for (int i = 0; i < columns.Count; i++)
-                {
-                    if(i == columns.Count-1)
-                        sqlCmd.Append(string.Format("{0} VARCHAR(254)", columns[i]));
-                    else
-                        sqlCmd.Append(string.Format("{0} VARCHAR(254),", columns[i]));
-                }
-
-            }
-            sqlCmd.Append(")");
-            #if DEBUG
-            Console.WriteLine(sqlCmd);
-            #endif
-            try
-            {
-                this.ExecuteNonQuery(sqlCmd.ToString());
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public bool CreateTableAutocompletamento()
-        {
-            string SQLCmd = @"CREATE TABLE IF NOT EXISTS Autocompletamento (Id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "Colonna INTEGER, Valore VARCHAR(254))";                          
-            try
-            {
-                this.ExecuteNonQuery(SQLCmd);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public void InitTabs()
-        {
-            try
-            {
-                #if DEBUG
-                Console.WriteLine(@"Init tabelle...");
-                #endif
-                CreateTableModello();
-                CreateTableCampo();
-                CreateTableBatch();
-                #if DEBUG
-                Console.WriteLine(@"Init tabelle completato.");
-                #endif
-            }
-            catch (Exception e)
-            {
-                logger.Error(string.Format("{0} | {1}", e.Source, e.Message));
-                #if DEBUG
-                Console.WriteLine(e.ToString());
-                #endif
-            }
-        }
-        
-        public void CreateCacheDb(List<string> columns)
-        {
-            #if DEBUG
-            Console.WriteLine(@"Create cache database...");
-            #endif
-            CreateTableAutocompletamento();
-            CreateTableDocumenti(columns);
-            #if DEBUG
-            Console.WriteLine(@"Cache db creato....");
-            #endif
-            
-        }
+        #endregion
 
         public Batch GetBatchById(int id)
         {
@@ -762,6 +788,7 @@ namespace BatchDataEntry.Helpers
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
                     b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
                 }
                 reader.Close();
                 return b;
@@ -1068,6 +1095,7 @@ namespace BatchDataEntry.Helpers
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
                     b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
                     batches.Add(b);
                 }
 
@@ -1260,6 +1288,7 @@ namespace BatchDataEntry.Helpers
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
                     b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
                     batches.Add(b);
                 }
 
