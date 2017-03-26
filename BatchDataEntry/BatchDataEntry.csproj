@@ -146,6 +146,9 @@
       <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="MoonPdfLib">
+      <HintPath>..\MoonPdfLib-0.3.0-x86\MoonPdfLib-0.3.0-x86\MoonPdfLib.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -368,6 +371,8 @@
     <Resource Include="Img\modify.png" />
     <Resource Include="Img\rename.png" />
     <Resource Include="Img\Synchronize-64.png" />
+    <Resource Include="Img\Zoom In-26.png" />
+    <Resource Include="Img\Zoom Out-26.png" />
     <Content Include="x64\SQLite.Interop.dll" />
     <Content Include="x86\SQLite.Interop.dll" />
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -435,6 +440,10 @@
     <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.104.0\build\net451\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.104.0\build\net451\System.Data.SQLite.Core.targets'))" />
   </Target>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.104.0\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.104.0\build\net451\System.Data.SQLite.Core.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y /d  "$(ProjectDir)\..\MoonPdfLib-0.3.0-x86\MoonPdfLib-0.3.0-x86\libmupdf.dll" "$(ProjectDir)$(OutDir)"
+xcopy /y /d  "$(ProjectDir)\..\MoonPdfLib-0.3.0-x86\MoonPdfLib-0.3.0-x86\MouseKeyboardActivityMonitor.dll" "$(ProjectDir)$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

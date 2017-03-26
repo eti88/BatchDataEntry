@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -13,6 +14,7 @@ using BatchDataEntry.Business;
 using BatchDataEntry.Components;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using MoonPdfLib;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -24,6 +26,7 @@ namespace BatchDataEntry.ViewModels
         private  Document _doc;
         private int _selectElementFocus;
         private string[] repeatValues;
+        private MoonPdfPanel _PdfWrapper;
 
         public Document DocFile
         {
@@ -58,6 +61,17 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        public MoonPdfPanel PdfWrapper
+        {
+            get { return _PdfWrapper; }
+            set
+            {
+                if (_PdfWrapper != value)
+                    _PdfWrapper = value;
+                RaisePropertyChanged("PdfWrapper");
+            }
+        }
+
         private bool CanMoveNext
         {
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasNext; }
@@ -82,11 +96,6 @@ namespace BatchDataEntry.ViewModels
 
         public ViewModelDocumento(Batch _currentBatch, int indexRowVal)
         {
-            //if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
-            //{
-            //    return;
-            //}
-
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
@@ -94,9 +103,15 @@ namespace BatchDataEntry.ViewModels
                 Batch.LoadModel();
             if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0)
                 Batch.Applicazione.LoadCampi();
+            PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
             DocFiles.CurrentIndex = indexRowVal;
             DocFile = new Document(Batch, DocFiles.Current);
+
+            PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
+            PdfWrapper.OpenFile(DocFile.Path);
+            PdfWrapper.ViewType = ViewType.SinglePage;
+
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;
@@ -112,10 +127,15 @@ namespace BatchDataEntry.ViewModels
                 Batch.LoadModel();
             if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0)
                 Batch.Applicazione.LoadCampi();
-
+            PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
             DocFiles.CurrentIndex = GetId();
             DocFile = new Document(Batch, DocFiles.Current);
+            
+            PdfWrapper.OpenFile(DocFile.Path);
+            PdfWrapper.ViewType = ViewType.SinglePage;
+            PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
+
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;
@@ -220,6 +240,7 @@ namespace BatchDataEntry.ViewModels
                     if (!string.IsNullOrEmpty(repeatValues[i]))
                         DocFile.Voci.ElementAt(i).Value = repeatValues[i];
                 }
+                PdfWrapper.OpenFile(DocFile.Path);
             }
 
             RaisePropertyChanged("DocFile");
@@ -238,6 +259,7 @@ namespace BatchDataEntry.ViewModels
                     if (!string.IsNullOrEmpty(repeatValues[i]))
                         DocFile.Voci.ElementAt(i).Value = repeatValues[i];
                 }
+                PdfWrapper.OpenFile(DocFile.Path);
             }
             
             RaisePropertyChanged("DocFile");
@@ -285,12 +307,24 @@ namespace BatchDataEntry.ViewModels
             RaisePropertyChanged("ViewModelDocumento");
         }
 
-        public void ReloadPdf()
+        private void ZoomInPdf()
         {
-            string pathFile = DocFile.Path;
-            DocFile.Path = "";
-            Thread.Sleep(500);
-            DocFile.Path = pathFile;
+            PdfWrapper?.ZoomIn();
+        }
+
+        private void ZoomOutPdf()
+        {
+            PdfWrapper?.ZoomOut();
+        }
+
+        private void ScrollPageDownPdf()
+        {
+            PdfWrapper?.GotoNextPage();
+        }
+
+        private void ScrollPageUpPdf()
+        {
+            PdfWrapper?.GotoPreviousPage();
         }
 
         #region Command
@@ -359,16 +393,57 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private RelayCommand _relCmd;
-        public ICommand CmdReload
+        // Pdf commands
+
+        private RelayCommand _ZoomInCmd;
+        public ICommand ZoomInCmd
         {
             get
             {
-                if (_relCmd == null)
+                if (_ZoomInCmd == null)
                 {
-                    _relCmd = new RelayCommand((param) => ReloadPdf());
+                    _ZoomInCmd = new RelayCommand((param) => ZoomInPdf());
                 }
-                return _relCmd;
+                return _ZoomInCmd;
+            }
+        }
+
+        private RelayCommand _ZoomOutCmd;
+        public ICommand ZoomOutCmd
+        {
+            get
+            {
+                if (_ZoomOutCmd == null)
+                {
+                    _ZoomOutCmd = new RelayCommand((param) => ZoomOutPdf());
+                }
+                return _ZoomOutCmd;
+            }
+        }
+
+        private RelayCommand _PageDownCmd;
+        public ICommand PageDownCmd
+        {
+            get
+            {
+                if (_PageDownCmd == null)
+                {
+                    _PageDownCmd = new RelayCommand((param) => ScrollPageDownPdf());
+                }
+                return _PageDownCmd;
+            }
+        }
+
+        private RelayCommand _PageUpCmd;
+        public ICommand PageUpCmd
+        {
+            get
+            {
+                if (_PageUpCmd == null)
+                {
+                    _PageUpCmd = new RelayCommand((param) => ScrollPageUpPdf());
+                }
+                return _PageUpCmd;
             }
         }
 

@@ -4,18 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
-        xmlns:customComponents="clr-namespace:BatchDataEntry.Components"
         xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
         xmlns:providers="clr-namespace:BatchDataEntry.Providers"
         xmlns:editors="http://wpfcontrols.com/"
         xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
         mc:Ignorable="d"
         x:Name="DocumentWindow"        
-        Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" KeyDown="DocumentWindow_KeyDown" WindowState="Maximized" Icon="/BatchDataEntry;component/Mesh-100.ico">
+        Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" WindowState="Maximized" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.DataContext>
         <viewModels:ViewModelDocumento></viewModels:ViewModelDocumento>
     </Window.DataContext>
-
+    <Window.InputBindings>
+        <KeyBinding Key="PageUp" Command="{Binding PageUpCmd}"/>
+        <KeyBinding Key="PageDown" Command="{Binding PageDownCmd}"/>
+    </Window.InputBindings>
+    
     <Window.Resources>
         <providers:CsvSuggestionProvider x:Key="CsvSuggestionProvider"/>
         <DataTemplate x:Key="SuggestionTemplate">
@@ -89,14 +92,24 @@
             <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <customComponents:PdfViewerHost x:Name="PdfViewerUc" 
-                                        IsEnabled="False" 
-                                        PdfPath="{Binding Path=DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
-                                        Focusable="False" helpers:FocusExtension.IsFocused="False"/>
-
-            <Grid Grid.Column="1" Margin="0,10">
+        <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
+            <Button Height="26" Width="26" Background="White" BorderBrush="Black" BorderThickness="1" Margin="5,1,5,0" Command="{Binding ZoomInCmd}">
+                <StackPanel>
+                    <Image Source="../Img/Zoom In-26.png" Margin="1"></Image>
+                </StackPanel>
+            </Button>
+            <Button Height="26" Width="26" Background="White" BorderBrush="Black" BorderThickness="1" Margin="5,1,5,0" Command="{Binding ZoomOutCmd}">
+                <StackPanel>
+                    <Image Source="../Img/Zoom Out-26.png" Margin="1"></Image>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+        <ContentPresenter Grid.Column="0" Grid.Row="1" Content="{Binding Path=PdfWrapper, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AllowDrop="False" Focusable="False" helpers:FocusExtension.IsFocused="False">
+        </ContentPresenter>
+        <Grid Grid.Column="1" Row="1" Margin="0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -106,17 +119,14 @@
             </Grid.RowDefinitions>
             <ScrollViewer Grid.Row="0">
                 <StackPanel x:Name="dataEntryElements" Margin="10,0">
-                    <ItemsControl x:Name="FieldItems"  ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemTemplateSelector="{StaticResource ListControlTemplateSelector}" Loaded="FieldItems_Loaded"/>
+                    <ItemsControl x:Name="FieldItems"  ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemTemplateSelector="{StaticResource ListControlTemplateSelector}"/>
                 </StackPanel>
             </ScrollViewer>
             <StackPanel Grid.Row="1" Height="40" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="buttonIndexes" Command="{Binding Path=CmdIndex}" Content="Indicizza" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" Click="buttonIndexes_Click"/>
-                <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold" Click="buttonPrevious_Click"/>
-                <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold" Click="buttonNext_Click"/>
+                <Button x:Name="buttonIndexes" Command="{Binding Path=CmdIndex}" Content="Indicizza" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
+                <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold" />
+                <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold"/>
                 <Button x:Name="buttonStop" Click="ButtonStop_OnClick" Command="{Binding Path=CmdStop}" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
-                <Button x:Name="buttonReload" Command="{Binding Path=CmdReload}" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="22" Margin="5,0,5,0" Background="#FFF0F0F0">
-                <Image Source="../Img/Synchronize-64.png"></Image>    
-                </Button>
             </StackPanel>
         </Grid>
     </Grid>

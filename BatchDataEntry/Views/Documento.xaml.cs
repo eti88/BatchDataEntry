@@ -20,12 +20,6 @@ namespace BatchDataEntry.Views
             InitializeComponent();      
         }
 
-        public void SetFocusOnPdfControl()
-        {
-            FocusManager.SetFocusedElement(DocumentWindow, PdfViewerUc);
-
-        }
-
         public void SetFocusOnSelectedTextBox(int pos)
         {
             if(FieldItems.Items == null) return;
@@ -45,31 +39,6 @@ namespace BatchDataEntry.Views
         private void ButtonStop_OnClick(object sender, RoutedEventArgs e)
         {
             this.Close();
-        }
-
-        private void DocumentWindow_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.F2)
-            {
-                #if DEBUG
-                Console.WriteLine(@"Premuta shortcut per Focus Pdf control");
-                #endif
-                SetFocusOnPdfControl();
-            }
-            else if (e.Key == Key.F3)
-            {
-                #if DEBUG
-                Console.WriteLine(@"Premuta shortcut per Textbox focus");
-                #endif
-                int startCol = Properties.Settings.Default.StartFocusCol;
-                SetFocusOnSelectedTextBox(startCol);
-            }else if (e.Key == Key.F5)
-            {
-                #if DEBUG
-                Console.WriteLine(@"Premuta shortcut Pdf Control Enabled: " + !PdfViewerUc.IsEnabled);
-                #endif
-                this.PdfViewerUc.IsEnabled = !PdfViewerUc.IsEnabled;
-            }
         }
 
         public T GetChild<T>(DependencyObject obj) where T : DependencyObject
@@ -92,51 +61,6 @@ namespace BatchDataEntry.Views
                 }
             }
             return child as T;
-        }
-
-        private void FieldItems_Loaded(object sender, RoutedEventArgs e)
-        {
-            HandleAcrobatBitchFocus();
-        }
-
-        private void HandleAcrobatBitchFocus()
-        {
-            Console.WriteLine("StartHandleBitch");
-            PdfViewerUc.IsEnabled = false;
-            int startCol = Properties.Settings.Default.StartFocusCol;
-
-            Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(700);
-                Dispatcher.Invoke(() =>
-                {
-                    PdfViewerUc.IsEnabled = true;
-                });
-            });
-
-            Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(500);
-                Dispatcher.Invoke(() =>
-                {
-                    SetFocusOnSelectedTextBox(startCol);
-                });
-            });
-        }
-
-        private void buttonIndexes_Click(object sender, RoutedEventArgs e)
-        {
-            HandleAcrobatBitchFocus();
-        }
-
-        private void buttonPrevious_Click(object sender, RoutedEventArgs e)
-        {
-            HandleAcrobatBitchFocus();
-        }
-
-        private void buttonNext_Click(object sender, RoutedEventArgs e)
-        {
-            HandleAcrobatBitchFocus();
         }
     }   
 }
