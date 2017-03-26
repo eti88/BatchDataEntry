@@ -32,9 +32,9 @@ namespace BatchDataEntry.Views
             }
             catch (Exception ex)
             {
-                #if DEBUG
+#if DEBUG
                 Console.WriteLine(ex.ToString());
-                #endif
+#endif
                 return;
             }
         }

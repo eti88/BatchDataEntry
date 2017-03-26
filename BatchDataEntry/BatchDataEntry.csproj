@@ -216,7 +216,6 @@
     <Compile Include="Business\CsvFileWriter.cs" />
     <Compile Include="Business\CsvRow.cs" />
     <Compile Include="Business\Utility.cs" />
-    <Compile Include="Components\AxAcroPDFFocusExtensions.cs" />
     <Compile Include="Components\NavigationList.cs" />
     <Compile Include="Components\PdfViewerHost.cs" />
     <Compile Include="Helpers\Converters.cs" />
@@ -368,6 +367,7 @@
     <Resource Include="Img\list.png" />
     <Resource Include="Img\modify.png" />
     <Resource Include="Img\rename.png" />
+    <Resource Include="Img\Synchronize-64.png" />
     <Content Include="x64\SQLite.Interop.dll" />
     <Content Include="x86\SQLite.Interop.dll" />
     <EmbeddedResource Include="Properties\Resources.resx">

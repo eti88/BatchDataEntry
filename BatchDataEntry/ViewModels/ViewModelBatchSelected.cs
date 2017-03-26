@@ -528,23 +528,30 @@ namespace BatchDataEntry.ViewModels
 
         public ViewModelBatchSelected(Batch batch)
         {
-            CurrentBatch = batch;
-            CurrentBatch.LoadModel();
-            var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
-            Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
-            LoadGrid();           
-            NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
-            CurrentBatch.Applicazione.LoadCampi();
-            backgroundWorker.WorkerReportsProgress = true;
-            backgroundWorker.ProgressChanged += ProgressChanged;
-            backgroundWorker.DoWork += DoWork;
-            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
-            Properties.Settings.Default.StartFocusCol = GetInitialTextBoxPosition(CurrentBatch.Applicazione);
-            Properties.Settings.Default.CurrentBatch = CurrentBatch.Id;
-            Properties.Settings.Default.Save();
-            MaxProgressBarValue = 100;
-            ValueProgressBar = 0;
-            //SelectedRowIndex = 12; // per selezionare la riga x (es: index: 5, (rappresenta la row 6), se selezioni la riga 6, si posiziona alla 7
+            try
+            {
+                CurrentBatch = batch;
+                CurrentBatch.LoadModel();
+                var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
+                Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
+                LoadGrid();
+                NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
+                CurrentBatch.Applicazione.LoadCampi();
+                backgroundWorker.WorkerReportsProgress = true;
+                backgroundWorker.ProgressChanged += ProgressChanged;
+                backgroundWorker.DoWork += DoWork;
+                backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+                Properties.Settings.Default.StartFocusCol = GetInitialTextBoxPosition(CurrentBatch.Applicazione);
+                Properties.Settings.Default.CurrentBatch = CurrentBatch.Id;
+                Properties.Settings.Default.Save();
+                MaxProgressBarValue = 100;
+                ValueProgressBar = 0;
+                //SelectedRowIndex = 12; // per selezionare la riga x (es: index: 5, (rappresenta la row 6), se selezioni la riga 6, si posiziona alla 7
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }          
         }
 
         #endregion

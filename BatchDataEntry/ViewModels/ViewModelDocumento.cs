@@ -285,6 +285,14 @@ namespace BatchDataEntry.ViewModels
             RaisePropertyChanged("ViewModelDocumento");
         }
 
+        public void ReloadPdf()
+        {
+            string pathFile = DocFile.Path;
+            DocFile.Path = "";
+            Thread.Sleep(500);
+            DocFile.Path = pathFile;
+        }
+
         #region Command
         private RelayCommand _cmdPrev;
         public ICommand CmdPrev
@@ -348,6 +356,19 @@ namespace BatchDataEntry.ViewModels
                     _textboxCmd = new RelayCommand((param) => EnterActionFunction(param));
                 }
                 return _textboxCmd;
+            }
+        }
+
+        private RelayCommand _relCmd;
+        public ICommand CmdReload
+        {
+            get
+            {
+                if (_relCmd == null)
+                {
+                    _relCmd = new RelayCommand((param) => ReloadPdf());
+                }
+                return _relCmd;
             }
         }
 

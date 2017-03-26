@@ -114,6 +114,9 @@
                 <Button x:Name="buttonPrevious" Command="{Binding Path=CmdPrev}" Content="&lt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold" Click="buttonPrevious_Click"/>
                 <Button x:Name="buttonNext" Command="{Binding Path=CmdNext}" Content="&gt;" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0" FontSize="22" FontWeight="Bold" Click="buttonNext_Click"/>
                 <Button x:Name="buttonStop" Click="ButtonStop_OnClick" Command="{Binding Path=CmdStop}" Content="Interrompi" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="82" Margin="5,0,5,0"/>
+                <Button x:Name="buttonReload" Command="{Binding Path=CmdReload}" VerticalAlignment="Center" HorizontalAlignment="Right" Height="35" Width="22" Margin="5,0,5,0" Background="#FFF0F0F0">
+                <Image Source="../Img/Synchronize-64.png"></Image>    
+                </Button>
             </StackPanel>
         </Grid>
     </Grid>

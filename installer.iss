@@ -41,10 +41,14 @@ Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\Bat
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\EntityFramework.SqlServer.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\EntityFramework.SqlServer.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\EntityFramework.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Gu.Wpf.NumericInput.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Gu.Wpf.NumericInput.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Interop.AcroPDFLib.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\itextsharp.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\itextsharp.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\logFile.log"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Microsoft.Expression.Interactions.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Microsoft.Expression.Interactions.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Newtonsoft.Json.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\NLog.config"; DestDir: "{app}"; Flags: ignoreversion
@@ -54,11 +58,16 @@ Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\Bat
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\System.Data.SQLite.EF6.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\System.Data.SQLite.Linq.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\System.Data.SQLite.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\System.Windows.Interactivity.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\System.Windows.Interactivity.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\WpfControls.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\WpfControls.pdb"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\WPFTextBoxAutoComplete.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\x86\SQLite.Interop.dll"; DestDir: "{app}\x86"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\x64\SQLite.Interop.dll"; DestDir: "{app}\x64"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\de\Gu.Wpf.NumericInput.resources.dll"; DestDir: "{app}\de"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\nl\Gu.Wpf.NumericInput.resources.dll"; DestDir: "{app}\nl"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\sv\Gu.Wpf.NumericInput.resources.dll"; DestDir: "{app}\sv"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

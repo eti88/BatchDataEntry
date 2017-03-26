@@ -1,27 +1,33 @@
 ﻿
 using System;
-using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Input;
-using BatchDataEntry.Components;
+using NLog;
 
 
 namespace BatchDataEntry.Views
 {
     public partial class AdobeViewer : System.Windows.Forms.UserControl
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private string pdfFilePath;
         //public AxAcroPDF acrobatViewer;
 
         public AdobeViewer()
         {
-            InitializeComponent();
-            PdfViewer.setShowToolbar(true);
-            PdfViewer.setPageMode("none");
-            PdfViewer.setLayoutMode("SinglePage");
-            PdfViewer.setView("Fit");
-            PdfViewer.TabStop = false;
-            //PdfViewer.SuspendStealFocus();
+            try
+            {
+                InitializeComponent();
+                PdfViewer.setShowToolbar(true);
+                PdfViewer.setPageMode("none");
+                PdfViewer.setLayoutMode("SinglePage");
+                PdfViewer.setView("Fit");
+                PdfViewer.TabStop = false;
+            }
+            catch (Exception e)
+            {
+                logger.Error("[PDFCONTROL]" + e.ToString());
+            }
+            
         }
 
         public string PdfFilePath
@@ -45,15 +51,21 @@ namespace BatchDataEntry.Views
 
         private void ChangeCurrentDisplayedPdf()
         {
-            PdfViewer.setShowToolbar(true);
-            PdfViewer.src = PdfFilePath;
-            PdfViewer.SuspendStealFocus();
-            PdfViewer.LoadFile(PdfFilePath);
+            try
+            {
+                PdfViewer.setShowToolbar(true);
+                PdfViewer.src = PdfFilePath;              
+                PdfViewer.LoadFile(PdfFilePath);
 
-            PdfViewer.setPageMode("none");
-            PdfViewer.setLayoutMode("SinglePage");
-            PdfViewer.setView("Fit");
-            //PdfViewer.setViewScroll("FitH", 0);
+                PdfViewer.setPageMode("none");
+                PdfViewer.setLayoutMode("SinglePage");
+                PdfViewer.setView("Fit");
+                PdfViewer.gotoFirstPage();
+            }
+            catch (Exception e)
+            {
+                logger.Error("[PDFCONTROL]" + e.ToString());
+            }          
         }
 
         public void ScrollPdfDown()
