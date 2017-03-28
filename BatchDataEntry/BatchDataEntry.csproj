@@ -220,7 +220,6 @@
     <Compile Include="Business\CsvRow.cs" />
     <Compile Include="Business\Utility.cs" />
     <Compile Include="Components\NavigationList.cs" />
-    <Compile Include="Components\PdfViewerHost.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Helpers\DialogCloser.cs" />
     <Compile Include="Helpers\DatabaseHelper.cs" />
@@ -254,12 +253,6 @@
     <Compile Include="ViewModels\ViewModelNewBatch.cs" />
     <Compile Include="ViewModels\ViewModelNuovaColonna.cs" />
     <Compile Include="ViewModels\ViewModelNuovoModello.cs" />
-    <Compile Include="Views\AdobeViewer.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Views\AdobeViewer.Designer.cs">
-      <DependentUpon>AdobeViewer.cs</DependentUpon>
-    </Compile>
     <Compile Include="Views\BatchSelected.xaml.cs">
       <DependentUpon>BatchSelected.xaml</DependentUpon>
     </Compile>
@@ -382,9 +375,6 @@
     <Content Include="database.db3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Views\AdobeViewer.resx">
-      <DependentUpon>AdobeViewer.cs</DependentUpon>
-    </EmbeddedResource>
     <Resource Include="Img\undo-5.png" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -420,16 +410,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="AxAcroPDFLib">
-      <Guid>{05BFD3F1-6319-4F30-B752-C7A22889BCC4}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>aximp</WrapperTool>
-      <Isolated>False</Isolated>
-    </COMReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

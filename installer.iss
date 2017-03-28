@@ -27,7 +27,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\AxInterop.AcroPDFLib.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.pdb"; DestDir: "{app}"; Flags: ignoreversion
@@ -43,7 +42,6 @@ Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\Bat
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\EntityFramework.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Gu.Wpf.NumericInput.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Gu.Wpf.NumericInput.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\Interop.AcroPDFLib.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\itextsharp.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\itextsharp.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\logFile.log"; DestDir: "{app}"; Flags: ignoreversion
@@ -68,6 +66,9 @@ Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\Bat
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\de\Gu.Wpf.NumericInput.resources.dll"; DestDir: "{app}\de"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\nl\Gu.Wpf.NumericInput.resources.dll"; DestDir: "{app}\nl"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\sv\Gu.Wpf.NumericInput.resources.dll"; DestDir: "{app}\sv"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\libmupdf.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\MoonPdfLib.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\MouseKeyboardActivityMonitor.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

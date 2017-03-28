@@ -111,6 +111,7 @@ namespace BatchDataEntry.ViewModels
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
             PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
+            PdfWrapper.PageRowDisplay = PageRowDisplayType.ContinuousPageRows;
 
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
@@ -135,6 +136,7 @@ namespace BatchDataEntry.ViewModels
             PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
+            PdfWrapper.PageRowDisplay = PageRowDisplayType.ContinuousPageRows;
 
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
