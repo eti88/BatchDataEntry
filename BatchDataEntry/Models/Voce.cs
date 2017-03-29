@@ -65,8 +65,8 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private string _focus;
-        public string IsFocused
+        private bool _focus;
+        public bool IsFocused
         {
             get
             {
@@ -74,8 +74,7 @@ namespace BatchDataEntry.Models
             }
             set
             {
-                if (_focus != value)
-                    _focus = value;
+                _focus = value;
                 OnPropertyChanged("IsFocused");
             }
         }
@@ -135,7 +134,7 @@ namespace BatchDataEntry.Models
         public Voce()
         {
             AUTOCOMPLETETYPE = "NULL";
-            IsFocused = "False";
+            IsFocused = false;
             IsDisabled = false;
         }
 
@@ -144,7 +143,7 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Key = key;
             AUTOCOMPLETETYPE = "NULL";
-            IsFocused = "False";
+            IsFocused = false;
             IsDisabled = !enabled;
         }
 
@@ -153,7 +152,7 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.Value = value;
             AUTOCOMPLETETYPE = "NULL";
-            IsFocused = "False";
+            IsFocused = false;
             IsDisabled = !enabled;
         }
 
@@ -163,7 +162,7 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.Value = value;
             AUTOCOMPLETETYPE = "NULL";
-            IsFocused = "False";
+            IsFocused = false;
             IsDisabled = !enabled;
         }
 
@@ -173,7 +172,7 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.IsAutocomplete = autocomp;
             AUTOCOMPLETETYPE = autoType;
-            IsFocused = "False";
+            IsFocused = false;
             IsDisabled = !enabled;
             QueryProviderSelector(autoType, id);
         }
@@ -184,7 +183,7 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.IsAutocomplete = autocomp;
             AUTOCOMPLETETYPE = autoType;
-            IsFocused = "False";
+            IsFocused = false;
             IsDisabled = !enabled;
             this.Value = valu;
             QueryProviderSelector(autoType, id);
@@ -199,7 +198,8 @@ namespace BatchDataEntry.Models
             }
             else if (tp.Equals("DB"))
             {
-                dbQueryProvider = await DbSuggestionProvider.GetRecords(id);
+                var dbprovider = new DbSuggestionProvider();
+                dbQueryProvider = await dbprovider.GetRecords(id);
             }       
         }
 

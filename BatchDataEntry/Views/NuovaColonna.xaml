@@ -25,7 +25,7 @@
                 </WrapPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label x:Name="labelNome" Content="Nome" Width="60" HorizontalAlignment="Left"/>
-                    <TextBlock Text="{Binding (Validation.Errors)[0].ErrorContent, ElementName=textBoxNome}" Height="29" Width="305" Foreground="Red"/>
+                    <TextBlock Text="{Binding Path=(Validation.Errors).CurrentItem.ErrorContent, ElementName=textBoxNome}" Height="29" Width="305" Foreground="Red"/>
                 </StackPanel>
 
                 <TextBox x:Name="textBoxNome" Margin="10,0,10,20" Style="{StaticResource generalTextbox}" FontSize="12">

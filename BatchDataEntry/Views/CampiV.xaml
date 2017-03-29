@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
-        xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         mc:Ignorable="d"
         Title="Campi" Height="580" Width="460" MinWidth="460" Icon="/BatchDataEntry;component/Mesh-100.ico"
         >
@@ -22,16 +21,18 @@
             </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Margin="25,0">
                 <Border>
-                    <ListBox x:Name="listBoxColonne" Height="415" ItemsSource="{Binding Colonne, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectedItem="{Binding SelectedCampo}">
+                    <ListBox x:Name="listBoxColonne" Height="415" 
+                             ItemsSource="{Binding Colonne, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             SelectionMode="Single" 
+                             IsSynchronizedWithCurrentItem="True"
+                             SelectedItem="{Binding SelectedCampo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="60" SharedSizeGroup="Column0"/>
                                         <ColumnDefinition Width="200" SharedSizeGroup="Column1"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding Posizione}"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Nome}"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding Nome}"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

@@ -21,19 +21,6 @@ namespace BatchDataEntry.ViewModels
 
         private RelayCommand _update;
 
-        public ViewModelCampi()
-        {
-            Colonne = new ObservableCollection<Campo>();
-        }
-
-        public ViewModelCampi(int idModello)
-        {
-            var db = new DatabaseHelper();
-            this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
-            RaisePropertyChanged("Colonne");
-            _idModello = idModello;
-        }
-
         private int _countCols
         {
             get { return Colonne.Count; }
@@ -57,11 +44,8 @@ namespace BatchDataEntry.ViewModels
             get { return _selectedCampo; }
             set
             {
-                if (_selectedCampo != value)
-                {
-                    _selectedCampo = value;
-                    RaisePropertyChanged("SelectedCampo");
-                }
+                _selectedCampo = value;
+                RaisePropertyChanged("SelectedCampo");
             }
         }
 
@@ -106,6 +90,24 @@ namespace BatchDataEntry.ViewModels
             get { return SelectedCampo == null ? false : true; }
         }
 
+        public ViewModelCampi()
+        {
+            Colonne = new ObservableCollection<Campo>();
+        }
+
+        public ViewModelCampi(int idModello)
+        {           
+            GetColonneFromDb(idModello);
+            _idModello = idModello;
+        }
+
+        private void GetColonneFromDb(int idModello)
+        {
+            var db = new DatabaseHelper();
+            this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
+            RaisePropertyChanged("Colonne");
+        }
+
         private void AddItem()
         {
             var colonna = new NuovaColonna();
@@ -137,6 +139,8 @@ namespace BatchDataEntry.ViewModels
             var colonna = new NuovaColonna();
             colonna.DataContext = new ViewModelNuovaColonna(SelectedCampo, true);
             colonna.ShowDialog();
+            SelectedCampo = null;
+            GetColonneFromDb(_idModello);
             RaisePropertyChanged("Colonne");
         }
     }

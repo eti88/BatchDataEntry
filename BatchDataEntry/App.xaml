@@ -99,10 +99,10 @@
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
                     <Grid Width="12" Height="12">
                         <Ellipse Style="{StaticResource redCircleError}"></Ellipse>
-                        <TextBlock Style="{StaticResource TextErrorImg}" ToolTip="{Binding ElementName=ErrorAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">X</TextBlock>
+                        <TextBlock Style="{StaticResource TextErrorImg}" ToolTip="{Binding ElementName=ErrorAdorner, Path=AdornedElement.(Validation.Errors).CurrentItem.ErrorContent}">X</TextBlock>
                     </Grid>
                     <TextBlock Style="{StaticResource TextError}" Text="{Binding ElementName=ErrorAdorner, 
-                       Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">
+                       Path=AdornedElement.(Validation.Errors).CurrentItem.ErrorContent}">
                     </TextBlock>
                 </StackPanel>
                 <AdornedElementPlaceholder x:Name="ErrorAdorner" ></AdornedElementPlaceholder>

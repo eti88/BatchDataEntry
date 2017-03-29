@@ -7,7 +7,7 @@
         xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
         xmlns:providers="clr-namespace:BatchDataEntry.Providers"
         xmlns:editors="http://wpfcontrols.com/"
-        xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
+        xmlns:controls1="clr-namespace:System.Windows.Controls;assembly=DotNetProjects.Input.Toolkit"
         mc:Ignorable="d"
         x:Name="DocumentWindow"        
         Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" WindowState="Maximized" Icon="/BatchDataEntry;component/Mesh-100.ico">
@@ -35,7 +35,6 @@
             <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
             <TextBox
                 Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
                 IsEnabled="{Binding Path=IsDisabled}"
                 VerticalAlignment="Center"
                 Height="30"/>
@@ -43,6 +42,21 @@
         </DataTemplate>
         <!-- db template -->
         <DataTemplate x:Key="AutocompleteDbDataTemplate">
+            <StackPanel Margin="5,0,5,0">
+                <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
+                <controls1:AutoCompleteBox
+                    IsEnabled="{Binding Path=IsDisabled}"
+                    VerticalAlignment="Center"
+                    Height="30"
+                    Width="352"
+                    ItemsSource="{Binding dbQueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    MinimumPrefixLength="3"
+                    ></controls1:AutoCompleteBox>
+            </StackPanel>
+        </DataTemplate>
+        <!-- old db template
+       <DataTemplate x:Key="AutocompleteDbDataTemplate">
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
                 <TextBox
@@ -57,13 +71,13 @@
                 </TextBox>
             </StackPanel>
         </DataTemplate>
+        -->
         <!-- csv template -->
         <DataTemplate x:Key="AutocompleteCsvDataTemplate">
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
                 <!-- autocompletetextbox -->
                 <editors:AutoCompleteTextBox
-                    helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
                     IsEnabled="{Binding Path=IsDisabled}"
                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     DisplayMember="ColumnA"
@@ -107,7 +121,7 @@
                 </StackPanel>
             </Button>
         </StackPanel>
-        <ContentPresenter Grid.Column="0" Grid.Row="1" Content="{Binding Path=PdfWrapper, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AllowDrop="False" Focusable="False" helpers:FocusExtension.IsFocused="False">
+        <ContentPresenter Grid.Column="0" Grid.Row="1" Content="{Binding Path=PdfWrapper, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AllowDrop="False" Focusable="False">
         </ContentPresenter>
         <Grid Grid.Column="1" Row="1" Margin="0,10">
             <Grid.ColumnDefinitions>
@@ -131,6 +145,18 @@
         </Grid>
     </Grid>
 </Window>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 
 namespace BatchDataEntry.Providers
 {
-    public static class DbSuggestionProvider
+    public class DbSuggestionProvider
     {
-        public static async Task<List<string>> GetRecords(int idCol)
+        public async Task<List<string>> GetRecords(int idCol)
         {
             Batch b;
             // Carica il batch corrente dalle impostazioni (controllare se presente)  
@@ -44,7 +42,7 @@ namespace BatchDataEntry.Providers
             }
         }
 
-        private static async Task<List<string>> GetList(DatabaseHelper db, int column)
+        private async Task<List<string>> GetList(DatabaseHelper db, int column)
         {
             var lst = new List<string>();
             await Task.Factory.StartNew(() =>

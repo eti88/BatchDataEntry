@@ -20,21 +20,21 @@ namespace BatchDataEntry.Views
             InitializeComponent();      
         }
 
-        public void SetFocusOnSelectedTextBox(int pos)
-        {
-            if(FieldItems.Items == null) return;
+        //public void SetFocusOnSelectedTextBox(int pos)
+        //{
+        //    if(FieldItems.Items == null) return;
             
-            for (int i = 0; i < FieldItems.Items.Count; i++)
-            {
-                if (i == pos)
-                {
-                    var cnt = FieldItems.ItemContainerGenerator.ContainerFromIndex(i);
-                    TextBox t2 = GetChild<TextBox>(cnt);
-                    t2.Focus();
-                    Keyboard.Focus(t2);
-                }
-            }
-        }
+        //    for (int i = 0; i < FieldItems.Items.Count; i++)
+        //    {
+        //        if (i == pos)
+        //        {
+        //            var cnt = FieldItems.ItemContainerGenerator.ContainerFromIndex(i);
+        //            TextBox t2 = GetChild<TextBox>(cnt);
+        //            t2.Focus();
+        //            Keyboard.Focus(t2);
+        //        }
+        //    }
+        //}
 
         private void ButtonStop_OnClick(object sender, RoutedEventArgs e)
         {
