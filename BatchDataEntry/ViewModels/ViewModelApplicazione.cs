@@ -9,18 +9,13 @@ namespace BatchDataEntry.ViewModels
 {
     internal class ViewModelApplicazione : ViewModelBase
     {
+        private Modello _intermediate;
         private RelayCommand _addNewModel;
-
         private RelayCommand _deleteModel;
-
         private ObservableCollection<Modello> _models;
-
         private RelayCommand _openCampiView;
-
         private Modello _selectedModel;
-
         private RelayCommand _updateModel;
-
         private RelayCommand _buttonCopyCommand;
 
         public ViewModelApplicazione()
@@ -50,6 +45,7 @@ namespace BatchDataEntry.ViewModels
                 if (_selectedModel != value)
                 {
                     _selectedModel = value;
+                    _intermediate = new Modello(_selectedModel);
                     RaisePropertyChanged("SelectedModel");
                 }
             }
@@ -64,7 +60,6 @@ namespace BatchDataEntry.ViewModels
                 return _addNewModel;
             }
         }
-
         public ICommand ButtonCopyCommand
         {
             get
@@ -74,7 +69,6 @@ namespace BatchDataEntry.ViewModels
                 return _buttonCopyCommand;
             }
         }
-
         public ICommand updateItemCommand
         {
             get
@@ -84,7 +78,6 @@ namespace BatchDataEntry.ViewModels
                 return _updateModel;
             }
         }
-
         public ICommand deleteItemCommand
         {
             get
@@ -94,7 +87,6 @@ namespace BatchDataEntry.ViewModels
                 return _deleteModel;
             }
         }
-
         public ICommand ButtonColonneCommand
         {
             get
@@ -113,6 +105,8 @@ namespace BatchDataEntry.ViewModels
         public void LoadModels()
         {
             var db = new DatabaseHelper();
+            if(Modelli == null) Modelli = new ObservableCollection<Modello>();
+            if(Modelli.Count > 0) Modelli.Clear();
             Modelli = db.GetModelloRecords();
             RaisePropertyChanged("Modelli");
         }
@@ -145,9 +139,10 @@ namespace BatchDataEntry.ViewModels
         private void ModifyItem()
         {
             var nuovoModello = new NuovoModello();
-            nuovoModello.DataContext = new ViewModelNuovoModello(SelectedModel, true);
+            nuovoModello.DataContext = new ViewModelNuovoModello(_intermediate, true);
             nuovoModello.ShowDialog();
             RaisePropertyChanged("Modelli");
+            LoadModels();
         }
 
         private void OpenCampiView()

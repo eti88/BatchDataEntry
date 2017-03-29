@@ -16,7 +16,7 @@ namespace BatchDataEntry.Views
         private void ButtonSalvaModel_OnClicknClick(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
-            this.Close();
+            //this.Close();
         }
 
         private void checkBoxDisableColumn_Checked(object sender, RoutedEventArgs e)

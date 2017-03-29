@@ -12,6 +12,7 @@ namespace BatchDataEntry.ViewModels
     class ViewModelMain : ViewModelBase
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
+        private Batch _intermediate;
 
         private ObservableCollection<Batch> _Batches { get; set; }
         public ObservableCollection<Batch> Batches
@@ -40,6 +41,7 @@ namespace BatchDataEntry.ViewModels
                 if (_SelectedBatch != value)
                 {
                     _SelectedBatch = value;
+                    _intermediate = new Batch(_SelectedBatch);
                     RaisePropertyChanged("SelectedBatch");
                 }
             }
@@ -148,7 +150,6 @@ namespace BatchDataEntry.ViewModels
             var newBatchWindow = new NuovoBatch();
             newBatchWindow.DataContext = new ViewModelNewBatch();          
             newBatchWindow.ShowDialog();
-
             LoadBatches();
             RaisePropertyChanged("Batches");      
         }
@@ -156,26 +157,27 @@ namespace BatchDataEntry.ViewModels
         private void ModifyBatchItem()
         {
             var newBatchWindow = new NuovoBatch();
-            newBatchWindow.DataContext = new ViewModelNewBatch(SelectedBatch);
+            newBatchWindow.DataContext = new ViewModelNewBatch(_intermediate);
             newBatchWindow.ShowDialog();
-
             LoadBatches();
             RaisePropertyChanged("Batches");
+            
         }
 
         private void ResumeBatchItem()
         {
             var resumeBatchWindow = new BatchSelected();
-            resumeBatchWindow.DataContext = new ViewModelBatchSelected(SelectedBatch);
-            resumeBatchWindow.Show();
+            resumeBatchWindow.DataContext = new ViewModelBatchSelected(_intermediate);
+            resumeBatchWindow.Show();           
             CloseWindow();
         }
 
         private void ModelAddItem()
         {
-            var Models = new Applicazione();
-            Models.DataContext = new ViewModelApplicazione();
-            Models.ShowDialog();
+            var models = new Applicazione();
+            models.DataContext = new ViewModelApplicazione();
+            models.ShowDialog();
+            LoadBatches();
         }
 
         private void DeleteBatchItem()
@@ -183,6 +185,7 @@ namespace BatchDataEntry.ViewModels
             DatabaseHelper db = new DatabaseHelper();
             db.Delete("Batch", String.Format("Id = {0}", SelectedBatch.Id));
             Batches.Remove(SelectedBatch);
+            LoadBatches();
         }
 
         #endregion

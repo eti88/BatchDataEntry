@@ -255,6 +255,7 @@ namespace BatchDataEntry.Models
 
         public Batch(Batch b)
         {
+            if(b == null) return;
             this.Id = b.Id;
             this.Nome = b.Nome;
             this.TipoFile = b.TipoFile;

@@ -154,6 +154,7 @@ namespace BatchDataEntry.Models
 
         public Modello(Modello m)
         {
+            if(m == null) return;
             this.Id = m.Id;
             this.Nome = m.Nome;
             this.OrigineCsv = m.OrigineCsv;

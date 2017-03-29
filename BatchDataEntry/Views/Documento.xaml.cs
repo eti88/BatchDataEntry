@@ -14,27 +14,29 @@ namespace BatchDataEntry.Views
     /// </summary>
     public partial class Documento : Window
     {
+        private readonly int MILLISEC_UPDATE = 1000;
 
         public Documento()
         {
-            InitializeComponent();      
+            InitializeComponent();
+            SetFocusOnSelectedTextBox(10);
         }
 
-        //public void SetFocusOnSelectedTextBox(int pos)
-        //{
-        //    if(FieldItems.Items == null) return;
-            
-        //    for (int i = 0; i < FieldItems.Items.Count; i++)
-        //    {
-        //        if (i == pos)
-        //        {
-        //            var cnt = FieldItems.ItemContainerGenerator.ContainerFromIndex(i);
-        //            TextBox t2 = GetChild<TextBox>(cnt);
-        //            t2.Focus();
-        //            Keyboard.Focus(t2);
-        //        }
-        //    }
-        //}
+        public void SetFocusOnSelectedTextBox(int pos)
+        {
+            if (FieldItems.Items == null) return;
+
+            for (int i = 0; i < FieldItems.Items.Count; i++)
+            {
+                if (i == pos)
+                {
+                    var cnt = FieldItems.ItemContainerGenerator.ContainerFromIndex(i);
+                    TextBox t2 = GetChild<TextBox>(cnt);
+                    t2.Focus();
+                    Keyboard.Focus(t2);
+                }
+            }
+        }
 
         private void ButtonStop_OnClick(object sender, RoutedEventArgs e)
         {
@@ -61,6 +63,38 @@ namespace BatchDataEntry.Views
                 }
             }
             return child as T;
+        }
+
+        private void DocumentWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            SetFocusOnSelectedTextBox(10);
+        }
+
+        private void buttonNext_Click(object sender, RoutedEventArgs e)
+        { 
+            Task.Factory.StartNew(() =>
+            {
+              Thread.Sleep(MILLISEC_UPDATE);
+                this.Dispatcher.BeginInvoke((Action) (() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+            });            
+        }
+
+        private void buttonPrevious_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(MILLISEC_UPDATE);
+                this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+            });
+        }
+
+        private void buttonIndexes_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(MILLISEC_UPDATE);
+                this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+            });
         }
     }   
 }

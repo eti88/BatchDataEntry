@@ -10,6 +10,7 @@ namespace BatchDataEntry.ViewModels
     internal class ViewModelCampi : ViewModelBase
     {
         private readonly int _idModello;
+        private Campo _intermediate;
 
         private RelayCommand _addnew;
 
@@ -45,6 +46,7 @@ namespace BatchDataEntry.ViewModels
             set
             {
                 _selectedCampo = value;
+                _intermediate = new Campo(SelectedCampo);
                 RaisePropertyChanged("SelectedCampo");
             }
         }
@@ -93,7 +95,7 @@ namespace BatchDataEntry.ViewModels
         public ViewModelCampi()
         {
             Colonne = new ObservableCollection<Campo>();
-        }
+    }
 
         public ViewModelCampi(int idModello)
         {           
@@ -104,6 +106,8 @@ namespace BatchDataEntry.ViewModels
         private void GetColonneFromDb(int idModello)
         {
             var db = new DatabaseHelper();
+            if(this.Colonne == null) this.Colonne = new ObservableCollection<Campo>();
+            if(this.Colonne.Count > 0) this.Colonne.Clear();
             this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
             RaisePropertyChanged("Colonne");
         }
@@ -116,9 +120,7 @@ namespace BatchDataEntry.ViewModels
             colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols);
             var result = colonna.ShowDialog();
             if (result == true)
-            {
                 Colonne.Add(campo);
-            }
             RaisePropertyChanged("Colonne");
         }
 
@@ -137,9 +139,9 @@ namespace BatchDataEntry.ViewModels
         private void UpdateItem()
         {
             var colonna = new NuovaColonna();
-            colonna.DataContext = new ViewModelNuovaColonna(SelectedCampo, true);
+            colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true);
             colonna.ShowDialog();
-            SelectedCampo = null;
+            
             GetColonneFromDb(_idModello);
             RaisePropertyChanged("Colonne");
         }

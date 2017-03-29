@@ -65,20 +65,6 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private bool _focus;
-        public bool IsFocused
-        {
-            get
-            {
-                return _focus;
-            }
-            set
-            {
-                _focus = value;
-                OnPropertyChanged("IsFocused");
-            }
-        }
-
         private bool _isDisabled;
         public bool IsDisabled
         {
@@ -134,7 +120,6 @@ namespace BatchDataEntry.Models
         public Voce()
         {
             AUTOCOMPLETETYPE = "NULL";
-            IsFocused = false;
             IsDisabled = false;
         }
 
@@ -143,7 +128,6 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Key = key;
             AUTOCOMPLETETYPE = "NULL";
-            IsFocused = false;
             IsDisabled = !enabled;
         }
 
@@ -152,7 +136,6 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.Value = value;
             AUTOCOMPLETETYPE = "NULL";
-            IsFocused = false;
             IsDisabled = !enabled;
         }
 
@@ -162,7 +145,6 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.Value = value;
             AUTOCOMPLETETYPE = "NULL";
-            IsFocused = false;
             IsDisabled = !enabled;
         }
 
@@ -172,7 +154,6 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.IsAutocomplete = autocomp;
             AUTOCOMPLETETYPE = autoType;
-            IsFocused = false;
             IsDisabled = !enabled;
             QueryProviderSelector(autoType, id);
         }
@@ -183,7 +164,6 @@ namespace BatchDataEntry.Models
             this.Key = key;
             this.IsAutocomplete = autocomp;
             AUTOCOMPLETETYPE = autoType;
-            IsFocused = false;
             IsDisabled = !enabled;
             this.Value = valu;
             QueryProviderSelector(autoType, id);

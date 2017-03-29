@@ -6,7 +6,7 @@ namespace BatchDataEntry.Models
     public class Campo : BaseModel
     {
         private MementoCampo MyMemento;
-
+        
         private int _id;
         private string _nome;
         private int _pos;
@@ -204,6 +204,7 @@ namespace BatchDataEntry.Models
 
         public Campo(Campo _campo)
         {
+            if(_campo == null) return;
             this.Id = _campo.Id;
             this.Nome = _campo.Nome;
             this.Posizione = _campo.Posizione;
@@ -237,39 +238,35 @@ namespace BatchDataEntry.Models
                 return false;
 
             Campo campo = obj as Campo;
-            if (this.Id != campo.Id)
-                return false;
-            if (this.Nome != campo.Nome)
-                return false;
-            if (this.Posizione != campo.Posizione)
-                return false;
-            if (this.SalvaValori != campo.SalvaValori)
-                return false;
-            if (this.ValorePredefinito != campo.ValorePredefinito)
-                return false;
-            if (this.IndiceSecondario != campo.IndiceSecondario)
-                return false;
-            if (this.IndicePrimario != campo.IndicePrimario)
-                return false;
-            if (this.TipoCampo != campo.TipoCampo)
-                return false;
-            if (this.IdModello != campo.IdModello)
-                return false;
 
+            if (this.Id != campo.Id) return false;
+            if (this.Nome != campo.Nome) return false;
+            if (this.Posizione != campo.Posizione) return false;
+            if (this.SalvaValori != campo.SalvaValori) return false;
+            if (this.ValorePredefinito != campo.ValorePredefinito) return false;
+            if (this.IndiceSecondario != campo.IndiceSecondario) return false;
+            if (this.IndicePrimario != campo.IndicePrimario) return false;
+            if (this.TipoCampo != campo.TipoCampo) return false;
+            if (this.IdModello != campo.IdModello) return false;
+            if(this.Riproponi != campo.Riproponi) return false;
+            if (this.IsDisabled != campo.IsDisabled) return false;
             return true;
         }
 
         public override int GetHashCode()
         {
-            int resutl = this.Id.GetHashCode();
-            resutl += string.IsNullOrEmpty(this.Nome) ? 0 : this.Nome.GetHashCode();
-            resutl += this.Posizione.GetHashCode();
-            resutl += this.SalvaValori.GetHashCode();
-            resutl += string.IsNullOrEmpty(this.ValorePredefinito) ? 0 : this.ValorePredefinito.GetHashCode();
-            resutl += this.IndicePrimario.GetHashCode();
-            resutl += this.IndiceSecondario.GetHashCode();
-            resutl += this.TipoCampo.GetHashCode();
-            resutl += this.IdModello.GetHashCode();
+            int resutl = 13;
+            resutl = (resutl *7) + this.Id.GetHashCode();
+            resutl = (resutl * 7) + ((string.IsNullOrEmpty(this.Nome)) ? 0 : this.Nome.GetHashCode());
+            resutl = (resutl * 7) + this.Posizione.GetHashCode();
+            resutl = (resutl * 7) + this.SalvaValori.GetHashCode();
+            resutl = (resutl * 7) + ((string.IsNullOrEmpty(this.ValorePredefinito) ? 0 : this.ValorePredefinito.GetHashCode()));
+            resutl = (resutl * 7) + this.IndicePrimario.GetHashCode();
+            resutl = (resutl * 7) + this.IndiceSecondario.GetHashCode();
+            resutl = (resutl * 7) + this.TipoCampo.GetHashCode();
+            resutl = (resutl * 7) + this.IdModello.GetHashCode();
+            resutl = (resutl * 7) + this.Riproponi.GetHashCode();
+            resutl = (resutl * 7) + this.IsDisabled.GetHashCode();
             return resutl;
         }
 
