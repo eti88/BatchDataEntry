@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,6 +16,7 @@ namespace BatchDataEntry.Views
     public partial class Documento : Window
     {
         private readonly int MILLISEC_UPDATE = 1000;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public Documento()
         {
@@ -75,7 +77,8 @@ namespace BatchDataEntry.Views
             Task.Factory.StartNew(() =>
             {
               Thread.Sleep(MILLISEC_UPDATE);
-                this.Dispatcher.BeginInvoke((Action) (() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+                try { this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol))); }catch(Exception exc) { logger.Error(exc); }
+                
             });            
         }
 
@@ -84,7 +87,7 @@ namespace BatchDataEntry.Views
             Task.Factory.StartNew(() =>
             {
                 Thread.Sleep(MILLISEC_UPDATE);
-                this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+                try { this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol))); } catch (Exception exc) { logger.Error(exc); }
             });
         }
 
@@ -93,7 +96,7 @@ namespace BatchDataEntry.Views
             Task.Factory.StartNew(() =>
             {
                 Thread.Sleep(MILLISEC_UPDATE);
-                this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+                try { this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol))); } catch (Exception exc) { logger.Error(exc); }
             });
         }
     }   

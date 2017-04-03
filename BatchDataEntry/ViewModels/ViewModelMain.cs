@@ -111,6 +111,19 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private RelayCommand _aboutWindowCmd;
+        public ICommand ShowAboutWindowCmd
+        {
+            get
+            {
+                if (_aboutWindowCmd == null)
+                {
+                    _aboutWindowCmd = new RelayCommand(param => this.AboutWindowOpen());
+                }
+                return _aboutWindowCmd;
+            }
+        }
+
         private bool CanEdit
         {
             get { return (SelectedBatch != null); }
@@ -190,6 +203,10 @@ namespace BatchDataEntry.ViewModels
 
         #endregion
 
-
+        private void AboutWindowOpen()
+        {
+            var about = new AboutWindow();
+            about.Show();
+        }
     }
 }

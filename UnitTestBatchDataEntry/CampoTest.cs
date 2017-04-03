@@ -1,6 +1,8 @@
 ﻿using System;
 using BatchDataEntry.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace UnitTestBatchDataEntry
 {
@@ -8,34 +10,54 @@ namespace UnitTestBatchDataEntry
     public class CampoTest
     {
         [TestMethod]
-        public void TestEqualTrue()
+        public void CampoHashCodeTestDiff()
         {
-            Campo campo = new Campo(0, "ColonnaTest", 1, false, string.Empty, true, false, 0);
-            Campo campoCopy = new Campo(campo);
-            bool actual = campo.Equals(campoCopy);
-            Assert.AreEqual(true, actual);          
+            Random rnd = new Random();
+            List<int> HashCampi = new List<int>();
+            for(int i=0; i < 50; i++)
+            {
+                Campo c = new Campo(BatchDataEntry.Business.Utility.GetRandomAlphanumericString(10),
+                rnd.Next(0, 2) == 0,
+                (rnd.Next(0, 2) == 0) ? BatchDataEntry.Business.Utility.GetRandomAlphanumericString(7) : string.Empty,
+                rnd.Next(0, 2) == 0,
+                rnd.Next(0, 2) == 0,
+                rnd.Next(0, 2) == 0);
+                HashCampi.Add(c.GetHashCode());
+            }
+            HashCampi.Sort();
+            Assert.AreEqual(HashCampi.Count, HashCampi.Distinct().Count());     
         }
 
         [TestMethod]
-        public void TestEqualFalse()
+        public void CampoEqualsTrue1Test()
         {
-            Campo campo = new Campo(3, "Colonna1", 1, false, string.Empty, true, false, 0);
-            Campo campo2 = new Campo(1, "Colonna2", 2, false, string.Empty, true, false, 1);
-            bool actual = campo.Equals(campo2);
-            Assert.AreEqual(false, actual);
+            Campo c1 = new Campo(BatchDataEntry.Business.Utility.GetRandomAlphanumericString(10), false, string.Empty, true);
+            Campo c2 = c1;
+            Assert.AreEqual(c1, c2);           
         }
 
         [TestMethod]
-        public void TestRevert()
+        public void CampoEqualsTrue2Test()
         {
-            Campo campo = new Campo(0, "ColonnaTest", 1, false, string.Empty, true, false, 0);
-            Campo campoCopy = new Campo(campo);         
-            campo.Nome = "Nuovo nome";
-            campo.Posizione = 99;
-            campo.SalvaValori = true;
-            campo.Revert();
-            bool actual = campo.Equals(campoCopy);
-            Assert.AreEqual(true, actual);
+            Campo c1 = new Campo(BatchDataEntry.Business.Utility.GetRandomAlphanumericString(10), false, string.Empty, true);
+            Campo c2 = new Campo(c1);
+            Assert.AreEqual(c1, c2);
+        }
+
+        [TestMethod]
+        public void CampoEqualsFalse1Test()
+        {
+            Campo c1 = new Campo(BatchDataEntry.Business.Utility.GetRandomAlphanumericString(10), false, string.Empty, true);
+            Campo c2 = new Campo(BatchDataEntry.Business.Utility.GetRandomAlphanumericString(16), true, string.Empty, false);
+            Assert.AreNotEqual(c1, c2);
+        }
+
+        [TestMethod]
+        public void CampoEqualsFalse2Test()
+        {
+            Campo c1 = new Campo(BatchDataEntry.Business.Utility.GetRandomAlphanumericString(8), false, BatchDataEntry.Business.Utility.GetRandomAlphanumericString(5), true);
+            Campo c2 = new Campo(BatchDataEntry.Business.Utility.GetRandomAlphanumericString(6), true, BatchDataEntry.Business.Utility.GetRandomAlphanumericString(18), false);
+            Assert.AreNotEqual(c1, c2);
         }
     }
 }

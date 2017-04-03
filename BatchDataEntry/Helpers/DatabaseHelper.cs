@@ -191,6 +191,7 @@ namespace BatchDataEntry.Helpers
             finally
             {
                 cnn.Close();
+                cnn.Dispose();
             }
 
             return rowsUpdated;
@@ -229,6 +230,7 @@ namespace BatchDataEntry.Helpers
             finally
             {
                 cnn.Close();
+                cnn.Dispose();
             }
         }
 

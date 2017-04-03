@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Batch Data Entry"
-#define MyAppVersion "1.0.0.24"
+#define MyAppVersion "1.0.1.1"
 #define MyAppPublisher "Modservice"
 #define MyAppExeName "BatchDataEntry.exe"
 
@@ -30,9 +30,9 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe.manifest"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe.config"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe.manifest"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\CsvHelper.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\CsvHelper.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\database.db3"; DestDir: "{app}"; Flags: ignoreversion

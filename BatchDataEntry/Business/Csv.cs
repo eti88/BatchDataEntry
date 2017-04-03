@@ -203,6 +203,7 @@ namespace BatchDataEntry.Business
                         writer.WriteRow(r);
                     }
                     writer.Close();
+                    writer.Dispose();
                 }             
                 return true;
             }
@@ -235,6 +236,7 @@ namespace BatchDataEntry.Business
                         writer.WriteRow(r);
                     }
                     writer.Close();
+                    writer.Dispose();
                 }
                 return true;
             }

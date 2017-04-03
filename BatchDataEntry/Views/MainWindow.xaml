@@ -19,6 +19,10 @@
 
     <Grid HorizontalAlignment="Left">
         <DockPanel LastChildFill="True">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="Log" Click="ButtonLog_OnClick"/>
+                <MenuItem Header="About" Command="{Binding ShowAboutWindowCmd}"/>
+            </Menu>
             <ListBox x:Name="listBoxBatches" Margin="10,10,0,8" Width="286" DockPanel.Dock="Left" ItemsSource="{Binding Batches, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" SelectedItem="{Binding SelectedBatch}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -34,7 +38,6 @@
                 <Button x:Name="buttonResumeBatch" Command="{Binding Path=ResumeCommand}"  Content="Continua" Style="{StaticResource GenericButton}" Margin="0,20,0,0" FontSize="12"/>
                 <Button x:Name="buttonAddApp" Command="{Binding Path=ModelAddCommand}"  Content="Modelli" Style="{StaticResource GenericButton}" Margin="0,20,0,0" FontSize="12"/>
                 <Button x:Name="buttonDeleteBatch" Command="{Binding Path=DeleteCommand}"  Content="Elimina" Style="{StaticResource GenericButton}" Margin="0,20,0,0" Background="#FFE02B2B" Foreground="White" FontWeight="Bold" FontSize="12"/>
-                <Button x:Name="buttonLog" Content="Log" Style="{StaticResource GenericButton}" Margin="0,20,0,0" Click="ButtonLog_OnClick" FontSize="12"/>
             </StackPanel>
         </DockPanel>
     </Grid>

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace BatchDataEntry.Models
 {
     public class Autocompletamento
@@ -12,10 +7,15 @@ namespace BatchDataEntry.Models
         public int Colonna { get; set; }
         public string Valore { get; set; }
 
-        public Autocompletamento() { }
+        public Autocompletamento() {
+            this.Id = 0;
+            this.Colonna = 0;
+            this.Valore = string.Empty;
+        }
 
         public Autocompletamento(int Col, string val)
         {
+            this.Id = 0;
             this.Colonna = Col;
             this.Valore = val;
         }

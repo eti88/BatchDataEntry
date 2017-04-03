@@ -383,7 +383,7 @@ namespace BatchDataEntry.ViewModels
             if (SelectedRowIndex > 0 && _currentBatch != null)
             {
                 var continua = new Documento();
-                var indexFile = SelectedRowIndex - 1;
+                var indexFile = (SelectedRowIndex > 0) ? SelectedRowIndex - 1 : SelectedRowIndex;
                 continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
                 continua.ShowDialog();
                 LoadGrid();

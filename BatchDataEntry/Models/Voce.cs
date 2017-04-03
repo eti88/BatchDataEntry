@@ -134,7 +134,7 @@ namespace BatchDataEntry.Models
         public Voce(string key, string value, bool enabled = true)
         {
             this.Key = key;
-            this.Value = value;
+            this.Value = (string.IsNullOrEmpty(value)) ? string.Empty : value;
             AUTOCOMPLETETYPE = "NULL";
             IsDisabled = !enabled;
         }
@@ -143,7 +143,7 @@ namespace BatchDataEntry.Models
         {
             this.Id = id;
             this.Key = key;
-            this.Value = value;
+            this.Value = (string.IsNullOrEmpty(value)) ? string.Empty : value;
             AUTOCOMPLETETYPE = "NULL";
             IsDisabled = !enabled;
         }
@@ -153,6 +153,7 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Key = key;
             this.IsAutocomplete = autocomp;
+            this.Value = string.Empty;
             AUTOCOMPLETETYPE = autoType;
             IsDisabled = !enabled;
             QueryProviderSelector(autoType, id);
@@ -165,7 +166,7 @@ namespace BatchDataEntry.Models
             this.IsAutocomplete = autocomp;
             AUTOCOMPLETETYPE = autoType;
             IsDisabled = !enabled;
-            this.Value = valu;
+            this.Value = (string.IsNullOrEmpty(valu)) ? string.Empty : valu;
             QueryProviderSelector(autoType, id);
         }
 

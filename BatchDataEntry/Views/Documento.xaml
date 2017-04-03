@@ -52,26 +52,10 @@
                     ItemsSource="{Binding dbQueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     MinimumPrefixLength="3"
+                    IsTextCompletionEnabled="False"
                     ></controls1:AutoCompleteBox>
             </StackPanel>
         </DataTemplate>
-        <!-- old db template
-       <DataTemplate x:Key="AutocompleteDbDataTemplate">
-            <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
-                <TextBox
-                    helpers:FocusExtension.IsFocused="{Binding Path=IsFocused}" 
-                    IsEnabled="{Binding Path=IsDisabled}"
-                    VerticalAlignment="Center"
-                    Height="30"
-                    Width="352"
-                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding dbQueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
-                    wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteStringComparison="InvariantCultureIgnoreCase">
-                </TextBox>
-            </StackPanel>
-        </DataTemplate>
-        -->
         <!-- csv template -->
         <DataTemplate x:Key="AutocompleteCsvDataTemplate">
             <StackPanel Margin="5,0,5,0">

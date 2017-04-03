@@ -15,11 +15,13 @@ using BatchDataEntry.Components;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using MoonPdfLib;
+using NLog;
 
 namespace BatchDataEntry.ViewModels
 {
     internal class ViewModelDocumento : ViewModelBase
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private static DatabaseHelper _db;
         private static Batch _batch;
         private NavigationList<Dictionary<int, string>> _dc;
@@ -156,78 +158,52 @@ namespace BatchDataEntry.ViewModels
             return Batch.UltimoIndicizzato;
         }
 
-        private bool IsFileLocked(string filePath, int secondsToWait)
+        public void Indexes()
         {
-            var isLocked = true;
-            var i = 0;
+            DocFile.IsIndexed = true;
+            _db.UpdateRecordDocumento(DocFile);
 
-            while (isLocked && ((i < secondsToWait) || (secondsToWait == 0)))
+            // Salva il valore se bisogna riproporlo
+            for (int z = 0; z < Batch.Applicazione.Campi.Count; z++)
+            {
+                if (Batch.Applicazione.Campi[z].Riproponi)
+                    repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Value);
+            }
+            DatabaseHelper maindb = new DatabaseHelper();
+            Batch.UltimoIndicizzato = DocFiles.CurrentIndex + 1;
+            maindb.UpdateRecordBatch(Batch);
+
+            // controllare se bisogna salvare il valore inserito per l'autocomletamento
+            foreach (var col in DocFile.Voci)
             {
                 try
                 {
-                    using (File.Open(filePath, FileMode.Open))
-                    {
-                    }
-                    return false;
-                }
-                catch (IOException e)
-                {
-                    var errorCode = Marshal.GetHRForException(e) & ((1 << 16) - 1);
-                    isLocked = errorCode == 32 || errorCode == 33;
-                    i++;
-
-                    if (secondsToWait != 0)
-                        new ManualResetEvent(false).WaitOne(1000);
-                }
-            }
-
-            return isLocked;
-        }
-
-        public void Indexes()
-        {
-            if (
-                !IsFileLocked(Path.Combine(Batch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]),
-                    5000))
-            {
-                DocFile.IsIndexed = true;
-                _db.UpdateRecordDocumento(DocFile);
-
-                // Salva il valore se bisogna riproporlo
-                Task.Factory.StartNew(() =>
-                {
-                    for (int z = 0; z < Batch.Applicazione.Campi.Count; z++)
-                    {
-                        if (Batch.Applicazione.Campi[z].Riproponi)
-                            repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Value);                     
-                    }
-                    DatabaseHelper maindb = new DatabaseHelper();
-                    Batch.UltimoIndicizzato = DocFiles.CurrentIndex + 1;
-                    maindb.UpdateRecordBatch(Batch);
-                }).Wait();
-
-                // controllare se bisogna salvare il valore inserito per l'autocomletamento
-                foreach (var col in DocFile.Voci)
-                {
                     if (col.IsAutocomplete == true && col.AUTOCOMPLETETYPE.Equals("DB"))
                     {
-                        var auto = new Autocompletamento();
-                        auto.Colonna = col.Id;
-                        auto.Valore = col.Value;
-                        _db.InsertRecordAutocompletamento(auto);
+                        if (!string.IsNullOrEmpty(col.Value) && col.Id > 0)
+                        {
+                            var auto = new Autocompletamento();
+                            auto.Colonna = col.Id;
+                            auto.Valore = col.Value;
+                            _db.InsertRecordAutocompletamento(auto);
+                        }  
                     }
                 }
-
-                if (!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
+                catch (Exception ex)
                 {
-                    if(!string.IsNullOrEmpty(Batch.PatternNome))
-                        Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome,DocFile.FileName + ".pdf"));
-                    else
-                        Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
+                    logger.Error("Errore aggiunta voce all'autocompletamento: " + ex.ToString());
                 }
-                    
-                MoveNextItem();
             }
+
+            if (!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
+            {
+                if (!string.IsNullOrEmpty(Batch.PatternNome))
+                    Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome, DocFile.FileName + ".pdf"));
+                else
+                    Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
+            }
+
+            MoveNextItem();
         }
 
         public void MovePreviousItem()
