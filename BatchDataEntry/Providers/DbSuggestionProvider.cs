@@ -8,9 +8,9 @@ using BatchDataEntry.Models;
 
 namespace BatchDataEntry.Providers
 {
-    public class DbSuggestionProvider
+    public static class DbSuggestionProvider
     {
-        public async Task<List<string>> GetRecords(int idCol)
+        public static async Task<List<string>> GetRecords(int idCol)
         {
             Batch b;
             // Carica il batch corrente dalle impostazioni (controllare se presente)  
@@ -41,7 +41,7 @@ namespace BatchDataEntry.Providers
             }
         }
 
-        private async Task<List<string>> GetList(DatabaseHelper db, int column)
+        private static async Task<List<string>> GetList(DatabaseHelper db, int column)
         {
             try {
                 var lst = new List<string>();

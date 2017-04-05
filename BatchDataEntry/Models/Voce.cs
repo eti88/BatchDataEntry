@@ -178,9 +178,8 @@ namespace BatchDataEntry.Models
                 QueryProvider = csv.ListOfSuggestions.ToList();
             }
             else if (tp.Equals("DB"))
-            {
-                var dbprovider = new DbSuggestionProvider();
-                dbQueryProvider = await dbprovider.GetRecords(id);
+            { 
+                dbQueryProvider = await DbSuggestionProvider.GetRecords(id);
             }       
         }
 

@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BatchDataEntry.Business;
@@ -107,8 +103,8 @@ namespace BatchDataEntry.ViewModels
                 Batch.Applicazione.LoadCampi();
             PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
-            DocFiles.CurrentIndex = indexRowVal;
-            DocFile = new Document(Batch, DocFiles.Current);
+            DocFiles.CurrentIndex = indexRowVal; // Qua può generare exception
+            DocFile = new Document(Batch, DocFiles.Current); // Qua può generare exception
 
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
             PdfWrapper.OpenFile(DocFile.Path);
@@ -132,9 +128,9 @@ namespace BatchDataEntry.ViewModels
                 Batch.Applicazione.LoadCampi();
             PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
-            DocFiles.CurrentIndex = GetId();
-            DocFile = new Document(Batch, DocFiles.Current);
-            
+            DocFiles.CurrentIndex = GetId(); // Qua può generare exception
+            DocFile = new Document(Batch, DocFiles.Current); // Qua può generare exception
+
             PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;

@@ -19,7 +19,7 @@ using System.Windows;
 // Se si imposta ComVisible su false, i tipi in questo assembly non saranno visibili 
 // ai componenti COM. Se è necessario accedere a un tipo in questo assembly da 
 // COM, impostare su true l'attributo ComVisible per tale tipo.
-[assembly: ComVisible(false)]
+[assembly: ComVisible(true)]
 
 //Per iniziare la compilazione delle applicazioni localizzabili, impostare 
 //<UICulture>CultureYouAreCodingWith</UICulture> nel file .csproj

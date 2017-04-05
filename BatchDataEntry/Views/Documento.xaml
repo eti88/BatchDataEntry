@@ -6,8 +6,8 @@
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
         xmlns:providers="clr-namespace:BatchDataEntry.Providers"
+        xmlns:wpfTextBoxAutoComplete="clr-namespace:WPFTextBoxAutoComplete;assembly=WPFTextBoxAutoComplete"
         xmlns:editors="http://wpfcontrols.com/"
-        xmlns:controls1="clr-namespace:System.Windows.Controls;assembly=DotNetProjects.Input.Toolkit"
         mc:Ignorable="d"
         x:Name="DocumentWindow"        
         Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" WindowState="Maximized" Icon="/BatchDataEntry;component/Mesh-100.ico" Loaded="DocumentWindow_Loaded">
@@ -44,6 +44,16 @@
         <DataTemplate x:Key="AutocompleteDbDataTemplate">
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
+                <TextBox
+                    IsEnabled="{Binding Path=IsDisabled}"
+                    VerticalAlignment="Center"
+                    Height="30"
+                    Width="352"
+                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding dbQueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteStringComparison="InvariantCultureIgnoreCase"
+                    ></TextBox>
+                <!--
                 <controls1:AutoCompleteBox
                     IsEnabled="{Binding Path=IsDisabled}"
                     VerticalAlignment="Center"
@@ -53,7 +63,7 @@
                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     MinimumPrefixLength="3"
                     IsTextCompletionEnabled="False"
-                    ></controls1:AutoCompleteBox>
+                    ></controls1:AutoCompleteBox> -->
             </StackPanel>
         </DataTemplate>
         <!-- csv template -->
