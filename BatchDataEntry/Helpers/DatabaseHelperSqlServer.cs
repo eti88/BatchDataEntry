@@ -20,11 +20,12 @@ namespace BatchDataEntry.Helpers
             cnn = new SqlConnection(string.Format("user id={0};password={1};server={2};Trusted_Connection=yes;database={3};connection timeout={4}", user, password, serverUrl, databaseName, timeout));
         }
 
-        public void Insert(Campo c)
+        public int Insert(Campo c)
         {
-            if (cnn == null || c == null) return;
+            if (cnn == null || c == null) return -1;
             SqlCommand cmdInsert = new SqlCommand("Campi", this.cnn);
             cmdInsert.CommandType = System.Data.CommandType.StoredProcedure;
+            int id = 0;
 
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
             cmdInsert.Parameters["@Nome"].Value = c.Nome;
@@ -51,22 +52,28 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Open();
                 cmdInsert.ExecuteNonQuery();
-            }catch(Exception e)
+
+                cmdInsert.Parameters.Clear();
+                cmdInsert.CommandText = "SELECT SCOPE_IDENTITY()";
+                id = Convert.ToInt32(cmdInsert.ExecuteScalar());
+            }
+            catch(Exception e)
             {
                 logger.Error(e.ToString());
             }
             finally
             {
                 cnn.Close();
-            }  
+            }
+            return id;
         }
 
-        public void Insert(Modello m)
+        public int Insert(Modello m)
         {
-            if (cnn == null || m == null) return;
+            if (cnn == null || m == null) return -1;
             SqlCommand cmdInsert = new SqlCommand("Modelli", this.cnn);
             cmdInsert.CommandType = System.Data.CommandType.StoredProcedure;
-
+            int id = 0;
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
             cmdInsert.Parameters["@Nome"].Value = m.Nome;
             cmdInsert.Parameters.Add(new SqlParameter("@OrigineCsv", System.Data.SqlDbType.Bit));
@@ -84,6 +91,10 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Open();
                 cmdInsert.ExecuteNonQuery();
+
+                cmdInsert.Parameters.Clear();
+                cmdInsert.CommandText = "SELECT SCOPE_IDENTITY()";
+                id = Convert.ToInt32(cmdInsert.ExecuteScalar());
             }
             catch (Exception e)
             {
@@ -93,14 +104,15 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Close();
             }
+            return id;
         }
 
-        public void Insert(Batch b)
+        public int Insert(Batch b)
         {
-            if (cnn == null || b == null) return;
+            if (cnn == null || b == null) return -1;
             SqlCommand cmdInsert = new SqlCommand("Batch", this.cnn);
             cmdInsert.CommandType = System.Data.CommandType.StoredProcedure;
-
+            int id = 0;
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
             cmdInsert.Parameters["@Nome"].Value = b.Nome;
             cmdInsert.Parameters.Add(new SqlParameter("@TipoFile", System.Data.SqlDbType.Int));
@@ -128,6 +140,10 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Open();
                 cmdInsert.ExecuteNonQuery();
+
+                cmdInsert.Parameters.Clear();
+                cmdInsert.CommandText = "SELECT SCOPE_IDENTITY()";
+                id = Convert.ToInt32(cmdInsert.ExecuteScalar());
             }
             catch (Exception e)
             {
@@ -137,6 +153,7 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Close();
             }
+            return id;
         }
 
         public void Update(Batch b)
@@ -264,22 +281,407 @@ namespace BatchDataEntry.Helpers
         }
         
         public Batch GetBatchById(int id) {
-            throw new NotImplementedException();
-        }
-        public Campo GetCampoById(int id) { throw new NotImplementedException(); }
-        public Modello GetModelloById(int id) { throw new NotImplementedException(); }
-        public ObservableCollection<Batch> GetBatchRecords() { throw new NotImplementedException(); }
-        public ObservableCollection<Campo> GetCampoRecords() { throw new NotImplementedException(); }
-        public ObservableCollection<Modello> GetModelloRecords() { throw new NotImplementedException(); }
-        public ObservableCollection<Batch> BatchQuery(string query) { throw new NotImplementedException(); }
-        public ObservableCollection<Campo> CampoQuery(string query) { throw new NotImplementedException(); }
-        public ObservableCollection<Modello> ModelloQuery(string query) { throw new NotImplementedException(); }
-        public IEnumerable<Modello> IEnumerableModelli() { throw new NotImplementedException(); }
-        public int Count(string sql) { throw new NotImplementedException(); }
-        // return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Autocompletamento")); 
-        // negli insert
+            if (cnn == null) return null;
+            string sql = string.Format("SELECT * FROM Batch WHERE Id = {0}", id);
 
-        // comandi liberi come count e altro vedi databasehelper
+            SqlCommand cmd = new SqlCommand(sql ,cnn);
+
+            try
+            {
+                cnn.Open();
+                cmd.ExecuteReader();
+                SqlDataReader reader = cmd.ExecuteReader();
+                Batch b = new Batch();
+                while (reader.Read())
+                {
+                    b.Id = Convert.ToInt32(reader["Id"]);
+                    b.Nome = Convert.ToString(reader["Nome"]);
+                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                }
+                reader.Close();
+                return b;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public Campo GetCampoById(int id) {
+            if (cnn == null) return null;
+            string sql = string.Format("SELECT * FROM Campi WHERE Id = {0}", id);
+
+            SqlCommand cmd = new SqlCommand(sql, cnn);
+
+            try
+            {
+                cnn.Open();
+                cmd.ExecuteReader();
+                SqlDataReader reader = cmd.ExecuteReader();
+                Campo c = new Campo();
+                while (reader.Read())
+                {
+                    c.Id = Convert.ToInt32(reader["Id"]);
+                    c.Nome = Convert.ToString(reader["Nome"]);
+                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
+                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                }
+                reader.Close();
+                return c;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public Modello GetModelloById(int id) {
+            if (cnn == null) return null;
+            string sql = string.Format("SELECT * FROM Modelli WHERE Id = {0}", id);
+
+            SqlCommand cmd = new SqlCommand(sql, cnn);
+
+            try
+            {
+                cnn.Open();
+                cmd.ExecuteReader();
+                SqlDataReader reader = cmd.ExecuteReader();
+                Modello m = new Modello();
+                while (reader.Read())
+                {
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                }
+                reader.Close();
+                return m;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public ObservableCollection<Batch> GetBatchRecords() {
+            if (cnn == null) return null;
+            string sql = string.Format("SELECT * FROM Batch");
+
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
+                while (reader.Read())
+                {
+                    Batch b = new Batch();
+                    b.Id = Convert.ToInt32(reader["Id"]);
+                    b.Nome = Convert.ToString(reader["Nome"]);
+                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                    batches.Add(b);
+                }
+
+                reader.Close();
+                return batches;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public ObservableCollection<Campo> GetCampoRecords() {
+            if (cnn == null) return null;
+            string sql = string.Format("SELECT * FROM Campi");
+            try {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
+                while (reader.Read())
+                {
+                    Campo c = new Campo();
+                    c.Id = Convert.ToInt32(reader["Id"]);
+                    c.Nome = Convert.ToString(reader["Nome"]);
+                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
+                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    campi.Add(c);
+                }
+
+                reader.Close();
+                return campi;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public ObservableCollection<Modello> GetModelloRecords() {
+            if (cnn == null) return null;
+            string sql = string.Format("SELECT * FROM Modelli");
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                ObservableCollection<Modello> models = new ObservableCollection<Modello>();
+                while (reader.Read())
+                {
+                    Modello m = new Modello();
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                    models.Add(m);
+                }
+
+                reader.Close();
+                return models;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public ObservableCollection<Batch> BatchQuery(string query) {
+            if (cnn == null) return null;
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(query, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
+                while (reader.Read())
+                {
+                    Batch b = new Batch();
+                    b.Id = Convert.ToInt32(reader["Id"]);
+                    b.Nome = Convert.ToString(reader["Nome"]);
+                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                    batches.Add(b);
+                }
+
+                reader.Close();
+                return batches;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public ObservableCollection<Campo> CampoQuery(string query) {
+            if (cnn == null) return null;
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(query, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
+                while (reader.Read())
+                {
+                    Campo c = new Campo();
+                    c.Id = Convert.ToInt32(reader["Id"]);
+                    c.Nome = Convert.ToString(reader["Nome"]);
+                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
+                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    campi.Add(c);
+                }
+
+                reader.Close();
+                return campi;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public ObservableCollection<Modello> ModelloQuery(string query) {
+            if (cnn == null) return null;
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(query, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                ObservableCollection<Modello> models = new ObservableCollection<Modello>();
+                while (reader.Read())
+                {
+                    Modello m = new Modello();
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                    models.Add(m);
+                }
+
+                reader.Close();
+                return models;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public IEnumerable<Modello> IEnumerableModelli() {
+            if (cnn == null) return null;
+            string sql = string.Format("SELECT * FROM Modelli");
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                List<Modello> models = new List<Modello>();
+                while (reader.Read())
+                {
+                    Modello m = new Modello();
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                    models.Add(m);
+                }
+
+                reader.Close();
+                return models.AsEnumerable();
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public int Count(string sql) {
+            int result = -1;
+            if (cnn == null) return result;
+            try {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                result = Convert.ToInt32(cmd.ExecuteScalar());
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return result;
+        }
 
         // Implementare autocomp lato server
 
