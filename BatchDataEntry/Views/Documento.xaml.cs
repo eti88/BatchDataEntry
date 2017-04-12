@@ -21,10 +21,11 @@ namespace BatchDataEntry.Views
         public Documento()
         {
             InitializeComponent();
-            SetFocusOnSelectedTextBox(10);
+            int st = (Properties.Settings.Default.StartFocusCol >= 0) ? Properties.Settings.Default.StartFocusCol : 0;
+            SetFocusOnSelectedTextBox(st);
         }
 
-        public void SetFocusOnSelectedTextBox(int pos)
+        public void SetFocusOnSelectedTextBox(int pos = 0)
         {
             if (FieldItems.Items == null) return;
 

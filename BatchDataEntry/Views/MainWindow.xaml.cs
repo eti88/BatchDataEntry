@@ -34,5 +34,10 @@ namespace BatchDataEntry
                 Process.Start(Path.Combine(Directory.GetCurrentDirectory(), "logFile.log"));
             }
         }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
     }
 }

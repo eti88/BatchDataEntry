@@ -264,7 +264,6 @@ namespace BatchDataEntry.ViewModels
                 List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
                 MaxValue = lines.Count;
                 List<Document> documents = new List<Document>();
-
                 for (int i = 0; i < lines.Count; i++)
                 {
                     Document doc = new Document();
@@ -329,6 +328,7 @@ namespace BatchDataEntry.ViewModels
                 if (files.Count == 0) return false;
 
                 files = files.CustomSort().ToList();
+                MaxValue = files.Count;
                 #if DEBUG
                 Console.WriteLine(@"### Inizio indicizzazione files ###");
                 #endif

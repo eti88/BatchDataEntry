@@ -103,8 +103,13 @@ namespace BatchDataEntry.ViewModels
                 Batch.Applicazione.LoadCampi();
             PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
-            DocFiles.CurrentIndex = indexRowVal; // Qua può generare exception
-            DocFile = new Document(Batch, DocFiles.Current); // Qua può generare exception
+            if (DocFiles.CurrentIndex > DocFiles.Count)
+            {
+                logger.Error(string.Format("DocFiles index: {0}, file totali nel dictionary {1} troppo alto!", DocFiles.CurrentIndex, DocFiles.Count));
+                return;
+            }
+            DocFiles.CurrentIndex = indexRowVal;
+            DocFile = new Document(Batch, DocFiles.Current);
 
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
             PdfWrapper.OpenFile(DocFile.Path);
@@ -128,8 +133,14 @@ namespace BatchDataEntry.ViewModels
                 Batch.Applicazione.LoadCampi();
             PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
-            DocFiles.CurrentIndex = GetId(); // Qua può generare exception
-            DocFile = new Document(Batch, DocFiles.Current); // Qua può generare exception
+            
+            DocFiles.CurrentIndex = GetId();
+            if(DocFiles.CurrentIndex > DocFiles.Count)
+            {
+                logger.Error(string.Format("DocFiles index: {0}, file totali nel dictionary {1} troppo alto!", DocFiles.CurrentIndex, DocFiles.Count));
+                return;
+            }
+            DocFile = new Document(Batch, DocFiles.Current);
 
             PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
@@ -144,8 +155,19 @@ namespace BatchDataEntry.ViewModels
 
         private void LoadDocsList()
         {
-            var dbCache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
-            DocFiles = dbCache.GetDocuments();
+            try {
+                var dbCache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+                DocFiles = dbCache.GetDocuments();
+            } catch (Exception ex) {
+                logger.Error(ex.ToString());
+            }
+            finally
+            {
+                if (DocFiles == null || DocFiles.Count == 0)
+                {
+                    logger.Error("La lista dei documenti risulta vuota o è fallita per qualche motivo(Errore Precedente): LoadDocsList()");
+                }
+            }
             RaisePropertyChanged("DocFiles");
         }
 

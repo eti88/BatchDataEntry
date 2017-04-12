@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Batch Data Entry"
-#define MyAppVersion "1.5.0.2"
+#define MyAppVersion "1.5.1.3"
 #define MyAppPublisher "Modservice"
 #define MyAppExeName "BatchDataEntry.exe"
 
@@ -29,23 +29,9 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 [Files]
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.pdb"; DestDir: "{app}"; Flags: ignoreversion
-;Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe"; DestDir: "{app}"; Flags: ignoreversion
-;Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-;Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\BatchDataEntry.vshost.exe.manifest"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\CsvHelper.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\CsvHelper.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\database.db3"; DestDir: "{app}"; Flags: ignoreversion
-
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\DotNetProjects.DataVisualization.Toolkit.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\DotNetProjects.DataVisualization.Toolkit.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\DotNetProjects.Input.Toolkit.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\DotNetProjects.Input.Toolkit.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\DotNetProjects.Layout.Toolkit.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\DotNetProjects.Layout.Toolkit.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\DotNetProjects.WPF.Themes.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\DotNetProjects.WPF.Themes.pdb"; DestDir: "{app}"; Flags: ignoreversion
-
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\EntityFramework.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\EntityFramework.SqlServer.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\EntityFramework.SqlServer.xml"; DestDir: "{app}"; Flags: ignoreversion
@@ -69,11 +55,10 @@ Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\Bat
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\System.Windows.Interactivity.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\System.Windows.Interactivity.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\WpfControls.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\WpfControls.pdb"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\libmupdf.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\MoonPdfLib.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\MouseKeyboardActivityMonitor.dll"; DestDir: "{app}"; Flags: ignoreversion
-; Sub Dirs
+Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\WPFTextBoxAutoComplete.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\x86\SQLite.Interop.dll"; DestDir: "{app}\x86"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\x64\SQLite.Interop.dll"; DestDir: "{app}\x64"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\BatchDataEntry\bin\x86\Release\de\Gu.Wpf.NumericInput.resources.dll"; DestDir: "{app}\de"; Flags: ignoreversion recursesubdirs createallsubdirs

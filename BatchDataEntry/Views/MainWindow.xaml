@@ -4,15 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:BatchDataEntry.ViewModels"
-        xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
-        xmlns:local="clr-namespace:BatchDataEntry"
         mc:Ignorable="d"
         Title="Batch" 
         Height="465" 
         Width="566.15"
         MinWidth="560"
         MaxWidth="560"
-        DataContext="{DynamicResource ViewModelMain }" Loaded="Window_Loaded" Icon="/BatchDataEntry;component/Mesh-100.ico">
+        DataContext="{DynamicResource ViewModelMain }" Loaded="Window_Loaded" Icon="/BatchDataEntry;component/Mesh-100.ico" Closed="Window_Closed">
     <Window.Resources>
         <vm:ViewModelMain x:Key="ViewModelMain"/>
     </Window.Resources>
