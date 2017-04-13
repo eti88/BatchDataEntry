@@ -234,7 +234,7 @@ namespace BatchDataEntry.Helpers
             }
         }
 
-        public string convertQuotes(string str)
+        public static string convertQuotes(string str)
         {
             try
             {

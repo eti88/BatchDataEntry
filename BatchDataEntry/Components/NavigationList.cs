@@ -25,7 +25,10 @@ namespace BatchDataEntry.Components
 
         public T MoveNext
         {
-            get { _currentIndex++; return this[CurrentIndex]; }
+            get {
+                if(hasNext)
+                    _currentIndex++;
+                return this[CurrentIndex]; }
         }
 
         public bool hasNext
@@ -40,7 +43,11 @@ namespace BatchDataEntry.Components
 
         public T MovePrevious
         {
-            get { _currentIndex--; return this[CurrentIndex]; }
+            get {
+                if (hasPrevious)
+                    _currentIndex--;
+                 return this[CurrentIndex];
+            }
         }
 
         public T Current
