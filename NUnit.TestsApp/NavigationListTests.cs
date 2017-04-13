@@ -39,6 +39,7 @@ namespace NUnit.TestsApp
         public void MovePreviousTest()
         {
             Assert.IsNotNull(list);
+            list.CurrentIndex = 50;
             string a = list.Current;
             string b = list.MovePrevious;
             Assert.IsNotNull(b);

@@ -19,87 +19,64 @@ namespace BatchDataEntry.Helpers.Tests
         [SetUp]
         public void Init()
         {
-            testDb = new DatabaseHelper(Path.Combine(Directory.GetCurrentDirectory(), @"test.db3"));
-            cacheTestDb = new DatabaseHelper(Path.Combine(Directory.GetCurrentDirectory(), @"cacheTest.db3"));
+            testDb = new DatabaseHelper(Path.Combine(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles", @"test.db3"));
+            cacheTestDb = new DatabaseHelper(Path.Combine(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles", @"cacheTest.db3"));
+            testDb.InitTabs();
+            cacheTestDb.CreateCacheDb(new List<string>());
+            testDb.InsertRecordBatch(new Batch("utest", TipoFileProcessato.Pdf, @"C:\\Input", @"C:\\Output"));
+            Modello m = new Modello();
+            m.Nome = "utestModel";
+            m.OrigineCsv = false;
+            testDb.InsertRecordModello(m);
+            testDb.InsertRecordCampo(new Campo("campo1", false, "ciao", true));
+            cacheTestDb.InsertRecordAutocompletamento(new Autocompletamento(0, "valore1"));
         }
 
-        [Test()]
+        [Test(), Order(1)]
         public void InitTabsTest()
         {
-            testDb.InitTabs();
             int countTable = Convert.ToInt32(testDb.ExecuteScalar(@"SELECT COUNT(*) FROM sqlite_master WHERE type='table'"));
             Assert.IsNotNull(testDb);
             Assert.IsTrue(countTable == 4); // 4 perché c'è anche la tabella di sistema
         }
 
-        [Test()]
+        [Test(), Order(2)]
         public void CreateCacheDbTest()
         {
-            cacheTestDb.CreateCacheDb(new List<string>());
-            int countTable = Convert.ToInt32(testDb.ExecuteScalar(@"SELECT COUNT(*) FROM sqlite_master WHERE type='table'"));
+            int countTable = Convert.ToInt32(cacheTestDb.ExecuteScalar(@"SELECT COUNT(*) FROM sqlite_master WHERE type='table'"));
             Assert.IsNotNull(cacheTestDb);
             Assert.IsTrue(countTable == 3); // 3 perché c'è anche la tabella di sistema
         }
 
-        [Test()]
+        [Test(), Order(3)]
         public void GetDataTableTest()
         {
             DataTable dt = testDb.GetDataTable("Batch");
             Assert.IsNotNull(dt);
         }
 
-        [Test()]
+        [Test(), Order(4)]
         public void GetDataTableDocumentiTest()
         {
             DataTable dt = cacheTestDb.GetDataTableDocumenti();
             Assert.IsNotNull(dt);
         }
 
-        [Test()]
+        [Test(), Order(5)]
         public void convertQuotesTest()
         {
             string a = "piu'";
             Assert.IsTrue(DatabaseHelper.convertQuotes(a) == "piu''");
         }
-
-        [Test()]
-        public void InsertRecordBatchTest()
-        {
-            Batch b = new Batch("utest", TipoFileProcessato.Pdf, @"C:\\Input", @"C:\\Output");
-            Assert.IsTrue(testDb.InsertRecordBatch(b) > 0);
-        }
-
-        [Test()]
-        public void InsertRecordModelloTest()
-        {
-            Modello m = new Modello();
-            m.Nome = "utestModel";
-            m.OrigineCsv = false;
-            Assert.IsTrue(testDb.InsertRecordModello(m) > 0);
-        }
-
-        [Test()]
-        public void InsertRecordCampoTest()
-        {
-            Campo c = new Campo("campo1", false, "ciao", true);
-            Assert.IsTrue(testDb.InsertRecordCampo(c) > 0);
-        }
-
-        [Test()]
-        public void InsertRecordAutocompletamentoTest()
-        {
-            Autocompletamento au = new Autocompletamento(0, "valore1");
-            Assert.IsTrue(cacheTestDb.InsertRecordAutocompletamento(au) > 0);
-        }
         
-        [Test()]
+        [Test(), Order(6)]
         public void InsertRecordDocumentoTest()
         {
             Document dc = new Document(1, "ciao", @"C:\\Input\ciao.pdf", false);
             Assert.IsTrue(cacheTestDb.InsertRecordDocumento(new Batch("test", TipoFileProcessato.Pdf, @"C:\\Input", @"C:\\Output"),dc) > 0); 
         }
 
-        [Test()]
+        [Test(), Order(7)]
         public void UpdateRecordBatchTest()
         {
             Batch b = new Batch("utest", TipoFileProcessato.Pdf, @"C:\\Input", @"C:\\Output");
@@ -107,10 +84,10 @@ namespace BatchDataEntry.Helpers.Tests
             testDb.UpdateRecordBatch(b);
             Batch expected = testDb.GetBatchById(1);
             Assert.IsNotNull(expected);
-            Assert.IsTrue(expected.IdModello == 1);
+            Assert.IsTrue(expected.IdModello > 0);
         }
 
-        [Test()]
+        [Test(), Order(8)]
         public void UpdateRecordCampoTest()
         {
             Campo c = new Campo("campo1", false, "ciao", true);
@@ -119,10 +96,10 @@ namespace BatchDataEntry.Helpers.Tests
             testDb.UpdateRecordCampo(c);
             Campo expected = testDb.GetCampoById(1);
             Assert.IsNotNull(expected);
-            Assert.IsTrue(expected.IdModello == 1 && expected.IsDisabled == true);
+            Assert.IsTrue(expected.IdModello > 0 && expected.IsDisabled == true);
         }
 
-        [Test()]
+        [Test(), Order(9)]
         public void UpdateRecordModelloTest()
         {
             Modello m = new Modello();
@@ -133,10 +110,10 @@ namespace BatchDataEntry.Helpers.Tests
             testDb.UpdateRecordModello(m);
             Modello expected = testDb.GetModelloById(1);
             Assert.IsNotNull(expected);
-            Assert.IsTrue(expected.OrigineCsv == true && expected.Separatore.Equals(";") && expected.PathFileCsv.Equals("D:\\test\\aaa.csv"))
+            Assert.IsTrue(expected.OrigineCsv == true && expected.Separatore.Equals(";") && expected.PathFileCsv.Equals("D:\\test\\aaa.csv"));
         }
 
-        [Test()]
+        [Test(), Order(10)]
         public void UpdateRecordDocumentoTest()
         {
             Document dc = new Document(1, "ciao", @"C:\\Input\ciao.pdf", false);
@@ -147,15 +124,15 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsTrue(expected.ContainsKey(3) && expected.ContainsValue("1"));
         }
 
-        [Test()]
+        [Test(), Order(11)]
         public void GetDataTableWithQueryTest()
         {
             DataTable dt = testDb.GetDataTableWithQuery("SELECT * FROM Batch WHERE Id = 1");
             Assert.IsNotNull(dt);
-            Assert.IsTrue(dt.Columns.Count == 10);
+            Assert.IsTrue(dt.Columns.Count > 0);
         }
         
-        [Test()]
+        [Test(), Order(12)]
         public void GetDocumentoTest1()
         {
             var expected = cacheTestDb.GetDocumento("ciao");
@@ -163,7 +140,7 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsTrue(expected.Count > 0);
         }
 
-        [Test()]
+        [Test(), Order(13)]
         public void GetDocumentsTest()
         {
             NavigationList<Dictionary<int, string>> nav = cacheTestDb.GetDocuments();
@@ -171,31 +148,31 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsTrue(nav.Count == 1);
         }
 
-        [Test()]
+        [Test(), Order(14)]
         public void GetAutocompleteListTest()
         {
             List<string> suggestions = cacheTestDb.GetAutocompleteList(0);
             Assert.IsNotNull(suggestions);
-            Assert.IsTrue(suggestions.Count == 1);
+            Assert.IsTrue(suggestions.Count > 0);
         }
 
-        [Test()]
+        [Test(), Order(15)]
         public void GetAutocompleteListObTest()
         {
             ObservableCollection<Suggestion> suggestions = cacheTestDb.GetAutocompleteListOb(0);
             Assert.IsNotNull(suggestions);
-            Assert.IsTrue(suggestions.Count == 1);
+            Assert.IsTrue(suggestions.Count > 0);
         }
 
-        [Test()]
+        [Test(), Order(16)]
         public void GetBatchRecordsTest()
         {
             ObservableCollection<Batch> batches = testDb.GetBatchRecords();
             Assert.IsNotNull(batches);
-            Assert.IsTrue(batches.Count == 1 && batches[0].Nome.Equals("utest"));
+            Assert.IsTrue(batches.Count > 0 && batches[0].Nome.Equals("utest"));
         }
 
-        [Test()]
+        [Test(), Order(17)]
         public void GetDocumentsListPartialTest()
         {
             List<Document> docs = cacheTestDb.GetDocumentsListPartial();
@@ -203,7 +180,7 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsTrue(docs.Count == 1);
         }
 
-        [Test()]
+        [Test(), Order(18)]
         public void GetDocumentsListPartialTest1()
         {
             List<Document> docs = cacheTestDb.GetDocumentsListPartial("SELECT * FROM Documenti WHERE Id = 1");
@@ -211,23 +188,23 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsTrue(docs.Count == 1);
         }
 
-        [Test()]
+        [Test(), Order(19)]
         public void GetCampoRecordsTest()
         {
             ObservableCollection<Campo> campi = testDb.GetCampoRecords();
             Assert.IsNotNull(campi);
-            Assert.IsTrue(campi.Count == 1);
+            Assert.IsTrue(campi.Count > 0);
         }
 
-        [Test()]
+        [Test(), Order(20)]
         public void GetModelloRecordsTest()
         {
             ObservableCollection<Modello> modello = testDb.GetModelloRecords();
             Assert.IsNotNull(modello);
-            Assert.IsTrue(modello.Count == 1);
+            Assert.IsTrue(modello.Count > 0);
         }
 
-        [Test()]
+        [Test(), Order(21)]
         public void BatchQueryTest()
         {
             ObservableCollection<Batch> batches = testDb.BatchQuery("SELECT * FROM Batch WHERE Id = 1");
@@ -235,7 +212,7 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsTrue(batches.Count == 1);
         }
 
-        [Test()]
+        [Test(), Order(22)]
         public void CampoQueryTest()
         {
             ObservableCollection<Campo> campi = testDb.CampoQuery("SELECT * FROM Campo WHERE Id = 1");
@@ -243,7 +220,7 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsTrue(campi.Count == 1);
         }
 
-        [Test()]
+        [Test(), Order(23)]
         public void ModelloQueryTest()
         {
             ObservableCollection<Modello> modelli = testDb.ModelloQuery("SELECT * FROM Modello WHERE Id = 1");
@@ -251,23 +228,11 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsTrue(modelli.Count == 1);
         }
 
-        [Test()]
+        [Test(), Order(24)]
         public void IEnumerableModelliTest()
         {
             IEnumerable<Modello> modelli = testDb.IEnumerableModelli();
             Assert.IsNotNull(modelli);
-        }
-
-        [Test()]
-        public void ClearTableTest()
-        {
-            Assert.IsTrue(testDb.ClearTable("Batch"));
-        }
-
-        [Test()]
-        public void ClearDBTest()
-        {
-            Assert.Fail();
         }
 
         [TearDown]

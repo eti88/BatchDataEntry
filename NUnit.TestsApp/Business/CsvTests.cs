@@ -13,18 +13,18 @@ namespace BatchDataEntry.Business.Tests
     public class CsvTests
     {
         private static readonly string _FILENAME = "test.csv";
-        private readonly string _PATHFILE = Path.Combine(Directory.GetCurrentDirectory(), _FILENAME);
-        private readonly string _PATHFILE2 = Path.Combine(Directory.GetCurrentDirectory(), "test2.csv");
+        private readonly string _PATHFILE = Path.Combine(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles", _FILENAME);
+        private readonly string _PATHFILE2 = Path.Combine(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles", "test2.csv");
 
-        [Test()]
-
+        [Test(), Order(1)]
         public void CreateCsvTest()
         {
             Csv.CreateCsv(_PATHFILE);
-            Assert.IsTrue(File.Exists(_PATHFILE));
+            Csv.CreateCsv(_PATHFILE2);
+            Assert.IsTrue(File.Exists(_PATHFILE) && File.Exists(_PATHFILE2));
         }
 
-        [Test()]
+        [Test(), Order(2)]
         public void AddRowTest()
         {
             Csv.AddRow(_PATHFILE, "000001;Mario;Rossi;44");
@@ -39,7 +39,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsTrue(lineCount == 8);
         }
 
-        [Test()]
+        [Test(), Order(3)]
         public void AddRowsTest()
         {
             List<string> records = new List<string>();
@@ -53,7 +53,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsTrue(lineCount == 4);
         }
 
-        [Test()]
+        [Test(), Order(4)]
         public void ReadRowsTest()
         {
             List<string> rows = Csv.ReadRows(_PATHFILE, ';');
@@ -61,7 +61,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsTrue(rows.Count == 8);
         }
 
-        [Test()]
+        [Test(), Order(5)]
         public void ReadColumnTest()
         {
             List<string> rows = Csv.ReadColumn(_PATHFILE, 0);
@@ -80,7 +80,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsTrue(expected.SequenceEqual(rows));
         }
 
-        [Test()]
+        [Test(), Order(6)]
         public void ReadColumnTest1()
         {
             List<string> rows = Csv.ReadColumn(_PATHFILE, 3);
@@ -99,7 +99,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsTrue(expected.SequenceEqual(rows));
         }
 
-        [Test()]
+        [Test(), Order(7)]
         public void DeleteRowTest()
         {
             Csv.DeleteRow(_PATHFILE, 6);
@@ -107,7 +107,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsFalse(lst.Contains("000007"));
         }
 
-        [Test()]
+        [Test(), Order(8)]
         public void DeleteRowTest1()
         {
             Csv.DeleteRow(_PATHFILE, "000001;Mario;Rossi;44");
@@ -115,7 +115,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsFalse(lst.Contains("000001"));
         }
 
-        [Test()]
+        [Test(), Order(9)]
         public void DeleteRowTest2()
         {
             Csv.DeleteRow(_PATHFILE, "000006", 0);
@@ -123,7 +123,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsFalse(lst.Contains("000006"));
         }
 
-        [Test()]
+        [Test(), Order(10)]
         public void UpdateRowTest()
         {
             Csv.UpdateRow(_PATHFILE, 3, "999933;Jonh;Doe;33");
@@ -131,7 +131,7 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsTrue(lst.Any(s => s.Contains("999933")));
         }
 
-        [Test()]
+        [Test(), Order(11)]
         public void UpdateRowTest1()
         {
             Csv.UpdateRow(_PATHFILE, "000002;Luigi;Bianchi;51", "092222;Luigi;Bianchi;51");
@@ -139,31 +139,31 @@ namespace BatchDataEntry.Business.Tests
             Assert.IsTrue(lst.Any(s => s.Contains("092222")));
         }
 
-        [Test()]
+        [Test(), Order(12)]
         public void SearchRowTest()
         {
             List<string> results = Csv.SearchRow(_PATHFILE, "999933", 0, ';');
             List<string> expected = new List<string>() {
-                "999933;Jonh;Doe;33"
+                "999933","Jonh","Doe","33"
             };
             Assert.NotNull(results);
             Assert.AreEqual(results.Count, expected.Count);
             Assert.IsTrue(expected.SequenceEqual(results));
         }
 
-        [Test()]
+        [Test(), Order(13)]
         public void SearchRowTest1()
         {
             List<string> results = Csv.SearchRow(_PATHFILE, "092222", "Luigi", 0, 1, ';');
             List<string> expected = new List<string>() {
-                "092222;Luigi;Bianchi;51"
+                "092222","Luigi","Bianchi","51"
             };
             Assert.NotNull(results);
             Assert.AreEqual(results.Count, expected.Count);
             Assert.IsTrue(expected.SequenceEqual(results));
         }
 
-        [Test()]
+        [Test(), Order(14)]
         public void CSVRowToStringArrayTest()
         {
             string[] test = Csv.CSVRowToStringArray("999933;Jonh;Doe;33", ';');

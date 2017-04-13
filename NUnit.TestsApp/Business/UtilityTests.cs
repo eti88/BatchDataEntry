@@ -78,31 +78,25 @@ namespace BatchDataEntry.Business.Tests
             List<Document> actual = input.CustomSort().ToList();
             Assert.NotNull(actual);
             Assert.AreEqual(input.Count, actual.Count);
-            Assert.IsTrue(expected.SequenceEqual(actual));
-        }
-
-        [Test()]
-        public void GetDirectorySizeTest()
-        {
-            long result = Utility.GetDirectorySize(Directory.GetCurrentDirectory());
-            Assert.IsTrue(result > 0);
+            for(int i=0; i < actual.Count; i++)
+                Assert.IsTrue(actual.ElementAt(i).FileName == expected.ElementAt(i).FileName);
         }
 
         [Test()]
         public void CountFilesTest()
         {
             for (int i = 1; i <= 5; i++)
-                File.Create(Path.Combine(Directory.GetCurrentDirectory(), string.Format("file{0}.pdf", i)));
+                File.Create(Path.Combine(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles", string.Format("file{0}.pdf", i))).Dispose();
 
             try
             {
-                int countFile = Utility.CountFiles(Directory.GetCurrentDirectory(), TipoFileProcessato.Pdf);
+                int countFile = Utility.CountFiles(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles", TipoFileProcessato.Pdf);
                 Assert.IsTrue(countFile >= 4);
             }
             finally
             {
                 for (int i = 1; i <= 5; i++)
-                    File.Delete(Path.Combine(Directory.GetCurrentDirectory(), string.Format("file{0}.pdf", i)));
+                    File.Delete(Path.Combine(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles", string.Format("file{0}.pdf", i)));
             }
         }
 
@@ -134,6 +128,16 @@ namespace BatchDataEntry.Business.Tests
             string pat = "DOC";
             string exp = "000001";
             Assert.AreEqual(Utility.RemovePatternFromString(a, pat), exp);
+        }
+
+        [TearDown]
+        public void CleanDir()
+        {
+            DirectoryInfo di = new DirectoryInfo(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles");
+            foreach (FileInfo file in di.GetFiles())
+            {
+                file.Delete();
+            }
         }
     }
 }
