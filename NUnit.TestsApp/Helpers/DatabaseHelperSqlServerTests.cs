@@ -3,6 +3,7 @@ using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using BatchDataEntry.Business;
 
 namespace BatchDataEntry.Helpers.Tests
 {
@@ -34,7 +35,7 @@ namespace BatchDataEntry.Helpers.Tests
         public void InsertTest1()
         {
             Campo c1 = new Campo("testCampo",false,"aaaa",true);
-            Modello mTmp = db.ModelloQuery(@"");
+            Modello mTmp = db.GetFirstModello();
             Assert.IsNotNull(mTmp);
             c1.IdModello = mTmp.Id;
             Campo c2 = new Campo("testCampo", false, "aaaa", true);
@@ -47,7 +48,9 @@ namespace BatchDataEntry.Helpers.Tests
         public void InsertTest2()
         {
             Batch b = new Batch("testUnitBatch",TipoFileProcessato.Pdf, @"C:\\input", @"C:\\output");
-            b.IdModello = 1;
+            Modello mTmp = db.GetFirstModello();
+            Assert.IsNotNull(mTmp);
+            b.IdModello = mTmp.Id;
             int insertId = db.Insert(b);
             Assert.IsTrue(insertId > 0);
         }
@@ -55,68 +58,79 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(4)]
         public void UpdateTest()
         {
-            Batch b = new Batch("testBatchA", TipoFileProcessato.Pdf, @"C:\\input", @"C:\\output");
-            b.Id = 1;
-            b.IdModello = 1;
+            Batch b = db.GetFirstBatch();
+            Assert.IsNotNull(b);
+            Modello m = db.GetFirstModello();
+            Assert.IsNotNull(m);
+            b.IdModello = m.Id;
+            b.Nome = Utility.GetRandomAlphanumericString(15);
             db.Update(b);
-            Batch b2 = db.GetBatchById(1);
-            Assert.IsTrue(b2.Nome.Equals("testBatchA"));
+            Batch b2 = db.GetBatchById(b.Id);
+            Assert.IsTrue(b2.Nome.Equals(b.Nome));
         }
 
         [Test(), Order(5)]
         public void DeleteFromTableTest()
         {
-            db.DeleteFromTable("Campi", @"Id = '1'");
-            Campo c = db.GetCampoById(1);
-            Assert.IsTrue(c.Id == 0 && string.IsNullOrWhiteSpace(c.Nome));
+            Campo c = db.GetFirstCampo();
+            Assert.IsNotNull(c);
+            db.DeleteFromTable("Campi", string.Format( @"Id = '{0}'", c.Id));
+            Campo c2 = db.GetFirstCampo();
+            Assert.IsTrue(c.Id != c2.Id);
         }
 
         [Test(), Order(6)]
         public void UpdateTest1()
         {
-            Campo c1 = new Campo("testCampoA", false, "bbbb", true);
-            c1.Id = 1;
-            c1.IdModello = 1;
-            db.Update(c1);
-            Campo c2 = db.GetCampoById(1);
+            Campo c = db.GetFirstCampo();
+            Assert.IsNotNull(c);
+            c.Posizione = 99;
+            db.Update(c);
+            Campo c2 = db.GetCampoById(c.Id);
             Assert.IsNotNull(c2);
-            Assert.IsTrue(c2.Nome.Equals("testCampoA") && c2.ValorePredefinito.Equals("bbbb"));
+            Assert.IsTrue(c2.Posizione == c.Posizione);
         }
 
         [Test(), Order(7)]
         public void UpdateTest2()
         {
-            Modello m = new Modello("testModel", false, new ObservableCollection<Campo>());
-            m.Nome = "testModelABC";
-            m.Id = 1;
+            Modello m = db.GetFirstModello();
+            Assert.IsNotNull(m);
+            m.Nome = Utility.GetRandomAlphanumericString(10);
             db.Update(m);
-            Modello m2 = db.GetModelloById(1);
+            Modello m2 = db.GetModelloById(m.Id);
             Assert.IsNotNull(m2);
-            Assert.IsTrue(m2.Nome.Equals("testModelABC"));
+            Assert.IsTrue(m2.Nome.Equals(m.Nome));
         }
 
         [Test(), Order(8)]
         public void GetBatchByIdTest()
         {
-            Batch batch = db.GetBatchById(1);
+            Batch tmp = db.GetFirstBatch();
+            Assert.IsNotNull(tmp);
+            Batch batch = db.GetBatchById(tmp.Id);
             Assert.IsNotNull(batch);
-            Assert.IsTrue(batch.Id > 0);
+            Assert.IsTrue(tmp.Id == batch.Id);
         }
 
         [Test(), Order(9)]
         public void GetCampoByIdTest()
         {
-            Campo c = db.GetCampoById(1);
+            Campo tmp = db.GetFirstCampo();
+            Assert.IsNotNull(tmp);
+            Campo c = db.GetCampoById(tmp.Id);
             Assert.IsNotNull(c);
-            Assert.IsTrue(c.Id == 1); ;
+            Assert.IsTrue(c.Id == tmp.Id); ;
         }
 
         [Test(), Order(10)]
         public void GetModelloByIdTest()
         {
-            Modello m = db.GetModelloById(1);
+            Modello tmp = db.GetFirstModello();
+            Assert.IsNotNull(tmp);
+            Modello m = db.GetModelloById(tmp.Id);
             Assert.IsNotNull(m);
-            Assert.IsTrue(m.Id == 1);
+            Assert.IsTrue(m.Id == tmp.Id);
         }
 
         [Test(), Order(11)]
@@ -146,25 +160,25 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(14)]
         public void BatchQueryTest()
         {
-            ObservableCollection<Batch> batches = db.BatchQuery("SELECT * FROM Batch WHERE Id = 1");
+            ObservableCollection<Batch> batches = db.BatchQuery("SELECT * FROM Batch WHERE Id > 1");
             Assert.IsNotNull(batches);
-            Assert.IsTrue(batches.Count == 1);
+            Assert.IsTrue(batches.Count > 0);
         }
 
         [Test(), Order(15)]
         public void CampoQueryTest()
         {
-            ObservableCollection<Campo> campi = db.CampoQuery("SELECT * FROM Campi WHERE Id = 1");
+            ObservableCollection<Campo> campi = db.CampoQuery("SELECT * FROM Campi WHERE Id > 1");
             Assert.IsNotNull(campi);
-            Assert.IsTrue(campi.Count == 1);
+            Assert.IsTrue(campi.Count > 0);
         }
 
         [Test(), Order(16)]
         public void ModelloQueryTest()
         {
-            ObservableCollection<Modello> modelli = db.ModelloQuery("SELECT * FROM Modelli WHERE Id = 1");
+            ObservableCollection<Modello> modelli = db.ModelloQuery("SELECT * FROM Modelli WHERE Id > 1");
             Assert.IsNotNull(modelli);
-            Assert.IsTrue(modelli.Count == 1);
+            Assert.IsTrue(modelli.Count > 0);
         }
 
         [Test(), Order(17)]

@@ -672,10 +672,10 @@ namespace BatchDataEntry.Helpers
             return;
         }
 
-        public Modello GetFirstElementFromTabl()
+        public Modello GetFirstModello()
         {
             if (cnn == null) throw new Exception("Connessione al database non inizializzata");
-            string sql = string.Format("SELECT TOP 1 FROM Modelli");
+            string sql = string.Format("SELECT TOP 1 * FROM Modelli");
             SqlCommand cmd = new SqlCommand(sql, cnn);
 
             try
@@ -693,10 +693,6 @@ namespace BatchDataEntry.Helpers
                     m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
                     m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
                 }
-
-
-
-
                 reader.Close();
                 return m;
             }
@@ -711,6 +707,84 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
+        public Batch GetFirstBatch()
+        {
+            if (cnn == null) return null;
+            try
+            {
+                cnn.Open();
+                string sql = string.Format("SELECT TOP 1 * FROM Batch");
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                cmd.CommandType = System.Data.CommandType.Text;
+                SqlDataReader reader = cmd.ExecuteReader();
+                Batch b = new Batch();
+                while (reader.Read())
+                {
+                    
+                    b.Id = Convert.ToInt32(reader["Id"]);
+                    b.Nome = Convert.ToString(reader["Nome"]);
+                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                }
+
+                reader.Close();
+                return b;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
+        public Campo GetFirstCampo()
+        {
+            if (cnn == null) return null;
+            try
+            {
+                cnn.Open();
+                string sql = string.Format("SELECT TOP 1 * FROM Campi");
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                Campo c = new Campo();
+                while (reader.Read())
+                {
+                    c.Id = Convert.ToInt32(reader["Id"]);
+                    c.Nome = Convert.ToString(reader["Nome"]);
+                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
+                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                }
+
+                reader.Close();
+                return c;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
         // Implementare autocomp lato server
         //ii
     }
