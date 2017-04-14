@@ -207,6 +207,26 @@ namespace BatchDataEntry.Helpers
             if (cnn == null || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(condition)) return;
             string sql = string.Format("DELETE FROM {0} WHERE {1}", tableName, condition);
             SqlCommand cmdInsert = new SqlCommand(sql, this.cnn);
+            
+            try
+            {
+                cnn.Open();
+                cmdInsert.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+        }
+
+        public void DeleteReference(string query)
+        {
+            if (cnn == null || string.IsNullOrWhiteSpace(query)) return;
+            SqlCommand cmdInsert = new SqlCommand(query, this.cnn);
 
             try
             {

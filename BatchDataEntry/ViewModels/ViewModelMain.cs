@@ -9,7 +9,7 @@ using NLog;
 
 namespace BatchDataEntry.ViewModels
 {
-    class ViewModelMain : ViewModelBase
+    public class ViewModelMain : ViewModelBase
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private Batch _intermediate;
@@ -147,13 +147,27 @@ namespace BatchDataEntry.ViewModels
             }
             catch (Exception e)
             {
-                #if DEBUG
-                Console.WriteLine(@"Exception in LoadBatches()");
-                Console.WriteLine(e.ToString());
-                #endif
+                ConsoleErrorPrint("Exception in LoadBatches()", e);
                 logger.Error("[ViewModelMain:LoadBatches]" + e.Message);
             }
             
+        }
+
+        public void LoadBatches(DatabaseHelperSqlServer db)
+        {
+            ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
+
+            try
+            {
+                batches = db.GetBatchRecords();
+                Batches = batches;
+            }
+            catch (Exception e)
+            {
+                ConsoleErrorPrint("Exception in LoadBatches()", e);
+                logger.Error("[ViewModelMain:LoadBatches]" + e.Message);
+            }
+
         }
 
         #region ButtonsCommand
@@ -193,12 +207,19 @@ namespace BatchDataEntry.ViewModels
             LoadBatches();
         }
 
-        private void DeleteBatchItem()
+        public void DeleteBatchItem()
         {
             DatabaseHelper db = new DatabaseHelper();
             db.Delete("Batch", String.Format("Id = {0}", SelectedBatch.Id));
             Batches.Remove(SelectedBatch);
             LoadBatches();
+        }
+
+        public void DeleteBatchItem(DatabaseHelperSqlServer db)
+        {
+            db.DeleteFromTable("Batch", String.Format("Id = {0}", SelectedBatch.Id));
+            Batches.Remove(SelectedBatch);
+            LoadBatches(db);
         }
 
         #endregion

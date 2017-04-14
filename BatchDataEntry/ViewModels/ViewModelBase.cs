@@ -1,12 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace BatchDataEntry.ViewModels
 {
-    internal class ViewModelBase : INotifyPropertyChanged
+    public class ViewModelBase : INotifyPropertyChanged
     {
         //Extra
         private bool? _CloseWindowFlag;
@@ -37,6 +38,12 @@ namespace BatchDataEntry.ViewModels
         {
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,
                 new Action(() => { CloseWindowFlag = CloseWindowFlag == null ? true : !CloseWindowFlag; }));
+        }
+
+        [Conditional("DEBUG")]
+        protected void ConsoleErrorPrint(string message, Exception ex)
+        {
+            Console.WriteLine(message, ex.ToString());
         }
     }
 }
