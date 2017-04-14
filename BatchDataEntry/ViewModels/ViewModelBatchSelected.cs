@@ -19,7 +19,7 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace BatchDataEntry.ViewModels
 {
-    internal class ViewModelBatchSelected : ViewModelMain
+    public class ViewModelBatchSelected : ViewModelMain
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
@@ -237,8 +237,6 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        
-
         private RelayCommand _daSelezCmd;
         public ICommand ContinuaDaSelezioneCmd
         {
@@ -354,7 +352,7 @@ namespace BatchDataEntry.ViewModels
             ValueProgressBar = e.ProgressPercentage;
         }
 
-        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        public void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             isVisible = false;
             MessageBox.Show("Conversione Tiff Terminata");
@@ -362,9 +360,21 @@ namespace BatchDataEntry.ViewModels
 
         #endregion
 
-        private void UpdateValues()
+        public void UpdateValues()
         {
             DatabaseHelper db = new DatabaseHelper();
+            Batch tmp = db.GetBatchById(CurrentBatch.Id);
+            if (tmp != null)
+            {
+                CurrentBatch.UltimoIndicizzato = tmp.UltimoIndicizzato;
+                CurrentBatch.DocCorrente = tmp.DocCorrente;
+                RaisePropertyChanged("CurrentBatch");
+            }
+
+        }
+
+        public void UpdateValues(DatabaseHelperSqlServer db)
+        {
             Batch tmp = db.GetBatchById(CurrentBatch.Id);
             if (tmp != null)
             {
@@ -410,7 +420,7 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private void EliminaSelezione()
+        public void EliminaSelezione()
         {
             if (SelectedRowIndex > 0)
             {
@@ -457,7 +467,7 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private async void CheckBatch()
+        public async void CheckBatch()
         {
             if (_currentBatch == null)
                 return;
@@ -499,7 +509,7 @@ namespace BatchDataEntry.ViewModels
             RaisePropertyChanged("DataSource");
         }
 
-        private void GeneratePdf()
+        public void GeneratePdf()
         {
             try
             {
@@ -613,7 +623,7 @@ namespace BatchDataEntry.ViewModels
             DataSource = db.GetDataTableDocumenti();
         }
         
-        private async void ConvertTiffRecord(Batch b)
+        public async void ConvertTiffRecord(Batch b)
         {
             if (b.TipoFile != TipoFileProcessato.Tiff)
                 return;
@@ -708,7 +718,7 @@ namespace BatchDataEntry.ViewModels
             });         
         }
 
-        private void ChangePhatsIntoCacheDb()
+        public void ChangePhatsIntoCacheDb()
         {
             string newPdfDirctory = "";
             DialogText dlgTxt = new DialogText();
@@ -751,7 +761,7 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private void ChangeNumerationPdf()
+        public void ChangeNumerationPdf()
         {
             DialogNumeration dlgNums = new DialogNumeration();
             if (dlgNums.ShowDialog() == true)

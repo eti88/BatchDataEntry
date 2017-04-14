@@ -5,30 +5,51 @@ using BatchDataEntry.Models;
 
 namespace BatchDataEntry.ViewModels
 {
-    class ViewModelNuovaColonna : ViewModelBase
+    public class ViewModelNuovaColonna : ViewModelBase
     {
+        private DatabaseHelperSqlServer db;
+
         public ViewModelNuovaColonna()
         {
             this.alreadyExist = false;
         }
 
-        public ViewModelNuovaColonna(Campo c, bool needUpdate)
+        public ViewModelNuovaColonna(Campo c, bool needUpdate, DatabaseHelperSqlServer dbq)
         {
+            DatabaseHelper dblite;
+            Modello mod;
             this.SelectedCampo = c;
             this.alreadyExist = needUpdate;
-
-            DatabaseHelper db = new DatabaseHelper();
-            Modello mod = db.GetModelloById(c.IdModello);
+            if (dbq != null)
+            {
+                db = dbq;
+                mod = dbq.GetModelloById(c.IdModello);
+            }
+            else
+            {
+                dblite = new DatabaseHelper();
+                mod = db.GetModelloById(c.IdModello);
+            } 
             this.NomeTabella = mod.Nome;
         }
 
-        public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount)
+        public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount, DatabaseHelperSqlServer dbq)
         {
+            DatabaseHelper dblite;
+            Modello mod;
+
             this.SelectedCampo = c;
             this.alreadyExist = needUpdate;
-
-            DatabaseHelper db = new DatabaseHelper();
-            Modello mod = db.GetModelloById(c.IdModello);
+            if(dbq != null)
+            {
+                db = dbq;
+                mod = db.GetModelloById(c.IdModello);
+            }
+            else
+            {
+                dblite = new DatabaseHelper();
+                mod = dblite.GetModelloById(c.IdModello);
+            }
             this.SelectedCampo.Posizione = colCount++;
             this.NomeTabella = mod.Nome;
         }
@@ -101,23 +122,26 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private void AddNewItem()
+        public void AddNewItem()
         {
-            DatabaseHelper db = new DatabaseHelper();
+            DatabaseHelper dbsqlite = new DatabaseHelper();
             Campo m = new Campo(SelectedCampo);
             int lastId = -1;
 
-            if (alreadyExist)
-                db.UpdateRecordCampo(m);
+            if(db == null && alreadyExist)
+                dbsqlite.UpdateRecordCampo(m);
+            else if(db == null && !alreadyExist)
+                lastId = dbsqlite.InsertRecordCampo(m);
+            else if (alreadyExist)
+                db.Update(m);
             else
-            {
-                lastId = db.InsertRecordCampo(m);
-                if(lastId == -1)
-                    return;
-                SelectedCampo.Id = lastId;
-                RaisePropertyChanged("SelectedCampo");
-            }
+                lastId = db.Insert(m);
 
+            if (lastId != -1)
+            {
+                SelectedCampo.Id = lastId;
+            }
+            RaisePropertyChanged("SelectedCampo");
             this.CloseWindow(true);
         }
 

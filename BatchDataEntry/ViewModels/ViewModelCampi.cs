@@ -11,6 +11,7 @@ namespace BatchDataEntry.ViewModels
     {
         private readonly int _idModello;
         private Campo _intermediate;
+        protected DatabaseHelperSqlServer db;
 
         private RelayCommand _addnew;
 
@@ -96,7 +97,7 @@ namespace BatchDataEntry.ViewModels
         {
             Colonne = new ObservableCollection<Campo>();
     }
-
+        //TODO: bisogna passare il DatabaseHelperSql al viewmodel in fase di istanziamento
         public ViewModelCampi(int idModello)
         {           
             GetColonneFromDb(idModello);
@@ -117,7 +118,7 @@ namespace BatchDataEntry.ViewModels
             var colonna = new NuovaColonna();
             var campo = new Campo();
             campo.IdModello = _idModello;
-            colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols);
+            colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols, db);
             var result = colonna.ShowDialog();
             if (result == true)
                 Colonne.Add(campo);
@@ -139,7 +140,7 @@ namespace BatchDataEntry.ViewModels
         private void UpdateItem()
         {
             var colonna = new NuovaColonna();
-            colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true);
+            colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true, db);
             colonna.ShowDialog();
             
             GetColonneFromDb(_idModello);
