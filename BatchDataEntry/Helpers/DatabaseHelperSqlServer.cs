@@ -17,14 +17,14 @@ namespace BatchDataEntry.Helpers
 
         public DatabaseHelperSqlServer(string user, string password, string serverUrl, string databaseName, int timeout = 30)
         {
-            cnn = new SqlConnection(string.Format("user id={0};password={1};server={2};Trusted_Connection=yes;database={3};connection timeout={4}", user, password, serverUrl, databaseName, timeout));
+            cnn = new SqlConnection(string.Format("user id={0};password={1};server={2};Trusted_Connection=yes;database={3};connection timeout={4};MultipleActiveResultSets=True", user, password, serverUrl, databaseName, timeout));
         }
 
         public int Insert(Campo c)
         {
             if (cnn == null || c == null) return -1;
-            SqlCommand cmdInsert = new SqlCommand("Campi", this.cnn);
-            cmdInsert.CommandType = System.Data.CommandType.StoredProcedure;
+            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Campi(Nome, Posizione, SalvaValori, ValorePredefinito, IndicePrimario, TipoCampo, IdModello, Riproponi,Disabilitato, IndiceSecondario) VALUES (@Nome, @Posizione, @SalvaValori, @ValorePredefinito, @IndicePrimario, @TipoCampo, @IdModello, @Riproponi, @Disabilitato, @IndiceSecondario)", this.cnn);
+            cmdInsert.CommandType = System.Data.CommandType.Text;
             int id = 0;
 
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
@@ -54,7 +54,7 @@ namespace BatchDataEntry.Helpers
                 cmdInsert.ExecuteNonQuery();
 
                 cmdInsert.Parameters.Clear();
-                cmdInsert.CommandText = "SELECT SCOPE_IDENTITY()";
+                cmdInsert.CommandText = "Select @@Identity";
                 id = Convert.ToInt32(cmdInsert.ExecuteScalar());
             }
             catch(Exception e)
@@ -71,13 +71,13 @@ namespace BatchDataEntry.Helpers
         public int Insert(Modello m)
         {
             if (cnn == null || m == null) return -1;
-            SqlCommand cmdInsert = new SqlCommand("Modelli", this.cnn);
-            cmdInsert.CommandType = System.Data.CommandType.StoredProcedure;
+            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Modelli(Nome, OrigineCsv, PathFileCsv, Separatore, FocusColumn, CsvColumn) VALUES (@Nome, @OrigineCsv, @PathFileCsv, @Separatore, @FocusColumn, @CsvColumn)", this.cnn);
+            cmdInsert.CommandType = System.Data.CommandType.Text;
             int id = 0;
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
             cmdInsert.Parameters["@Nome"].Value = m.Nome;
             cmdInsert.Parameters.Add(new SqlParameter("@OrigineCsv", System.Data.SqlDbType.Bit));
-            cmdInsert.Parameters["@OrigineCsv"].Value = m.OrigineCsv;
+            cmdInsert.Parameters["@OrigineCsv"].Value = (m.OrigineCsv) ? 1 : 0;
             cmdInsert.Parameters.Add(new SqlParameter("@PathFileCsv", System.Data.SqlDbType.VarChar));
             cmdInsert.Parameters["@PathFileCsv"].Value = m.PathFileCsv;
             cmdInsert.Parameters.Add(new SqlParameter("@Separatore", System.Data.SqlDbType.VarChar, 1));
@@ -93,7 +93,7 @@ namespace BatchDataEntry.Helpers
                 cmdInsert.ExecuteNonQuery();
 
                 cmdInsert.Parameters.Clear();
-                cmdInsert.CommandText = "SELECT SCOPE_IDENTITY()";
+                cmdInsert.CommandText = "Select @@Identity";
                 id = Convert.ToInt32(cmdInsert.ExecuteScalar());
             }
             catch (Exception e)
@@ -110,8 +110,8 @@ namespace BatchDataEntry.Helpers
         public int Insert(Batch b)
         {
             if (cnn == null || b == null) return -1;
-            SqlCommand cmdInsert = new SqlCommand("Batch", this.cnn);
-            cmdInsert.CommandType = System.Data.CommandType.StoredProcedure;
+            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Batch(Nome, TipoFile, DirectoryInput, DirectoryOutput, IdModello, DocCorrente, UltimoIndicizzato, PatternNome, UltimoDocumentoEsportato) VALUES (@Nome, @TipoFile, @DirectoryInput, @DirectoryOutput, @IdModello, @DocCorrente, @UltimoIndicizzato, @PatternNome, @UltimoDocumentoEsportato)", this.cnn);
+            cmdInsert.CommandType = System.Data.CommandType.Text;
             int id = 0;
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
             cmdInsert.Parameters["@Nome"].Value = b.Nome;
@@ -123,10 +123,6 @@ namespace BatchDataEntry.Helpers
             cmdInsert.Parameters["@DirectoryOutput"].Value = b.DirectoryOutput;
             cmdInsert.Parameters.Add(new SqlParameter("@IdModello", System.Data.SqlDbType.Int));
             cmdInsert.Parameters["@IdModello"].Value = b.IdModello;
-            cmdInsert.Parameters.Add(new SqlParameter("@NumDoc", System.Data.SqlDbType.Int));
-            cmdInsert.Parameters["@NumDoc"].Value = b.NumDoc;
-            cmdInsert.Parameters.Add(new SqlParameter("@NumPages", System.Data.SqlDbType.Int));
-            cmdInsert.Parameters["@NumPages"].Value = b.NumPages;
             cmdInsert.Parameters.Add(new SqlParameter("@DocCorrente", System.Data.SqlDbType.Int));
             cmdInsert.Parameters["@DocCorrente"].Value = b.DocCorrente;
             cmdInsert.Parameters.Add(new SqlParameter("@UltimoIndicizzato", System.Data.SqlDbType.Int));
@@ -142,7 +138,7 @@ namespace BatchDataEntry.Helpers
                 cmdInsert.ExecuteNonQuery();
 
                 cmdInsert.Parameters.Clear();
-                cmdInsert.CommandText = "SELECT SCOPE_IDENTITY()";
+                cmdInsert.CommandText = "Select @@Identity";
                 id = Convert.ToInt32(cmdInsert.ExecuteScalar());
             }
             catch (Exception e)
@@ -156,27 +152,24 @@ namespace BatchDataEntry.Helpers
             return id;
         }
 
-        public void Update(Batch b)
-        {
-            if (cnn == null || b == null) return;
-            string sqltxt = string.Format("UPDATE Batch(Nome, TipoFile, DirectoryInput, DirectoryOutput, " +
-                "IdModello, NumDoc,NumPages,DocCorrente,UltimoIndicizzato,PatternNome,UltimoDocumentoEsportato) " +
-                "VALUES (@Nome,@TipoFile,@DirectoryInput,@DirectoryOutput,@IdModello," +
-                "@NumDoc,@NumPages,@DocCorrente,@UltimoIndicizzato,@PatternNome,@UltimoDocumentoEsportato) WHERE Id='{0}'", b.Id);
-            SqlCommand cmdUpdate = new SqlCommand(sqltxt, this.cnn);
+        private void UpdateRaw(string table, Dictionary<string, string> values, string where) {
+            StringBuilder frmtVals = new StringBuilder();
+            if(values.Count >= 1)
+            {
+                foreach(KeyValuePair<string, string> val in values)
+                {
+                    if (string.IsNullOrWhiteSpace(val.Value))
+                        frmtVals.AppendFormat(" {0} = '{1}',", DatabaseHelper.convertQuotes(val.Key.ToString()), string.Empty);
+                    else
+                        frmtVals.AppendFormat(" {0} = '{1}',", DatabaseHelper.convertQuotes(val.Key.ToString()), DatabaseHelper.convertQuotes(val.Value.ToString()));
+                }
+                frmtVals.Length--; // rimuovo l'ultima virgola (in eccesso)
+            }
+            StringBuilder sqlTxt = new StringBuilder();
+            sqlTxt.AppendFormat("UPDATE {0} SET {1} WHERE {2};", table, frmtVals.ToString(), where);
 
-            cmdUpdate.Parameters.AddWithValue("@Nome", b.Nome);
-            cmdUpdate.Parameters.AddWithValue("@TipoFile", b.TipoFile);
-            cmdUpdate.Parameters.AddWithValue("@DirectoryInput", b.DirectoryInput);
-            cmdUpdate.Parameters.AddWithValue("@DirectoryOutput", b.DirectoryOutput);
-            cmdUpdate.Parameters.AddWithValue("@IdModello", b.IdModello);
-            cmdUpdate.Parameters.AddWithValue("@NumDoc", b.NumDoc);
-            cmdUpdate.Parameters.AddWithValue("@NumPages", b.NumPages);
-            cmdUpdate.Parameters.AddWithValue("@DocCorrente", b.DocCorrente);
-            cmdUpdate.Parameters.AddWithValue("@UltimoIndicizzato", b.UltimoIndicizzato);
-            cmdUpdate.Parameters.AddWithValue("@PatternNome", b.PatternNome);
-            cmdUpdate.Parameters.AddWithValue("@UltimoDocumentoEsportato", b.UltimoDocumentoEsportato);
-
+            SqlCommand cmdUpdate = new SqlCommand(sqlTxt.ToString(), this.cnn);
+            cmdUpdate.CommandType = System.Data.CommandType.Text;
             try
             {
                 cnn.Open();
@@ -190,6 +183,23 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Close();
             }
+        }
+
+        public void Update(Batch b)
+        {
+            if (cnn == null || b == null) return;
+            if (b.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Nome", b.Nome);
+            values.Add("TipoFile", string.Format("{0}", (int)b.TipoFile));
+            values.Add("DirectoryInput", b.DirectoryInput);
+            values.Add("DirectoryOutput", b.DirectoryOutput);
+            values.Add("IdModello", b.IdModello.ToString());
+            values.Add("DocCorrente", b.DocCorrente.ToString());
+            values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
+            values.Add("PatternNome", b.PatternNome);
+            values.Add("UltimoDocumentoEsportato", b.UltimoDocumentoEsportato);
+            UpdateRaw("Batch", values, string.Format("Id={0}", b.Id));
         }
 
         public void DeleteFromTable(string tableName, string condition)
@@ -216,68 +226,33 @@ namespace BatchDataEntry.Helpers
         public void Update(Campo c)
         {
             if (cnn == null || c == null) return;
-            string sqltxt = string.Format("UPDATE Campi(Nome,Posizione,SalvaValori,ValorePredefinito," +
-                "IndicePrimario,TipoCampo,IdModello,Riproponi,Disabilitato,IndiceSecondario) " +
-                "VALUES (@Nome,@Posizione,@SalvaValori,@ValorePredefinito,@IndicePrimario," +
-                "@TipoCampo,@IdModello,@Riproponi,@Disabilitato,@IndiceSecondario) WHERE Id='{0}'", c.Id);
-
-            SqlCommand cmdUpdate = new SqlCommand(sqltxt, this.cnn);
-
-            cmdUpdate.Parameters.AddWithValue("@Nome", c.Nome);
-            cmdUpdate.Parameters.AddWithValue("@Posizione", c.Posizione);
-            cmdUpdate.Parameters.AddWithValue("@SalvaValori", c.SalvaValori);
-            cmdUpdate.Parameters.AddWithValue("@ValorePredefinito", c.ValorePredefinito);
-            cmdUpdate.Parameters.AddWithValue("@IndicePrimario", c.IndicePrimario);
-            cmdUpdate.Parameters.AddWithValue("@TipoCampo", c.TipoCampo);
-            cmdUpdate.Parameters.AddWithValue("@IdModello", c.IdModello);
-            cmdUpdate.Parameters.AddWithValue("@Riproponi", c.Riproponi);
-            cmdUpdate.Parameters.AddWithValue("@Disabilitato", c.IsDisabled);
-            cmdUpdate.Parameters.AddWithValue("@IndiceSecondario", c.IndiceSecondario);
-            
-            try
-            {
-                cnn.Open();
-                cmdUpdate.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                logger.Error(e.ToString());
-            }
-            finally
-            {
-                cnn.Close();
-            }
+            if (c.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Nome", c.Nome);
+            values.Add("Posizione", c.Posizione.ToString());
+            values.Add("SalvaValori", Convert.ToInt32(c.SalvaValori).ToString());
+            values.Add("ValorePredefinito", c.ValorePredefinito);
+            values.Add("IndicePrimario", Convert.ToInt32(c.IndicePrimario).ToString());
+            values.Add("TipoCampo", c.TipoCampo.ToString());
+            values.Add("IdModello", c.IdModello.ToString());
+            values.Add("Riproponi", Convert.ToInt32(c.Riproponi).ToString());
+            values.Add("Disabilitato", Convert.ToInt32(c.IsDisabled).ToString());
+            values.Add("IndiceSecondario", Convert.ToInt32(c.IndiceSecondario).ToString());
+            UpdateRaw("Campi", values, string.Format("Id={0}", c.Id));
         }
 
         public void Update(Modello m)
         {
             if (cnn == null || m == null) return;
-            string sqltxt = string.Format("UPDATE Modelli(Nome,OrigineCsv,PathFileCsv,Separatore," +
-                "FocusColumn,CsvColumn) " +
-                "VALUES (@Nome,@OrigineCsv,@PathFileCsv,@Separatore,@FocusColumn,@CsvColumn) WHERE Id='{0}'", m.Id);
-
-            SqlCommand cmdUpdate = new SqlCommand(sqltxt, this.cnn);
-
-            cmdUpdate.Parameters.AddWithValue("@Nome", m.Nome);
-            cmdUpdate.Parameters.AddWithValue("@OrigineCsv", m.OrigineCsv);
-            cmdUpdate.Parameters.AddWithValue("@PathFileCsv", m.PathFileCsv);
-            cmdUpdate.Parameters.AddWithValue("@Separatore", m.Separatore);
-            cmdUpdate.Parameters.AddWithValue("@FocusColumn", m.StartFocusColumn);
-            cmdUpdate.Parameters.AddWithValue("@CsvColumn", m.CsvColumn);
-
-            try
-            {
-                cnn.Open();
-                cmdUpdate.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                logger.Error(e.ToString());
-            }
-            finally
-            {
-                cnn.Close();
-            }
+            if (m.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Nome", m.Nome);
+            values.Add("OrigineCsv", Convert.ToInt32(m.OrigineCsv).ToString());
+            values.Add("PathFileCsv", m.PathFileCsv);
+            values.Add("Separatore", m.Separatore);
+            values.Add("FocusColumn", m.StartFocusColumn.ToString());
+            values.Add("CsvColumn", m.CsvColumn.ToString());
+            UpdateRaw("Modelli", values, string.Format("Id={0}", m.Id));
         }
         
         public Batch GetBatchById(int id) {
@@ -285,11 +260,10 @@ namespace BatchDataEntry.Helpers
             string sql = string.Format("SELECT * FROM Batch WHERE Id = {0}", id);
 
             SqlCommand cmd = new SqlCommand(sql ,cnn);
-
+            cmd.CommandType = System.Data.CommandType.Text;
             try
             {
                 cnn.Open();
-                cmd.ExecuteReader();
                 SqlDataReader reader = cmd.ExecuteReader();
                 Batch b = new Batch();
                 while (reader.Read())
@@ -300,8 +274,6 @@ namespace BatchDataEntry.Helpers
                     b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
                     b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
                     b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
-                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
                     b.PatternNome = Convert.ToString(reader["PatternNome"]);
@@ -330,7 +302,6 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                cmd.ExecuteReader();
                 SqlDataReader reader = cmd.ExecuteReader();
                 Campo c = new Campo();
                 while (reader.Read())
@@ -370,7 +341,6 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                cmd.ExecuteReader();
                 SqlDataReader reader = cmd.ExecuteReader();
                 Modello m = new Modello();
                 while (reader.Read())
@@ -416,8 +386,6 @@ namespace BatchDataEntry.Helpers
                     b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
                     b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
                     b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
-                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
                     b.PatternNome = Convert.ToString(reader["PatternNome"]);
@@ -520,6 +488,7 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand(query, cnn);
+                cmd.CommandType = System.Data.CommandType.Text;
                 SqlDataReader reader = cmd.ExecuteReader();
                 ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
                 while (reader.Read())
@@ -531,8 +500,6 @@ namespace BatchDataEntry.Helpers
                     b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
                     b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
                     b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
-                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
                     b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
                     b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
                     b.PatternNome = Convert.ToString(reader["PatternNome"]);
@@ -560,6 +527,7 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand(query, cnn);
+                cmd.CommandType = System.Data.CommandType.Text;
                 SqlDataReader reader = cmd.ExecuteReader();
                 ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
                 while (reader.Read())
@@ -670,6 +638,7 @@ namespace BatchDataEntry.Helpers
             try {
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand(sql, cnn);
+                cmd.CommandType = System.Data.CommandType.Text;
                 result = Convert.ToInt32(cmd.ExecuteScalar());
             }
             catch (Exception e)
@@ -681,6 +650,65 @@ namespace BatchDataEntry.Helpers
                 cnn.Close();
             }
             return result;
+        }
+
+        public void DropAllRowsFromTable(string tableName)
+        {
+            if (cnn == null) return;
+            string sql = string.Format("DELETE FROM {0}", tableName);
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return;
+        }
+
+        public Modello GetFirstElementFromTabl()
+        {
+            if (cnn == null) throw new Exception("Connessione al database non inizializzata");
+            string sql = string.Format("SELECT TOP 1 FROM Modelli");
+            SqlCommand cmd = new SqlCommand(sql, cnn);
+
+            try
+            {
+                cnn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                Modello m = new Modello();
+                while (reader.Read())
+                {
+                    m.Id = Convert.ToInt32(reader["Id"]);
+                    m.Nome = Convert.ToString(reader["Nome"]);
+                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                    m.Separatore = Convert.ToString(reader["Separatore"]);
+                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                }
+
+
+
+
+                reader.Close();
+                return m;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
         }
 
         // Implementare autocomp lato server

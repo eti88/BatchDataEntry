@@ -52,7 +52,6 @@ namespace BatchDataEntry.Models.Tests
         public void RevertTest()
         {
             Modello m = new Modello(1, "unitModel", false, new ObservableCollection<Campo>(), "C:\\boh\file.csv", ";");
-            m.Id = 100;
             m.Nome = "isaodnoand";
             m.Revert();
             Assert.IsTrue(m.Id == 1 && m.Nome.Equals("unitModel"));
@@ -83,7 +82,7 @@ namespace BatchDataEntry.Models.Tests
             Modello m2 = new Modello(1, "unitModel", false, new ObservableCollection<Campo>(), "C:\\boh\file.csv", ";");
             int h1 = m.GetHashCode();
             int h2 = m2.GetHashCode();
-            Assert.Equals(h1, h2);
+            Assert.AreEqual(h1, h2);
         }
     }
 }

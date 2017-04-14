@@ -931,7 +931,7 @@ namespace BatchDataEntry.Helpers
         public Dictionary<int, string> GetDocumento(string name)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT * FROM Documenti WHERE FileName = {0}", name);
+            string sql = string.Format("SELECT * FROM Documenti WHERE FileName = '{0}'", name);
             try
             {
                 cnn.Open();

@@ -80,29 +80,32 @@ namespace BatchDataEntry.Helpers.Tests
         public void UpdateRecordBatchTest()
         {
             Batch b = new Batch("utest", TipoFileProcessato.Pdf, @"C:\\Input", @"C:\\Output");
-            b.IdModello = 1;
+            b.Id = 1;
+            b.Nome = "aaaaa";
             testDb.UpdateRecordBatch(b);
             Batch expected = testDb.GetBatchById(1);
             Assert.IsNotNull(expected);
-            Assert.IsTrue(expected.IdModello > 0);
+            Assert.IsTrue(expected.Nome.Equals("aaaaa"));
         }
 
         [Test(), Order(8)]
         public void UpdateRecordCampoTest()
         {
             Campo c = new Campo("campo1", false, "ciao", true);
-            c.IdModello = 1;
+            c.Id= 1;
+            c.Nome = "bbbb";
             c.IsDisabled = true;
             testDb.UpdateRecordCampo(c);
             Campo expected = testDb.GetCampoById(1);
             Assert.IsNotNull(expected);
-            Assert.IsTrue(expected.IdModello > 0 && expected.IsDisabled == true);
+            Assert.IsTrue(expected.Nome.Equals("bbbb") && expected.IsDisabled == true);
         }
 
         [Test(), Order(9)]
         public void UpdateRecordModelloTest()
         {
             Modello m = new Modello();
+            m.Id = 1;
             m.Nome = "utestModel";
             m.OrigineCsv = true;
             m.Separatore = ";";
@@ -135,7 +138,7 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(12)]
         public void GetDocumentoTest1()
         {
-            var expected = cacheTestDb.GetDocumento("ciao");
+            Dictionary<int, string> expected = cacheTestDb.GetDocumento(@"ciao");
             Assert.IsNotNull(expected);
             Assert.IsTrue(expected.Count > 0);
         }
@@ -169,7 +172,8 @@ namespace BatchDataEntry.Helpers.Tests
         {
             ObservableCollection<Batch> batches = testDb.GetBatchRecords();
             Assert.IsNotNull(batches);
-            Assert.IsTrue(batches.Count > 0 && batches[0].Nome.Equals("utest"));
+            List<Batch> tmp = new List<Batch>(batches);
+            Assert.IsTrue(batches.Count > 0 && tmp.Exists(b => b.Nome.Equals("utest")));
         }
 
         [Test(), Order(17)]

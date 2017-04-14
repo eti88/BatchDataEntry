@@ -14,49 +14,45 @@ namespace BatchDataEntry.Models.Tests
         [Test()]
         public void BatchTest()
         {
-            Assert.Fail();
+            Batch b = new Batch();
+            Assert.NotNull(b);
         }
 
         [Test()]
         public void BatchTest1()
         {
-            Assert.Fail();
+            Batch b = new Batch("test1", TipoFileProcessato.Pdf, @"C:\\In", @"C:\\out");
+            Assert.NotNull(b);
         }
 
         [Test()]
         public void BatchTest2()
         {
-            Assert.Fail();
+            Batch b = new Batch("test1", TipoFileProcessato.Pdf, @"C:\\In", @"C:\\out", new Modello());
+            Assert.NotNull(b);
         }
 
         [Test()]
         public void BatchTest3()
         {
-            Assert.Fail();
+            Batch b = new Batch("test1", TipoFileProcessato.Pdf, @"C:\\In", @"C:\\out", new Modello(), 1, 2, 0L, 3, 4, "aeio");
+            Assert.NotNull(b);
         }
 
         [Test()]
         public void BatchTest4()
         {
-            Assert.Fail();
+            Batch b = new Batch(1, "test1", TipoFileProcessato.Pdf, @"C:\\In", @"C:\\out", new Modello(), 1, 2, 0L, 3, 4, "aeio");
+            Assert.NotNull(b);
         }
 
         [Test()]
         public void BatchTest5()
         {
-            Assert.Fail();
+            Batch a = new Batch("test2", TipoFileProcessato.Tiff, @"C:\\Inaaa", @"C:\\outbbb", new Modello(), 1, 2, 0L, 3, 4, "aeio");
+            Batch c = new Batch(a);
+            Assert.NotNull(c);
         }
 
-        [Test()]
-        public void LoadModelTest()
-        {
-            Assert.Fail();
-        }
-
-        [Test()]
-        public void ToStringTest()
-        {
-            Assert.Fail();
-        }
     }
 }

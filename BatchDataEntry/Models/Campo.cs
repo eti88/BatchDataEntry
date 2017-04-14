@@ -162,6 +162,7 @@ namespace BatchDataEntry.Models
             this.IndiceSecondario = false;
             this.TipoCampo = 0;
             this.Riproponi = false;
+            this.MyMemento = new MementoCampo(nome, this.Posizione, sv, vp, ip, this.IndiceSecondario);
         }
 
         public Campo(string nome, bool sv, string vp, bool ip, bool rip, bool disab)
@@ -173,6 +174,7 @@ namespace BatchDataEntry.Models
             this.TipoCampo = 0;
             this.Riproponi = rip;
             this.IsDisabled = disab;
+            this.MyMemento = new MementoCampo(nome, this.Posizione, sv, vp, ip, this.IndiceSecondario);
         }
 
         public Campo(int id, string nome, bool sv, string vp, bool ip, bool rip, bool disab)
@@ -185,6 +187,7 @@ namespace BatchDataEntry.Models
             this.TipoCampo = 0;
             this.Riproponi = rip;
             this.IsDisabled = disab;
+            this.MyMemento = new MementoCampo(nome, this.Posizione, sv, vp, ip, this.IndiceSecondario);
         }
 
         public Campo(int id, string nome, int po, bool sv, string vp, bool ip, bool sc, bool disab, int fk)

@@ -131,6 +131,10 @@ namespace BatchDataEntry.Models
             this.Nome = nome;
             this.OrigineCsv = orig;
             this.Campi = campi;
+            this.PathFileCsv = string.Empty;
+            this.Separatore = string.Empty;
+            this.StartFocusColumn = 0;
+            this.CsvColumn = -1;
         }
 
         public Modello(int id, string nome, bool orig, ObservableCollection<Campo> campi)
@@ -139,6 +143,10 @@ namespace BatchDataEntry.Models
             this.Nome = nome;
             this.OrigineCsv = orig;
             this.Campi = campi;
+            this.PathFileCsv = string.Empty;
+            this.Separatore = string.Empty;
+            this.StartFocusColumn = 0;
+            this.CsvColumn = -1;
         }
 
         public Modello(int id, string nome, bool orig, ObservableCollection<Campo> campi, string path, string sep)

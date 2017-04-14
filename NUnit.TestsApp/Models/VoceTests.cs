@@ -14,43 +14,43 @@ namespace BatchDataEntry.Models.Tests
         [Test()]
         public void VoceTest()
         {
-            Assert.Fail();
+            Voce v1 = new Voce();
+            Assert.NotNull(v1);
         }
 
         [Test()]
         public void VoceTest1()
         {
-            Assert.Fail();
+            Voce v1 = new Voce(1, "key1");
+            Assert.NotNull(v1);
         }
 
         [Test()]
         public void VoceTest2()
         {
-            Assert.Fail();
+            Voce v1 = new Voce("key1", "val1");
+            Assert.NotNull(v1);
         }
 
         [Test()]
         public void VoceTest3()
         {
-            Assert.Fail();
+            Voce v1 = new Voce(1, "key1", "val1");
+            Assert.NotNull(v1);
         }
 
         [Test()]
         public void VoceTest4()
         {
-            Assert.Fail();
+            Voce v1 = new Voce(1, "key1", false, "NULL");
+            Assert.NotNull(v1);
         }
 
         [Test()]
         public void VoceTest5()
         {
-            Assert.Fail();
-        }
-
-        [Test()]
-        public void ToStringTest()
-        {
-            Assert.Fail();
+            Voce v1 = new Voce(1, "key1", "valll", false, "NULL");
+            Assert.NotNull(v1);
         }
     }
 }
