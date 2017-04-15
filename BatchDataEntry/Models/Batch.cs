@@ -286,6 +286,12 @@ namespace BatchDataEntry.Models
             }
         }
 
+        public void LoadModel(DatabaseHelperSqlServer db)
+        {
+            if (this.IdModello > 0)
+                this.Applicazione = db.GetModelloById(this.IdModello);
+        }
+
         public override string ToString()
         {
             return String.Format("[{0},{1},{2},{3},{4},{5}]", this.Id, this.Nome, this.TipoFile, this.DirectoryInput, this.DirectoryOutput, this.IdModello);

@@ -11,5 +11,20 @@
     <Setting Name="LastExportIndex" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>
+    <Setting Name="SqlUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">admin</Value>
+    </Setting>
+    <Setting Name="SqlPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">admin</Value>
+    </Setting>
+    <Setting Name="SqlServerAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost\SQLEXPRESS</Value>
+    </Setting>
+    <Setting Name="SqlDbName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">db_BatchDataEntry</Value>
+    </Setting>
+    <Setting Name="UseSQLServer" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

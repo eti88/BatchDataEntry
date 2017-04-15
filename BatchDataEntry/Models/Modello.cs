@@ -184,6 +184,15 @@ namespace BatchDataEntry.Models
             }
         }
 
+        public void LoadCampi(DatabaseHelperSqlServer db)
+        {
+            if (this.Id > 0)
+            {
+                ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", this.Id));
+                this.Campi = tmpc;
+            }
+        }
+
         public void Revert()
         {
             this.Nome = this.MyMemento.nome;

@@ -20,7 +20,7 @@ namespace NUnit.TestsApp.ViewModels
             string server = @"localhost\SQLEXPRESS";
             string dbname = @"db_BatchDataEntry_unitTest";
             db = new DatabaseHelperSqlServer(user, user, server, dbname);
-            viewModel = new ViewModelMain();
+            viewModel = new ViewModelMain(user, user, user, dbname);
             Assert.IsNotNull(viewModel);
         }
 
@@ -42,7 +42,7 @@ namespace NUnit.TestsApp.ViewModels
             Assert.IsTrue(viewModel.Batches.Count > 0);
             Batch b = db.GetFirstBatch();
             viewModel.SelectedBatch = b;
-            viewModel.DeleteBatchItem(db);
+            viewModel.DeleteBatchItem();
             List<Batch> l = new List<Batch>(viewModel.Batches);
             Assert.IsTrue(!l.Exists(x => x.Id == b.Id));
         }

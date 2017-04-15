@@ -11,8 +11,10 @@ namespace BatchDataEntry.ViewModels
 {
     public class ViewModelMain : ViewModelBase
     {
+#region Attribute
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private Batch _intermediate;
+        private DatabaseHelperSqlServer dbsql;
 
         private ObservableCollection<Batch> _Batches { get; set; }
         public ObservableCollection<Batch> Batches
@@ -128,11 +130,33 @@ namespace BatchDataEntry.ViewModels
         {
             get { return (SelectedBatch != null); }
         }
+#endregion
 
         public ViewModelMain()
         {
             this.Batches = new ObservableCollection<Batch>();
-            LoadBatches();
+            if(Properties.Settings.Default.UseSQLServer)
+                dbsql = new DatabaseHelperSqlServer(
+                    Properties.Settings.Default.SqlUser,
+                    Properties.Settings.Default.SqlPassword,
+                    Properties.Settings.Default.SqlServerAddress,
+                    Properties.Settings.Default.SqlDbName);
+            if(Properties.Settings.Default.UseSQLServer && dbsql != null)
+                LoadBatches(dbsql);
+            else
+                LoadBatches();
+        }
+
+        public ViewModelMain(string user, string password, string address, string dbname)
+        {
+            this.Batches = new ObservableCollection<Batch>();
+            Properties.Settings.Default.UseSQLServer = true;
+            if (Properties.Settings.Default.UseSQLServer)
+                dbsql = new DatabaseHelperSqlServer(user, password, address, dbname);
+            if (Properties.Settings.Default.UseSQLServer && dbsql != null)
+                LoadBatches(dbsql);
+            else
+                LoadBatches();
         }
 
         public void LoadBatches()
@@ -175,7 +199,7 @@ namespace BatchDataEntry.ViewModels
         private void NewBatchItem()
         {
             var newBatchWindow = new NuovoBatch();
-            newBatchWindow.DataContext = new ViewModelNewBatch();          
+            newBatchWindow.DataContext = new ViewModelNewBatch();
             newBatchWindow.ShowDialog();
             LoadBatches();
             RaisePropertyChanged("Batches");      
@@ -184,17 +208,22 @@ namespace BatchDataEntry.ViewModels
         private void ModifyBatchItem()
         {
             var newBatchWindow = new NuovoBatch();
-            newBatchWindow.DataContext = new ViewModelNewBatch(_intermediate);
+            if (Properties.Settings.Default.UseSQLServer && dbsql != null)
+                newBatchWindow.DataContext = new ViewModelNewBatch(_intermediate);
+            else
+                newBatchWindow.DataContext = new ViewModelNewBatch(_intermediate);
             newBatchWindow.ShowDialog();
             LoadBatches();
-            RaisePropertyChanged("Batches");
-            
+            RaisePropertyChanged("Batches");          
         }
 
         private void ResumeBatchItem()
         {
             var resumeBatchWindow = new BatchSelected();
-            resumeBatchWindow.DataContext = new ViewModelBatchSelected(_intermediate);
+            if (Properties.Settings.Default.UseSQLServer && dbsql != null)
+                resumeBatchWindow.DataContext = new ViewModelBatchSelected(_intermediate, dbsql);
+            else
+                resumeBatchWindow.DataContext = new ViewModelBatchSelected(_intermediate);
             resumeBatchWindow.Show();           
             CloseWindow();
         }
@@ -202,24 +231,29 @@ namespace BatchDataEntry.ViewModels
         private void ModelAddItem()
         {
             var models = new Applicazione();
-            models.DataContext = new ViewModelApplicazione();
+            if (Properties.Settings.Default.UseSQLServer && dbsql != null)
+                models.DataContext = new ViewModelApplicazione(dbsql);
+            else
+                models.DataContext = new ViewModelApplicazione();
             models.ShowDialog();
             LoadBatches();
         }
 
         public void DeleteBatchItem()
         {
-            DatabaseHelper db = new DatabaseHelper();
-            db.Delete("Batch", String.Format("Id = {0}", SelectedBatch.Id));
-            Batches.Remove(SelectedBatch);
-            LoadBatches();
-        }
-
-        public void DeleteBatchItem(DatabaseHelperSqlServer db)
-        {
-            db.DeleteFromTable("Batch", String.Format("Id = {0}", SelectedBatch.Id));
-            Batches.Remove(SelectedBatch);
-            LoadBatches(db);
+            if (Properties.Settings.Default.UseSQLServer && dbsql != null)
+            {
+                dbsql.DeleteFromTable("Batch", String.Format("Id = {0}", SelectedBatch.Id));
+                Batches.Remove(SelectedBatch);
+                LoadBatches(dbsql);
+            }
+            else
+            {
+                DatabaseHelper db = new DatabaseHelper();
+                db.Delete("Batch", String.Format("Id = {0}", SelectedBatch.Id));
+                Batches.Remove(SelectedBatch);
+                LoadBatches();
+            }
         }
 
         #endregion

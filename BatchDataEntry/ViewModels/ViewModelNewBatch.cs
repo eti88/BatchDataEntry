@@ -17,12 +17,14 @@ using Batch = BatchDataEntry.Models.Batch;
 
 namespace BatchDataEntry.ViewModels
 {
-    internal class ViewModelNewBatch : ViewModelBase
+    public class ViewModelNewBatch : ViewModelBase
     {
+#region Attributes
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private bool _alreadyExist;
         private bool _saved = false;
+        private DatabaseHelperSqlServer dbsql;
 
         private bool _isVisible = false;
         public bool isVisible
@@ -135,6 +137,8 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+#endregion
+
         public ViewModelNewBatch()
         {
             CurrentBatch = new Batch();
@@ -143,7 +147,6 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
-            // not required for this question, but is a helpful event to handle
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
         }
 
@@ -155,7 +158,28 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
-            // not required for this question, but is a helpful event to handle
+            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+        }
+
+        public ViewModelNewBatch(DatabaseHelperSqlServer dbs)
+        {
+            CurrentBatch = new Batch();
+            _alreadyExist = false;
+            PopulateComboboxModels(dbs);
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.ProgressChanged += ProgressChanged;
+            backgroundWorker.DoWork += DoWork;
+            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+        }
+
+        public ViewModelNewBatch(Batch batch, DatabaseHelperSqlServer dbs)
+        {
+            CurrentBatch = batch;
+            _alreadyExist = true;
+            PopulateComboboxModels(dbs);
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.ProgressChanged += ProgressChanged;
+            backgroundWorker.DoWork += DoWork;
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
         }
 
@@ -178,7 +202,7 @@ namespace BatchDataEntry.ViewModels
             MessageBox.Show("Finito");
         }
 
-        private void AddOrUpdateBatchItem()
+        public void AddOrUpdateBatchItem()
         {
             isVisible = true;
             Progress = 0;
@@ -204,36 +228,24 @@ namespace BatchDataEntry.ViewModels
             _saved = true;
         }
 
-        private void PopulateComboboxModels()
+        public void PopulateComboboxModels()
         {
-            DatabaseHelper db = new DatabaseHelper();
-            IEnumerable<Modello> tmp = db.IEnumerableModelli();      
-            Models = tmp;
+            DatabaseHelper db = new DatabaseHelper();      
+            Models = db.IEnumerableModelli();
+            RaisePropertyChanged("Models");
+        }
+
+        public void PopulateComboboxModels(DatabaseHelperSqlServer db)
+        { 
+            Models = db.IEnumerableModelli();
             RaisePropertyChanged("Models");
         }
 
         #region CacheFilesInit
 
-        public string convertQuotes(string str)
-        {
-            try
-            {
-                if (str == null)
-                    return String.Empty;
-
-                return str.Replace("'", "''");
-            }
-            catch (Exception)
-            {
-                return String.Empty;
-            }
-
-        }
-
-        public bool fillCacheDb(DatabaseHelper db, Batch b)
+        public bool fillCacheDb(DatabaseHelper db, DatabaseHelperSqlServer dbs, Batch b)
         {
             List<string> files = new List<string>();
-
             // Genera il file di cache partendo dal file csv invece che dalla lista all'interno della cartella.
             if (IndexType.Contains("Automatica"))
             {
@@ -241,15 +253,11 @@ namespace BatchDataEntry.ViewModels
                 Console.WriteLine(@"### USO GENERAZIONE Automatica ###");
                 #endif
 
-                if(CurrentBatch.Applicazione.Id == 0)
-                    CurrentBatch.LoadModel();
-
-                if (!CurrentBatch.Applicazione.OrigineCsv)
-                    return false;
-
-                if(CurrentBatch.Applicazione.Campi.Count == 0)
-                    CurrentBatch.Applicazione.LoadCampi();
-
+                if(CurrentBatch.Applicazione.Id == 0 && dbs == null) CurrentBatch.LoadModel();
+                else if(CurrentBatch.Applicazione.Id == 0) CurrentBatch.LoadModel(dbs);
+                if (!CurrentBatch.Applicazione.OrigineCsv) return false;
+                if(CurrentBatch.Applicazione.Campi.Count == 0 && dbs == null) CurrentBatch.Applicazione.LoadCampi();
+                else if (CurrentBatch.Applicazione.Campi.Count == 0) CurrentBatch.Applicazione.LoadCampi(dbs);
                 int indexColumn = 0;
 
                 for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)
@@ -303,6 +311,7 @@ namespace BatchDataEntry.ViewModels
                     {
                         logger.Error("### Init basato su file Csv esterno ### break at line: " + (i+1));
                         logger.Error(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message));
+                        ConsoleErrorPrint(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message), er);
                         throw;
                     }
                     documents.Add(doc);
@@ -385,11 +394,11 @@ namespace BatchDataEntry.ViewModels
         {
             try
             {
-                if (batch.Applicazione == null || batch.Applicazione.Id == 0)
-                    batch.LoadModel();
+                if (dbsql == null && batch.Applicazione == null || batch.Applicazione.Id == 0) batch.LoadModel();
+                else if(dbsql != null && batch.Applicazione == null || batch.Applicazione.Id == 0) batch.LoadModel(dbsql);
 
-                if (batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0)
-                    batch.Applicazione.LoadCampi();
+                if (dbsql == null && batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0) batch.Applicazione.LoadCampi();
+                else if (dbsql != null && batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0) batch.Applicazione.LoadCampi(dbsql);
 
                 List<string> campi = new List<string>();
                 for (int i = 0; i < batch.Applicazione.Campi.Count; i++)
@@ -402,7 +411,7 @@ namespace BatchDataEntry.ViewModels
                     bool res = false;
 
                     dbc.CreateCacheDb(campi);
-                    res = fillCacheDb(dbc, batch);
+                    res = fillCacheDb(dbc, dbsql, batch);
                     if (!res)
                     {
                         Task.Factory.StartNew(() =>
@@ -431,7 +440,7 @@ namespace BatchDataEntry.ViewModels
                 }else if (File.Exists(pathCacheDb))
                 {
                     // Appende al db cache i nuovi pdf
-                    fillCacheDb(dbc, batch);
+                    fillCacheDb(dbc, dbsql, batch);
                 }
 
                 if (CheckOutputDirFiles(batch.DirectoryOutput))
@@ -447,19 +456,19 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        protected void CreateMissingFiles(bool res, Batch m)
+        public void CreateMissingFiles(bool res, Batch m)
         {
             if (res)
                 CreateDbCsv(m.DirectoryOutput);
         }
 
-        protected bool CheckOutputDirFiles(string output_path)
+        public bool CheckOutputDirFiles(string output_path)
         {
             bool res = !File.Exists(Path.Combine(output_path, ConfigurationManager.AppSettings["csv_file_name"]));
             return res;
         }
 
-        protected void CreateDbCsv(string output_dir)
+        public void CreateDbCsv(string output_dir)
         {
             File.Create(Path.Combine(output_dir, ConfigurationManager.AppSettings["csv_file_name"]));
         }
