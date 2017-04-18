@@ -132,6 +132,7 @@ namespace BatchDataEntry.ViewModels.Tests
         {
             DatabaseHelper dbtest = new DatabaseHelper(_DBNAME_, UnitTestPath2);
             vm2.CurrentBatch.Applicazione.PathFileCsv = Path.Combine(UnitTestPath, @"\origin\inc.csv");
+            vm2.CurrentBatch.DirectoryInput = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\origin\incrementalPdf";
             vm2.IndexType = "Manuale";
             int records = dbtest.Count("SELECT Count(Id) FROM Documenti");
             Assert.IsTrue(records > 0);

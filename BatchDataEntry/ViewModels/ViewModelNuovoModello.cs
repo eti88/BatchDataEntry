@@ -5,19 +5,11 @@ using BatchDataEntry.Models;
 
 namespace BatchDataEntry.ViewModels
 {
-    class ViewModelNuovoModello :ViewModelBase
+    public class ViewModelNuovoModello :ViewModelBase
     {
-        public ViewModelNuovoModello()
-        {
-            this.alreadyExist = false;
-        }
+        #region Attr
 
-        public ViewModelNuovoModello(Models.Modello modello, bool needUpdate)
-        {
-            this.SelectedModel = modello;
-            this.alreadyExist = needUpdate;
-        }
-
+        private DatabaseHelperSqlServer dbsql;
         private bool alreadyExist = false;
 
         private Modello _selectedModel;
@@ -57,7 +49,6 @@ namespace BatchDataEntry.ViewModels
         }
 
         private bool CanUse => this.alreadyExist;
-
         private bool CanSave
         {
             get
@@ -69,17 +60,59 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private void AddNewItem()
+        #endregion
+
+        #region Constructors
+
+        public ViewModelNuovoModello()
         {
-            DatabaseHelper db = new DatabaseHelper();
+            this.alreadyExist = false;
+        }
+
+        public ViewModelNuovoModello(DatabaseHelperSqlServer dbs)
+        {
+            this.alreadyExist = false;
+            dbsql = dbs;
+        }
+
+        public ViewModelNuovoModello(Modello modello, bool needUpdate)
+        {
+            this.SelectedModel = modello;
+            this.alreadyExist = needUpdate;
+        }
+
+        public ViewModelNuovoModello(DatabaseHelperSqlServer dbs ,Modello modello, bool needUpdate)
+        {
+            this.SelectedModel = modello;
+            this.alreadyExist = needUpdate;
+            dbsql = dbs;
+        }
+
+        #endregion
+
+        public void AddNewItem()
+        {
+            DatabaseHelper db = null;
+            if(dbsql == null) 
+                db = new DatabaseHelper();
+
             Modello m = new Modello(SelectedModel);
             int lastId = -1;
 
             if (alreadyExist)
-                db.UpdateRecordModello(m);
+            {
+                if (dbsql == null)
+                    db.UpdateRecordModello(m);
+                else
+                    dbsql.Update(m);
+            }               
             else
             {
-                lastId = db.InsertRecordModello(m);
+                if (dbsql == null)
+                    lastId = db.InsertRecordModello(m);
+                else
+                    lastId = dbsql.Insert(m);
+
                 if(lastId == -1)
                     return;
                 SelectedModel.Id = lastId;
