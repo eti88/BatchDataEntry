@@ -8,65 +8,68 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NUnit.TestsApp.ViewModels
+namespace BatchDataEntry.ViewModels.Tests
 {
     [TestFixture()]
     public class ViewModelNuovaColonnaTests
     {
-        protected ViewModelNuovaColonna vm;
-        protected ViewModelNuovaColonna vm2;
-        protected DatabaseHelperSqlServer dbc;
+        public DatabaseHelperSqlServer dbsql;
+        public ViewModelNuovaColonna vm;
+        public ViewModelNuovaColonna vm2;
 
-        [Test()]
-        public void ViewModelNuovaColonnaTest()
-        {
-            ViewModelNuovaColonna tmp = new ViewModelNuovaColonna();
-            Assert.IsNotNull(tmp);
-        }
-
-        [Test()]
         [SetUp]
-        public void ViewModelNuovaColonnaTest1()
+        public void init()
         {
             string user = @"unitTest";
             string server = @"localhost\SQLEXPRESS";
             string dbname = @"db_BatchDataEntry_unitTest";
-            dbc = new DatabaseHelperSqlServer(user, user, server, dbname);
-            Campo c1 = new Campo("campoProva123", false, string.Empty, false);
-            c1.IdModello = dbc.GetFirstModello().Id;
-            vm = new ViewModelNuovaColonna(c1, false, dbc);
-            Assert.IsNotNull(vm);
-            Assert.IsNotNull(vm.SelectedCampo);
+            dbsql = new DatabaseHelperSqlServer(user, user, server, dbname);
         }
 
-        [Test()]
+        [Test(), Order(1)]
+        public void ViewModelNuovaColonnaTest()
+        {
+            Assert.IsNotNull(dbsql);
+            ViewModelNuovaColonna v = new ViewModelNuovaColonna();
+            Assert.IsNotNull(v);
+        }
+
+        [Test(), Order(2)]
+        public void ViewModelNuovaColonnaTest1()
+        {
+            Assert.IsNotNull(dbsql);
+            ViewModelNuovaColonna vm = new ViewModelNuovaColonna(dbsql);
+            Assert.IsNotNull(vm);
+        }
+
+        [Test(), Order(3)]
         public void ViewModelNuovaColonnaTest2()
         {
-            Campo c1 = new Campo("campoProva123456789", false, string.Empty, false);
-            c1.IdModello = dbc.GetFirstModello().Id;
-            vm2 = new ViewModelNuovaColonna(c1, false, 3, dbc);
+            Assert.IsNotNull(dbsql);
+            Campo c = new Campo("campo1234", false, string.Empty, true);
+            ViewModelNuovaColonna vm2 = new ViewModelNuovaColonna(c, false, dbsql);
             Assert.IsNotNull(vm2);
             Assert.IsNotNull(vm2.SelectedCampo);
-            Assert.IsTrue(vm2.SelectedCampo.Posizione == 3);
         }
 
-        [Test()]
+        [Test(), Order(4)]
         public void AddNewItemTest()
         {
-            Assert.IsNotNull(vm.SelectedCampo);
-            vm.SelectedCampo.Nome = BatchDataEntry.Business.Utility.GetRandomAlphanumericString(19);
+            Assert.IsNotNull(dbsql);
+            Assert.IsNotNull(vm2);
+            Campo c = new Campo("campo1234fdkshfd", false, string.Empty, true);
+            vm2.SelectedCampo = c;
             try
             {
-                vm.AddNewItem();
+                vm2.AddNewItem();
             }
             catch (NullReferenceException)
             {
-                // l'eccezione è riferita alla funzione CloseWindow che non essendoci
-                // nessun riferimento all'interfaccia generea l'exception
+
             }
-            
-            Campo c = dbc.GetCampoById(vm.SelectedCampo.Id);
-            Assert.IsTrue(c.Nome.Equals(vm.SelectedCampo.Nome));
+            Campo resp = dbsql.CampoQuery(string.Format("SELECT * FROM Campi WHRE Nome = {0}", c.Nome)).FirstOrDefault();
+            Assert.IsNotNull(resp);
+            Assert.IsTrue(resp.Nome.Equals(c.Nome));
         }
     }
 }

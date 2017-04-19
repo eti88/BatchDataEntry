@@ -23,6 +23,7 @@ namespace BatchDataEntry.ViewModels
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
+        private DatabaseHelperSqlServer dbsql;
 
         #region Members
 
@@ -352,7 +353,7 @@ namespace BatchDataEntry.ViewModels
             ValueProgressBar = e.ProgressPercentage;
         }
 
-        public void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             isVisible = false;
             MessageBox.Show("Conversione Tiff Terminata");
@@ -362,27 +363,25 @@ namespace BatchDataEntry.ViewModels
 
         public void UpdateValues()
         {
-            DatabaseHelper db = new DatabaseHelper();
-            Batch tmp = db.GetBatchById(CurrentBatch.Id);
+            DatabaseHelper db;
+            Batch tmp;
+
+            if (dbsql == null)
+            {
+                db = new DatabaseHelper();
+                tmp = db.GetBatchById(CurrentBatch.Id);
+            }
+            else
+            {
+                tmp = dbsql.GetBatchById(CurrentBatch.Id);
+            }
+                
             if (tmp != null)
             {
                 CurrentBatch.UltimoIndicizzato = tmp.UltimoIndicizzato;
                 CurrentBatch.DocCorrente = tmp.DocCorrente;
                 RaisePropertyChanged("CurrentBatch");
             }
-
-        }
-
-        public void UpdateValues(DatabaseHelperSqlServer db)
-        {
-            Batch tmp = db.GetBatchById(CurrentBatch.Id);
-            if (tmp != null)
-            {
-                CurrentBatch.UltimoIndicizzato = tmp.UltimoIndicizzato;
-                CurrentBatch.DocCorrente = tmp.DocCorrente;
-                RaisePropertyChanged("CurrentBatch");
-            }
-
         }
 
         private void ContinuaDaSelezione()
@@ -391,7 +390,10 @@ namespace BatchDataEntry.ViewModels
             {
                 var continua = new Documento();
                 var indexFile = (SelectedRowIndex > 0) ? SelectedRowIndex - 1 : SelectedRowIndex;
-                continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile);
+                if(dbsql == null)
+                    continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile, null);
+                else
+                    continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile, dbsql);
                 continua.ShowDialog();
                 LoadGrid();
                 RaisePropertyChanged("DataSource");
@@ -404,7 +406,10 @@ namespace BatchDataEntry.ViewModels
             if (_currentBatch != null)
             {
                 var inserimento = new Documento();
-                inserimento.DataContext = new ViewModelDocumento(_currentBatch);
+                if(dbsql == null)
+                    inserimento.DataContext = new ViewModelDocumento(_currentBatch, null);
+                else
+                    inserimento.DataContext = new ViewModelDocumento(_currentBatch, dbsql);
                 try
                 {
                     inserimento.ShowDialog();
@@ -427,10 +432,20 @@ namespace BatchDataEntry.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     if (_currentBatch.Applicazione == null || _currentBatch.Applicazione.Id == 0)
-                        _currentBatch.LoadModel();
+                    {
+                        if (dbsql == null)
+                            _currentBatch.LoadModel();
+                        else
+                            _currentBatch.LoadModel(dbsql);
+                    }   
                     if (_currentBatch.Applicazione.Campi == null || _currentBatch.Applicazione.Campi.Count == 0)
-                        _currentBatch.Applicazione.LoadCampi();
-
+                    {
+                        if (dbsql == null)
+                            _currentBatch.Applicazione.LoadCampi();
+                        else
+                            _currentBatch.Applicazione.LoadCampi(dbsql);
+                    }
+                    // Recupera il database di cache (differente da quello relativo ai batch e modelli    
                     var db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
                         _currentBatch.DirectoryOutput);
 
@@ -561,17 +576,18 @@ namespace BatchDataEntry.ViewModels
             }          
         }
 
-        public ViewModelBatchSelected(Batch batch, DatabaseHelperSqlServer dbsql)
+        public ViewModelBatchSelected(Batch batch, DatabaseHelperSqlServer dbp)
         {
             try
             {
+                dbsql = dbp;
                 CurrentBatch = batch;
-                CurrentBatch.LoadModel();
+                CurrentBatch.LoadModel(dbsql);
                 var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
                 Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
                 LoadGrid();
                 NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
-                CurrentBatch.Applicazione.LoadCampi();
+                CurrentBatch.Applicazione.LoadCampi(dbsql);
                 backgroundWorker.WorkerReportsProgress = true;
                 backgroundWorker.ProgressChanged += ProgressChanged;
                 backgroundWorker.DoWork += DoWork;
@@ -657,9 +673,19 @@ namespace BatchDataEntry.ViewModels
                 return;
 
             if (b.Applicazione == null || b.Applicazione.Id == 0)
-                b.LoadModel();
+            {
+                if(dbsql == null)
+                    b.LoadModel();
+                else
+                    b.LoadModel(dbsql);
+            }         
             if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
-                b.Applicazione.LoadCampi();
+            {
+                if (dbsql == null)
+                    b.Applicazione.LoadCampi();
+                else
+                    b.Applicazione.LoadCampi(dbsql);
+            }
 
             var db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], b.DirectoryOutput);
             var docs = db.GetDocuments();

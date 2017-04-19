@@ -12,7 +12,7 @@ using NLog;
 
 namespace BatchDataEntry.ViewModels
 {
-    internal class ViewModelExport : ViewModelMain
+    public class ViewModelExport : ViewModelMain
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -49,6 +49,7 @@ namespace BatchDataEntry.ViewModels
         public ViewModelExport()
         {
             ColumnList = new ObservableCollection<ExportColumn>();
+            _dtSource = new DataTable();
             LastExportedIndex = -1;
         }
 

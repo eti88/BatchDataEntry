@@ -133,7 +133,7 @@ namespace BatchDataEntry.ViewModels
             var campo = new Campo();
             campo.IdModello = _idModello;
             if(dbsql == null)
-                colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols);
+                colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols, null);
             else
                 colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols, dbsql);
             var result = colonna.ShowDialog();
@@ -165,7 +165,7 @@ namespace BatchDataEntry.ViewModels
         {
             var colonna = new NuovaColonna();
             if(dbsql == null)
-                colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true);
+                colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true, null);
             else
                 colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true, dbsql);
             colonna.ShowDialog();           

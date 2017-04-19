@@ -7,9 +7,14 @@ namespace BatchDataEntry.ViewModels
 {
     public class ViewModelNuovaColonna : ViewModelBase
     {
-        private DatabaseHelperSqlServer db;
+        private DatabaseHelperSqlServer dbsql;
 
         public ViewModelNuovaColonna()
+        {
+            this.alreadyExist = false;
+        }
+
+        public ViewModelNuovaColonna(DatabaseHelperSqlServer db)
         {
             this.alreadyExist = false;
         }
@@ -22,13 +27,13 @@ namespace BatchDataEntry.ViewModels
             this.alreadyExist = needUpdate;
             if (dbq != null)
             {
-                db = dbq;
-                mod = dbq.GetModelloById(c.IdModello);
+                dbsql = dbq;
+                mod = dbsql.GetModelloById(c.IdModello);
             }
             else
             {
                 dblite = new DatabaseHelper();
-                mod = db.GetModelloById(c.IdModello);
+                mod = dblite.GetModelloById(c.IdModello);
             } 
             this.NomeTabella = mod.Nome;
         }
@@ -42,8 +47,8 @@ namespace BatchDataEntry.ViewModels
             this.alreadyExist = needUpdate;
             if(dbq != null)
             {
-                db = dbq;
-                mod = db.GetModelloById(c.IdModello);
+                dbsql = dbq;
+                mod = dbsql.GetModelloById(c.IdModello);
             }
             else
             {
@@ -128,14 +133,14 @@ namespace BatchDataEntry.ViewModels
             Campo m = new Campo(SelectedCampo);
             int lastId = -1;
 
-            if(db == null && alreadyExist)
+            if(dbsql == null && alreadyExist)
                 dbsqlite.UpdateRecordCampo(m);
-            else if(db == null && !alreadyExist)
+            else if(dbsql == null && !alreadyExist)
                 lastId = dbsqlite.InsertRecordCampo(m);
             else if (alreadyExist)
-                db.Update(m);
+                dbsql.Update(m);
             else
-                lastId = db.Insert(m);
+                lastId = dbsql.Insert(m);
 
             if (lastId != -1)
             {

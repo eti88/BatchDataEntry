@@ -15,10 +15,11 @@ using NLog;
 
 namespace BatchDataEntry.ViewModels
 {
-    internal class ViewModelDocumento : ViewModelBase
+    public class ViewModelDocumento : ViewModelBase
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private static DatabaseHelper _db;
+        private DatabaseHelperSqlServer dbsql;
         private static Batch _batch;
         private NavigationList<Dictionary<int, string>> _dc;
         private  Document _doc;
@@ -36,7 +37,6 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("DocFile");
             }
         }
-
         public NavigationList<Dictionary<int, string>> DocFiles
         {
             get { return _dc; }
@@ -47,7 +47,6 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("DocFiles");
             }
         }
-
         public Batch Batch
         {
             get { return _batch; }
@@ -58,7 +57,6 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("Batch");
             }
         }
-
         public MoonPdfPanel PdfWrapper
         {
             get { return _PdfWrapper; }
@@ -69,14 +67,11 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("PdfWrapper");
             }
         }
-
         private bool CanMoveNext
         {
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasNext; }
         }
-
         private bool CanFocused {  get { return _selectElementFocus >= 0; } }
-
         private bool CanMovePrevious
         {
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasPrevious; }
@@ -92,15 +87,27 @@ namespace BatchDataEntry.ViewModels
             repeatValues = new string[10];
         }
 
-        public ViewModelDocumento(Batch _currentBatch, int indexRowVal)
+        public ViewModelDocumento(Batch _currentBatch, int indexRowVal, DatabaseHelperSqlServer dbc)
         {
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
             if (Batch.Applicazione == null || Batch.Applicazione.Id == 0)
-                Batch.LoadModel();
+            {
+                if(dbc == null)
+                    Batch.LoadModel();
+                else
+                    Batch.LoadModel(dbc);
+            }
+                
             if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0)
-                Batch.Applicazione.LoadCampi();
+            {
+                if(dbc == null)
+                    Batch.Applicazione.LoadCampi();
+                else
+                    Batch.Applicazione.LoadCampi(dbc);
+            }
+                
             PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
             if (DocFiles.CurrentIndex > DocFiles.Count)
@@ -122,15 +129,26 @@ namespace BatchDataEntry.ViewModels
             Properties.Settings.Default.Save();
         }
 
-        public ViewModelDocumento(Batch _currentBatch)
+        public ViewModelDocumento(Batch _currentBatch, DatabaseHelperSqlServer dbc)
         {
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
             if (Batch.Applicazione == null || Batch.Applicazione.Id == 0)
-                Batch.LoadModel();
+            {
+                if (dbc == null)
+                    Batch.LoadModel();
+                else
+                    Batch.LoadModel(dbc);
+            }
+
             if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0)
-                Batch.Applicazione.LoadCampi();
+            {
+                if (dbc == null)
+                    Batch.Applicazione.LoadCampi();
+                else
+                    Batch.Applicazione.LoadCampi(dbc);
+            }
             PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
             
@@ -187,9 +205,15 @@ namespace BatchDataEntry.ViewModels
                 if (Batch.Applicazione.Campi[z].Riproponi)
                     repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Value);
             }
-            DatabaseHelper maindb = new DatabaseHelper();
             Batch.UltimoIndicizzato = DocFiles.CurrentIndex + 1;
-            maindb.UpdateRecordBatch(Batch);
+
+            if(dbsql == null)
+            {
+                DatabaseHelper maindb = new DatabaseHelper();
+                maindb.UpdateRecordBatch(Batch);
+            }
+            else
+                dbsql.Update(Batch);
 
             // controllare se bisogna salvare il valore inserito per l'autocomletamento
             foreach (var col in DocFile.Voci)
@@ -268,9 +292,14 @@ namespace BatchDataEntry.ViewModels
             #if DEBUG
             Console.WriteLine("Documento corrente: " + Batch.DocCorrente);
             #endif
-
-            DatabaseHelper maindb = new DatabaseHelper();
-            maindb.UpdateRecordBatch(Batch);
+            if(dbsql == null)
+            {
+                DatabaseHelper maindb = new DatabaseHelper();
+                maindb.UpdateRecordBatch(Batch);
+            }
+            else
+                dbsql.Update(Batch);
+            
             CloseWindow(true);
         }
 
