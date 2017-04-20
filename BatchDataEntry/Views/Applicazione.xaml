@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
+        xmlns:vm="clr-namespace:BatchDataEntry.ViewModels"
         mc:Ignorable="d"
         Title="Modelli"
         Height="550"
@@ -13,7 +13,7 @@
         MaxWidth="700"
         MaxHeight="550" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.DataContext>
-        <viewModels:ViewModelApplicazione></viewModels:ViewModelApplicazione>
+        <vm:ViewModelApplicazione></vm:ViewModelApplicazione>
     </Window.DataContext>
     <Grid>
         <DockPanel LastChildFill="True">

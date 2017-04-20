@@ -24,10 +24,10 @@ namespace BatchDataEntry.ViewModels
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private bool _alreadyExist;
         private bool _saved = false;
-        private DatabaseHelperSqlServer dbsql;
+        private DatabaseHelperSqlServer dbsql = null;
 
         private bool _isVisible = false;
-        public bool isVisible
+        public bool IsVisible
         {
             get { return _isVisible; }
             set
@@ -198,13 +198,13 @@ namespace BatchDataEntry.ViewModels
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            isVisible = false;
+            IsVisible = false;
             MessageBox.Show("Finito");
         }
 
         public void AddOrUpdateBatchItem()
         {
-            isVisible = true;
+            IsVisible = true;
             Progress = 0;
             MaxValue = 100;
 
@@ -243,7 +243,7 @@ namespace BatchDataEntry.ViewModels
 
         #region CacheFilesInit
 
-        public bool fillCacheDb(DatabaseHelper db, DatabaseHelperSqlServer dbs, Batch b)
+        public bool FillCacheDb(DatabaseHelper db, DatabaseHelperSqlServer dbs, Batch b)
         {
             List<string> files = new List<string>();
             // Genera il file di cache partendo dal file csv invece che dalla lista all'interno della cartella.
@@ -274,9 +274,10 @@ namespace BatchDataEntry.ViewModels
                 List<Document> documents = new List<Document>();
                 for (int i = 0; i < lines.Count; i++)
                 {
-                    Document doc = new Document();
-                    doc.Id = i + 1;
-
+                    Document doc = new Document()
+                    {
+                        Id = i + 1
+                    };
                     try
                     {
                         string[] cells = lines[i].Split(b.Applicazione.Separatore[0]);
@@ -358,13 +359,14 @@ namespace BatchDataEntry.ViewModels
                 {
                     string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(files[i]));
                     if (db.Count(queryCheck) > 0) continue;
-                    
-                    Document doc = new Document();
-                    doc.Id = lastId + 1;
-                    doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
-                    doc.Path = files[i];
-                    doc.IsIndexed = false;
-                
+
+                    Document doc = new Document()
+                    {
+                        Id = lastId + 1,
+                        FileName = Path.GetFileNameWithoutExtension(files[i]),
+                        Path = files[i],
+                        IsIndexed = false
+                    };
                     if (!b.Applicazione.OrigineCsv)
                     {                     
                         for (int z = 0; z < b.Applicazione.Campi.Count; z++)
@@ -411,7 +413,7 @@ namespace BatchDataEntry.ViewModels
                     bool res = false;
 
                     dbc.CreateCacheDb(campi);
-                    res = fillCacheDb(dbc, dbsql, batch);
+                    res = FillCacheDb(dbc, dbsql, batch);
                     if (!res)
                     {
                         Task.Factory.StartNew(() =>
@@ -440,7 +442,7 @@ namespace BatchDataEntry.ViewModels
                 }else if (File.Exists(pathCacheDb))
                 {
                     // Appende al db cache i nuovi pdf
-                    fillCacheDb(dbc, dbsql, batch);
+                    FillCacheDb(dbc, dbsql, batch);
                 }
 
                 if (CheckOutputDirFiles(batch.DirectoryOutput))
@@ -470,7 +472,10 @@ namespace BatchDataEntry.ViewModels
 
         public void CreateDbCsv(string output_dir)
         {
-            File.Create(Path.Combine(output_dir, ConfigurationManager.AppSettings["csv_file_name"]));
+            if (ConfigurationManager.AppSettings["csv_file_name"] == null)
+                File.Create(Path.Combine(output_dir, @"db.csv"));
+            else
+                File.Create(Path.Combine(output_dir, ConfigurationManager.AppSettings["csv_file_name"]));
         }
 
         #endregion

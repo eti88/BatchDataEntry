@@ -712,6 +712,10 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        /*
+         * Questa funzione converte i tiff (ogni tiff corrisponde a una pagina) all'interno della cartella
+         * e li unisce in un nuico pdf
+         */
         public void ConvertTiffToPdf(string source_dir, string path_output_file)
         {
             List<string> files = Directory.GetFiles(source_dir, "*.*").Where(s => s.ToLower().EndsWith(".tif") || s.ToLower().EndsWith(".tiff")).ToList();

@@ -20,11 +20,29 @@ namespace BatchDataEntry.Helpers
             cnn = new SqlConnection(string.Format("user id={0};password={1};server={2};Trusted_Connection=yes;database={3};connection timeout={4};MultipleActiveResultSets=True", user, password, serverUrl, databaseName, timeout));
         }
 
+        public static bool IsServerConnected(string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    return true;
+                }
+                catch (SqlException)
+                {
+                    return false;
+                }
+            }
+        }
+
         public int Insert(Campo c)
         {
             if (cnn == null || c == null) return -1;
-            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Campi(Nome, Posizione, SalvaValori, ValorePredefinito, IndicePrimario, TipoCampo, IdModello, Riproponi,Disabilitato, IndiceSecondario) VALUES (@Nome, @Posizione, @SalvaValori, @ValorePredefinito, @IndicePrimario, @TipoCampo, @IdModello, @Riproponi, @Disabilitato, @IndiceSecondario)", this.cnn);
-            cmdInsert.CommandType = System.Data.CommandType.Text;
+            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Campi(Nome, Posizione, SalvaValori, ValorePredefinito, IndicePrimario, TipoCampo, IdModello, Riproponi,Disabilitato, IndiceSecondario) VALUES (@Nome, @Posizione, @SalvaValori, @ValorePredefinito, @IndicePrimario, @TipoCampo, @IdModello, @Riproponi, @Disabilitato, @IndiceSecondario)", this.cnn)
+            {
+                CommandType = System.Data.CommandType.Text
+            };
             int id = 0;
 
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
@@ -71,8 +89,10 @@ namespace BatchDataEntry.Helpers
         public int Insert(Modello m)
         {
             if (cnn == null || m == null) return -1;
-            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Modelli(Nome, OrigineCsv, PathFileCsv, Separatore, FocusColumn, CsvColumn) VALUES (@Nome, @OrigineCsv, @PathFileCsv, @Separatore, @FocusColumn, @CsvColumn)", this.cnn);
-            cmdInsert.CommandType = System.Data.CommandType.Text;
+            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Modelli(Nome, OrigineCsv, PathFileCsv, Separatore, FocusColumn, CsvColumn) VALUES (@Nome, @OrigineCsv, @PathFileCsv, @Separatore, @FocusColumn, @CsvColumn)", this.cnn)
+            {
+                CommandType = System.Data.CommandType.Text
+            };
             int id = 0;
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
             cmdInsert.Parameters["@Nome"].Value = m.Nome;
@@ -110,8 +130,10 @@ namespace BatchDataEntry.Helpers
         public int Insert(Batch b)
         {
             if (cnn == null || b == null) return -1;
-            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Batch(Nome, TipoFile, DirectoryInput, DirectoryOutput, IdModello, DocCorrente, UltimoIndicizzato, PatternNome, UltimoDocumentoEsportato) VALUES (@Nome, @TipoFile, @DirectoryInput, @DirectoryOutput, @IdModello, @DocCorrente, @UltimoIndicizzato, @PatternNome, @UltimoDocumentoEsportato)", this.cnn);
-            cmdInsert.CommandType = System.Data.CommandType.Text;
+            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Batch(Nome, TipoFile, DirectoryInput, DirectoryOutput, IdModello, DocCorrente, UltimoIndicizzato, PatternNome, UltimoDocumentoEsportato) VALUES (@Nome, @TipoFile, @DirectoryInput, @DirectoryOutput, @IdModello, @DocCorrente, @UltimoIndicizzato, @PatternNome, @UltimoDocumentoEsportato)", this.cnn)
+            {
+                CommandType = System.Data.CommandType.Text
+            };
             int id = 0;
             cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
             cmdInsert.Parameters["@Nome"].Value = b.Nome;
@@ -168,8 +190,10 @@ namespace BatchDataEntry.Helpers
             StringBuilder sqlTxt = new StringBuilder();
             sqlTxt.AppendFormat("UPDATE {0} SET {1} WHERE {2};", table, frmtVals.ToString(), where);
 
-            SqlCommand cmdUpdate = new SqlCommand(sqlTxt.ToString(), this.cnn);
-            cmdUpdate.CommandType = System.Data.CommandType.Text;
+            SqlCommand cmdUpdate = new SqlCommand(sqlTxt.ToString(), this.cnn)
+            {
+                CommandType = System.Data.CommandType.Text
+            };
             try
             {
                 cnn.Open();
@@ -189,16 +213,18 @@ namespace BatchDataEntry.Helpers
         {
             if (cnn == null || b == null) return;
             if (b.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
-            Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Nome", b.Nome);
-            values.Add("TipoFile", string.Format("{0}", (int)b.TipoFile));
-            values.Add("DirectoryInput", b.DirectoryInput);
-            values.Add("DirectoryOutput", b.DirectoryOutput);
-            values.Add("IdModello", b.IdModello.ToString());
-            values.Add("DocCorrente", b.DocCorrente.ToString());
-            values.Add("UltimoIndicizzato", b.UltimoIndicizzato.ToString());
-            values.Add("PatternNome", b.PatternNome);
-            values.Add("UltimoDocumentoEsportato", b.UltimoDocumentoEsportato);
+            Dictionary<string, string> values = new Dictionary<string, string>
+            {
+                { "Nome", b.Nome },
+                { "TipoFile", string.Format("{0}", (int)b.TipoFile) },
+                { "DirectoryInput", b.DirectoryInput },
+                { "DirectoryOutput", b.DirectoryOutput },
+                { "IdModello", b.IdModello.ToString() },
+                { "DocCorrente", b.DocCorrente.ToString() },
+                { "UltimoIndicizzato", b.UltimoIndicizzato.ToString() },
+                { "PatternNome", b.PatternNome },
+                { "UltimoDocumentoEsportato", b.UltimoDocumentoEsportato }
+            };
             UpdateRaw("Batch", values, string.Format("Id={0}", b.Id));
         }
 
@@ -247,17 +273,19 @@ namespace BatchDataEntry.Helpers
         {
             if (cnn == null || c == null) return;
             if (c.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
-            Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Nome", c.Nome);
-            values.Add("Posizione", c.Posizione.ToString());
-            values.Add("SalvaValori", Convert.ToInt32(c.SalvaValori).ToString());
-            values.Add("ValorePredefinito", c.ValorePredefinito);
-            values.Add("IndicePrimario", Convert.ToInt32(c.IndicePrimario).ToString());
-            values.Add("TipoCampo", c.TipoCampo.ToString());
-            values.Add("IdModello", c.IdModello.ToString());
-            values.Add("Riproponi", Convert.ToInt32(c.Riproponi).ToString());
-            values.Add("Disabilitato", Convert.ToInt32(c.IsDisabled).ToString());
-            values.Add("IndiceSecondario", Convert.ToInt32(c.IndiceSecondario).ToString());
+            Dictionary<string, string> values = new Dictionary<string, string>
+            {
+                { "Nome", c.Nome },
+                { "Posizione", c.Posizione.ToString() },
+                { "SalvaValori", Convert.ToInt32(c.SalvaValori).ToString() },
+                { "ValorePredefinito", c.ValorePredefinito },
+                { "IndicePrimario", Convert.ToInt32(c.IndicePrimario).ToString() },
+                { "TipoCampo", c.TipoCampo.ToString() },
+                { "IdModello", c.IdModello.ToString() },
+                { "Riproponi", Convert.ToInt32(c.Riproponi).ToString() },
+                { "Disabilitato", Convert.ToInt32(c.IsDisabled).ToString() },
+                { "IndiceSecondario", Convert.ToInt32(c.IndiceSecondario).ToString() }
+            };
             UpdateRaw("Campi", values, string.Format("Id={0}", c.Id));
         }
 
@@ -265,13 +293,15 @@ namespace BatchDataEntry.Helpers
         {
             if (cnn == null || m == null) return;
             if (m.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
-            Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Nome", m.Nome);
-            values.Add("OrigineCsv", Convert.ToInt32(m.OrigineCsv).ToString());
-            values.Add("PathFileCsv", m.PathFileCsv);
-            values.Add("Separatore", m.Separatore);
-            values.Add("FocusColumn", m.StartFocusColumn.ToString());
-            values.Add("CsvColumn", m.CsvColumn.ToString());
+            Dictionary<string, string> values = new Dictionary<string, string>
+            {
+                { "Nome", m.Nome },
+                { "OrigineCsv", Convert.ToInt32(m.OrigineCsv).ToString() },
+                { "PathFileCsv", m.PathFileCsv },
+                { "Separatore", m.Separatore },
+                { "FocusColumn", m.StartFocusColumn.ToString() },
+                { "CsvColumn", m.CsvColumn.ToString() }
+            };
             UpdateRaw("Modelli", values, string.Format("Id={0}", m.Id));
         }
         
@@ -279,8 +309,10 @@ namespace BatchDataEntry.Helpers
             if (cnn == null) return null;
             string sql = string.Format("SELECT * FROM Batch WHERE Id = {0}", id);
 
-            SqlCommand cmd = new SqlCommand(sql ,cnn);
-            cmd.CommandType = System.Data.CommandType.Text;
+            SqlCommand cmd = new SqlCommand(sql, cnn)
+            {
+                CommandType = System.Data.CommandType.Text
+            };
             try
             {
                 cnn.Open();
@@ -399,17 +431,19 @@ namespace BatchDataEntry.Helpers
                 ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
                 while (reader.Read())
                 {
-                    Batch b = new Batch();
-                    b.Id = Convert.ToInt32(reader["Id"]);
-                    b.Nome = Convert.ToString(reader["Nome"]);
-                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
-                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
-                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
-                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
-                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
-                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
-                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                    Batch b = new Batch()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Nome = Convert.ToString(reader["Nome"]),
+                        TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]),
+                        DirectoryInput = Convert.ToString(reader["DirectoryInput"]),
+                        DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]),
+                        IdModello = Convert.ToInt32(reader["IdModello"]),
+                        DocCorrente = Convert.ToInt32(reader["DocCorrente"]),
+                        UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]),
+                        PatternNome = Convert.ToString(reader["PatternNome"]),
+                        UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"])
+                    };
                     batches.Add(b);
                 }
 
@@ -437,18 +471,20 @@ namespace BatchDataEntry.Helpers
                 ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
                 while (reader.Read())
                 {
-                    Campo c = new Campo();
-                    c.Id = Convert.ToInt32(reader["Id"]);
-                    c.Nome = Convert.ToString(reader["Nome"]);
-                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
-                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
-                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
-                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
-                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
-                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    Campo c = new Campo()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Nome = Convert.ToString(reader["Nome"]),
+                        Posizione = Convert.ToInt32(reader["Posizione"]),
+                        SalvaValori = Convert.ToBoolean(reader["SalvaValori"]),
+                        ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
+                        IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
+                        IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
+                        TipoCampo = Convert.ToInt32(reader["TipoCampo"]),
+                        IdModello = Convert.ToInt32(reader["IdModello"]),
+                        Riproponi = Convert.ToBoolean(reader["Riproponi"]),
+                        IsDisabled = Convert.ToBoolean(reader["Disabilitato"])
+                    };
                     campi.Add(c);
                 }
 
@@ -477,14 +513,16 @@ namespace BatchDataEntry.Helpers
                 ObservableCollection<Modello> models = new ObservableCollection<Modello>();
                 while (reader.Read())
                 {
-                    Modello m = new Modello();
-                    m.Id = Convert.ToInt32(reader["Id"]);
-                    m.Nome = Convert.ToString(reader["Nome"]);
-                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
-                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
-                    m.Separatore = Convert.ToString(reader["Separatore"]);
-                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
-                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                    Modello m = new Modello()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Nome = Convert.ToString(reader["Nome"]),
+                        OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]),
+                        PathFileCsv = Convert.ToString(reader["PathFileCsv"]),
+                        Separatore = Convert.ToString(reader["Separatore"]),
+                        StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]),
+                        CsvColumn = Convert.ToInt32(reader["CsvColumn"])
+                    };
                     models.Add(m);
                 }
 
@@ -507,23 +545,27 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                SqlCommand cmd = new SqlCommand(query, cnn);
-                cmd.CommandType = System.Data.CommandType.Text;
+                SqlCommand cmd = new SqlCommand(query, cnn)
+                {
+                    CommandType = System.Data.CommandType.Text
+                };
                 SqlDataReader reader = cmd.ExecuteReader();
                 ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
                 while (reader.Read())
                 {
-                    Batch b = new Batch();
-                    b.Id = Convert.ToInt32(reader["Id"]);
-                    b.Nome = Convert.ToString(reader["Nome"]);
-                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
-                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
-                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
-                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
-                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
-                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
-                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                    Batch b = new Batch()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Nome = Convert.ToString(reader["Nome"]),
+                        TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]),
+                        DirectoryInput = Convert.ToString(reader["DirectoryInput"]),
+                        DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]),
+                        IdModello = Convert.ToInt32(reader["IdModello"]),
+                        DocCorrente = Convert.ToInt32(reader["DocCorrente"]),
+                        UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]),
+                        PatternNome = Convert.ToString(reader["PatternNome"]),
+                        UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"])
+                    };
                     batches.Add(b);
                 }
 
@@ -546,24 +588,28 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                SqlCommand cmd = new SqlCommand(query, cnn);
-                cmd.CommandType = System.Data.CommandType.Text;
+                SqlCommand cmd = new SqlCommand(query, cnn)
+                {
+                    CommandType = System.Data.CommandType.Text
+                };
                 SqlDataReader reader = cmd.ExecuteReader();
                 ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
                 while (reader.Read())
                 {
-                    Campo c = new Campo();
-                    c.Id = Convert.ToInt32(reader["Id"]);
-                    c.Nome = Convert.ToString(reader["Nome"]);
-                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
-                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
-                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
-                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
-                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
-                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    Campo c = new Campo()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Nome = Convert.ToString(reader["Nome"]),
+                        Posizione = Convert.ToInt32(reader["Posizione"]),
+                        SalvaValori = Convert.ToBoolean(reader["SalvaValori"]),
+                        ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
+                        IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
+                        IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
+                        TipoCampo = Convert.ToInt32(reader["TipoCampo"]),
+                        IdModello = Convert.ToInt32(reader["IdModello"]),
+                        Riproponi = Convert.ToBoolean(reader["Riproponi"]),
+                        IsDisabled = Convert.ToBoolean(reader["Disabilitato"])
+                    };
                     campi.Add(c);
                 }
 
@@ -591,14 +637,16 @@ namespace BatchDataEntry.Helpers
                 ObservableCollection<Modello> models = new ObservableCollection<Modello>();
                 while (reader.Read())
                 {
-                    Modello m = new Modello();
-                    m.Id = Convert.ToInt32(reader["Id"]);
-                    m.Nome = Convert.ToString(reader["Nome"]);
-                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
-                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
-                    m.Separatore = Convert.ToString(reader["Separatore"]);
-                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
-                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                    Modello m = new Modello()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Nome = Convert.ToString(reader["Nome"]),
+                        OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]),
+                        PathFileCsv = Convert.ToString(reader["PathFileCsv"]),
+                        Separatore = Convert.ToString(reader["Separatore"]),
+                        StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]),
+                        CsvColumn = Convert.ToInt32(reader["CsvColumn"])
+                    };
                     models.Add(m);
                 }
 
@@ -627,14 +675,16 @@ namespace BatchDataEntry.Helpers
                 List<Modello> models = new List<Modello>();
                 while (reader.Read())
                 {
-                    Modello m = new Modello();
-                    m.Id = Convert.ToInt32(reader["Id"]);
-                    m.Nome = Convert.ToString(reader["Nome"]);
-                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
-                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
-                    m.Separatore = Convert.ToString(reader["Separatore"]);
-                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
-                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                    Modello m = new Modello()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Nome = Convert.ToString(reader["Nome"]),
+                        OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]),
+                        PathFileCsv = Convert.ToString(reader["PathFileCsv"]),
+                        Separatore = Convert.ToString(reader["Separatore"]),
+                        StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]),
+                        CsvColumn = Convert.ToInt32(reader["CsvColumn"])
+                    };
                     models.Add(m);
                 }
 
@@ -657,8 +707,10 @@ namespace BatchDataEntry.Helpers
             if (cnn == null) return result;
             try {
                 cnn.Open();
-                SqlCommand cmd = new SqlCommand(sql, cnn);
-                cmd.CommandType = System.Data.CommandType.Text;
+                SqlCommand cmd = new SqlCommand(sql, cnn)
+                {
+                    CommandType = System.Data.CommandType.Text
+                };
                 result = Convert.ToInt32(cmd.ExecuteScalar());
             }
             catch (Exception e)
@@ -734,8 +786,10 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Open();
                 string sql = string.Format("SELECT TOP 1 * FROM Batch");
-                SqlCommand cmd = new SqlCommand(sql, cnn);
-                cmd.CommandType = System.Data.CommandType.Text;
+                SqlCommand cmd = new SqlCommand(sql, cnn)
+                {
+                    CommandType = System.Data.CommandType.Text
+                };
                 SqlDataReader reader = cmd.ExecuteReader();
                 Batch b = new Batch();
                 while (reader.Read())

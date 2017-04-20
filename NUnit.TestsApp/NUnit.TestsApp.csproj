@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -63,6 +64,7 @@
     <Compile Include="Helpers\DatabaseHelperTests.cs" />
     <Compile Include="Models\BatchTests.cs" />
     <Compile Include="Models\CampoTests.cs" />
+    <Compile Include="Models\DbCredentialTests.cs" />
     <Compile Include="Models\DocumentTests.cs" />
     <Compile Include="Models\ModelloTests.cs" />
     <Compile Include="Models\VoceTests.cs" />
@@ -78,6 +80,7 @@
     <Compile Include="ViewModels\ViewModelNewBatchTests.cs" />
     <Compile Include="ViewModels\ViewModelNuovaColonnaTests.cs" />
     <Compile Include="ViewModels\ViewModelNuovoModelloTests.cs" />
+    <Compile Include="Views\ViewModelSettingsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

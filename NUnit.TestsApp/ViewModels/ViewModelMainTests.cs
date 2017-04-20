@@ -24,27 +24,27 @@ namespace NUnit.TestsApp.ViewModels
             Assert.IsNotNull(viewModel);
         }
 
-        [Test(), Order(1)]
-        public void LoadBatchesTest()
-        {
-            Assert.IsNotNull(viewModel);
-            Assert.IsNotNull(db, "Connessione al database fallita");
-            viewModel.LoadBatches(db);
-            Assert.IsTrue(viewModel.Batches.Count > 0);
-        }
+        //[Test(), Order(1)]
+        //public void LoadBatchesTest()
+        //{
+        //    Assert.IsNotNull(viewModel);
+        //    Assert.IsNotNull(db, "Connessione al database fallita");
+        //    viewModel.LoadBatches(db);
+        //    Assert.IsTrue(viewModel.Batches.Count > 0);
+        //}
 
-        [Test(), Order(2)]
-        public void DeleteBatchTest()
-        {
-            Assert.IsNotNull(viewModel);
-            Assert.IsNotNull(db);
-            if(viewModel.Batches == null) viewModel.LoadBatches(db);
-            Assert.IsTrue(viewModel.Batches.Count > 0);
-            Batch b = db.GetFirstBatch();
-            viewModel.SelectedBatch = b;
-            viewModel.DeleteBatchItem();
-            List<Batch> l = new List<Batch>(viewModel.Batches);
-            Assert.IsTrue(!l.Exists(x => x.Id == b.Id));
-        }
+        //[Test(), Order(2)]
+        //public void DeleteBatchTest()
+        //{
+        //    Assert.IsNotNull(viewModel);
+        //    Assert.IsNotNull(db);
+        //    if(viewModel.Batches == null) viewModel.LoadBatches(db);
+        //    Assert.IsTrue(viewModel.Batches.Count > 0);
+        //    Batch b = db.GetFirstBatch();
+        //    viewModel.SelectedBatch = b;
+        //    viewModel.DeleteBatchItem();
+        //    List<Batch> l = new List<Batch>(viewModel.Batches);
+        //    Assert.IsTrue(!l.Exists(x => x.Id == b.Id));
+        //}
     }
 }

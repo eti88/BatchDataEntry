@@ -10,14 +10,15 @@
         Width="566.15"
         MinWidth="560"
         MaxWidth="560"
-        DataContext="{DynamicResource ViewModelMain }" Loaded="Window_Loaded" Icon="/BatchDataEntry;component/Mesh-100.ico" Closed="Window_Closed">
-    <Window.Resources>
-        <vm:ViewModelMain x:Key="ViewModelMain"/>
-    </Window.Resources>
+        Loaded="Window_Loaded" Icon="/BatchDataEntry;component/Mesh-100.ico" Closed="Window_Closed">
+    <Window.DataContext>
+        <vm:ViewModelMain />
+    </Window.DataContext>
 
     <Grid HorizontalAlignment="Left">
         <DockPanel LastChildFill="True">
             <Menu DockPanel.Dock="Top">
+                <MenuItem Header="Impostazioni" Command="{Binding ShowSettingsWindowCmd}"/>
                 <MenuItem Header="Log" Click="ButtonLog_OnClick"/>
                 <MenuItem Header="About" Command="{Binding ShowAboutWindowCmd}"/>
             </Menu>

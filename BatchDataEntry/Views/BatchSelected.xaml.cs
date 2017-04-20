@@ -18,16 +18,32 @@ namespace BatchDataEntry.Views
         private void dataGridRecords_Loaded(object sender, RoutedEventArgs e)
         {
             Batch b;
+            DatabaseHelperSqlServer dbsql;
+            DatabaseHelper db;
             if (Properties.Settings.Default.CurrentBatch == 0) return;
 
-            DatabaseHelper db = new DatabaseHelper();
             try
             {
-                b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
-                if (b == null) return;
-                if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel();
-                if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi();
-
+                if (Properties.Settings.Default.UseSQLServer)
+                {
+                    dbsql = new DatabaseHelperSqlServer(
+                        Properties.Settings.Default.SqlUser,
+                        Properties.Settings.Default.SqlPassword,
+                        Properties.Settings.Default.SqlServerAddress,
+                        Properties.Settings.Default.SqlDbName);
+                    b = dbsql.GetBatchById(Properties.Settings.Default.CurrentBatch);
+                    if (b == null) return;
+                    if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel(dbsql);
+                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(dbsql);
+                }
+                else
+                {
+                    db = new DatabaseHelper();
+                    b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
+                    if (b == null) return;
+                    if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel();
+                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi();
+                }
                 dataGridRecords.SelectedIndex = (b.UltimoIndicizzato > 1) ? b.UltimoIndicizzato - 1 : b.UltimoIndicizzato;
             }
             catch (Exception ex)

@@ -1,0 +1,30 @@
+﻿<Window x:Class="BatchDataEntry.Views.SettingsApp"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:BatchDataEntry.ViewModels"
+        xmlns:vm1="clr-namespace:BatchDataEntry.Views"
+        mc:Ignorable="d"       
+        Title="Impostazioni" MinWidth="300"  SizeToContent="WidthAndHeight">
+    <Window.DataContext>
+        <vm1:ViewModelSettings></vm1:ViewModelSettings>
+    </Window.DataContext>
+    <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Bottom" Margin="10,6,10,5" Orientation="Horizontal" HorizontalAlignment="Right" >
+            <Button x:Name="btnTest" Command="{Binding BtnTestCmd}" Content="Testa" Height="30" Width="75" FontSize="11" Background="#FFFFC359" Margin="0,0,20,0"/>
+            <Button x:Name="btnSave" Command="{Binding BtnSaveCmd}" Content="Salva" Height="30" Width="75" FontSize="11" Background="#FFA7DC7B"/>
+        </StackPanel>
+        <StackPanel Margin="10">
+            <CheckBox x:Name="ckUseServer"  Content="Usa server SQL" IsChecked="{Binding Path=Credential.Use, Mode=TwoWay}" Margin="5,0,0,0" />
+            <Label Content="Username:"/>
+            <TextBox x:Name="txtUser"  Text="{Binding Path=Credential.User, Mode=TwoWay}"/>
+            <Label Content="Password:"/>
+            <TextBox x:Name="txtPass"  Text="{Binding Path=Credential.Password, Mode=TwoWay}"/>
+            <Label Content="Indirizzo:"/>
+            <TextBox x:Name="txtAddress"  Text="{Binding Path=Credential.Address, Mode=TwoWay}"/>
+            <Label Content="Nome Database:"/>
+            <TextBox x:Name="txtDbName"  Text="{Binding Path=Credential.Dbname, Mode=TwoWay}"/>
+        </StackPanel>
+    </DockPanel>
+</Window>

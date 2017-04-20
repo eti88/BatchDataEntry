@@ -27,15 +27,30 @@ namespace BatchDataEntry.Providers
             // Carica il batch corrente dalle impostazioni (controllare se presente)  
             if (Properties.Settings.Default.CurrentBatch == 0) return null;
 
-            DatabaseHelper db = new DatabaseHelper();
             try
             {
-                b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
-                if (b == null) return null;
-                if (b.Applicazione == null || b.Applicazione.Id == 0)
-                    b.LoadModel();
-                if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
-                    b.Applicazione.LoadCampi();
+                if (Properties.Settings.Default.UseSQLServer)
+                {
+                    var dbsql = new DatabaseHelperSqlServer(Properties.Settings.Default.SqlUser, Properties.Settings.Default.SqlPassword,
+                     Properties.Settings.Default.SqlServerAddress, Properties.Settings.Default.SqlDbName);
+                    b = dbsql.GetBatchById(Properties.Settings.Default.CurrentBatch);
+                    if (b == null) return null;
+                    if (b.Applicazione == null || b.Applicazione.Id == 0)
+                        b.LoadModel(dbsql);
+                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
+                        b.Applicazione.LoadCampi(dbsql);
+                }
+                else
+                {
+                    DatabaseHelper db = new DatabaseHelper();
+                    b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
+                    if (b == null) return null;
+                    if (b.Applicazione == null || b.Applicazione.Id == 0)
+                        b.LoadModel();
+                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
+                        b.Applicazione.LoadCampi();
+                }
+
                 int colIdx = 0;
                 int colSec = 0;
                 foreach (var c in b.Applicazione.Campi)

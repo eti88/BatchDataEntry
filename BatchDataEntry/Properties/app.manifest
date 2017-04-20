@@ -15,10 +15,10 @@
             Se si specifica l'elemento requestedExecutionLevel, la funzionalità Virtualizzazione file system e registro di sistema verrà disabilitata. 
             Rimuovere questo elemento se l'applicazione richiede questa virtualizzazione per
             compatibilità con le versioni precedenti.
+         <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />   
         -->
-        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
-        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
-      </requestedPrivileges>
+            <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+          </requestedPrivileges>
       <applicationRequestMinimum>
         <defaultAssemblyRequest permissionSetReference="Custom" />
         <PermissionSet class="System.Security.PermissionSet" version="1" ID="Custom" SameSite="site" Unrestricted="true" />

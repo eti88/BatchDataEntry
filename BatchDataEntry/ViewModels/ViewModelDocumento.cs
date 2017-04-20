@@ -19,7 +19,7 @@ namespace BatchDataEntry.ViewModels
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private static DatabaseHelper _db;
-        private DatabaseHelperSqlServer dbsql;
+        private DatabaseHelperSqlServer dbsql = null;
         private static Batch _batch;
         private NavigationList<Dictionary<int, string>> _dc;
         private  Document _doc;

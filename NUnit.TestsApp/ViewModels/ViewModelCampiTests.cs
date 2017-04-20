@@ -13,11 +13,11 @@ namespace BatchDataEntry.ViewModels.Tests
     [TestFixture()]
     public class ViewModelCampiTests
     {
-        private DatabaseHelperSqlServer dbc;
-        private ViewModelCampi vm;
-        private ViewModelCampi vm2;
-        private ViewModelCampi vm3;
-        private ViewModelCampi vm4;
+        DatabaseHelperSqlServer dbc;
+        ViewModelCampi vm;
+        ViewModelCampi vm2;
+        ViewModelCampi vm3;
+        ViewModelCampi vm4;
 
 
         [SetUp]
@@ -52,27 +52,28 @@ namespace BatchDataEntry.ViewModels.Tests
             Assert.IsNotNull(vm4);
         }
 
-        [Test(), Order(4)]
-        public void GetColonneFromDbTest1()
-        {
-            Assert.IsNotNull(dbc);
-            Assert.IsNotNull(vm2);
-            int idMod = dbc.GetFirstModello().Id;
-            vm2.GetColonneFromDb(dbc, idMod);
-            Assert.IsNotNull(vm2.Colonne);
-        }
+        //[Test(), Order(4)]
+        //public void GetColonneFromDbTest1()
+        //{
+        //    Assert.IsNotNull(dbc);
+        //    vm2 = new ViewModelCampi(dbc);
+        //    Assert.IsNotNull(vm2);
+        //    int idMod = dbc.GetFirstModello().Id;
+        //    vm2.GetColonneFromDb(dbc, idMod);
+        //    Assert.IsNotNull(vm2.Colonne);
+        //}
 
-        [Test(), Order(5)]
-        public void DelItemTest()
-        {
-            Assert.IsNotNull(dbc);
-            Assert.IsNotNull(vm2);
-            Modello m = dbc.GetFirstModello();
-            Campo c = dbc.CampoQuery(string.Format("SELECT * FROM Campi WHRE IdModello = {0}", m.Id)).FirstOrDefault();
-            vm2.SelectedCampo = c;
-            Assert.IsNotNull(vm2.SelectedCampo);
-            vm2.DelItem();
-            Assert.IsTrue(dbc.CampoQuery(string.Format(@"SELECT COUNT(Id) FROM Campi WHERE IdModello = {0}",m.Id)).Count == 0);
-        }
+        //[Test(), Order(5)]
+        //public void DelItemTest()
+        //{
+        //    Assert.IsNotNull(dbc);
+        //    Assert.IsNotNull(vm2);
+        //    Modello m = dbc.GetFirstModello();
+        //    Campo c = dbc.CampoQuery(string.Format("SELECT * FROM Campi WHRE IdModello = {0}", m.Id)).FirstOrDefault();
+        //    vm2.SelectedCampo = c;
+        //    Assert.IsNotNull(vm2.SelectedCampo);
+        //    vm2.DelItem();
+        //    Assert.IsTrue(dbc.CampoQuery(string.Format(@"SELECT COUNT(Id) FROM Campi WHERE IdModello = {0}",m.Id)).Count == 0);
+        //}
     }
 }

@@ -126,6 +126,19 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private RelayCommand _settingsWindowCmd;
+        public ICommand ShowSettingsWindowCmd
+        {
+            get
+            {
+                if(_settingsWindowCmd == null)
+                {
+                    _settingsWindowCmd = new RelayCommand(param => this.SettingsWindowOpen());
+                }
+                return _settingsWindowCmd;
+            }
+        }
+
         private bool CanEdit
         {
             get { return (SelectedBatch != null); }
@@ -198,8 +211,10 @@ namespace BatchDataEntry.ViewModels
 
         private void NewBatchItem()
         {
-            var newBatchWindow = new NuovoBatch();
-            newBatchWindow.DataContext = new ViewModelNewBatch();
+            var newBatchWindow = new NuovoBatch()
+            {
+                DataContext = new ViewModelNewBatch()
+            };
             newBatchWindow.ShowDialog();
             LoadBatches();
             RaisePropertyChanged("Batches");      
@@ -262,6 +277,12 @@ namespace BatchDataEntry.ViewModels
         {
             var about = new AboutWindow();
             about.Show();
+        }
+
+        private void SettingsWindowOpen()
+        {
+            var settingsWindow = new SettingsApp();
+            settingsWindow.Show();
         }
     }
 }

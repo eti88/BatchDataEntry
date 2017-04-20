@@ -14,7 +14,7 @@ namespace NUnit.TestsApp.ViewModels
         protected DatabaseHelperSqlServer db;
         protected ViewModelBatchSelected vm;
         private string basepath = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\origin\tiff\";
-        private string tiff = @"CCITT_1.TIF";
+        //private string tiff = @"CCITT_1.TIF";
         private string pdf = @"out.pdf";
 
 
@@ -54,22 +54,29 @@ namespace NUnit.TestsApp.ViewModels
         [Test()]
         public void ConvertTiffToPdfTest()
         {
-            string t = Path.Combine(basepath, tiff);
+            string t = basepath;
             string p = Path.Combine(basepath, @"conv", pdf);
             Assert.IsNotNull(vm);
             vm.ConvertTiffToPdf(t, p);
             Assert.IsTrue(File.Exists(p) && new FileInfo(p).Length > 0);
         }
 
-        [Test()]
-        public void GenerateListTxtTest()
-        {
-            Assert.IsNotNull(vm);
-            Assert.IsNotNull(vm.SelectedBatch);
-            vm.SelectedBatch.DirectoryInput = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\in";
-            vm.SelectedBatch.DirectoryOutput = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\out";
-            vm.GenerateListTxt();
-            Assert.IsTrue(File.Exists(Path.Combine(vm.SelectedBatch.DirectoryOutput, @"LISTA.txt")));
-        }
+        //[Test()]
+        //public void GenerateListTxtTest()
+        //{
+        //    string user = @"unitTest";
+        //    string server = @"localhost\SQLEXPRESS";
+        //    string dbname = @"db_BatchDataEntry_unitTest";
+        //    db = new DatabaseHelperSqlServer(user, user, server, dbname);
+        //    Batch b = db.GetFirstBatch();
+        //    Assert.IsNotNull(b);
+        //    vm = new ViewModelBatchSelected(b, db);
+        //    Assert.IsNotNull(vm);
+        //    Assert.IsNotNull(vm.SelectedBatch);
+        //    vm.SelectedBatch.DirectoryInput = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\in";
+        //    vm.SelectedBatch.DirectoryOutput = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\out";
+        //    vm.GenerateListTxt();
+        //    Assert.IsTrue(File.Exists(Path.Combine(vm.SelectedBatch.DirectoryOutput, @"LISTA.txt")));
+        //}
     }
 }
