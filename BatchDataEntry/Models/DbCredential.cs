@@ -1,12 +1,13 @@
 ﻿using BatchDataEntry.Helpers;
 using System;
 using System.Security;
+using System.Windows;
 
 namespace BatchDataEntry.Models
 {
     public class DbCredential : BaseModel
     {
-        static byte[] entropy = System.Text.Encoding.Unicode.GetBytes("adTd1UcQj2Bxxo6NCFJ3BT3TUt6M9Err2uC");
+        static byte[] entropy = System.Text.Encoding.Unicode.GetBytes("adTd1UcQj2Bxx");
         private bool _use;
         private string _user;
         private string _pass;
@@ -103,18 +104,20 @@ namespace BatchDataEntry.Models
                 settings.UseSQLServer = Use;
             if (settings.SqlUser != User)
                 settings.SqlUser = User;
-            if (string.IsNullOrWhiteSpace(Password))
-                settings.SqlPassword = EncryptString(ToSecureString(Password));
+            if (settings.SqlPassword != Password)
+                settings.SqlPassword = Password;
             if (settings.SqlServerAddress != Address)
                 settings.SqlServerAddress = Address;
             if (settings.SqlDbName != Dbname)
                 settings.SqlDbName = Dbname;
+            settings.Save();
+            MessageBox.Show("Riavvia l'applicazione per rendere effettive le modifiche.");
         }
 
         public static DbCredential Load() {
             DbCredential crd = new DbCredential(Properties.Settings.Default.UseSQLServer,
                 Properties.Settings.Default.SqlUser,
-                ToInsecureString(DecryptString(Properties.Settings.Default.SqlPassword)),
+                Properties.Settings.Default.SqlPassword,
                 Properties.Settings.Default.SqlServerAddress,
                 Properties.Settings.Default.SqlDbName);
             return crd;
@@ -130,56 +133,56 @@ namespace BatchDataEntry.Models
             return DatabaseHelperSqlServer.IsServerConnected(cnn);
         }
 
-        public static string EncryptString(System.Security.SecureString input)
-        {
-            byte[] encryptedData = System.Security.Cryptography.ProtectedData.Protect(
-                System.Text.Encoding.Unicode.GetBytes(ToInsecureString(input)),
-                entropy,
-                System.Security.Cryptography.DataProtectionScope.CurrentUser);
-            return Convert.ToBase64String(encryptedData);
-        }
+        //public static string EncryptString(System.Security.SecureString input)
+        //{
+        //    byte[] encryptedData = System.Security.Cryptography.ProtectedData.Protect(
+        //        System.Text.Encoding.Unicode.GetBytes(ToInsecureString(input)),
+        //        entropy,
+        //        System.Security.Cryptography.DataProtectionScope.CurrentUser);
+        //    return Convert.ToBase64String(encryptedData);
+        //}
 
-        public static SecureString DecryptString(string encryptedData)
-        {
-            byte[] decryptedData;
-            try
-            {
-                decryptedData = System.Security.Cryptography.ProtectedData.Unprotect(
-                    Convert.FromBase64String(encryptedData),
-                    entropy,
-                    System.Security.Cryptography.DataProtectionScope.CurrentUser);
-                return ToSecureString(System.Text.Encoding.Unicode.GetString(decryptedData));
-            }
-            catch
-            {
-                return new SecureString();
-            }
-        }
+        //public static SecureString DecryptString(string encryptedData)
+        //{
+        //    byte[] decryptedData;
+        //    try
+        //    {
+        //        decryptedData = System.Security.Cryptography.ProtectedData.Unprotect(
+        //            Convert.FromBase64String(encryptedData),
+        //            entropy,
+        //            System.Security.Cryptography.DataProtectionScope.CurrentUser);
+        //        return ToSecureString(System.Text.Encoding.Unicode.GetString(decryptedData));
+        //    }
+        //    catch
+        //    {
+        //        return new SecureString();
+        //    }
+        //}
 
-        public static SecureString ToSecureString(string input)
-        {
-            SecureString secure = new SecureString();
-            foreach (char c in input)
-            {
-                secure.AppendChar(c);
-            }
-            secure.MakeReadOnly();
-            return secure;
-        }
+        //public static SecureString ToSecureString(string input)
+        //{
+        //    SecureString secure = new SecureString();
+        //    foreach (char c in input)
+        //    {
+        //        secure.AppendChar(c);
+        //    }
+        //    secure.MakeReadOnly();
+        //    return secure;
+        //}
 
-        public static string ToInsecureString(SecureString input)
-        {
-            string returnValue = string.Empty;
-            IntPtr ptr = System.Runtime.InteropServices.Marshal.SecureStringToBSTR(input);
-            try
-            {
-                returnValue = System.Runtime.InteropServices.Marshal.PtrToStringBSTR(ptr);
-            }
-            finally
-            {
-                System.Runtime.InteropServices.Marshal.ZeroFreeBSTR(ptr);
-            }
-            return returnValue;
-        }
+        //public static string ToInsecureString(SecureString input)
+        //{
+        //    string returnValue = string.Empty;
+        //    IntPtr ptr = System.Runtime.InteropServices.Marshal.SecureStringToBSTR(input);
+        //    try
+        //    {
+        //        returnValue = System.Runtime.InteropServices.Marshal.PtrToStringBSTR(ptr);
+        //    }
+        //    finally
+        //    {
+        //        System.Runtime.InteropServices.Marshal.ZeroFreeBSTR(ptr);
+        //    }
+        //    return returnValue;
+        //}
     }
 }

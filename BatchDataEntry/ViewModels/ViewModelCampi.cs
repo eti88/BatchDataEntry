@@ -123,7 +123,7 @@ namespace BatchDataEntry.ViewModels
         {
             if (this.Colonne == null) this.Colonne = new ObservableCollection<Campo>();
             if (this.Colonne.Count > 0) this.Colonne.Clear();
-            this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
+            this.Colonne = db.CampoQuery("SELECT * FROM Campi WHERE IdModello = " + idModello);
             RaisePropertyChanged("Colonne");
         }
 
@@ -168,8 +168,11 @@ namespace BatchDataEntry.ViewModels
                 colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true, null);
             else
                 colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true, dbsql);
-            colonna.ShowDialog();           
-            GetColonneFromDb(_idModello);
+            colonna.ShowDialog();
+            if(dbsql == null)
+                GetColonneFromDb(_idModello);
+            else
+                GetColonneFromDb(dbsql ,_idModello);
             RaisePropertyChanged("Colonne");
         }
     }

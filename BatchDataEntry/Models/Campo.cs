@@ -151,7 +151,19 @@ namespace BatchDataEntry.Models
          futuri inserimenti.
          */
 
-        public Campo() { }
+        public Campo() {
+            Id = 0;
+            Nome = string.Empty;
+            Posizione = 0;
+            SalvaValori = false;
+            ValorePredefinito = string.Empty;
+            IndicePrimario = false;
+            IndiceSecondario = false;
+            TipoCampo = 0;
+            IdModello = -1;
+            Riproponi = false;
+            IsDisabled = false;
+        }
 
         public Campo(string nome, bool sv, string vp, bool ip)
         {

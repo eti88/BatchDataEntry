@@ -178,6 +178,10 @@ namespace BatchDataEntry.Models
 
         public Batch()
         {
+            Id = 0;
+            Nome = string.Empty;
+            DirectoryInput = string.Empty;
+            DirectoryOutput = string.Empty;
             Applicazione = new Modello();
             NumDoc = 0;
             NumPages = 0;

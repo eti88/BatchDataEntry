@@ -172,8 +172,11 @@ namespace BatchDataEntry.ViewModels
             else
                 nuovoModello.DataContext = new ViewModelNuovoModello(dbsql, _intermediate, true);
             nuovoModello.ShowDialog();
+            if (dbsql == null)
+                LoadModels();
+            else
+                LoadModels(dbsql);
             RaisePropertyChanged("Modelli");
-            LoadModels();
         }
 
         private void OpenCampiView()

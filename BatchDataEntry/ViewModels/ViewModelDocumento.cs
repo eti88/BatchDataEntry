@@ -92,20 +92,21 @@ namespace BatchDataEntry.ViewModels
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+            dbsql = dbc;
             if (Batch.Applicazione == null || Batch.Applicazione.Id == 0)
             {
                 if(dbc == null)
                     Batch.LoadModel();
                 else
-                    Batch.LoadModel(dbc);
+                    Batch.LoadModel(dbsql);
             }
                 
             if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0)
             {
-                if(dbc == null)
+                if(dbsql == null)
                     Batch.Applicazione.LoadCampi();
                 else
-                    Batch.Applicazione.LoadCampi(dbc);
+                    Batch.Applicazione.LoadCampi(dbsql);
             }
                 
             PdfWrapper = new MoonPdfPanel();
@@ -117,12 +118,12 @@ namespace BatchDataEntry.ViewModels
             }
             DocFiles.CurrentIndex = indexRowVal;
             DocFile = new Document(Batch, DocFiles.Current);
-
+            DocFile.AddInputsToPanel(Batch, _db);
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
             PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
             PdfWrapper.PageRowDisplay = PageRowDisplayType.ContinuousPageRows;
-
+            RaisePropertyChanged("DocFile");
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;
@@ -134,12 +135,13 @@ namespace BatchDataEntry.ViewModels
             if (_currentBatch != null)
                 Batch = _currentBatch;
             _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+            dbsql = dbc;
             if (Batch.Applicazione == null || Batch.Applicazione.Id == 0)
             {
-                if (dbc == null)
+                if (dbsql == null)
                     Batch.LoadModel();
                 else
-                    Batch.LoadModel(dbc);
+                    Batch.LoadModel(dbsql);
             }
 
             if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0)
@@ -147,7 +149,7 @@ namespace BatchDataEntry.ViewModels
                 if (dbc == null)
                     Batch.Applicazione.LoadCampi();
                 else
-                    Batch.Applicazione.LoadCampi(dbc);
+                    Batch.Applicazione.LoadCampi(dbsql);
             }
             PdfWrapper = new MoonPdfPanel();
             LoadDocsList();
@@ -159,12 +161,12 @@ namespace BatchDataEntry.ViewModels
                 return;
             }
             DocFile = new Document(Batch, DocFiles.Current);
-
+            DocFile.AddInputsToPanel(Batch, _db);
             PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
             PdfWrapper.PageRowDisplay = PageRowDisplayType.ContinuousPageRows;
-
+            
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;

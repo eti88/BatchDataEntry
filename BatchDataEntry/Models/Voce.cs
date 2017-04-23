@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Transactions;
 using BatchDataEntry.Providers;
 
 namespace BatchDataEntry.Models
 {
     public class Voce : BaseModel
     {
+#region Attr
         private int _id;
         public int Id
         {
@@ -116,6 +115,8 @@ namespace BatchDataEntry.Models
                 }
             }
         }
+
+#endregion
 
         public Voce()
         {

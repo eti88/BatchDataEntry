@@ -73,18 +73,6 @@ namespace BatchDataEntry.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("admin")]
-        public string SqlPassword {
-            get {
-                return ((string)(this["SqlPassword"]));
-            }
-            set {
-                this["SqlPassword"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("localhost\\SQLEXPRESS")]
         public string SqlServerAddress {
             get {
@@ -116,6 +104,18 @@ namespace BatchDataEntry.Properties {
             }
             set {
                 this["UseSQLServer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("admin123")]
+        public string SqlPassword {
+            get {
+                return ((string)(this["SqlPassword"]));
+            }
+            set {
+                this["SqlPassword"] = value;
             }
         }
     }

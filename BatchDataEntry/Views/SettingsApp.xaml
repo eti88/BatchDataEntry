@@ -6,17 +6,17 @@
         xmlns:vm="clr-namespace:BatchDataEntry.ViewModels"
         xmlns:vm1="clr-namespace:BatchDataEntry.Views"
         mc:Ignorable="d"       
-        Title="Impostazioni" MinWidth="300"  SizeToContent="WidthAndHeight">
+        Title="Impostazioni" MinWidth="300"  SizeToContent="WidthAndHeight" Initialized="Window_Initialized">
     <Window.DataContext>
         <vm1:ViewModelSettings></vm1:ViewModelSettings>
     </Window.DataContext>
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" Margin="10,6,10,5" Orientation="Horizontal" HorizontalAlignment="Right" >
             <Button x:Name="btnTest" Command="{Binding BtnTestCmd}" Content="Testa" Height="30" Width="75" FontSize="11" Background="#FFFFC359" Margin="0,0,20,0"/>
-            <Button x:Name="btnSave" Command="{Binding BtnSaveCmd}" Content="Salva" Height="30" Width="75" FontSize="11" Background="#FFA7DC7B"/>
+            <Button x:Name="btnSave" Command="{Binding BtnSaveCmd}" Content="Salva" Height="30" Width="75" FontSize="11" Background="#FFA7DC7B" Click="btnSave_Click"/>
         </StackPanel>
         <StackPanel Margin="10">
-            <CheckBox x:Name="ckUseServer"  Content="Usa server SQL" IsChecked="{Binding Path=Credential.Use, Mode=TwoWay}" Margin="5,0,0,0" />
+            <CheckBox x:Name="ckUseServer"  Content="Usa server SQL" IsChecked="{Binding Path=Credential.Use, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0" Unchecked="ckUseServer_Unchecked" Checked="ckUseServer_Checked" />
             <Label Content="Username:"/>
             <TextBox x:Name="txtUser"  Text="{Binding Path=Credential.User, Mode=TwoWay}"/>
             <Label Content="Password:"/>

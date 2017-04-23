@@ -211,12 +211,16 @@ namespace BatchDataEntry.ViewModels
 
         private void NewBatchItem()
         {
-            var newBatchWindow = new NuovoBatch()
-            {
-                DataContext = new ViewModelNewBatch()
-            };
+            var newBatchWindow = new NuovoBatch();
+            if (Properties.Settings.Default.UseSQLServer && dbsql == null)
+                newBatchWindow.DataContext = new ViewModelNewBatch();
+            else
+                newBatchWindow.DataContext = new ViewModelNewBatch(dbsql);
             newBatchWindow.ShowDialog();
-            LoadBatches();
+            if(!Properties.Settings.Default.UseSQLServer && dbsql == null)
+                LoadBatches();
+            else
+                LoadBatches(dbsql);
             RaisePropertyChanged("Batches");      
         }
 
@@ -224,11 +228,14 @@ namespace BatchDataEntry.ViewModels
         {
             var newBatchWindow = new NuovoBatch();
             if (Properties.Settings.Default.UseSQLServer && dbsql != null)
-                newBatchWindow.DataContext = new ViewModelNewBatch(_intermediate);
+                newBatchWindow.DataContext = new ViewModelNewBatch(_intermediate, dbsql);
             else
                 newBatchWindow.DataContext = new ViewModelNewBatch(_intermediate);
             newBatchWindow.ShowDialog();
-            LoadBatches();
+            if (!Properties.Settings.Default.UseSQLServer && dbsql == null)
+                LoadBatches();
+            else
+                LoadBatches(dbsql);
             RaisePropertyChanged("Batches");          
         }
 
@@ -251,7 +258,10 @@ namespace BatchDataEntry.ViewModels
             else
                 models.DataContext = new ViewModelApplicazione();
             models.ShowDialog();
-            LoadBatches();
+            if (!Properties.Settings.Default.UseSQLServer && dbsql == null)
+                LoadBatches();
+            else
+                LoadBatches(dbsql);
         }
 
         public void DeleteBatchItem()

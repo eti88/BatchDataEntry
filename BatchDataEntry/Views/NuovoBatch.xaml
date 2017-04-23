@@ -105,7 +105,7 @@
                     <Label Content="Anteponi stringa a nome file " />
                     <TextBox Text="{Binding Path=CurrentBatch.PatternNome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,10,10,0" VerticalContentAlignment="Center" Height="30" FontSize="12"/>
                 </StackPanel>
-                <ProgressBar x:Name="ProgressBarInit" Visibility="{Binding Path=isVisible, Converter={StaticResource BoolToVis}}" Minimum="0" Value="{Binding Path=Progress}" Maximum="{Binding Path=MaxValue}" Height="30" VerticalAlignment="Bottom" Margin="10,5,10,0"/>
+                <ProgressBar x:Name="ProgressBarInit" Visibility="{Binding Path=IsVisible, Converter={StaticResource BoolToVis}}" Minimum="0" Value="{Binding Path=Progress}" Maximum="{Binding Path=MaxValue}" Height="30" VerticalAlignment="Bottom" Margin="10,5,10,0"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="45" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                 <Button Content="Cancella" Click="ButtonCancella_Click"  VerticalAlignment="Center" Style="{StaticResource GenericButton}" FontSize="12"/>

@@ -9,6 +9,7 @@ namespace BatchDataEntry.Models
 {
     public class Document: BaseModel
     {
+        #region attr
         private int _index;
         public int Id
         {
@@ -73,6 +74,8 @@ namespace BatchDataEntry.Models
         {
             return (File.GetAttributes(this.Path) & FileAttributes.Directory) == FileAttributes.Directory;
         }
+
+        #endregion
 
         public Document()
         {

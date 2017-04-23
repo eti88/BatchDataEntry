@@ -148,6 +148,7 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+            IsVisible = false;
         }
 
         public ViewModelNewBatch(Batch batch)
@@ -159,28 +160,33 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+            IsVisible = false;
         }
 
         public ViewModelNewBatch(DatabaseHelperSqlServer dbs)
         {
             CurrentBatch = new Batch();
             _alreadyExist = false;
+            dbsql = dbs;
             PopulateComboboxModels(dbs);
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+            IsVisible = false;
         }
 
         public ViewModelNewBatch(Batch batch, DatabaseHelperSqlServer dbs)
         {
             CurrentBatch = batch;
             _alreadyExist = true;
+            dbsql = dbs;
             PopulateComboboxModels(dbs);
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+            IsVisible = false;
         }
 
         private void DoWork(object sender, DoWorkEventArgs e)
@@ -214,13 +220,19 @@ namespace BatchDataEntry.ViewModels
             {
                 // Il batch è già esistente e quindi si effettua un update              
                 Batch batch = new Batch(CurrentBatch);
-                db.UpdateRecordBatch(batch);
+                if (dbsql == null)
+                    db.UpdateRecordBatch(batch);
+                else
+                    dbsql.Update(batch);
                 RaisePropertyChanged("Batches");             
             }
             else
             {
                 Batch batch = new Batch(CurrentBatch);
-                db.InsertRecordBatch(batch);
+                if (dbsql == null)
+                    db.InsertRecordBatch(batch);
+                else
+                    dbsql.Insert(batch);
                 RaisePropertyChanged("Batches");
             }
 
@@ -235,9 +247,9 @@ namespace BatchDataEntry.ViewModels
             RaisePropertyChanged("Models");
         }
 
-        public void PopulateComboboxModels(DatabaseHelperSqlServer db)
+        public void PopulateComboboxModels(DatabaseHelperSqlServer dbs)
         { 
-            Models = db.IEnumerableModelli();
+            Models = dbs.IEnumerableModelli();
             RaisePropertyChanged("Models");
         }
 

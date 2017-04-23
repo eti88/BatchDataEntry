@@ -122,8 +122,15 @@ namespace BatchDataEntry.Models
 
         public Modello()
         {
+            this.Id = 0;
+            this.Nome = string.Empty;
             this.OrigineCsv = false;
             this.Campi = new ObservableCollection<Campo>();
+            this.PathFileCsv = string.Empty;
+            this.Separatore = string.Empty;
+            this.StartFocusColumn = -1;
+            this.CsvColumn = -1;
+
         }
 
         public Modello(string nome, bool orig, ObservableCollection<Campo> campi)

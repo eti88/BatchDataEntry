@@ -126,7 +126,9 @@
             </Grid.RowDefinitions>
             <ScrollViewer Grid.Row="0">
                 <StackPanel x:Name="dataEntryElements" Margin="10,0">
-                    <ItemsControl x:Name="FieldItems"  ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemTemplateSelector="{StaticResource ListControlTemplateSelector}"/>
+                    <ItemsControl x:Name="FieldItems"  
+                                  ItemsSource="{Binding Path=DocFile.Voci, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                  ItemTemplateSelector="{StaticResource ListControlTemplateSelector}"/>
                 </StackPanel>
             </ScrollViewer>
             <StackPanel Grid.Row="1" Height="40" Orientation="Horizontal" HorizontalAlignment="Center">

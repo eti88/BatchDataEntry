@@ -23,5 +23,52 @@ namespace BatchDataEntry.Views
         {
             InitializeComponent();
         }
+
+        private void ckUseServer_Unchecked(object sender, RoutedEventArgs e)
+        {
+            DisableCampi();
+        }
+
+        private void DisableCampi()
+        {
+            if (txtUser != null)
+                txtUser.IsEnabled = false;
+            if (txtPass != null)
+                txtPass.IsEnabled = false;
+            if (txtAddress != null)
+                txtAddress.IsEnabled = false;
+            if (txtDbName != null)
+                txtDbName.IsEnabled = false;
+        }
+
+        private void EnableCampi()
+        {
+            if(txtUser != null)
+                txtUser.IsEnabled = true;
+            if (txtPass != null)
+                txtPass.IsEnabled = true;
+            if (txtAddress != null)
+                txtAddress.IsEnabled = true;
+            if (txtDbName != null)
+                txtDbName.IsEnabled = true;
+        }
+
+        private void ckUseServer_Checked(object sender, RoutedEventArgs e)
+        {
+            EnableCampi();
+        }
+
+        private void Window_Initialized(object sender, EventArgs e)
+        {
+            if (ckUseServer.IsChecked.Value)
+                EnableCampi();
+            else
+                DisableCampi();
+        }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

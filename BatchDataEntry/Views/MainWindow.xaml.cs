@@ -3,11 +3,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Input;
-using BatchDataEntry.Helpers;
-using BatchDataEntry.Models;
-using BatchDataEntry.ViewModels;
-using BatchDataEntry.Views;
 
 namespace BatchDataEntry
 {

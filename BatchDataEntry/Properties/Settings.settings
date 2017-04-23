@@ -14,9 +14,6 @@
     <Setting Name="SqlUser" Type="System.String" Scope="User">
       <Value Profile="(Default)">admin</Value>
     </Setting>
-    <Setting Name="SqlPassword" Type="System.String" Scope="User">
-      <Value Profile="(Default)">admin</Value>
-    </Setting>
     <Setting Name="SqlServerAddress" Type="System.String" Scope="User">
       <Value Profile="(Default)">localhost\SQLEXPRESS</Value>
     </Setting>
@@ -25,6 +22,9 @@
     </Setting>
     <Setting Name="UseSQLServer" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SqlPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">admin123</Value>
     </Setting>
   </Settings>
 </SettingsFile>
