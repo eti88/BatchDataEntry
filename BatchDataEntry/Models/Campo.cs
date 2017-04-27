@@ -1,12 +1,11 @@
-﻿using System;
+﻿using BatchDataEntry.Helpers;
+using System;
 
 namespace BatchDataEntry.Models
 {
 
     public class Campo : BaseModel
-    {
-        private MementoCampo MyMemento;
-        
+    {   
         private int _id;
         private string _nome;
         private int _pos;
@@ -14,7 +13,7 @@ namespace BatchDataEntry.Models
         private string _val;
         private bool _primary;
         private bool _secondary;
-        private int _tipo;
+        private EnumTypeOfCampo _tipo;
         private int _idModello;
         private bool _riproponi;
         private bool _isDisabled;
@@ -99,7 +98,7 @@ namespace BatchDataEntry.Models
             }
         }
 
-        public int TipoCampo
+        public EnumTypeOfCampo TipoCampo
         { // Utilizzato per future implementazioni (es textbox[0], combobox[1], checkbox[2])
             get { return _tipo; }
             set
@@ -174,7 +173,6 @@ namespace BatchDataEntry.Models
             this.IndiceSecondario = false;
             this.TipoCampo = 0;
             this.Riproponi = false;
-            this.MyMemento = new MementoCampo(nome, this.Posizione, sv, vp, ip, this.IndiceSecondario);
         }
 
         public Campo(string nome, bool sv, string vp, bool ip, bool rip, bool disab)
@@ -186,7 +184,6 @@ namespace BatchDataEntry.Models
             this.TipoCampo = 0;
             this.Riproponi = rip;
             this.IsDisabled = disab;
-            this.MyMemento = new MementoCampo(nome, this.Posizione, sv, vp, ip, this.IndiceSecondario);
         }
 
         public Campo(int id, string nome, bool sv, string vp, bool ip, bool rip, bool disab)
@@ -199,7 +196,6 @@ namespace BatchDataEntry.Models
             this.TipoCampo = 0;
             this.Riproponi = rip;
             this.IsDisabled = disab;
-            this.MyMemento = new MementoCampo(nome, this.Posizione, sv, vp, ip, this.IndiceSecondario);
         }
 
         public Campo(int id, string nome, int po, bool sv, string vp, bool ip, bool sc, bool disab, int fk)
@@ -214,7 +210,6 @@ namespace BatchDataEntry.Models
             this.IdModello = fk;
             this.IsDisabled = disab;
             this.IndiceSecondario = sc;
-            this.MyMemento = new MementoCampo(nome, po, sv, vp, ip, sc);
         }
 
         public Campo(Campo _campo)
@@ -231,17 +226,21 @@ namespace BatchDataEntry.Models
             this.IdModello = _campo.IdModello;
             this.Riproponi = _campo.Riproponi;
             this.IsDisabled = _campo.IsDisabled;
-            this.MyMemento = new MementoCampo(_campo.Nome, _campo.Posizione, _campo.SalvaValori, _campo.ValorePredefinito, _campo.IndicePrimario, _campo.IndiceSecondario);
         }
 
-        public void Revert()
+        public void SetConfigBasedOnType()
         {
-            this.Nome = this.MyMemento.nome;
-            this.Posizione = this.MyMemento.posizione;
-            this.SalvaValori = this.MyMemento.salvaValori;
-            this.ValorePredefinito = this.MyMemento.valPredefinito;
-            this.IndicePrimario = this.MyMemento.isPrimary;
-            this.IndiceSecondario = this.MyMemento.isSecondary;
+            switch(this.TipoCampo)
+            {
+                case EnumTypeOfCampo.Normale:
+                    this.SalvaValori = false;
+                    break;
+                case EnumTypeOfCampo.AutocompletamentoCsv:
+                case EnumTypeOfCampo.AutocompletamentoDbSql:
+                case EnumTypeOfCampo.AutocompletamentoDbSqlite:
+                    this.SalvaValori = true;
+                    break;
+            }
         }
 
         public override bool Equals(object obj)
@@ -290,27 +289,6 @@ namespace BatchDataEntry.Models
             return String.Format("[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}]", this.Id, this.Nome,
                 this.Posizione, this.SalvaValori, this.ValorePredefinito, this.IndicePrimario, this.TipoCampo,
                 this.IdModello);
-        }
-    }
-
-    public class MementoCampo
-    {
-        // Applico il pattern memento solo alle proprietà che possono effettivamente essere modificate dall'ui
-        public readonly string nome;
-        public readonly int posizione;
-        public readonly bool salvaValori;
-        public readonly string valPredefinito;
-        public readonly bool isPrimary;
-        public readonly bool isSecondary;
-
-        public MementoCampo(string _nome, int _pos, bool _salva, string _valp, bool _isp, bool sc)
-        {
-            this.nome = _nome;
-            this.posizione = _pos;
-            this.salvaValori = _salva;
-            this.valPredefinito = _valp;
-            this.isPrimary = _isp;
-            this.isSecondary = sc;
         }
     }
 }

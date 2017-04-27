@@ -597,7 +597,7 @@ namespace BatchDataEntry.Helpers
             values.Add("IndicePrimario", tmp2.ToString());
             int tmpS = Convert.ToInt32(c.IndiceSecondario);
             values.Add("IndiceSecondario", tmpS.ToString());
-            values.Add("TipoCampo", c.TipoCampo.ToString());
+            values.Add("TipoCampo", ((int)c.TipoCampo).ToString());
             values.Add("IdModello", c.IdModello.ToString());
             int rip = Convert.ToInt32(c.Riproponi);
             values.Add("Riproponi", rip.ToString());
@@ -710,7 +710,7 @@ namespace BatchDataEntry.Helpers
             values.Add("IndicePrimario", tmp2.ToString());
             int tmpS = Convert.ToInt32(c.IndiceSecondario);
             values.Add("IndiceSecondario", tmpS.ToString());
-            values.Add("TipoCampo", c.TipoCampo.ToString());
+            values.Add("TipoCampo", ((int)c.TipoCampo).ToString());
             values.Add("IdModello", c.IdModello.ToString());
             int rip = Convert.ToInt32(c.Riproponi);
             values.Add("Riproponi", rip.ToString());
@@ -826,7 +826,7 @@ namespace BatchDataEntry.Helpers
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
                     c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
@@ -1206,7 +1206,7 @@ namespace BatchDataEntry.Helpers
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
                     c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
@@ -1328,7 +1328,7 @@ namespace BatchDataEntry.Helpers
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
                     c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);

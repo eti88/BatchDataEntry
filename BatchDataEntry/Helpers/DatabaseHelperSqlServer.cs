@@ -3,6 +3,7 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -280,7 +281,7 @@ namespace BatchDataEntry.Helpers
                 { "SalvaValori", Convert.ToInt32(c.SalvaValori).ToString() },
                 { "ValorePredefinito", c.ValorePredefinito },
                 { "IndicePrimario", Convert.ToInt32(c.IndicePrimario).ToString() },
-                { "TipoCampo", c.TipoCampo.ToString() },
+                { "TipoCampo", ((int)c.TipoCampo).ToString() },
                 { "IdModello", c.IdModello.ToString() },
                 { "Riproponi", Convert.ToInt32(c.Riproponi).ToString() },
                 { "Disabilitato", Convert.ToInt32(c.IsDisabled).ToString() },
@@ -365,7 +366,7 @@ namespace BatchDataEntry.Helpers
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
                     c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
@@ -480,7 +481,7 @@ namespace BatchDataEntry.Helpers
                         ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
                         IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
                         IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
-                        TipoCampo = Convert.ToInt32(reader["TipoCampo"]),
+                        TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]),
                         IdModello = Convert.ToInt32(reader["IdModello"]),
                         Riproponi = Convert.ToBoolean(reader["Riproponi"]),
                         IsDisabled = Convert.ToBoolean(reader["Disabilitato"])
@@ -605,7 +606,7 @@ namespace BatchDataEntry.Helpers
                         ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
                         IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
                         IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
-                        TipoCampo = Convert.ToInt32(reader["TipoCampo"]),
+                        TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]),
                         IdModello = Convert.ToInt32(reader["IdModello"]),
                         Riproponi = Convert.ToBoolean(reader["Riproponi"]),
                         IsDisabled = Convert.ToBoolean(reader["Disabilitato"])
@@ -840,7 +841,7 @@ namespace BatchDataEntry.Helpers
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = Convert.ToInt32(reader["TipoCampo"]);
+                    c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
                     c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
@@ -859,6 +860,35 @@ namespace BatchDataEntry.Helpers
             }
             return null;
         }
+
+        // Funzione per ritornare la lista di tabelle presenti nel server
+        public List<string> GetTableList()
+        {
+            if (cnn == null) return null;
+            List<string> res = new List<string>();
+
+            try
+            {
+                cnn.Open();
+                var dt = cnn.GetSchema(@"Tables");
+                foreach (DataRow row in dt.Rows)
+                {
+                    string tabName = row[2] as string;
+                    res.Add(tabName);
+                }
+                return res;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return null;
+        }
+
         // Implementare autocomp lato server
         //ii
     }

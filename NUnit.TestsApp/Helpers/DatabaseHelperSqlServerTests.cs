@@ -4,6 +4,7 @@ using BatchDataEntry.Models;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using BatchDataEntry.Business;
+using System;
 
 namespace BatchDataEntry.Helpers.Tests
 {
@@ -193,6 +194,14 @@ namespace BatchDataEntry.Helpers.Tests
         {
             int n = db.Count("SELECT COUNT(*) FROM Batch");
             Assert.IsTrue(n > 0);
+        }
+
+        [Test(), Order(19)]
+        public void GetTableListTest()
+        {
+            var r = db.GetTableList();
+            Assert.IsNotNull(r);
+            Assert.IsTrue(r.Count >= 0);
         }
 
         [TearDown]

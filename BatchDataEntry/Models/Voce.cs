@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using BatchDataEntry.Providers;
+using BatchDataEntry.Helpers;
 
 namespace BatchDataEntry.Models
 {
@@ -74,6 +75,20 @@ namespace BatchDataEntry.Models
                 {
                     _isDisabled = value;
                     OnPropertyChanged("IsDisabled");
+                }
+            }
+        }
+
+        private EnumTypeOfCampo _voiceType;
+        public EnumTypeOfCampo VoiceType
+        {
+            get { return _voiceType; }
+            set
+            {
+                if (value != VoiceType)
+                {
+                    _voiceType = value;
+                    OnPropertyChanged("VoiceType");
                 }
             }
         }

@@ -219,6 +219,8 @@
     <Compile Include="Helpers\DatabaseHelperSqlServer.cs" />
     <Compile Include="Helpers\DialogCloser.cs" />
     <Compile Include="Helpers\DatabaseHelper.cs" />
+    <Compile Include="Helpers\EnumBindingSourceExtension.cs" />
+    <Compile Include="Helpers\EnumTypeOfCampo.cs" />
     <Compile Include="Helpers\IClosableViewModel.cs" />
     <Compile Include="Helpers\ListControlTemplateSelector.cs" />
     <Compile Include="Helpers\MyAttachedBehaviors.cs" />

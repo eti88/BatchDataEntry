@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace BatchDataEntry.Views
 {
@@ -11,6 +12,7 @@ namespace BatchDataEntry.Views
         public NuovaColonna()
         {
             InitializeComponent();
+            CmbTable.IsEnabled = false;
         }
 
         private void ButtonSalvaModel_OnClicknClick(object sender, RoutedEventArgs e)
@@ -21,13 +23,13 @@ namespace BatchDataEntry.Views
 
         private void checkBoxDisableColumn_Checked(object sender, RoutedEventArgs e)
         {
-            checkBoxSalvaValori.IsEnabled = false;
-            checkBoxPartialSave.IsEnabled = false;
+            //checkBoxSalvaValori.IsEnabled = false;
+            //checkBoxPartialSave.IsEnabled = false;
         }
 
         private void checkBoxDisableColumn_Unchecked(object sender, RoutedEventArgs e)
         {
-            checkBoxSalvaValori.IsEnabled = true;
+            //checkBoxSalvaValori.IsEnabled = true;
             checkBoxPartialSave.IsEnabled = true;
         }
 
@@ -53,6 +55,27 @@ namespace BatchDataEntry.Views
         {
             checkBoxIsPrimary.IsEnabled = false;
             checkBoxIsSecondary.IsEnabled = true;
+        }
+
+        private void CmbTipoCampo_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if(CmbTipoCampo.SelectedItem != null)
+            {               
+                switch (CmbTipoCampo.SelectedValue.ToString())
+                {
+                    case "AutocompletamentoDbSql":
+                        CmbTable.IsEnabled = true;
+                        break;
+                    default:
+                        if(CmbTable != null)
+                        {
+                            CmbTable.IsEnabled = false;
+                            CmbTable.SelectedIndex = -1;
+                            CmbTable.SelectedItem = null;
+                        }    
+                        break;
+                }
+            }
         }
     }
 }

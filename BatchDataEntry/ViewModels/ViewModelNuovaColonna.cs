@@ -100,17 +100,6 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private RelayCommand _restorevalues;
-        public ICommand RestoreValuesCmd
-        {
-            get
-            {
-                if (_restorevalues == null)
-                    _restorevalues = new RelayCommand(param => this.restoreValuesObj(), param => this.CanUse);
-                return _restorevalues;
-            }
-        }
-
         private bool CanUse
         {
             get { return this.alreadyExist; }
@@ -148,12 +137,6 @@ namespace BatchDataEntry.ViewModels
             }
             RaisePropertyChanged("SelectedCampo");
             this.CloseWindow(true);
-        }
-
-        private void restoreValuesObj()
-        {
-            SelectedCampo.Revert();
-            RaisePropertyChanged("SelectedCampo");
         }
     }
 }

@@ -47,22 +47,5 @@ namespace BatchDataEntry.Models.Tests
             DbCredential d = new DbCredential(true, user, user, server, dbname);
             Assert.IsTrue(d.TestConnection());
         }
-
-        [Test()]
-        public void ToSecureStringTest()
-        {
-            SecureString s = DbCredential.ToSecureString("abcde");
-            Assert.IsTrue(DbCredential.ToInsecureString(s).Equals("abcde"));
-        }
-
-        [Test()]
-        public void ToInsecureStringTest()
-        {
-            char[] c = new char[] { 'a', 'b', 'c', 'd', 'e' };
-            SecureString sr = new SecureString();
-            foreach (char x in c)
-                sr.AppendChar(x);
-            Assert.IsTrue(DbCredential.ToInsecureString(sr).Equals("abcde"));
-        }
     }
 }

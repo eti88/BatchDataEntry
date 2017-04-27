@@ -148,12 +148,13 @@ namespace BatchDataEntry.Models
             ObservableCollection<Voce> voci = new ObservableCollection<Voce>();         
             foreach (Campo campo in b.Applicazione.Campi)
             {
-                if (campo.SalvaValori)
+                if (b.Applicazione.CsvColumn == campo.Posizione)
+                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, "CSV", campo.IsDisabled));
+                else if(campo.SalvaValori)
                     voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, "DB", campo.IsDisabled));
                 else
                     voci.Add(new Voce(campo.Posizione, campo.Nome, campo.IsDisabled));
-            }
-            
+            }          
             this.Voci = voci;
         }
 
