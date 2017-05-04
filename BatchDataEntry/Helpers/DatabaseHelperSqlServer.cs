@@ -1,4 +1,6 @@
-﻿using BatchDataEntry.Models;
+﻿using BatchDataEntry.Abstracts;
+using BatchDataEntry.Interfaces;
+using BatchDataEntry.Models;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -7,11 +9,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BatchDataEntry.Helpers
 {
-    public class DatabaseHelperSqlServer
+    /*
+     La tabella campi è contiene un campo addizionale: "SourceTable" per recuperare dal database mssql le sorgenti di dati per alcuni autocompletamenti.
+     */
+    public class DatabaseHelperSqlServer : AbsDbHelper, IMsql
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
         protected SqlConnection cnn;
@@ -37,7 +41,7 @@ namespace BatchDataEntry.Helpers
             }
         }
 
-        public int Insert(Campo c)
+        public override int Insert(Campo c)
         {
             if (cnn == null || c == null) return -1;
             SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Campi(Nome, Posizione, SalvaValori, ValorePredefinito, IndicePrimario, TipoCampo, IdModello, Riproponi,Disabilitato, IndiceSecondario) VALUES (@Nome, @Posizione, @SalvaValori, @ValorePredefinito, @IndicePrimario, @TipoCampo, @IdModello, @Riproponi, @Disabilitato, @IndiceSecondario)", this.cnn)
@@ -54,6 +58,8 @@ namespace BatchDataEntry.Helpers
             cmdInsert.Parameters["@SalvaValori"].Value = c.SalvaValori;
             cmdInsert.Parameters.Add(new SqlParameter("@ValorePredefinito", System.Data.SqlDbType.VarChar,255));
             cmdInsert.Parameters["@ValorePredefinito"].Value = c.ValorePredefinito;
+            cmdInsert.Parameters.Add(new SqlParameter("@SourceTable", System.Data.SqlDbType.VarChar, 255));
+            cmdInsert.Parameters["@SourceTable"].Value = c.SourceTableAutocomplete;
             cmdInsert.Parameters.Add(new SqlParameter("@IndicePrimario", System.Data.SqlDbType.Bit));
             cmdInsert.Parameters["@IndicePrimario"].Value = c.IndicePrimario;
             cmdInsert.Parameters.Add(new SqlParameter("@TipoCampo", System.Data.SqlDbType.Int));
@@ -63,7 +69,7 @@ namespace BatchDataEntry.Helpers
             cmdInsert.Parameters.Add(new SqlParameter("@Riproponi", System.Data.SqlDbType.Bit));
             cmdInsert.Parameters["@Riproponi"].Value = c.Riproponi;
             cmdInsert.Parameters.Add(new SqlParameter("@Disabilitato", System.Data.SqlDbType.Bit));
-            cmdInsert.Parameters["@Disabilitato"].Value = c.IsDisabled;
+            cmdInsert.Parameters["@Disabilitato"].Value = c.IsDisabilitato;
             cmdInsert.Parameters.Add(new SqlParameter("@IndiceSecondario", System.Data.SqlDbType.Bit));
             cmdInsert.Parameters["@IndiceSecondario"].Value = c.IndiceSecondario;
 
@@ -87,7 +93,7 @@ namespace BatchDataEntry.Helpers
             return id;
         }
 
-        public int Insert(Modello m)
+        public override int Insert(Modello m)
         {
             if (cnn == null || m == null) return -1;
             SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Modelli(Nome, OrigineCsv, PathFileCsv, Separatore, FocusColumn, CsvColumn) VALUES (@Nome, @OrigineCsv, @PathFileCsv, @Separatore, @FocusColumn, @CsvColumn)", this.cnn)
@@ -128,7 +134,7 @@ namespace BatchDataEntry.Helpers
             return id;
         }
 
-        public int Insert(Batch b)
+        public override int Insert(Batch b)
         {
             if (cnn == null || b == null) return -1;
             SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Batch(Nome, TipoFile, DirectoryInput, DirectoryOutput, IdModello, DocCorrente, UltimoIndicizzato, PatternNome, UltimoDocumentoEsportato) VALUES (@Nome, @TipoFile, @DirectoryInput, @DirectoryOutput, @IdModello, @DocCorrente, @UltimoIndicizzato, @PatternNome, @UltimoDocumentoEsportato)", this.cnn)
@@ -210,7 +216,7 @@ namespace BatchDataEntry.Helpers
             }
         }
 
-        public void Update(Batch b)
+        public override void Update(Batch b)
         {
             if (cnn == null || b == null) return;
             if (b.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
@@ -229,7 +235,7 @@ namespace BatchDataEntry.Helpers
             UpdateRaw("Batch", values, string.Format("Id={0}", b.Id));
         }
 
-        public void DeleteFromTable(string tableName, string condition)
+        public override void DeleteFromTable(string tableName, string condition)
         {
             if (cnn == null || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(condition)) return;
             string sql = string.Format("DELETE FROM {0} WHERE {1}", tableName, condition);
@@ -270,7 +276,7 @@ namespace BatchDataEntry.Helpers
             }
         }
 
-        public void Update(Campo c)
+        public override void Update(Campo c)
         {
             if (cnn == null || c == null) return;
             if (c.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
@@ -280,17 +286,18 @@ namespace BatchDataEntry.Helpers
                 { "Posizione", c.Posizione.ToString() },
                 { "SalvaValori", Convert.ToInt32(c.SalvaValori).ToString() },
                 { "ValorePredefinito", c.ValorePredefinito },
+                { "SourceTable", c.SourceTableAutocomplete },
                 { "IndicePrimario", Convert.ToInt32(c.IndicePrimario).ToString() },
                 { "TipoCampo", ((int)c.TipoCampo).ToString() },
                 { "IdModello", c.IdModello.ToString() },
                 { "Riproponi", Convert.ToInt32(c.Riproponi).ToString() },
-                { "Disabilitato", Convert.ToInt32(c.IsDisabled).ToString() },
+                { "Disabilitato", Convert.ToInt32(c.IsDisabilitato).ToString() },
                 { "IndiceSecondario", Convert.ToInt32(c.IndiceSecondario).ToString() }
             };
             UpdateRaw("Campi", values, string.Format("Id={0}", c.Id));
         }
 
-        public void Update(Modello m)
+        public override void Update(Modello m)
         {
             if (cnn == null || m == null) return;
             if (m.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
@@ -306,7 +313,7 @@ namespace BatchDataEntry.Helpers
             UpdateRaw("Modelli", values, string.Format("Id={0}", m.Id));
         }
         
-        public Batch GetBatchById(int id) {
+        public override Batch GetBatchById(int id) {
             if (cnn == null) return null;
             string sql = string.Format("SELECT * FROM Batch WHERE Id = {0}", id);
 
@@ -346,7 +353,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public Campo GetCampoById(int id) {
+        public override Campo GetCampoById(int id) {
             if (cnn == null) return null;
             string sql = string.Format("SELECT * FROM Campi WHERE Id = {0}", id);
 
@@ -364,12 +371,13 @@ namespace BatchDataEntry.Helpers
                     c.Posizione = Convert.ToInt32(reader["Posizione"]);
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.SourceTableAutocomplete = Convert.ToString(reader["SourceTable"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
                 }
                 reader.Close();
                 return c;
@@ -385,7 +393,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public Modello GetModelloById(int id) {
+        public override Modello GetModelloById(int id) {
             if (cnn == null) return null;
             string sql = string.Format("SELECT * FROM Modelli WHERE Id = {0}", id);
 
@@ -420,7 +428,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Batch> GetBatchRecords() {
+        public override ObservableCollection<Batch> GetBatchRecords() {
             if (cnn == null) return null;
             string sql = string.Format("SELECT * FROM Batch");
 
@@ -462,7 +470,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Campo> GetCampoRecords() {
+        public override ObservableCollection<Campo> GetCampoRecords() {
             if (cnn == null) return null;
             string sql = string.Format("SELECT * FROM Campi");
             try {
@@ -479,12 +487,13 @@ namespace BatchDataEntry.Helpers
                         Posizione = Convert.ToInt32(reader["Posizione"]),
                         SalvaValori = Convert.ToBoolean(reader["SalvaValori"]),
                         ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
+                        SourceTableAutocomplete = Convert.ToString(reader["SourceTable"]),
                         IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
                         IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
                         TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]),
                         IdModello = Convert.ToInt32(reader["IdModello"]),
                         Riproponi = Convert.ToBoolean(reader["Riproponi"]),
-                        IsDisabled = Convert.ToBoolean(reader["Disabilitato"])
+                        IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"])
                     };
                     campi.Add(c);
                 }
@@ -503,7 +512,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Modello> GetModelloRecords() {
+        public override ObservableCollection<Modello> GetModelloRecords() {
             if (cnn == null) return null;
             string sql = string.Format("SELECT * FROM Modelli");
             try
@@ -541,7 +550,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Batch> BatchQuery(string query) {
+        public override ObservableCollection<Batch> BatchQuery(string query) {
             if (cnn == null) return null;
             try
             {
@@ -584,7 +593,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Campo> CampoQuery(string query) {
+        public override ObservableCollection<Campo> CampoQuery(string query) {
             if (cnn == null) return null;
             try
             {
@@ -604,12 +613,13 @@ namespace BatchDataEntry.Helpers
                         Posizione = Convert.ToInt32(reader["Posizione"]),
                         SalvaValori = Convert.ToBoolean(reader["SalvaValori"]),
                         ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
+                        SourceTableAutocomplete = Convert.ToString(reader["SourceTable"]),
                         IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
                         IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
                         TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]),
                         IdModello = Convert.ToInt32(reader["IdModello"]),
                         Riproponi = Convert.ToBoolean(reader["Riproponi"]),
-                        IsDisabled = Convert.ToBoolean(reader["Disabilitato"])
+                        IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"])
                     };
                     campi.Add(c);
                 }
@@ -628,7 +638,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Modello> ModelloQuery(string query) {
+        public override ObservableCollection<Modello> ModelloQuery(string query) {
             if (cnn == null) return null;
             try
             {
@@ -665,7 +675,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public IEnumerable<Modello> IEnumerableModelli() {
+        public override IEnumerable<Modello> IEnumerableModelli() {
             if (cnn == null) return null;
             string sql = string.Format("SELECT * FROM Modelli");
             try
@@ -703,7 +713,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public int Count(string sql) {
+        public override int Count(string sql) {
             int result = -1;
             if (cnn == null) return result;
             try {
@@ -725,7 +735,7 @@ namespace BatchDataEntry.Helpers
             return result;
         }
 
-        public void DropAllRowsFromTable(string tableName)
+        public override void DropAllRowsFromTable(string tableName)
         {
             if (cnn == null) return;
             string sql = string.Format("DELETE FROM {0}", tableName);
@@ -839,12 +849,13 @@ namespace BatchDataEntry.Helpers
                     c.Posizione = Convert.ToInt32(reader["Posizione"]);
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                    c.SourceTableAutocomplete = Convert.ToString(reader["SourceTable"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
                 }
 
                 reader.Close();
@@ -889,7 +900,30 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        // Implementare autocomp lato server
-        //ii
+        public List<string> GetAutocompleteList(string tableName, int columnTable)
+        {
+            if (cnn == null) return null;
+            var suggestions = new List<string>();
+            string sql = string.Format("SELECT * FROM {0}", tableName);
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    suggestions.Add(Convert.ToString(reader[columnTable]));
+                reader.Close();
+                //return suggestions;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return suggestions;
+        }
     }
 }

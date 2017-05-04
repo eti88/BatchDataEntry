@@ -42,7 +42,10 @@
                           Height="30" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding Path=SelectedCampo.TipoCampo, Mode=TwoWay}" ItemsSource="{Binding Source={local:EnumBindingSource {x:Type local:EnumTypeOfCampo}}}" SelectionChanged="CmbTipoCampo_SelectionChanged"/>
                 <!-- Row 1 -->
                 <TextBlock Grid.Column="0" Grid.Row="2" Text="Tabella di autocomp."/>
-                <ComboBox Grid.Column="1" Grid.Row="2" x:Name="CmbTable" Height="30">
+                <ComboBox Grid.Column="1" Grid.Row="2" x:Name="CmbTable" Height="30" 
+                          IsSynchronizedWithCurrentItem="True"
+                          ItemsSource="{Binding Path=SrcTables, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding Path=SelectedCampo.SourceTableAutocomplete, Mode=TwoWay}">
                 </ComboBox>
                 <!-- Row 3 -->
                 <TextBlock Grid.Column="0" Grid.Row="3" x:Name="labelNome" Text="Nome"/>

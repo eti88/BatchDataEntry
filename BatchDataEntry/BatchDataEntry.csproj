@@ -209,6 +209,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Abstracts\AbsDbHelper.cs" />
+    <Compile Include="Abstracts\AbsDbSuggestions.cs" />
+    <Compile Include="Abstracts\AbsSuggestion.cs" />
     <Compile Include="Business\Csv.cs" />
     <Compile Include="Business\CsvFileReader.cs" />
     <Compile Include="Business\CsvFileWriter.cs" />
@@ -226,17 +229,24 @@
     <Compile Include="Helpers\MyAttachedBehaviors.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\ScrollIntoViewBehavior.cs" />
-    <Compile Include="Models\Autocompletamento.cs" />
+    <Compile Include="Interfaces\ICampo.cs" />
+    <Compile Include="Interfaces\IDatabaseHelper.cs" />
+    <Compile Include="Interfaces\IMsql.cs" />
+    <Compile Include="Interfaces\ISQLite.cs" />
+    <Compile Include="Interfaces\ISuggestion.cs" />
+    <Compile Include="Interfaces\ISuggestionProvider.cs" />
     <Compile Include="Models\BaseModel.cs" />
     <Compile Include="Models\DbCredential.cs" />
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\ExportColumn.cs" />
-    <Compile Include="Models\Suggestion.cs" />
+    <Compile Include="Suggestions\SuggestionDoubleColumn.cs" />
     <Compile Include="Models\TipoFileProcessato.cs" />
     <Compile Include="Models\Voce.cs" />
     <Compile Include="Providers\CsvSuggestionProvider.cs" />
+    <Compile Include="Providers\DbSqlSuggestionProvider.cs" />
     <Compile Include="Providers\DbSuggestionProvider.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Suggestions\SuggestionSingleColumn.cs" />
     <Compile Include="Validators\ColumnValidator.cs" />
     <Compile Include="Validators\NameValidator.cs" />
     <Compile Include="Validators\NumValidator.cs" />

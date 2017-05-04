@@ -1,24 +1,16 @@
 ﻿using BatchDataEntry.Helpers;
+using BatchDataEntry.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace BatchDataEntry.Models
 {
 
-    public class Campo : BaseModel
+    public class Campo : BaseModel, ICampo
     {   
         private int _id;
-        private string _nome;
-        private int _pos;
-        private bool _salva;
-        private string _val;
-        private bool _primary;
-        private bool _secondary;
-        private EnumTypeOfCampo _tipo;
-        private int _idModello;
-        private bool _riproponi;
-        private bool _isDisabled;
-
-        public int Id {
+        public int Id
+        {
             get { return _id; }
             set
             {
@@ -29,7 +21,10 @@ namespace BatchDataEntry.Models
                 }
             }
         }
-        public string Nome {
+
+        private string _nome;   
+        public string Nome
+        {
             get { return _nome; }
             set
             {
@@ -40,7 +35,25 @@ namespace BatchDataEntry.Models
                 }
             }
         }
-        public int Posizione {
+
+        private string _value;
+        public string Valore
+        {
+            get
+            {
+                return _value;
+            }
+            set
+            {
+                if (_value != value)
+                    _value = value;
+                OnPropertyChanged("Valore");
+            }
+        }
+
+        private int _pos;
+        public int Posizione
+        {
             get { return _pos; }
             set
             {
@@ -51,7 +64,10 @@ namespace BatchDataEntry.Models
                 }
             }
         }
-        public bool SalvaValori {
+
+        private bool _salva;
+        public bool SalvaValori
+        {
             get { return _salva; }
             set
             {
@@ -62,18 +78,38 @@ namespace BatchDataEntry.Models
                 }
             }
         }
-        public string ValorePredefinito {
-            get { return _val; }
+
+        private string _predefval;
+        public string ValorePredefinito
+        {
+            get { return _predefval; }
             set
             {
-                if (value != _val)
+                if (value != _predefval)
                 {
-                    _val = value;
+                    _predefval = value;
                     OnPropertyChanged("ValorePredefinito");
                 }
             }
         }
-        public bool IndicePrimario {
+
+        private string _sourceTableAutocomplete;
+        public string SourceTableAutocomplete
+        {
+            get { return _sourceTableAutocomplete; }
+            set
+            {
+                if (value != _sourceTableAutocomplete)
+                {
+                    _sourceTableAutocomplete = value;
+                    OnPropertyChanged("SourceTableAutocomplete");
+                }
+            }
+        }
+
+        private bool _primary;
+        public bool IndicePrimario
+        {
             get { return _primary; }
             set
             {
@@ -85,6 +121,7 @@ namespace BatchDataEntry.Models
             }
         }
 
+        private bool _secondary;
         public bool IndiceSecondario
         {
             get { return _secondary; }
@@ -98,8 +135,9 @@ namespace BatchDataEntry.Models
             }
         }
 
+        private EnumTypeOfCampo _tipo;
         public EnumTypeOfCampo TipoCampo
-        { // Utilizzato per future implementazioni (es textbox[0], combobox[1], checkbox[2])
+        { 
             get { return _tipo; }
             set
             {
@@ -109,8 +147,11 @@ namespace BatchDataEntry.Models
                     OnPropertyChanged("TipoCampo");
                 }
             }
-        }  
-        public int IdModello {
+        }
+
+        private int _idModello;
+        public int IdModello
+        {
             get { return _idModello; }
             set
             {
@@ -121,6 +162,8 @@ namespace BatchDataEntry.Models
                 }
             }
         }
+
+        private bool _riproponi;
         public bool Riproponi
         {
             get { return _riproponi; }
@@ -134,17 +177,70 @@ namespace BatchDataEntry.Models
             }
         }
 
-        public bool IsDisabled
+        private bool _isDisabled;
+        public bool IsDisabilitato
         {
             get { return _isDisabled; }
-            set {
-                if (value != IsDisabled)
+            set
+            {
+                if (value != _isDisabled)
                 {
                     _isDisabled = value;
-                    OnPropertyChanged("IsDisabled");
+                    OnPropertyChanged("IsDisabilitato");
+                }
+            }
+        }
+
+        private string _source;
+        public string TabellaSorgente {
+            get { return _source; }
+            set { if (value != _source)
+                {
+                    _source = value;
+                    OnPropertyChanged("TabellaSorgente");
                 } }
         }
 
+        private ISuggestion _selected;
+        public ISuggestion ElementoSelezionato {
+            get { return _selected; }
+            set
+            {
+                if (value != _selected)
+                {
+                    _selected = value;
+                    OnPropertyChanged("ElementoSelezionato");
+                }
+            }
+        }
+
+        private string _selectedValue;
+        public string ElementoSelezionatoValore {
+            get { return _selectedValue; }
+            set
+            {
+                if (value != _selectedValue)
+                {
+                    _selectedValue = value;
+                    OnPropertyChanged("ElementoSelezionatoValore");
+                }
+            }
+        }
+
+        private List<ISuggestion> _qprov;
+        public List<ISuggestion> QueryProvider {
+            get { return _qprov; }
+            set
+            {
+                if (value != _qprov)
+                {
+                    _qprov = value;
+                    OnPropertyChanged("QueryProvider");
+                }
+            }
+        }
+
+        private int _sourceTableColumn { get; set; }
         /*
          SalvaValori permette di tenere traccia dei dati nel medesimo campo velocizzando
          futuri inserimenti.
@@ -153,94 +249,349 @@ namespace BatchDataEntry.Models
         public Campo() {
             Id = 0;
             Nome = string.Empty;
-            Posizione = 0;
-            SalvaValori = false;
+            Valore = string.Empty;
+            Posizione = -1;
             ValorePredefinito = string.Empty;
+            TabellaSorgente = string.Empty;
             IndicePrimario = false;
             IndiceSecondario = false;
-            TipoCampo = 0;
-            IdModello = -1;
+            TipoCampo = EnumTypeOfCampo.Normale;
+            IdModello = 0;
             Riproponi = false;
-            IsDisabled = false;
+            IsDisabilitato = false;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            QueryProvider = new List<ISuggestion>();
+            SetConfigBasedOnType();
         }
 
-        public Campo(string nome, bool sv, string vp, bool ip)
-        {
-            this.Nome = nome;
-            this.SalvaValori = sv;
-            this.ValorePredefinito = vp;
-            this.IndicePrimario = ip;
-            this.IndiceSecondario = false;
-            this.TipoCampo = 0;
-            this.Riproponi = false;
+        /// <summary>
+        /// Costruttore per il campo concepito per il tipo Normale
+        /// senza passare il valore dell'id
+        /// </summary>
+        /// <param name="nome">Nome del campo</param>
+        /// <param name="posizione">Posizione del campo</param>
+        /// <param name="valorePredefinito">Valore predefinito del campo</param>
+        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
+        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
+        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
+        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
+        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
+        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
+        public Campo(string nome, int posizione, string valorePredefinito, bool isIndicePrimario, 
+            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool isDisabilitato) {
+            Id = 0;
+            Nome = nome;
+            Valore = string.Empty;
+            Posizione = posizione;
+            ValorePredefinito = valorePredefinito;
+            TabellaSorgente = string.Empty;
+            IndicePrimario = isIndicePrimario;
+            IndiceSecondario = isIndiceSecondario;
+            TipoCampo = campo;
+            IdModello = idmodello;
+            Riproponi = riproponi;
+            IsDisabilitato = isDisabilitato;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            QueryProvider = new List<ISuggestion>();
+            SetConfigBasedOnType();
         }
 
-        public Campo(string nome, bool sv, string vp, bool ip, bool rip, bool disab)
+        /// <summary>
+        /// Costruttore per il campo concepito per il tipo Normale e Sqlite
+        /// </summary>
+        /// <param name="id">Id del campo</param>
+        /// <param name="nome">Nome del campo</param>
+        /// <param name="posizione">Posizione del campo</param>
+        /// <param name="valorePredefinito">Valore predefinito del campo</param>
+        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
+        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
+        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
+        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
+        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
+        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
+        public Campo(int id, string nome, int posizione, string valorePredefinito, bool isIndicePrimario,
+            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
+            bool isDisabilitato)
         {
-            this.Nome = nome;
-            this.SalvaValori = sv;
-            this.ValorePredefinito = vp;
-            this.IndicePrimario = ip;
-            this.TipoCampo = 0;
-            this.Riproponi = rip;
-            this.IsDisabled = disab;
+            Id = id;
+            Nome = nome;
+            Valore = string.Empty;
+            Posizione = posizione;
+            ValorePredefinito = valorePredefinito;
+            TabellaSorgente = string.Empty;
+            IndicePrimario = isIndicePrimario;
+            IndiceSecondario = isIndiceSecondario;
+            TipoCampo = campo;
+            IdModello = idmodello;
+            Riproponi = riproponi;
+            IsDisabilitato = isDisabilitato;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            QueryProvider = new List<ISuggestion>();
+            SetConfigBasedOnType();
         }
 
-        public Campo(int id, string nome, bool sv, string vp, bool ip, bool rip, bool disab)
+        /// <summary>
+        /// Costruttore per campo Normale e Sqlite con Valore
+        /// </summary>
+        /// /// <param name="id">Id del campo</param>
+        /// <param name="nome">Nome del campo</param>
+        /// <param name="val">Valore associato al campo</param>
+        /// <param name="posizione">Posizione del campo</param>
+        /// <param name="valorePredefinito">Valore predefinito del campo</param>
+        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
+        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
+        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
+        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
+        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
+        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
+        public Campo(int id, string nome, string val, int posizione, string valorePredefinito, bool isIndicePrimario,
+            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
+            bool isDisabilitato)
         {
-            this.Id = id;
-            this.Nome = nome;
-            this.SalvaValori = sv;
-            this.ValorePredefinito = vp;
-            this.IndicePrimario = ip;
-            this.TipoCampo = 0;
-            this.Riproponi = rip;
-            this.IsDisabled = disab;
+            Id = id;
+            Nome = nome;
+            Valore = val;
+            Posizione = posizione;
+            ValorePredefinito = valorePredefinito;
+            TabellaSorgente = string.Empty;
+            IndicePrimario = isIndicePrimario;
+            IndiceSecondario = isIndiceSecondario;
+            TipoCampo = campo;
+            IdModello = idmodello;
+            Riproponi = riproponi;
+            IsDisabilitato = isDisabilitato;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            QueryProvider = new List<ISuggestion>();
+            SetConfigBasedOnType();
         }
 
-        public Campo(int id, string nome, int po, bool sv, string vp, bool ip, bool sc, bool disab, int fk)
+        /// <summary>
+        /// Costruttore per campo Db Sql (senza id)
+        /// </summary>
+        /// <param name="nome">Nome del campo</param>
+        /// <param name="posizione">Posizione del campo</param>
+        /// <param name="valorePredefinito">Valore predefinito del campo</param>
+        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
+        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
+        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
+        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
+        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
+        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
+        /// <param name="sourcetab">Tabella di riferimento per il database</param>
+        /// <param name="sourcetabcol">Indica la colonna della sourcetab da proporre come autocompletamento</param>
+        public Campo(string nome, int posizione, string valorePredefinito, bool isIndicePrimario,
+            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
+            bool isDisabilitato, string sourcetab, int sourcetabcol = 1)
         {
-            this.Id = id;
-            this.Nome = nome;
-            this.Posizione = po;
-            this.SalvaValori = sv;
-            this.ValorePredefinito = vp;
-            this.IndicePrimario = ip;
-            this.TipoCampo = 0;
-            this.IdModello = fk;
-            this.IsDisabled = disab;
-            this.IndiceSecondario = sc;
+            Id = 0;
+            Nome = nome;
+            Valore = string.Empty;
+            Posizione = posizione;
+            ValorePredefinito = valorePredefinito;
+            TabellaSorgente = sourcetab;
+            IndicePrimario = isIndicePrimario;
+            IndiceSecondario = isIndiceSecondario;
+            TipoCampo = campo;
+            IdModello = idmodello;
+            Riproponi = riproponi;
+            IsDisabilitato = isDisabilitato;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            _sourceTableColumn = sourcetabcol;
+            QueryProvider = new List<ISuggestion>();
+            SetConfigBasedOnType();
+        }
+ 
+        /// <summary>
+        /// Costruttore per campo Db Sql
+        /// </summary>
+        /// <param name="id">Id del campo</param>
+        /// <param name="nome">Nome del campo</param>
+        /// <param name="posizione">Posizione del campo</param>
+        /// <param name="valorePredefinito">Valore predefinito del campo</param>
+        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
+        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
+        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
+        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
+        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
+        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
+        /// <param name="sourcetab">Tabella di riferimento per il database</param>
+        /// <param name="sourcetabcol">Indica la colonna della sourcetab da proporre come autocompletamento</param>
+        public Campo(int id, string nome, int posizione, string valorePredefinito, bool isIndicePrimario,
+            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
+            bool isDisabilitato, string sourcetab, int sourcetabcol = 1)
+        {
+            Id = id;
+            Nome = nome;
+            Valore = string.Empty;
+            Posizione = posizione;
+            ValorePredefinito = valorePredefinito;
+            TabellaSorgente = sourcetab;
+            IndicePrimario = isIndicePrimario;
+            IndiceSecondario = isIndiceSecondario;
+            TipoCampo = campo;
+            IdModello = idmodello;
+            Riproponi = riproponi;
+            IsDisabilitato = isDisabilitato;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            _sourceTableColumn = sourcetabcol;
+            QueryProvider = new List<ISuggestion>();
+            SetConfigBasedOnType();
         }
 
-        public Campo(Campo _campo)
+        /// <summary>
+        /// Costruttore per campo Db Sql con Valore
+        /// </summary>
+        /// <param name="id">Id del campo</param>
+        /// <param name="nome">Nome del campo</param>
+        /// <param name="val">Valore associato al campo</param>
+        /// <param name="posizione">Posizione del campo</param>
+        /// <param name="valorePredefinito">Valore predefinito del campo</param>
+        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
+        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
+        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
+        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
+        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
+        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
+        /// <param name="sourcetab">Tabella di riferimento per il database</param>
+        /// <param name="sourcetabcol">Indica la colonna della sourcetab da proporre come autocompletamento</param>
+        public Campo(int id, string nome, string val, int posizione, string valorePredefinito, bool isIndicePrimario,
+            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
+            bool isDisabilitato, string sourcetab, int sourcetabcol = 1)
         {
-            if(_campo == null) return;
-            this.Id = _campo.Id;
-            this.Nome = _campo.Nome;
-            this.Posizione = _campo.Posizione;
-            this.SalvaValori = _campo.SalvaValori;
-            this.ValorePredefinito = _campo.ValorePredefinito;
-            this.IndicePrimario = _campo.IndicePrimario;
-            this.IndiceSecondario = _campo.IndiceSecondario;
-            this.TipoCampo = _campo.TipoCampo;
-            this.IdModello = _campo.IdModello;
-            this.Riproponi = _campo.Riproponi;
-            this.IsDisabled = _campo.IsDisabled;
+            Id = id;
+            Nome = nome;
+            Valore = val;
+            Posizione = posizione;
+            ValorePredefinito = valorePredefinito;
+            TabellaSorgente = sourcetab;
+            IndicePrimario = isIndicePrimario;
+            IndiceSecondario = isIndiceSecondario;
+            TipoCampo = campo;
+            IdModello = idmodello;
+            Riproponi = riproponi;
+            IsDisabilitato = isDisabilitato;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            _sourceTableColumn = sourcetabcol;
+            QueryProvider = new List<ISuggestion>();
+            SetConfigBasedOnType();
         }
+
+        public Campo(Campo campo) {
+            Id = campo.Id;
+            Nome = campo.Nome;
+            Valore = campo.Valore;
+            Posizione = campo.Posizione;
+            ValorePredefinito = campo.ValorePredefinito;
+            TabellaSorgente = campo.TabellaSorgente;
+            IndicePrimario = campo.IndicePrimario;
+            IndiceSecondario = campo.IndiceSecondario;
+            TipoCampo = campo.TipoCampo;
+            IdModello = campo.IdModello;
+            Riproponi = campo.Riproponi;
+            IsDisabilitato = campo.IsDisabilitato;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            _sourceTableColumn = campo._sourceTableColumn;
+            QueryProvider = campo.QueryProvider;
+        }
+
+        //public Campo() {
+        //    Id = 0;
+        //    Nome = string.Empty;
+        //    Posizione = 0;
+        //    SalvaValori = false;
+        //    ValorePredefinito = string.Empty;
+        //    IndicePrimario = false;
+        //    IndiceSecondario = false;
+        //    TipoCampo = 0;
+        //    IdModello = -1;
+        //    Riproponi = false;
+        //    IsDisabled = false;
+        //    SourceTableAutocomplete = string.Empty;
+        //}
+
+        //public Campo(string nome, bool sv, string vp, bool ip)
+        //{
+        //    this.Nome = nome;
+        //    this.SalvaValori = sv;
+        //    this.ValorePredefinito = vp;
+        //    this.IndicePrimario = ip;
+        //    this.IndiceSecondario = false;
+        //    this.TipoCampo = 0;
+        //    this.Riproponi = false;
+        //    SourceTableAutocomplete = string.Empty;
+        //}
+
+        //public Campo(string nome, bool sv, string vp, bool ip, bool rip, bool disab)
+        //{
+        //    this.Nome = nome;
+        //    this.SalvaValori = sv;
+        //    this.ValorePredefinito = vp;
+        //    this.IndicePrimario = ip;
+        //    this.TipoCampo = 0;
+        //    this.Riproponi = rip;
+        //    this.IsDisabled = disab;
+        //    SourceTableAutocomplete = string.Empty;
+        //}
+
+        //public Campo(int id, string nome, bool sv, string vp, bool ip, bool rip, bool disab)
+        //{
+        //    this.Id = id;
+        //    this.Nome = nome;
+        //    this.SalvaValori = sv;
+        //    this.ValorePredefinito = vp;
+        //    this.IndicePrimario = ip;
+        //    this.TipoCampo = 0;
+        //    this.Riproponi = rip;
+        //    this.IsDisabled = disab;
+        //    SourceTableAutocomplete = string.Empty;
+        //}
+
+        //public Campo(int id, string nome, int po, bool sv, string vp, bool ip, bool sc, bool disab, int fk)
+        //{
+        //    this.Id = id;
+        //    this.Nome = nome;
+        //    this.Posizione = po;
+        //    this.SalvaValori = sv;
+        //    this.ValorePredefinito = vp;
+        //    this.IndicePrimario = ip;
+        //    this.TipoCampo = 0;
+        //    this.IdModello = fk;
+        //    this.IsDisabled = disab;
+        //    this.IndiceSecondario = sc;
+        //    SourceTableAutocomplete = string.Empty;
+        //}
+
+        //public Campo(Campo _campo)
+        //{
+        //    if(_campo == null) return;
+        //    this.Id = _campo.Id;
+        //    this.Nome = _campo.Nome;
+        //    this.Posizione = _campo.Posizione;
+        //    this.SalvaValori = _campo.SalvaValori;
+        //    this.ValorePredefinito = _campo.ValorePredefinito;
+        //    this.IndicePrimario = _campo.IndicePrimario;
+        //    this.IndiceSecondario = _campo.IndiceSecondario;
+        //    this.TipoCampo = _campo.TipoCampo;
+        //    this.IdModello = _campo.IdModello;
+        //    this.Riproponi = _campo.Riproponi;
+        //    this.IsDisabled = _campo.IsDisabled;
+        //    this.SourceTableAutocomplete = _campo.SourceTableAutocomplete;
+        //}
 
         public void SetConfigBasedOnType()
         {
-            switch(this.TipoCampo)
-            {
-                case EnumTypeOfCampo.Normale:
-                    this.SalvaValori = false;
-                    break;
-                case EnumTypeOfCampo.AutocompletamentoCsv:
-                case EnumTypeOfCampo.AutocompletamentoDbSql:
-                case EnumTypeOfCampo.AutocompletamentoDbSqlite:
-                    this.SalvaValori = true;
-                    break;
-            }
+            if (this.TipoCampo == EnumTypeOfCampo.Normale)
+                this.SalvaValori = false;
+            else
+                this.SalvaValori = true;
         }
 
         public override bool Equals(object obj)
@@ -260,10 +611,11 @@ namespace BatchDataEntry.Models
             if (this.ValorePredefinito != campo.ValorePredefinito) return false;
             if (this.IndiceSecondario != campo.IndiceSecondario) return false;
             if (this.IndicePrimario != campo.IndicePrimario) return false;
+            if (this.TabellaSorgente != campo.TabellaSorgente) return false;
             if (this.TipoCampo != campo.TipoCampo) return false;
             if (this.IdModello != campo.IdModello) return false;
             if(this.Riproponi != campo.Riproponi) return false;
-            if (this.IsDisabled != campo.IsDisabled) return false;
+            if (this.IsDisabilitato != campo.IsDisabilitato) return false;
             return true;
         }
 
@@ -279,16 +631,20 @@ namespace BatchDataEntry.Models
             resutl = (resutl * 7) + this.IndiceSecondario.GetHashCode();
             resutl = (resutl * 7) + this.TipoCampo.GetHashCode();
             resutl = (resutl * 7) + this.IdModello.GetHashCode();
+            resutl = (resutl * 7) + this.TabellaSorgente.GetHashCode();
             resutl = (resutl * 7) + this.Riproponi.GetHashCode();
-            resutl = (resutl * 7) + this.IsDisabled.GetHashCode();
+            resutl = (resutl * 7) + this.IsDisabilitato.GetHashCode();
             return resutl;
         }
 
         public override string ToString()
         {
-            return String.Format("[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}]", this.Id, this.Nome,
-                this.Posizione, this.SalvaValori, this.ValorePredefinito, this.IndicePrimario, this.TipoCampo,
-                this.IdModello);
+            return String.Format("{this.Id},{this.TipoCampo},{this.Nome},{this.Valore}),{this.SalvaValori}");
+        }
+
+        public void QueryProviderSelector()
+        {
+            throw new NotImplementedException();
         }
     }
 }

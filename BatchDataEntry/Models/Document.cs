@@ -101,25 +101,70 @@ namespace BatchDataEntry.Models
                 if (i == 3) this.IsIndexed = GetBool(row.Value);
                 if (i > 3)
                 {
-                    if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn) {                   
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true,"CSV", b.Applicazione.Campi.ElementAt(h).IsDisabled));
-                    }
-                    else if(!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
+                    // Sceglie il tipo di campo (Prima vengono valutate le casistiche con l'autocompletamento
+                    // Autocompletamento Csv (No val)
+                    if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn)
                     {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).SalvaValori, "DB",b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                        //TODO: Da scrivere
                     }
-                    else if(string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
+                    // Autocompletamento Csv (con val)
+                    else if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn)
                     {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).SalvaValori, "DB", b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                        //TODO: Da scrivere
                     }
+                    // Autocompletamento DbSqlite (No val)
+                    else if (string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori && b.Applicazione.Campi.ElementAt(h).TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
+                    {
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true, EnumTypeOfCampo.AutocompletamentoDbSqlite, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    }
+                    // Autocompletamento DbSqlite (con val)
+                    else if (!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori && b.Applicazione.Campi.ElementAt(h).TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
+                    {
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, true, EnumTypeOfCampo.AutocompletamentoDbSqlite, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    }
+                    // Autocompletamento DbSql (No val)
+                    else if (string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori && b.Applicazione.Campi.ElementAt(h).TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
+                    {
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true, EnumTypeOfCampo.AutocompletamentoDbSql, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    }
+                    // Autocompletamento DbSql (con val)
+                    else if (!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori && b.Applicazione.Campi.ElementAt(h).TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
+                    {
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, true,EnumTypeOfCampo.AutocompletamentoDbSql, b.Applicazione.Campi.ElementAt(h).IsDisabled, b.Applicazione.Campi.ElementAt(h).SourceTableAutocomplete, 1));
+                    }
+                    // normale (con val)
                     else if (!string.IsNullOrEmpty(row.Value))
                     {
                         this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).IsDisabled));
                     }
+                    // ALTRIMENTI Normale (senza val)
                     else
                     {
                         this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).IsDisabled));
-                    }                       
+                    }
+
+                    //if () {                   
+                    //    this.Voci.Add(new Voce(h, 
+                    //        b.Applicazione.Campi.ElementAt(h).Nome, 
+                    //        true,
+                    //        EnumTypeOfCampo.AutocompletamentoCsv, 
+                    //        b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    //}
+                    //else if(!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
+                    //{
+                    //    // è un campo autocompletante
+                    //    this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, 
+                    //        row.Value, 
+                    //        b.Applicazione.Campi.ElementAt(h).SalvaValori, 
+                    //        EnumTypeOfCampo.AutocompletamentoDbSqlite, 
+                    //        b.Applicazione.Campi.ElementAt(h).IsDisabled,
+                    //        ,
+                    //        h));
+                    //}
+                    //else if(string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
+                    //{
+                    //    this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSqlite, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                    //}                      
                     h++;
                 }       
             }
@@ -149,9 +194,11 @@ namespace BatchDataEntry.Models
             foreach (Campo campo in b.Applicazione.Campi)
             {
                 if (b.Applicazione.CsvColumn == campo.Posizione)
-                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, "CSV", campo.IsDisabled));
-                else if(campo.SalvaValori)
-                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, "DB", campo.IsDisabled));
+                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoCsv, campo.IsDisabled));
+                else if(campo.SalvaValori && campo.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
+                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSqlite, campo.IsDisabled));
+                else if (campo.SalvaValori && campo.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
+                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSql, campo.IsDisabled));
                 else
                     voci.Add(new Voce(campo.Posizione, campo.Nome, campo.IsDisabled));
             }          

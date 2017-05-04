@@ -12,14 +12,17 @@ using NLog;
 using Batch = BatchDataEntry.Models.Batch;
 using Campo = BatchDataEntry.Models.Campo;
 using Modello = BatchDataEntry.Models.Modello;
+using BatchDataEntry.Suggestions;
+using BatchDataEntry.Interfaces;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.Helpers
 {
     
-    public class DatabaseHelper
+    public class DatabaseHelper : AbsDbHelper, ISQLite 
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        public string dbConnection;
+        public string dbConnection { get; set; }
 
         #region Constructors
 
@@ -58,7 +61,7 @@ namespace BatchDataEntry.Helpers
         /// </summary>
         /// <param name="tablename"></param>
         /// <returns></returns>
-        public DataTable GetDataTable(string tablename)
+        public  DataTable GetDataTable(string tablename)
         {
             DataTable dt = new DataTable();
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
@@ -145,7 +148,7 @@ namespace BatchDataEntry.Helpers
         /// </summary>
         /// <param name="sql"></param>
         /// <returns></returns>
-        public int Count(string sql)
+        public override int Count(string sql)
         {
             int result = -1;
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
@@ -344,53 +347,12 @@ namespace BatchDataEntry.Helpers
             return returnCode;
         }
 
-        /// <summary>
-        ///     Allows the programmer to easily delete all data from the DB.
-        /// </summary>
-        /// <returns>A boolean true or false to signify success or failure.</returns>
-        public bool ClearDB()
-        {
-            DataTable tables;
-            try
-            {
-                tables = this.GetDataTable("select NAME from SQLITE_MASTER where type='table' order by NAME;");
-                foreach (DataRow table in tables.Rows)
-                {
-                    this.ClearTable(table["NAME"].ToString());
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        ///     Allows the user to easily clear all data from a specific table.
-        /// </summary>
-        /// <param name="table">The name of the table to clear.</param>
-        /// <returns>A boolean true or false to signify success or failure.</returns>
-        public bool ClearTable(String table)
-        {
-            try
-            {
-                this.ExecuteNonQuery(String.Format("delete from {0};", table));
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-
-        }
-
         private void ErrorCatch(Exception e)
         {
             logger.Error(e.ToString);
-#if DEBUG
+            #if DEBUG
             Console.WriteLine(e.ToString());
-#endif
+            #endif
         }
 
         #endregion
@@ -401,22 +363,13 @@ namespace BatchDataEntry.Helpers
         {
             try
             {
-#if DEBUG
-                Console.WriteLine(@"Init tabelle...");
-#endif
                 CreateTableModello();
                 CreateTableCampo();
                 CreateTableBatch();
-#if DEBUG
-                Console.WriteLine(@"Init tabelle completato.");
-#endif
             }
             catch (Exception e)
             {
                 logger.Error(string.Format("{0} | {1}", e.Source, e.Message));
-#if DEBUG
-                Console.WriteLine(e.ToString());
-#endif
             }
         }
 
@@ -561,7 +514,7 @@ namespace BatchDataEntry.Helpers
 
         #region InsertTables
 
-        public int InsertRecordBatch(Batch b)
+        public override int Insert(Batch b)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             //values.Add("Id", b.Id.ToString());
@@ -584,7 +537,7 @@ namespace BatchDataEntry.Helpers
             return -1;
         }
 
-        public int InsertRecordCampo(Campo c)
+        public override int Insert(Campo c)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             //values.Add("Id", c.Id.ToString());
@@ -601,7 +554,7 @@ namespace BatchDataEntry.Helpers
             values.Add("IdModello", c.IdModello.ToString());
             int rip = Convert.ToInt32(c.Riproponi);
             values.Add("Riproponi", rip.ToString());
-            int ds = Convert.ToInt32(c.IsDisabled);
+            int ds = Convert.ToInt32(c.IsDisabilitato);
             values.Add("Disabilitato", ds.ToString());
 
             bool r = Insert("Campo", values);
@@ -611,21 +564,25 @@ namespace BatchDataEntry.Helpers
             return -1;
         }
 
-        public int InsertRecordAutocompletamento(Autocompletamento a)
+        public int Insert(AbsSuggestion a)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
-            //values.Add("Id", a.Id.ToString());
-            values.Add("Colonna", a.Colonna.ToString());
-            values.Add("Valore", a.Valore);
-           
-            bool r = Insert("Autocompletamento", values);
-            if (r)
-                return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Autocompletamento"));
+            if(a is SuggestionSingleColumn)
+            {
+                var tmp = a as SuggestionSingleColumn;
+                values.Add("Colonna", tmp.Colonna.ToString());
+                values.Add("Valore", tmp.Valore);
 
+                bool r = Insert("Autocompletamento", values);
+                if (r)
+                    return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Autocompletamento"));
+
+                return -1;
+            }
             return -1;
         }
 
-        public int InsertRecordModello(Modello m)
+        public override int Insert(Modello m)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             if(m.Id > 0)
@@ -679,7 +636,7 @@ namespace BatchDataEntry.Helpers
 
         #region UpdateTables
 
-        public void UpdateRecordBatch(Batch b)
+        public override void Update(Batch b)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", b.Id.ToString());
@@ -697,7 +654,7 @@ namespace BatchDataEntry.Helpers
             Update("Batch", values, string.Format("Id={0}", b.Id));
         }
 
-        public void UpdateRecordCampo(Campo c)
+        public override void Update(Campo c)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", c.Id.ToString());
@@ -714,23 +671,13 @@ namespace BatchDataEntry.Helpers
             values.Add("IdModello", c.IdModello.ToString());
             int rip = Convert.ToInt32(c.Riproponi);
             values.Add("Riproponi", rip.ToString());
-            int ds = Convert.ToInt32(c.IsDisabled);
+            int ds = Convert.ToInt32(c.IsDisabilitato);
             values.Add("Disabilitato", ds.ToString());
 
             Update("Campo", values, string.Format("Id={0}", c.Id));
         }
 
-        public void UpdateRecordAutocompletamento(Autocompletamento a)
-        {
-            Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Id", a.Id.ToString());
-            values.Add("Colonna", a.Colonna.ToString());
-            values.Add("Valore", a.Valore);
-
-            Update("Autocompletamento", values, string.Format("Id={0}", a.Id));
-        }
-
-        public void UpdateRecordModello(Modello m)
+        public override void Update(Modello m)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             values.Add("Id", m.Id.ToString());
@@ -753,12 +700,12 @@ namespace BatchDataEntry.Helpers
             int b = Convert.ToInt32(d.IsIndexed);
             values.Add("isIndicizzato", b.ToString());
 
-            foreach (Voce col in d.Voci)
+            foreach (Campo col in d.Voci)
             {
-                if(string.IsNullOrEmpty(col.Value))
-                    values.Add(col.Key, string.Empty);
+                if(string.IsNullOrEmpty(col.Valore))
+                    values.Add(col.Nome, string.Empty);
                 else
-                    values.Add(col.Key, col.Value);
+                    values.Add(col.Nome, col.Valore);
             }
 
             Update("Documenti", values, string.Format("Id={0}", d.Id));
@@ -766,7 +713,7 @@ namespace BatchDataEntry.Helpers
 
         #endregion
 
-        public Batch GetBatchById(int id)
+        public override Batch GetBatchById(int id)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = string.Format("SELECT * FROM Batch WHERE Id = {0}", id);
@@ -806,7 +753,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public Campo GetCampoById(int id)
+        public override Campo GetCampoById(int id)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = string.Format("SELECT * FROM Campo WHERE Id = {0}", id);
@@ -829,7 +776,7 @@ namespace BatchDataEntry.Helpers
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
                 }
                 reader.Close();
                 return c;
@@ -845,7 +792,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public Modello GetModelloById(int id)
+        public override Modello GetModelloById(int id)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = string.Format("SELECT * FROM Modello WHERE Id = {0}", id);
@@ -907,55 +854,6 @@ namespace BatchDataEntry.Helpers
                     {
                         doc.Add(z, Convert.ToString(reader[z]));
                     }
-                }
-                reader.Close();
-                return doc;
-            }
-            catch (Exception e)
-            {
-                ErrorCatch(e);
-            }
-            finally
-            {
-                cnn.Close();
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Restituisce un Documento sotto forma di Dizionario in quanto il numero di colonne varia
-        /// da database a database.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public Dictionary<int, string> GetDocumento(string name)
-        {
-            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT * FROM Documenti WHERE FileName = '{0}'", name);
-            try
-            {
-                cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                Dictionary<int, string> doc = new Dictionary<int, string>();
-
-                while (reader.Read())
-                {
-                    int i = 0;
-                    doc.Add(i, Convert.ToString(reader["Id"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["FileName"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["Path"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
-                    i++;
-
-                    for (int z=i; z < reader.FieldCount; z++)
-                    {
-                        doc.Add(z, Convert.ToString(reader[z]));
-                        
-                    }  
                 }
                 reader.Close();
                 return doc;
@@ -1044,7 +942,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Suggestion> GetAutocompleteListOb(int column)
+        public ObservableCollection<AbsSuggestion> GetAutocompleteListOb(int column)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = string.Format("SELECT Valore FROM Autocompletamento WHERE Colonna = {0}", column);
@@ -1053,10 +951,10 @@ namespace BatchDataEntry.Helpers
                 cnn.Open();
                 SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
                 SQLiteDataReader reader = myCmd.ExecuteReader();
-                var suggestions = new ObservableCollection<Suggestion>();
+                var suggestions = new ObservableCollection<AbsSuggestion>();
 
                 while (reader.Read())
-                    suggestions.Add(new Suggestion(Convert.ToString(reader["Valore"]), string.Empty));
+                    suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader["Valore"])));
 
                 reader.Close();
                 return suggestions;
@@ -1072,7 +970,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Batch> GetBatchRecords()
+        public override ObservableCollection<Batch> GetBatchRecords()
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Batch";
@@ -1185,7 +1083,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Campo> GetCampoRecords()
+        public override ObservableCollection<Campo> GetCampoRecords()
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Campo";
@@ -1209,7 +1107,7 @@ namespace BatchDataEntry.Helpers
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
                     campi.Add(c);
                 }
 
@@ -1227,7 +1125,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Modello> GetModelloRecords()
+        public override ObservableCollection<Modello> GetModelloRecords()
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Modello";
@@ -1265,7 +1163,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Batch> BatchQuery(string query)
+        public override ObservableCollection<Batch> BatchQuery(string query)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 
@@ -1308,7 +1206,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Campo> CampoQuery(string query)
+        public override ObservableCollection<Campo> CampoQuery(string query)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             try
@@ -1331,7 +1229,7 @@ namespace BatchDataEntry.Helpers
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
                     c.IdModello = Convert.ToInt32(reader["IdModello"]);
                     c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabled = Convert.ToBoolean(reader["Disabilitato"]);
+                    c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
                     campi.Add(c);
                 }
 
@@ -1349,7 +1247,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public ObservableCollection<Modello> ModelloQuery(string query)
+        public override ObservableCollection<Modello> ModelloQuery(string query)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
 
@@ -1387,7 +1285,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public IEnumerable<Modello> IEnumerableModelli()
+        public override IEnumerable<Modello> IEnumerableModelli()
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Modello";
@@ -1423,6 +1321,30 @@ namespace BatchDataEntry.Helpers
                 cnn.Close();
             }
             return null;
+        }
+
+        public override void DeleteFromTable(string tableName, string condition)
+        {          
+            try
+            {
+                Delete(tableName, condition);
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+        }
+
+        public override void DropAllRowsFromTable(string tableName)
+        {
+            try
+            {
+                Delete(tableName, @"Id > 0");
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
         }
     }
 }

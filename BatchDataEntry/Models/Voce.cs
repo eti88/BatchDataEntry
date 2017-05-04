@@ -2,10 +2,12 @@
 using System.Linq;
 using BatchDataEntry.Providers;
 using BatchDataEntry.Helpers;
+using BatchDataEntry.Interfaces;
+using System;
 
 namespace BatchDataEntry.Models
 {
-    public class Voce : BaseModel
+    public class Voce : BaseModel, ICampo
     {
 #region Attr
         private int _id;
@@ -23,18 +25,18 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private string _key;
-        public string Key
+        private string _nome;
+        public string Nome
         {
             get
             {
-                return _key;
+                return _nome;
             }
             set
             {
-                if (_key != value)
-                    _key = value;
-                OnPropertyChanged("Key");
+                if (_nome != value)
+                    _nome = value;
+                OnPropertyChanged("Nome");
             }
         }
 
@@ -93,8 +95,6 @@ namespace BatchDataEntry.Models
             }
         }
 
-        public string AUTOCOMPLETETYPE;
-
         private Suggestion _selectedItem;
         public Suggestion AutoSelectedItem { get { return _selectedItem; } set { if (value != _selectedItem) { _selectedItem = value;
                     OnPropertyChanged("AutoSelectedItem");
@@ -131,11 +131,15 @@ namespace BatchDataEntry.Models
             }
         }
 
-#endregion
+        
+        
+        
+
+        #endregion
 
         public Voce()
         {
-            AUTOCOMPLETETYPE = "NULL";
+            VoiceType = EnumTypeOfCampo.Normale;
             IsDisabled = false;
         }
 
@@ -143,7 +147,7 @@ namespace BatchDataEntry.Models
         {
             this.Id = id;
             this.Key = key;
-            AUTOCOMPLETETYPE = "NULL";
+            VoiceType = EnumTypeOfCampo.Normale;
             IsDisabled = !enabled;
         }
 
@@ -151,7 +155,7 @@ namespace BatchDataEntry.Models
         {
             this.Key = key;
             this.Value = (string.IsNullOrEmpty(value)) ? string.Empty : value;
-            AUTOCOMPLETETYPE = "NULL";
+            VoiceType = EnumTypeOfCampo.Normale;
             IsDisabled = !enabled;
         }
 
@@ -160,43 +164,82 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Key = key;
             this.Value = (string.IsNullOrEmpty(value)) ? string.Empty : value;
-            AUTOCOMPLETETYPE = "NULL";
+            VoiceType = EnumTypeOfCampo.Normale;
             IsDisabled = !enabled;
         }
 
-        public Voce(int id, string key, bool autocomp, string autoType, bool enabled = true)
+        // Usato per l'inizializzazione del csv 
+        public Voce(int id, string key, bool autocomp, EnumTypeOfCampo autoType, bool enabled)
         {
             this.Id = id;
             this.Key = key;
             this.IsAutocomplete = autocomp;
             this.Value = string.Empty;
-            AUTOCOMPLETETYPE = autoType;
+            VoiceType = autoType;
             IsDisabled = !enabled;
-            QueryProviderSelector(autoType, id);
+            QueryProviderSelector(autoType);
         }
 
-        public Voce(int id, string key, string valu, bool autocomp, string autoType, bool enabled = true)
+        // Usato per l'inizializzazione del csv versione con Valore
+        public Voce(int id, string key, string value, bool autocomp, EnumTypeOfCampo autoType, bool enabled)
+        {
+            this.Id = id;
+            this.Key = key;
+            this.Value = value;
+            this.IsAutocomplete = autocomp;
+            this.Value = string.Empty;
+            VoiceType = autoType;
+            IsDisabled = !enabled;
+            QueryProviderSelector(autoType);
+        }
+
+        public Voce(int id, string key, bool autocomp, EnumTypeOfCampo autoType, bool enabled, string table, int tabcol)
         {
             this.Id = id;
             this.Key = key;
             this.IsAutocomplete = autocomp;
-            AUTOCOMPLETETYPE = autoType;
+            this.Value = string.Empty;
+            VoiceType = autoType;
             IsDisabled = !enabled;
-            this.Value = (string.IsNullOrEmpty(valu)) ? string.Empty : valu;
-            QueryProviderSelector(autoType, id);
+            QueryProviderSelector(autoType, id, table, tabcol);
         }
 
-        private async void QueryProviderSelector(string tp, int id)
+        public Voce(int id, string key, string valu, bool autocomp, EnumTypeOfCampo autoType, bool enabled, string table, int tabcol)
         {
-            if (tp.Equals("CSV"))
+            this.Id = id;
+            this.Key = key;
+            this.IsAutocomplete = autocomp;
+            VoiceType = autoType;
+            IsDisabled = !enabled;
+            this.Value = (string.IsNullOrEmpty(valu)) ? string.Empty : valu;
+            QueryProviderSelector(autoType, id, table, tabcol);
+        }
+
+        private async void QueryProviderSelector(EnumTypeOfCampo tp)
+        {
+            if (tp == EnumTypeOfCampo.AutocompletamentoCsv)
             {
                 var csv = new CsvSuggestionProvider();
                 QueryProvider = csv.ListOfSuggestions.ToList();
             }
-            else if (tp.Equals("DB"))
-            { 
+        }
+
+        private async void QueryProviderSelector(EnumTypeOfCampo tp, int id)
+        {
+            if (tp == EnumTypeOfCampo.AutocompletamentoDbSqlite)
+            {
                 dbQueryProvider = await DbSuggestionProvider.GetRecords(id);
-            }       
+            }
+        }
+
+        // Per il momento utilizziamo sempre la prima colonna Nel caso basta aggiungere un campo nella definizione della nuova colonna per la selezione specifica
+        private async void QueryProviderSelector(EnumTypeOfCampo tp, int id, string table, int tableColumn = 1)
+        {
+            if (tp == EnumTypeOfCampo.AutocompletamentoDbSql)
+            {
+                if (string.IsNullOrWhiteSpace(table) || tableColumn < 1) return;
+                dbQueryProvider = await DbSqlSuggestionProvider.GetRecords(id, table, tableColumn);
+            }
         }
 
         public override string ToString()
@@ -204,5 +247,9 @@ namespace BatchDataEntry.Models
             return string.Format("[Key: {0}, Value: {1}, AutocompleteList: {2}]", this.Id, this.Key, this.Value);
         }
 
+        public void QueryProviderSelector()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

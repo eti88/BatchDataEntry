@@ -212,17 +212,21 @@ namespace BatchDataEntry.ViewModels
             if(dbsql == null)
             {
                 DatabaseHelper maindb = new DatabaseHelper();
-                maindb.UpdateRecordBatch(Batch);
+                maindb.Update(Batch);
             }
             else
                 dbsql.Update(Batch);
 
-            // controllare se bisogna salvare il valore inserito per l'autocomletamento
+            // controllare se bisogna salvare il valore inserito per l'autocomletamento in base al tipo di database usato
             foreach (var col in DocFile.Voci)
-            {
+            {        
+                /*
+                 * TODO: Se richiesto modificarne il funzionamento
+                 * Attualmente se si uitlizza il server mssql non è implementata una funzione di aggiunta dei valori all'autocompletamento
+                 */
                 try
                 {
-                    if (col.IsAutocomplete == true && col.AUTOCOMPLETETYPE.Equals("DB"))
+                    if (col.IsAutocomplete == true && col.VoiceType == EnumTypeOfCampo.AutocompletamentoDbSqlite)
                     {
                         if (!string.IsNullOrEmpty(col.Value) && col.Id > 0)
                         {

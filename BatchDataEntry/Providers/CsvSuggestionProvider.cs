@@ -8,12 +8,14 @@ using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using CsvHelper;
 using WpfControls.Editors;
+using BatchDataEntry.Abstracts;
+using BatchDataEntry.Suggestions;
 
 namespace BatchDataEntry.Providers
 {
     public class CsvSuggestionProvider: ISuggestionProvider
     {
-        public IEnumerable<Suggestion> ListOfSuggestions { get; set; }
+        public IEnumerable<AbsSuggestion> ListOfSuggestions { get; set; }
 
         public CsvSuggestionProvider()
         {
@@ -21,7 +23,7 @@ namespace BatchDataEntry.Providers
             ListOfSuggestions = suggestions;
         }
 
-        public static IEnumerable<Suggestion> GetCsvRecords()
+        public static IEnumerable<AbsSuggestion> GetCsvRecords()
         {
             Batch b;
             // Carica il batch corrente dalle impostazioni (controllare se presente)  
@@ -58,7 +60,7 @@ namespace BatchDataEntry.Providers
                     if (c.IndicePrimario) colIdx = c.Posizione;
                     if (c.IndiceSecondario) colSec = c.Posizione;
                 }
-                IEnumerable<Suggestion> task;
+                IEnumerable<AbsSuggestion> task;
                 if (colSec == 0)
                     task = GetSingleColumnList(b.Applicazione.PathFileCsv, b.Applicazione.Separatore, colIdx);
                 else
@@ -75,9 +77,9 @@ namespace BatchDataEntry.Providers
             }
         }
 
-        private static IEnumerable<Suggestion> GetSingleColumnList(string file, string separator, int column)
+        private static IEnumerable<AbsSuggestion> GetSingleColumnList(string file, string separator, int column)
         {
-            var lst = new List<Suggestion>();
+            var lst = new List<AbsSuggestion>();
             if (File.Exists(file))
             {
                 using (var sr = new StreamReader(file))
@@ -86,7 +88,7 @@ namespace BatchDataEntry.Providers
                     csv.Configuration.Delimiter = separator;
                     while (csv.Read())
                     {
-                        lst.Add(new Suggestion(csv.GetField<string>(column), string.Empty));
+                        lst.Add(new SuggestionSingleColumn(csv.GetField<string>(column)));
                     }
                 }
             }
@@ -94,9 +96,9 @@ namespace BatchDataEntry.Providers
             return lst;
         }
 
-        private static IEnumerable<Suggestion> GetDoubleColumnList(string file, string separator, int colA, int colB)
+        private static IEnumerable<AbsSuggestion> GetDoubleColumnList(string file, string separator, int colA, int colB)
         {
-            var ret = new List<Suggestion>();
+            var ret = new List<AbsSuggestion>();
 
             string[,] lst;
             if (File.Exists(file))
@@ -105,7 +107,7 @@ namespace BatchDataEntry.Providers
                 int len = lst.Length / 2;
                 for (int i = 0; i < len; i++)
                 {
-                    ret.Add(new Suggestion(lst[i, 0], lst[i, 1]));
+                    ret.Add(new SuggestionDoubleColumn(lst[i, 0], lst[i, 1]));
                 }
             }
 
@@ -115,7 +117,11 @@ namespace BatchDataEntry.Providers
         public IEnumerable GetSuggestions(string filter)
         {
             if (string.IsNullOrWhiteSpace(filter) && ListOfSuggestions == null) return null;
-            var results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(item.ColumnA) && item.ColumnA.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase));
+            IEnumerable<AbsSuggestion> results = new List<AbsSuggestion>();
+            if(this.ListOfSuggestions.GetType().GetElementType() is SuggestionDoubleColumn)
+                results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionDoubleColumn)item).ColumnA) && ((SuggestionDoubleColumn)item).ColumnA.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase));
+            else if(this.ListOfSuggestions.GetType().GetElementType() is SuggestionSingleColumn)
+                results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionSingleColumn)item).Valore) && ((SuggestionSingleColumn)item).Valore.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase));
             return results.ToList();
         }
     }

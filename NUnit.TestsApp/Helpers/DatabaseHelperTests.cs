@@ -134,14 +134,6 @@ namespace BatchDataEntry.Helpers.Tests
             Assert.IsNotNull(dt);
             Assert.IsTrue(dt.Columns.Count > 0);
         }
-        
-        [Test(), Order(12)]
-        public void GetDocumentoTest1()
-        {
-            Dictionary<int, string> expected = cacheTestDb.GetDocumento(@"ciao");
-            Assert.IsNotNull(expected);
-            Assert.IsTrue(expected.Count > 0);
-        }
 
         [Test(), Order(13)]
         public void GetDocumentsTest()

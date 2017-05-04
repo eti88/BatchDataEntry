@@ -2,64 +2,28 @@
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using System.Collections.Generic;
 
 namespace BatchDataEntry.ViewModels
 {
     public class ViewModelNuovaColonna : ViewModelBase
     {
         private DatabaseHelperSqlServer dbsql;
-
-        public ViewModelNuovaColonna()
-        {
-            this.alreadyExist = false;
-        }
-
-        public ViewModelNuovaColonna(DatabaseHelperSqlServer db)
-        {
-            this.alreadyExist = false;
-        }
-
-        public ViewModelNuovaColonna(Campo c, bool needUpdate, DatabaseHelperSqlServer dbq)
-        {
-            DatabaseHelper dblite;
-            Modello mod;
-            this.SelectedCampo = c;
-            this.alreadyExist = needUpdate;
-            if (dbq != null)
-            {
-                dbsql = dbq;
-                mod = dbsql.GetModelloById(c.IdModello);
-            }
-            else
-            {
-                dblite = new DatabaseHelper();
-                mod = dblite.GetModelloById(c.IdModello);
-            } 
-            this.NomeTabella = mod.Nome;
-        }
-
-        public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount, DatabaseHelperSqlServer dbq)
-        {
-            DatabaseHelper dblite;
-            Modello mod;
-
-            this.SelectedCampo = c;
-            this.alreadyExist = needUpdate;
-            if(dbq != null)
-            {
-                dbsql = dbq;
-                mod = dbsql.GetModelloById(c.IdModello);
-            }
-            else
-            {
-                dblite = new DatabaseHelper();
-                mod = dblite.GetModelloById(c.IdModello);
-            }
-            this.SelectedCampo.Posizione = colCount++;
-            this.NomeTabella = mod.Nome;
-        }
-
         private bool alreadyExist = false;
+
+        private List<string> _srcTables;
+        public List<string> SrcTables
+        {
+            get { return _srcTables; }
+            set
+            {
+                if(_srcTables != value)
+                {
+                    _srcTables = value;
+                    RaisePropertyChanged("SrcTables");
+                }
+            }
+        }
 
         private Campo _selectCampo;
         public Campo SelectedCampo
@@ -104,7 +68,6 @@ namespace BatchDataEntry.ViewModels
         {
             get { return this.alreadyExist; }
         }
-
         private bool CanSave
         {
             get
@@ -115,6 +78,66 @@ namespace BatchDataEntry.ViewModels
                     return false;
             }
         }
+
+        #region Constructors
+
+        public ViewModelNuovaColonna()
+        {
+            this.alreadyExist = false;
+            SrcTables = new List<string>();
+        }
+
+        public ViewModelNuovaColonna(DatabaseHelperSqlServer db)
+        {
+            this.alreadyExist = false;
+            SrcTables = db.GetTableList();
+        }
+
+        public ViewModelNuovaColonna(Campo c, bool needUpdate, DatabaseHelperSqlServer dbq)
+        {
+            DatabaseHelper dblite;
+            Modello mod;
+            this.SelectedCampo = c;
+            this.alreadyExist = needUpdate;
+            if (dbq != null)
+            {
+                dbsql = dbq;
+                mod = dbsql.GetModelloById(c.IdModello);
+                SrcTables = dbsql.GetTableList();
+            }
+            else
+            {
+                dblite = new DatabaseHelper();
+                mod = dblite.GetModelloById(c.IdModello);
+                SrcTables = new List<string>();
+            }
+            this.NomeTabella = mod.Nome;                      
+        }
+
+        public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount, DatabaseHelperSqlServer dbq)
+        {
+            DatabaseHelper dblite;
+            Modello mod;
+
+            this.SelectedCampo = c;
+            this.alreadyExist = needUpdate;
+            if (dbq != null)
+            {
+                dbsql = dbq;
+                mod = dbsql.GetModelloById(c.IdModello);
+                SrcTables = dbsql.GetTableList();
+            }
+            else
+            {
+                dblite = new DatabaseHelper();
+                mod = dblite.GetModelloById(c.IdModello);
+                SrcTables = new List<string>();
+            }
+            this.SelectedCampo.Posizione = colCount++;
+            this.NomeTabella = mod.Nome;            
+        }
+
+        #endregion
 
         public void AddNewItem()
         {
