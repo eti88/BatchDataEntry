@@ -1,5 +1,8 @@
-﻿using BatchDataEntry.Helpers;
+﻿using BatchDataEntry.Abstracts;
+using BatchDataEntry.Helpers;
 using BatchDataEntry.Interfaces;
+using BatchDataEntry.Providers;
+using BatchDataEntry.Suggestions;
 using System;
 using System.Collections.Generic;
 
@@ -201,8 +204,8 @@ namespace BatchDataEntry.Models
                 } }
         }
 
-        private ISuggestion _selected;
-        public ISuggestion ElementoSelezionato {
+        private AbsSuggestion _selected;
+        public AbsSuggestion ElementoSelezionato {
             get { return _selected; }
             set
             {
@@ -227,8 +230,8 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private List<ISuggestion> _qprov;
-        public List<ISuggestion> QueryProvider {
+        private List<AbsSuggestion> _qprov;
+        public List<AbsSuggestion> QueryProvider {
             get { return _qprov; }
             set
             {
@@ -246,6 +249,26 @@ namespace BatchDataEntry.Models
          futuri inserimenti.
          */
 
+        public Campo(string nome, string valore)
+        {
+            Id = 0;
+            Nome = nome;
+            Valore = valore;
+            Posizione = -1;
+            ValorePredefinito = string.Empty;
+            TabellaSorgente = string.Empty;
+            IndicePrimario = false;
+            IndiceSecondario = false;
+            TipoCampo = EnumTypeOfCampo.Normale;
+            IdModello = 0;
+            Riproponi = false;
+            IsDisabilitato = false;
+            ElementoSelezionato = null;
+            ElementoSelezionatoValore = string.Empty;
+            QueryProvider = new List<AbsSuggestion>();
+            SetConfigBasedOnType();
+        }
+
         public Campo() {
             Id = 0;
             Nome = string.Empty;
@@ -261,7 +284,7 @@ namespace BatchDataEntry.Models
             IsDisabilitato = false;
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<ISuggestion>();
+            QueryProvider = new List<AbsSuggestion>();
             SetConfigBasedOnType();
         }
 
@@ -294,7 +317,7 @@ namespace BatchDataEntry.Models
             IsDisabilitato = isDisabilitato;
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<ISuggestion>();
+            QueryProvider = new List<AbsSuggestion>();
             SetConfigBasedOnType();
         }
 
@@ -329,7 +352,7 @@ namespace BatchDataEntry.Models
             IsDisabilitato = isDisabilitato;
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<ISuggestion>();
+            QueryProvider = new List<AbsSuggestion>();
             SetConfigBasedOnType();
         }
 
@@ -365,7 +388,7 @@ namespace BatchDataEntry.Models
             IsDisabilitato = isDisabilitato;
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<ISuggestion>();
+            QueryProvider = new List<AbsSuggestion>();
             SetConfigBasedOnType();
         }
 
@@ -402,7 +425,7 @@ namespace BatchDataEntry.Models
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
             _sourceTableColumn = sourcetabcol;
-            QueryProvider = new List<ISuggestion>();
+            QueryProvider = new List<AbsSuggestion>();
             SetConfigBasedOnType();
         }
  
@@ -440,7 +463,7 @@ namespace BatchDataEntry.Models
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
             _sourceTableColumn = sourcetabcol;
-            QueryProvider = new List<ISuggestion>();
+            QueryProvider = new List<AbsSuggestion>();
             SetConfigBasedOnType();
         }
 
@@ -479,7 +502,7 @@ namespace BatchDataEntry.Models
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
             _sourceTableColumn = sourcetabcol;
-            QueryProvider = new List<ISuggestion>();
+            QueryProvider = new List<AbsSuggestion>();
             SetConfigBasedOnType();
         }
 
@@ -501,90 +524,6 @@ namespace BatchDataEntry.Models
             _sourceTableColumn = campo._sourceTableColumn;
             QueryProvider = campo.QueryProvider;
         }
-
-        //public Campo() {
-        //    Id = 0;
-        //    Nome = string.Empty;
-        //    Posizione = 0;
-        //    SalvaValori = false;
-        //    ValorePredefinito = string.Empty;
-        //    IndicePrimario = false;
-        //    IndiceSecondario = false;
-        //    TipoCampo = 0;
-        //    IdModello = -1;
-        //    Riproponi = false;
-        //    IsDisabled = false;
-        //    SourceTableAutocomplete = string.Empty;
-        //}
-
-        //public Campo(string nome, bool sv, string vp, bool ip)
-        //{
-        //    this.Nome = nome;
-        //    this.SalvaValori = sv;
-        //    this.ValorePredefinito = vp;
-        //    this.IndicePrimario = ip;
-        //    this.IndiceSecondario = false;
-        //    this.TipoCampo = 0;
-        //    this.Riproponi = false;
-        //    SourceTableAutocomplete = string.Empty;
-        //}
-
-        //public Campo(string nome, bool sv, string vp, bool ip, bool rip, bool disab)
-        //{
-        //    this.Nome = nome;
-        //    this.SalvaValori = sv;
-        //    this.ValorePredefinito = vp;
-        //    this.IndicePrimario = ip;
-        //    this.TipoCampo = 0;
-        //    this.Riproponi = rip;
-        //    this.IsDisabled = disab;
-        //    SourceTableAutocomplete = string.Empty;
-        //}
-
-        //public Campo(int id, string nome, bool sv, string vp, bool ip, bool rip, bool disab)
-        //{
-        //    this.Id = id;
-        //    this.Nome = nome;
-        //    this.SalvaValori = sv;
-        //    this.ValorePredefinito = vp;
-        //    this.IndicePrimario = ip;
-        //    this.TipoCampo = 0;
-        //    this.Riproponi = rip;
-        //    this.IsDisabled = disab;
-        //    SourceTableAutocomplete = string.Empty;
-        //}
-
-        //public Campo(int id, string nome, int po, bool sv, string vp, bool ip, bool sc, bool disab, int fk)
-        //{
-        //    this.Id = id;
-        //    this.Nome = nome;
-        //    this.Posizione = po;
-        //    this.SalvaValori = sv;
-        //    this.ValorePredefinito = vp;
-        //    this.IndicePrimario = ip;
-        //    this.TipoCampo = 0;
-        //    this.IdModello = fk;
-        //    this.IsDisabled = disab;
-        //    this.IndiceSecondario = sc;
-        //    SourceTableAutocomplete = string.Empty;
-        //}
-
-        //public Campo(Campo _campo)
-        //{
-        //    if(_campo == null) return;
-        //    this.Id = _campo.Id;
-        //    this.Nome = _campo.Nome;
-        //    this.Posizione = _campo.Posizione;
-        //    this.SalvaValori = _campo.SalvaValori;
-        //    this.ValorePredefinito = _campo.ValorePredefinito;
-        //    this.IndicePrimario = _campo.IndicePrimario;
-        //    this.IndiceSecondario = _campo.IndiceSecondario;
-        //    this.TipoCampo = _campo.TipoCampo;
-        //    this.IdModello = _campo.IdModello;
-        //    this.Riproponi = _campo.Riproponi;
-        //    this.IsDisabled = _campo.IsDisabled;
-        //    this.SourceTableAutocomplete = _campo.SourceTableAutocomplete;
-        //}
 
         public void SetConfigBasedOnType()
         {
@@ -642,9 +581,23 @@ namespace BatchDataEntry.Models
             return String.Format("{this.Id},{this.TipoCampo},{this.Nome},{this.Valore}),{this.SalvaValori}");
         }
 
-        public void QueryProviderSelector()
+        public async void QueryProviderSelector()
         {
-            throw new NotImplementedException();
+            if (TipoCampo == EnumTypeOfCampo.Normale) return;
+            if(TipoCampo == EnumTypeOfCampo.AutocompletamentoCsv)
+            {
+                var csv = new CsvSuggestionProvider();
+                QueryProvider = (List<AbsSuggestion>)csv.ListOfSuggestions;
+            }else if(TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
+            {
+                QueryProvider = await DbSuggestionProvider.GetRecords(Posizione);
+            }
+            else if(TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
+            {
+                if (string.IsNullOrWhiteSpace(TabellaSorgente) || _sourceTableColumn < 1)
+                    throw new Exception("QueryProviderSelector mancano argomenti");
+                QueryProvider = await DbSqlSuggestionProvider.GetRecords(this.Posizione, SourceTableAutocomplete, _sourceTableColumn);
+            }
         }
     }
 }

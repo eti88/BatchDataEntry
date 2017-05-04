@@ -119,9 +119,9 @@ namespace BatchDataEntry.Providers
             if (string.IsNullOrWhiteSpace(filter) && ListOfSuggestions == null) return null;
             IEnumerable<AbsSuggestion> results = new List<AbsSuggestion>();
             if(this.ListOfSuggestions.GetType().GetElementType() is SuggestionDoubleColumn)
-                results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionDoubleColumn)item).ColumnA) && ((SuggestionDoubleColumn)item).ColumnA.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase));
+                results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionDoubleColumn)item).ColumnA) && ((SuggestionDoubleColumn)item).ColumnA.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase)).ToList();
             else if(this.ListOfSuggestions.GetType().GetElementType() is SuggestionSingleColumn)
-                results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionSingleColumn)item).Valore) && ((SuggestionSingleColumn)item).Valore.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase));
+                results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionSingleColumn)item).Valore) && ((SuggestionSingleColumn)item).Valore.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase)).ToList();
             return results.ToList();
         }
     }

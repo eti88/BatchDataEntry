@@ -58,8 +58,8 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private ObservableCollection<Voce> _voci;
-        public ObservableCollection<Voce> Voci
+        private ObservableCollection<Campo> _voci;
+        public ObservableCollection<Campo> Voci
         {
             get { return _voci; }
             set
@@ -81,12 +81,12 @@ namespace BatchDataEntry.Models
         {
             this.Id = 0;
             this.Path = "";
-            this.Voci = new ObservableCollection<Voce>();
+            this.Voci = new ObservableCollection<Campo>();
         }
 
         public Document(Batch b, Dictionary<int, string> dictionary)
         {
-            this.Voci = new ObservableCollection<Voce>();
+            this.Voci = new ObservableCollection<Campo>();
             if(b.Applicazione.Id == 0)
                 b.Applicazione.LoadCampi();
             if(b.Applicazione.Campi.Count == 0)
@@ -135,7 +135,7 @@ namespace BatchDataEntry.Models
                     // normale (con val)
                     else if (!string.IsNullOrEmpty(row.Value))
                     {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).IsDisabled));
+                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).Is));
                     }
                     // ALTRIMENTI Normale (senza val)
                     else
@@ -176,7 +176,7 @@ namespace BatchDataEntry.Models
             this.FileName = name;
             this.Path = path;
             this.IsIndexed = indexed;
-            this.Voci = new ObservableCollection<Voce>();
+            this.Voci = new ObservableCollection<Campo>();
         }
 
         public Document(Document dc)
@@ -185,25 +185,26 @@ namespace BatchDataEntry.Models
             this.FileName = dc.FileName;
             this.Path = dc.Path;
             this.IsIndexed = dc.IsIndexed;
-            this.Voci = new ObservableCollection<Voce>();
+            this.Voci = new ObservableCollection<Campo>();
         }
 
-        public void AddInputsToPanel(Batch b, DatabaseHelper db)
-        {
-            ObservableCollection<Voce> voci = new ObservableCollection<Voce>();         
-            foreach (Campo campo in b.Applicazione.Campi)
-            {
-                if (b.Applicazione.CsvColumn == campo.Posizione)
-                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoCsv, campo.IsDisabled));
-                else if(campo.SalvaValori && campo.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
-                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSqlite, campo.IsDisabled));
-                else if (campo.SalvaValori && campo.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
-                    voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSql, campo.IsDisabled));
-                else
-                    voci.Add(new Voce(campo.Posizione, campo.Nome, campo.IsDisabled));
-            }          
-            this.Voci = voci;
-        }
+        // Può essere rimosso ?
+        //public void AddInputsToPanel(Batch b, DatabaseHelper db)
+        //{
+        //    var voci = new ObservableCollection<Campo>();         
+        //    foreach (Campo campo in b.Applicazione.Campi)
+        //    {
+        //        if (b.Applicazione.CsvColumn == campo.Posizione)
+        //            voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoCsv, campo.IsDisabilitato));
+        //        else if(campo.SalvaValori && campo.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
+        //            voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSqlite, campo.IsDisabilitato));
+        //        else if (campo.SalvaValori && campo.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
+        //            voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSql, campo.IsDisabilitato));
+        //        else
+        //            voci.Add(new Voce(campo.Posizione, campo.Nome, campo.IsDisabilitato));
+        //    }          
+        //    this.Voci = voci;
+        //}
 
         private bool GetBool(string val)
         {

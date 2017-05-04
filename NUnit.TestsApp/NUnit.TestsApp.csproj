@@ -67,7 +67,6 @@
     <Compile Include="Models\DbCredentialTests.cs" />
     <Compile Include="Models\DocumentTests.cs" />
     <Compile Include="Models\ModelloTests.cs" />
-    <Compile Include="Models\VoceTests.cs" />
     <Compile Include="NavigationListTests.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

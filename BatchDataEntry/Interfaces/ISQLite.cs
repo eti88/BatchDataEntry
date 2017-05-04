@@ -29,7 +29,7 @@ namespace BatchDataEntry.Interfaces
         Dictionary<int, string> GetDocumento(int id);
         NavigationList<Dictionary<int, string>> GetDocuments();
 
-        int Insert(AbsSuggestion a);
+        int Insert(SuggestionSingleColumn a);
 
         void InitTabs();
         void CreateCacheDb(List<string> columns);
@@ -42,7 +42,7 @@ namespace BatchDataEntry.Interfaces
         List<Document> GetDocumentsListPartial();
         List<Document> GetDocumentsListPartial(string query);
 
-        List<string> GetAutocompleteList(int column);
+        List<AbsSuggestion> GetAutocompleteList(int column);
         ObservableCollection<AbsSuggestion> GetAutocompleteListOb(int column);
     }
 }

@@ -241,7 +241,6 @@
     <Compile Include="Models\ExportColumn.cs" />
     <Compile Include="Suggestions\SuggestionDoubleColumn.cs" />
     <Compile Include="Models\TipoFileProcessato.cs" />
-    <Compile Include="Models\Voce.cs" />
     <Compile Include="Providers\CsvSuggestionProvider.cs" />
     <Compile Include="Providers\DbSqlSuggestionProvider.cs" />
     <Compile Include="Providers\DbSuggestionProvider.cs" />

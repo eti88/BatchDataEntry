@@ -221,7 +221,7 @@ namespace BatchDataEntry.ViewModels
                 // Il batch è già esistente e quindi si effettua un update              
                 Batch batch = new Batch(CurrentBatch);
                 if (dbsql == null)
-                    db.UpdateRecordBatch(batch);
+                    db.Update(batch);
                 else
                     dbsql.Update(batch);
                 RaisePropertyChanged("Batches");             
@@ -230,7 +230,7 @@ namespace BatchDataEntry.ViewModels
             {
                 Batch batch = new Batch(CurrentBatch);
                 if (dbsql == null)
-                    db.InsertRecordBatch(batch);
+                    db.Insert(batch);
                 else
                     dbsql.Insert(batch);
                 RaisePropertyChanged("Batches");
@@ -316,7 +316,7 @@ namespace BatchDataEntry.ViewModels
                             string colName = b.Applicazione.Campi.ElementAt(z).Nome;
                             
                             string celValue = (z < cells.Length && !string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
-                            doc.Voci.Add(new Voce(colName, celValue));
+                            doc.Voci.Add(new Campo(colName, celValue));
                         }
 
                     }
@@ -387,7 +387,7 @@ namespace BatchDataEntry.ViewModels
                             string valore = (string.IsNullOrEmpty(b.Applicazione.Campi.ElementAt(z).ValorePredefinito))
                                 ? ""
                                 : b.Applicazione.Campi.ElementAt(z).ValorePredefinito;
-                            doc.Voci.Add(new Voce(colName, valore));
+                            doc.Voci.Add(new Campo(colName, valore));
                         }
                     } 
                     db.InsertRecordDocumento(b, doc);

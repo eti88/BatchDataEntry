@@ -1,4 +1,5 @@
-﻿using BatchDataEntry.Helpers;
+﻿using BatchDataEntry.Abstracts;
+using BatchDataEntry.Helpers;
 using System.Collections.Generic;
 
 namespace BatchDataEntry.Interfaces
@@ -22,9 +23,9 @@ namespace BatchDataEntry.Interfaces
 
         // Attributi aggiuntivi incorporati per il modello voce
         string Valore { get; set; }
-        ISuggestion ElementoSelezionato { get; set; }
+        AbsSuggestion ElementoSelezionato { get; set; }
         string ElementoSelezionatoValore { get; set; }
-        List<ISuggestion> QueryProvider { get; set; }
+        List<AbsSuggestion> QueryProvider { get; set; }
 
         void QueryProviderSelector();
     }

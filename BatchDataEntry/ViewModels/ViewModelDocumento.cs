@@ -12,6 +12,7 @@ using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using MoonPdfLib;
 using NLog;
+using BatchDataEntry.Suggestions;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -205,7 +206,7 @@ namespace BatchDataEntry.ViewModels
             for (int z = 0; z < Batch.Applicazione.Campi.Count; z++)
             {
                 if (Batch.Applicazione.Campi[z].Riproponi)
-                    repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Value);
+                    repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Valore);
             }
             Batch.UltimoIndicizzato = DocFiles.CurrentIndex + 1;
 
@@ -226,14 +227,14 @@ namespace BatchDataEntry.ViewModels
                  */
                 try
                 {
-                    if (col.IsAutocomplete == true && col.VoiceType == EnumTypeOfCampo.AutocompletamentoDbSqlite)
+                    if (col.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
                     {
-                        if (!string.IsNullOrEmpty(col.Value) && col.Id > 0)
+                        if (!string.IsNullOrEmpty(col.Valore) && col.Id > 0)
                         {
-                            var auto = new Autocompletamento();
+                            var auto = new SuggestionSingleColumn();
                             auto.Colonna = col.Id;
-                            auto.Valore = col.Value;
-                            _db.InsertRecordAutocompletamento(auto);
+                            auto.Valore = col.Valore;
+                            _db.Insert(auto);
                         }  
                     }
                 }
@@ -264,7 +265,7 @@ namespace BatchDataEntry.ViewModels
                 for (int i = 0; i < repeatValues.Length; i++)
                 {
                     if (!string.IsNullOrEmpty(repeatValues[i]))
-                        DocFile.Voci.ElementAt(i).Value = repeatValues[i];
+                        DocFile.Voci.ElementAt(i).Valore = repeatValues[i];
                 }
                 PdfWrapper.OpenFile(DocFile.Path);
             }
@@ -283,7 +284,7 @@ namespace BatchDataEntry.ViewModels
                 for (int i = 0; i < repeatValues.Length; i++)
                 {
                     if (!string.IsNullOrEmpty(repeatValues[i]))
-                        DocFile.Voci.ElementAt(i).Value = repeatValues[i];
+                        DocFile.Voci.ElementAt(i).Valore = repeatValues[i];
                 }
                 PdfWrapper.OpenFile(DocFile.Path);
             }
@@ -301,7 +302,7 @@ namespace BatchDataEntry.ViewModels
             if(dbsql == null)
             {
                 DatabaseHelper maindb = new DatabaseHelper();
-                maindb.UpdateRecordBatch(Batch);
+                maindb.Update(Batch);
             }
             else
                 dbsql.Update(Batch);
@@ -311,7 +312,7 @@ namespace BatchDataEntry.ViewModels
 
         public void EnterActionFunction(object parameter)
         {
-            var sugg = parameter as Suggestion;
+            var sugg = parameter as SuggestionDoubleColumn;
 
             if (sugg == null) return;
 
@@ -332,7 +333,7 @@ namespace BatchDataEntry.ViewModels
             {
                 if (i < countVoci)
                 {
-                    DocFile.Voci[i].Value = record[i];
+                    DocFile.Voci[i].Valore = record[i];
                 }
             }
             RaisePropertyChanged("ViewModelDocumento");

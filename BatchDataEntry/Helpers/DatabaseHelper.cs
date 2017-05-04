@@ -564,7 +564,7 @@ namespace BatchDataEntry.Helpers
             return -1;
         }
 
-        public int Insert(AbsSuggestion a)
+        public int Insert(SuggestionSingleColumn a)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
             if(a is SuggestionSingleColumn)
@@ -614,13 +614,13 @@ namespace BatchDataEntry.Helpers
 
             for (int i = 0; i < d.Voci.Count; i++)
             {
-                if (string.IsNullOrEmpty(d.Voci[i].Value))
-                    values.Add(d.Voci[i].Key, string.Empty);
+                if (string.IsNullOrEmpty(d.Voci[i].Valore))
+                    values.Add(d.Voci[i].Nome, string.Empty);
                 else
-                    values.Add(b.Applicazione.Campi.ElementAt(i).Nome, d.Voci[i].Value);
+                    values.Add(b.Applicazione.Campi.ElementAt(i).Nome, d.Voci[i].Valore);
             }
 
-            foreach (Voce col in d.Voci)
+            foreach (Campo col in d.Voci)
             {
                 
             }
@@ -914,7 +914,7 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public List<string> GetAutocompleteList(int column)
+        public List<AbsSuggestion> GetAutocompleteList(int column)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = string.Format("SELECT Valore FROM Autocompletamento WHERE Colonna = {0}", column);
@@ -923,10 +923,10 @@ namespace BatchDataEntry.Helpers
                 cnn.Open();
                 SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
                 SQLiteDataReader reader = myCmd.ExecuteReader();
-                List<string> suggestions = new List<string>();
+                var suggestions = new List<AbsSuggestion>();
 
                 while (reader.Read())
-                    suggestions.Add(Convert.ToString(reader["Valore"]));
+                    suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader["Valore"])));
 
                 reader.Close();
                 return suggestions;

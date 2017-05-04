@@ -10,23 +10,15 @@ namespace BatchDataEntry.Helpers
         {
             FrameworkElement element = container as FrameworkElement;
 
-            Voce voce = item as Voce;
-            if (voce.IsAutocomplete && voce.VoiceType == EnumTypeOfCampo.AutocompletamentoCsv)
-            {
+            Campo voce = item as Campo;
+            if (voce.TipoCampo == EnumTypeOfCampo.AutocompletamentoCsv)
                 return element.FindResource("AutocompleteCsvDataTemplate") as DataTemplate;
-            }else if (voce.IsAutocomplete && voce.VoiceType == EnumTypeOfCampo.AutocompletamentoDbSqlite)
-            {
+            else if (voce.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
                 return element.FindResource("AutocompleteDbDataTemplate") as DataTemplate;
-            }
-            else if (voce.IsAutocomplete && voce.VoiceType == EnumTypeOfCampo.AutocompletamentoDbSql)
-            {
+            else if (voce.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
                 return element.FindResource("AutocompleteDbSqlDataTemplate") as DataTemplate;
-            }
             else
-            {
                 return element.FindResource("TextBoxDataTemplate") as DataTemplate;
-            }
-
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using BatchDataEntry.Abstracts;
 using BatchDataEntry.Interfaces;
 using BatchDataEntry.Models;
+using BatchDataEntry.Suggestions;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -900,10 +901,10 @@ namespace BatchDataEntry.Helpers
             return null;
         }
 
-        public List<string> GetAutocompleteList(string tableName, int columnTable)
+        public List<AbsSuggestion> GetAutocompleteList(string tableName, int columnTable)
         {
             if (cnn == null) return null;
-            var suggestions = new List<string>();
+            var suggestions = new List<AbsSuggestion>();
             string sql = string.Format("SELECT * FROM {0}", tableName);
             try
             {
@@ -911,7 +912,7 @@ namespace BatchDataEntry.Helpers
                 SqlCommand cmd = new SqlCommand(sql, cnn);
                 SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
-                    suggestions.Add(Convert.ToString(reader[columnTable]));
+                    suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader[columnTable])));
                 reader.Close();
                 //return suggestions;
             }
