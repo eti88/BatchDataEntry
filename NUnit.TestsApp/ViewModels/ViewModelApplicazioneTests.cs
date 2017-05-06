@@ -1,4 +1,5 @@
-﻿using BatchDataEntry.Helpers;
+﻿using BatchDataEntry.Abstracts;
+using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.ViewModels;
 using NUnit.Framework;
@@ -12,7 +13,7 @@ namespace NUnit.TestsApp.ViewModels
     {
         protected ViewModelApplicazione vm;
         protected ViewModelApplicazione vm2; // sqlite db
-        protected DatabaseHelperSqlServer db;
+        protected AbsDbHelper db;
 
         [Test()]
         [SetUp]
@@ -30,7 +31,7 @@ namespace NUnit.TestsApp.ViewModels
         [Test(), Order(1)]
         public void ViewModelApplicazioneTest1()
         {
-            vm2 = new ViewModelApplicazione();
+            vm2 = new ViewModelApplicazione(new DatabaseHelper());
             Assert.IsNotNull(vm);
         }
 
@@ -46,7 +47,7 @@ namespace NUnit.TestsApp.ViewModels
         public void LoadModelsTestSQLite()
         {
             vm2.Modelli = new ObservableCollection<Modello>();
-            vm2.LoadModels();
+            vm2.LoadModels(db);
             Assert.IsTrue(vm.Modelli.Count > 0);
         }
 
@@ -61,19 +62,6 @@ namespace NUnit.TestsApp.ViewModels
             Assert.IsTrue(fresh[fresh.Count - 1].Nome.Contains("Copia"));
         }
 
-        //[Test(), Order(4)]
-        //public void CopyModelTestSQLite()
-        //{
-        //    vm2 = new ViewModelApplicazione();
-        //    if (vm2.Modelli == null || vm2.Modelli.Count == 0) vm2.LoadModels();
-        //    vm2.SelectedModel = vm2.Modelli[0];
-        //    vm2.CopyModel();
-        //    DatabaseHelper dbsqlite = new DatabaseHelper(); // probabilmente bisogna specificare il percorso del database
-        //    ObservableCollection<Modello> fresh = dbsqlite.GetModelloRecords();
-        //    Assert.IsTrue(vm2.Modelli.Count == fresh.Count);
-        //    Assert.IsTrue(fresh[fresh.Count - 1].Nome.Contains("Copia"));
-        //}
-
         [Test(), Order(5)]
         public void RemoveModelItemTest()
         {
@@ -84,17 +72,5 @@ namespace NUnit.TestsApp.ViewModels
             List<Modello> tmpl = new List<Modello>(db.GetModelloRecords());
             Assert.IsTrue(!tmpl.Exists(x => x.Id == tmp.Id));
         }
-
-        //[Test(), Order(6)]
-        //public void RemoveModelItemTestSQLite()
-        //{
-        //    if (vm2.Modelli == null || vm2.Modelli.Count == 0) vm2.LoadModels();
-        //    Modello tmp = new Modello(vm2.Modelli[0]);
-        //    vm2.SelectedModel = vm2.Modelli[0];
-        //    vm2.RemoveModelItem();
-        //    DatabaseHelper dbsqlite = new DatabaseHelper();
-        //    List<Modello> tmpl = new List<Modello>(dbsqlite.GetModelloRecords());
-        //    Assert.IsTrue(!tmpl.Exists(x => x.Id == tmp.Id));
-        //}
     }
 }

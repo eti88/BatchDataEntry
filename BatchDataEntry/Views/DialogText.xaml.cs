@@ -20,13 +20,18 @@ namespace BatchDataEntry.Views
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-            txtPath.SelectAll();
-            txtPath.Focus();
+            txtPathOld.SelectAll();
+            txtPathOld.Focus();
         }
 
-        public string FullPath
+        public string FullPathOld
         {
-            get { return txtPath.Text; }
+            get { return txtPathOld.Text; }
+        }
+
+        public string FullPathNew
+        {
+            get { return txtPathNew.Text; }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using BatchDataEntry.Helpers;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.Models
 {
@@ -58,8 +59,8 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private ObservableCollection<Campo> _voci;
-        public ObservableCollection<Campo> Voci
+        private ObservableCollection<Record> _voci;
+        public ObservableCollection<Record> Voci
         {
             get { return _voci; }
             set
@@ -81,16 +82,14 @@ namespace BatchDataEntry.Models
         {
             this.Id = 0;
             this.Path = "";
-            this.Voci = new ObservableCollection<Campo>();
+            this.Voci = new ObservableCollection<Record>();
         }
 
-        public Document(Batch b, Dictionary<int, string> dictionary)
+        public Document(AbsDbHelper db,Batch b, Dictionary<int, string> dictionary)
         {
-            this.Voci = new ObservableCollection<Campo>();
-            if(b.Applicazione.Id == 0)
-                b.Applicazione.LoadCampi();
-            if(b.Applicazione.Campi.Count == 0)
-                b.Applicazione.LoadCampi();
+            this.Voci = new ObservableCollection<Record>();
+            if(b.Applicazione.Id == 0) b.Applicazione.LoadCampi(db);
+            if(b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(db);
             int h = 0;
             for (int i = 0; i < dictionary.Count; i++)
             {
@@ -101,70 +100,14 @@ namespace BatchDataEntry.Models
                 if (i == 3) this.IsIndexed = GetBool(row.Value);
                 if (i > 3)
                 {
-                    // Sceglie il tipo di campo (Prima vengono valutate le casistiche con l'autocompletamento
-                    // Autocompletamento Csv (No val)
-                    if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn)
-                    {
-                        //TODO: Da scrivere
-                    }
-                    // Autocompletamento Csv (con val)
-                    else if (b.Applicazione.OrigineCsv && h == b.Applicazione.CsvColumn)
-                    {
-                        //TODO: Da scrivere
-                    }
-                    // Autocompletamento DbSqlite (No val)
-                    else if (string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori && b.Applicazione.Campi.ElementAt(h).TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
-                    {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true, EnumTypeOfCampo.AutocompletamentoDbSqlite, b.Applicazione.Campi.ElementAt(h).IsDisabled));
-                    }
-                    // Autocompletamento DbSqlite (con val)
-                    else if (!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori && b.Applicazione.Campi.ElementAt(h).TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
-                    {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, true, EnumTypeOfCampo.AutocompletamentoDbSqlite, b.Applicazione.Campi.ElementAt(h).IsDisabled));
-                    }
-                    // Autocompletamento DbSql (No val)
-                    else if (string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori && b.Applicazione.Campi.ElementAt(h).TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
-                    {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, true, EnumTypeOfCampo.AutocompletamentoDbSql, b.Applicazione.Campi.ElementAt(h).IsDisabled));
-                    }
-                    // Autocompletamento DbSql (con val)
-                    else if (!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori && b.Applicazione.Campi.ElementAt(h).TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
-                    {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, true,EnumTypeOfCampo.AutocompletamentoDbSql, b.Applicazione.Campi.ElementAt(h).IsDisabled, b.Applicazione.Campi.ElementAt(h).SourceTableAutocomplete, 1));
-                    }
-                    // normale (con val)
-                    else if (!string.IsNullOrEmpty(row.Value))
-                    {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, row.Value, b.Applicazione.Campi.ElementAt(h).Is));
-                    }
-                    // ALTRIMENTI Normale (senza val)
+                    Record r = null;
+                    if (!string.IsNullOrEmpty(row.Value))
+                        r = Record.Create(b.Applicazione.Campi.ElementAt(h), h, row.Value);
                     else
-                    {
-                        this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).IsDisabled));
-                    }
+                        r = Record.Create(b.Applicazione.Campi.ElementAt(h), h);
 
-                    //if () {                   
-                    //    this.Voci.Add(new Voce(h, 
-                    //        b.Applicazione.Campi.ElementAt(h).Nome, 
-                    //        true,
-                    //        EnumTypeOfCampo.AutocompletamentoCsv, 
-                    //        b.Applicazione.Campi.ElementAt(h).IsDisabled));
-                    //}
-                    //else if(!string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
-                    //{
-                    //    // è un campo autocompletante
-                    //    this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, 
-                    //        row.Value, 
-                    //        b.Applicazione.Campi.ElementAt(h).SalvaValori, 
-                    //        EnumTypeOfCampo.AutocompletamentoDbSqlite, 
-                    //        b.Applicazione.Campi.ElementAt(h).IsDisabled,
-                    //        ,
-                    //        h));
-                    //}
-                    //else if(string.IsNullOrEmpty(row.Value) && b.Applicazione.Campi.ElementAt(h).SalvaValori)
-                    //{
-                    //    this.Voci.Add(new Voce(h, b.Applicazione.Campi.ElementAt(h).Nome, b.Applicazione.Campi.ElementAt(h).SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSqlite, b.Applicazione.Campi.ElementAt(h).IsDisabled));
-                    //}                      
+                    if (r == null) throw new Exception("Record creation error");
+                    this.Voci.Add(r);
                     h++;
                 }       
             }
@@ -176,7 +119,7 @@ namespace BatchDataEntry.Models
             this.FileName = name;
             this.Path = path;
             this.IsIndexed = indexed;
-            this.Voci = new ObservableCollection<Campo>();
+            this.Voci = new ObservableCollection<Record>();
         }
 
         public Document(Document dc)
@@ -185,26 +128,18 @@ namespace BatchDataEntry.Models
             this.FileName = dc.FileName;
             this.Path = dc.Path;
             this.IsIndexed = dc.IsIndexed;
-            this.Voci = new ObservableCollection<Campo>();
+            this.Voci = new ObservableCollection<Record>();
         }
 
-        // Può essere rimosso ?
-        //public void AddInputsToPanel(Batch b, DatabaseHelper db)
-        //{
-        //    var voci = new ObservableCollection<Campo>();         
-        //    foreach (Campo campo in b.Applicazione.Campi)
-        //    {
-        //        if (b.Applicazione.CsvColumn == campo.Posizione)
-        //            voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoCsv, campo.IsDisabilitato));
-        //        else if(campo.SalvaValori && campo.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
-        //            voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSqlite, campo.IsDisabilitato));
-        //        else if (campo.SalvaValori && campo.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
-        //            voci.Add(new Voce(campo.Id, campo.Nome, campo.SalvaValori, EnumTypeOfCampo.AutocompletamentoDbSql, campo.IsDisabilitato));
-        //        else
-        //            voci.Add(new Voce(campo.Posizione, campo.Nome, campo.IsDisabilitato));
-        //    }          
-        //    this.Voci = voci;
-        //}
+        public void AddInputsToPanel(Batch b, AbsDbHelper db)
+        {
+            var voci = new ObservableCollection<Record>();
+            foreach (Campo campo in b.Applicazione.Campi)
+            {
+                voci.Add(Record.Create(campo, campo.Posizione));
+            }
+            this.Voci = voci;
+        }
 
         private bool GetBool(string val)
         {

@@ -16,6 +16,7 @@ using iTextSharp.text.pdf;
 using NLog;
 using Document = BatchDataEntry.Models.Document;
 using MessageBox = System.Windows.MessageBox;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -23,7 +24,7 @@ namespace BatchDataEntry.ViewModels
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
-        private DatabaseHelperSqlServer dbsql;
+        private AbsDbHelper db;
 
         #region Members
 
@@ -363,19 +364,8 @@ namespace BatchDataEntry.ViewModels
 
         public void UpdateValues()
         {
-            DatabaseHelper db;
-            Batch tmp;
-
-            if (dbsql == null)
-            {
-                db = new DatabaseHelper();
-                tmp = db.GetBatchById(CurrentBatch.Id);
-            }
-            else
-            {
-                tmp = dbsql.GetBatchById(CurrentBatch.Id);
-            }
-                
+            var tmp = db.GetBatchById(CurrentBatch.Id);
+            
             if (tmp != null)
             {
                 CurrentBatch.UltimoIndicizzato = tmp.UltimoIndicizzato;
@@ -390,10 +380,7 @@ namespace BatchDataEntry.ViewModels
             {
                 var continua = new Documento();
                 var indexFile = (SelectedRowIndex > 0) ? SelectedRowIndex - 1 : SelectedRowIndex;
-                if(dbsql == null)
-                    continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile, null);
-                else
-                    continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile, dbsql);
+                continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile, db);
                 continua.ShowDialog();
                 LoadGrid();
                 RaisePropertyChanged("DataSource");
@@ -406,10 +393,7 @@ namespace BatchDataEntry.ViewModels
             if (_currentBatch != null)
             {
                 var inserimento = new Documento();
-                if(dbsql == null)
-                    inserimento.DataContext = new ViewModelDocumento(_currentBatch, null);
-                else
-                    inserimento.DataContext = new ViewModelDocumento(_currentBatch, dbsql);
+                inserimento.DataContext = new ViewModelDocumento(_currentBatch, db);
                 try
                 {
                     inserimento.ShowDialog();
@@ -431,30 +415,17 @@ namespace BatchDataEntry.ViewModels
             {
                 Task.Factory.StartNew(() =>
                 {
-                    if (_currentBatch.Applicazione == null || _currentBatch.Applicazione.Id == 0)
-                    {
-                        if (dbsql == null)
-                            _currentBatch.LoadModel();
-                        else
-                            _currentBatch.LoadModel(dbsql);
-                    }   
-                    if (_currentBatch.Applicazione.Campi == null || _currentBatch.Applicazione.Campi.Count == 0)
-                    {
-                        if (dbsql == null)
-                            _currentBatch.Applicazione.LoadCampi();
-                        else
-                            _currentBatch.Applicazione.LoadCampi(dbsql);
-                    }
+                    if (_currentBatch.Applicazione == null || _currentBatch.Applicazione.Id == 0) _currentBatch.LoadModel(db); 
+                    if (_currentBatch.Applicazione.Campi == null || _currentBatch.Applicazione.Campi.Count == 0) _currentBatch.Applicazione.LoadCampi(db);
                     // Recupera il database di cache (differente da quello relativo ai batch e modelli    
-                    var db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
-                        _currentBatch.DirectoryOutput);
+                    var dbcache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
 
                     #if DEBUG
                     Console.WriteLine("SelectedRowIndex: " + SelectedRowIndex);
                     #endif
 
-                    Document current = new Document(_currentBatch, db.GetDocumento(SelectedRowIndex));
-                    db.Delete("Documenti", string.Format("Id= {0}", current.Id));
+                    Document current = new Document(db, _currentBatch, dbcache.GetDocumento(SelectedRowIndex));
+                    dbcache.Delete("Documenti", string.Format("Id= {0}", current.Id));
 
                     try
                     {
@@ -499,16 +470,16 @@ namespace BatchDataEntry.ViewModels
             
             await Task.Factory.StartNew(() =>
             {
-                var dbc = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
+                var dbcache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"],
                     _currentBatch.DirectoryOutput);
                 try
                 {
                     var rowCount = 0;
                     var cmd = string.Format("SELECT COUNT(*) FROM {0}", "Documenti");
-                    rowCount = dbc.Count(cmd);
+                    rowCount = dbcache.Count(cmd);
                     var processedRow = 0;
                     var cmd2 = $"SELECT COUNT(*) FROM {"Documenti"} WHERE isIndicizzato=1";
-                    processedRow = dbc.Count(cmd2);
+                    processedRow = dbcache.Count(cmd2);
 
                     StatusBarCol1 = $"File Indicizzati ({processedRow} / {rowCount})";
                     if (processedRow == rowCount && rowCount > 0)
@@ -548,46 +519,18 @@ namespace BatchDataEntry.ViewModels
             backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
         }
 
-        public ViewModelBatchSelected(Batch batch)
+        public ViewModelBatchSelected(Batch batch, AbsDbHelper dbp)
         {
             try
             {
+                db = dbp;
                 CurrentBatch = batch;
-                CurrentBatch.LoadModel();
+                CurrentBatch.LoadModel(db);
                 var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
                 Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
                 LoadGrid();
                 NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
-                CurrentBatch.Applicazione.LoadCampi();
-                backgroundWorker.WorkerReportsProgress = true;
-                backgroundWorker.ProgressChanged += ProgressChanged;
-                backgroundWorker.DoWork += DoWork;
-                backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
-                Properties.Settings.Default.StartFocusCol = GetInitialTextBoxPosition(CurrentBatch.Applicazione);
-                Properties.Settings.Default.CurrentBatch = CurrentBatch.Id;
-                Properties.Settings.Default.Save();
-                MaxProgressBarValue = 100;
-                ValueProgressBar = 0;
-                //SelectedRowIndex = 12; // per selezionare la riga x (es: index: 5, (rappresenta la row 6), se selezioni la riga 6, si posiziona alla 7
-            }
-            catch (Exception e)
-            {
-                logger.Error(e.ToString());
-            }          
-        }
-
-        public ViewModelBatchSelected(Batch batch, DatabaseHelperSqlServer dbp)
-        {
-            try
-            {
-                dbsql = dbp;
-                CurrentBatch = batch;
-                CurrentBatch.LoadModel(dbsql);
-                var bytes = Utility.GetDirectorySize(batch.DirectoryInput);
-                Dimensioni = Utility.ConvertSize(bytes, "MB").ToString("0.00");
-                LoadGrid();
-                NumeroDocumenti = Utility.CountFiles(batch.DirectoryInput, batch.TipoFile);
-                CurrentBatch.Applicazione.LoadCampi(dbsql);
+                CurrentBatch.Applicazione.LoadCampi(db);
                 backgroundWorker.WorkerReportsProgress = true;
                 backgroundWorker.ProgressChanged += ProgressChanged;
                 backgroundWorker.DoWork += DoWork;
@@ -623,8 +566,8 @@ namespace BatchDataEntry.ViewModels
             }
             
             var export = new Views.Export();
-            DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
-            DataTable insertedDocs = db.GetDataTableWithQuery("SELECT * FROM Documenti WHERE isIndicizzato = 1");
+            var dbcache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+            var insertedDocs = dbcache.GetDataTableWithQuery("SELECT * FROM Documenti WHERE isIndicizzato = 1");
             export.DataContext = new ViewModelExport(insertedDocs, Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
             if (export.ShowDialog() == true)
             {
@@ -638,14 +581,13 @@ namespace BatchDataEntry.ViewModels
                 {
                     try
                     {
-                        doc = db.GetDocumento(idx);
+                        doc = dbcache.GetDocumento(idx);
                         foreach (var item in doc)
                         {
                             if (item.Key == 1)
                             {
                                 CurrentBatch.UltimoDocumentoEsportato = item.Value;
-                                DatabaseHelper dbmain = new DatabaseHelper();
-                                dbmain.UpdateRecordBatch(CurrentBatch);
+                                db.Update(CurrentBatch);
                                 break;
                             }                              
                         }
@@ -655,46 +597,32 @@ namespace BatchDataEntry.ViewModels
                         logger.Error("[GenerateCsv] " + ex.ToString());
                     }
 
-                }
-                    
+                }                  
             }
-            StatusBarCol1 = String.Format("Csv generato...");
+            StatusBarCol1 = String.Format("Csv generato");
         }
 
         private void LoadGrid()
         {
-            DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
-            DataSource = db.GetDataTableDocumenti();
+            var dbcache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+            DataSource = dbcache.GetDataTableDocumenti();
         }
         
         public async void ConvertTiffRecord(Batch b)
         {
             if (b.TipoFile != TipoFileProcessato.Tiff)
                 return;
+            if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel(db);        
+            if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(db);
 
-            if (b.Applicazione == null || b.Applicazione.Id == 0)
-            {
-                if(dbsql == null)
-                    b.LoadModel();
-                else
-                    b.LoadModel(dbsql);
-            }         
-            if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
-            {
-                if (dbsql == null)
-                    b.Applicazione.LoadCampi();
-                else
-                    b.Applicazione.LoadCampi(dbsql);
-            }
-
-            var db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], b.DirectoryOutput);
-            var docs = db.GetDocuments();
+            var dbcache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], b.DirectoryOutput);
+            var docs = dbcache.GetDocuments();
             MaxProgressBarValue = docs.Count;
             ValueProgressBar = 0;
 
             foreach (var doc in docs)
             {
-                Document dc = new Document(_currentBatch, doc);
+                Document dc = new Document(db, _currentBatch, doc);
                 string new_path = String.Empty;
                 var fileName = Path.GetFileName(dc.Path);
                 if (!Utility.ContainsOnlyNumbers(fileName))
@@ -707,7 +635,7 @@ namespace BatchDataEntry.ViewModels
                 });
                 
                 dc.Path = new_path;
-                db.UpdateRecordDocumento(dc);
+                dbcache.UpdateRecordDocumento(dc);
                 ValueProgressBar++;
             }
         }
@@ -731,8 +659,7 @@ namespace BatchDataEntry.ViewModels
 
                     foreach (var file in files)
                     {
-                        iTextSharp.text.Image tiff = iTextSharp.text.Image.GetInstance(file);
-                        
+                        iTextSharp.text.Image tiff = iTextSharp.text.Image.GetInstance(file);                     
                         iTextSharp.text.Rectangle pageSize = new iTextSharp.text.Rectangle(tiff.Width, tiff.Height);
                         document.SetPageSize(pageSize);
                         document.NewPage();
@@ -778,35 +705,32 @@ namespace BatchDataEntry.ViewModels
 
         public void ChangePhatsIntoCacheDb()
         {
-            string newPdfDirctory = "";
+            string oldPartialPath = string.Empty;
+            string newPartialPath = string.Empty;
+
             DialogText dlgTxt = new DialogText();
-            if (dlgTxt.ShowDialog() == true)
-            {
-                newPdfDirctory = dlgTxt.FullPath;
-                if (!Directory.Exists(newPdfDirctory))
-                {
-                    MessageBox.Show("Path non valido!");
-                    return;
-                }
-            }
-            else
-            {
+            dlgTxt.ShowDialog();
+            oldPartialPath = dlgTxt.FullPathOld;
+            if (string.IsNullOrEmpty(oldPartialPath)) {
+                MessageBox.Show(string.Format("Path: {0} vuoto", oldPartialPath));
                 return;
             }
-
-            if (string.IsNullOrEmpty(newPdfDirctory)) return;
-
-            DatabaseHelper db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+            newPartialPath = dlgTxt.FullPathNew;
+            if (string.IsNullOrEmpty(newPartialPath) || !Directory.Exists(newPartialPath))
+            {
+                MessageBox.Show(string.Format("Path: {0} non trovato o vuoto", newPartialPath));
+                return;
+            }
+ 
+            var dbcache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
             List<Document> documents = new List<Document>();
             try
             {
-                documents = db.GetDocumentsListPartial();
-                string originalPath = Path.GetDirectoryName(documents.ElementAt(0).Path);
-               
+                documents = dbcache.GetDocumentsListPartial();           
                 foreach (var doc in documents)
                 {
-                    doc.Path = doc.Path.Replace(originalPath, newPdfDirctory);
-                    db.UpdateRecordDocumento(doc);
+                    doc.Path = doc.Path.Replace(oldPartialPath, newPartialPath);
+                    dbcache.UpdateRecordDocumento(doc);
                 }
                 MessageBox.Show("Percorsi aggiornati");
             }
@@ -899,60 +823,6 @@ namespace BatchDataEntry.ViewModels
                         modifiedRecords.Add(i, Path.GetFileNameWithoutExtension(fileName));
                         startNum++;
                     }
-                    // Genera csv
-                    DataTable dt = new DataTable();
-                    string sqlQuery = String.Format("SELECT * FROM Documenti WHERE (Id BETWEEN {0} AND {1}) AND (isIndicizzato = 1)", idxStart, idxStop + 1);
-                    dt = dbc.GetDataTableWithQuery(sqlQuery);
-                    if (dt.Rows.Count == 0) return;
-
-                    for (int i = 0; i < dt.Rows.Count; i++)
-                    {
-                        if(modifiedRecords.ElementAt(i).Key == i)
-                            dt.Rows[i]["FileName"] = modifiedRecords.ElementAt(i).Value;
-                    }
-
-                    if (!File.Exists(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"])))
-                        File.Create(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
-
-                    var export = new Views.Export();
-                    export.DataContext = new ViewModelExport(dt, Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["csv_file_name"]));
-                    if (export.ShowDialog() == true)
-                    {
-                        int idx = (Properties.Settings.Default.LastExportIndex > 0)
-                            ? Properties.Settings.Default.LastExportIndex
-                            : 0;
-
-                        Dictionary<int, string> doc = new Dictionary<int, string>();
-
-                        if (idx > 0)
-                        {
-                            try
-                            {
-                                DatabaseHelper db = new DatabaseHelper(
-                                    ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
-                                doc = db.GetDocumento(idx);
-                                foreach (var item in doc)
-                                {
-                                    if (item.Key == 1)
-                                    {
-                                        CurrentBatch.UltimoDocumentoEsportato = item.Value;
-                                        DatabaseHelper dbmain = new DatabaseHelper();
-                                        dbmain.UpdateRecordBatch(CurrentBatch);
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                logger.Error("[ChangeNumerationPdf] " + ex.ToString());
-                            }
-
-                        }
-                    }
-                    StatusBarCol1 = String.Format("Csv generato...");
-                    //General lista
-                    GenerateListTxt();
-                    StatusBarCol1 = String.Format("LIST.txt generato...");
                 }
                 catch (ArgumentOutOfRangeException)
                 {

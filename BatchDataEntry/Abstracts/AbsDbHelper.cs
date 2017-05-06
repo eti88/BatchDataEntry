@@ -26,5 +26,6 @@ namespace BatchDataEntry.Abstracts
         public abstract void Update(Batch b);
         public abstract void Update(Modello m);
         public abstract void Update(Campo c);
+        public abstract void DeleteReference(string v);
     }
 }

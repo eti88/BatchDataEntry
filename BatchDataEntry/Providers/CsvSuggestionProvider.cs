@@ -31,27 +31,19 @@ namespace BatchDataEntry.Providers
 
             try
             {
+                AbsDbHelper db = null;
                 if (Properties.Settings.Default.UseSQLServer)
                 {
                     var dbsql = new DatabaseHelperSqlServer(Properties.Settings.Default.SqlUser, Properties.Settings.Default.SqlPassword,
-                     Properties.Settings.Default.SqlServerAddress, Properties.Settings.Default.SqlDbName);
-                    b = dbsql.GetBatchById(Properties.Settings.Default.CurrentBatch);
-                    if (b == null) return null;
-                    if (b.Applicazione == null || b.Applicazione.Id == 0)
-                        b.LoadModel(dbsql);
-                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
-                        b.Applicazione.LoadCampi(dbsql);
+                     Properties.Settings.Default.SqlServerAddress, Properties.Settings.Default.SqlDbName);  
                 }
                 else
-                {
-                    DatabaseHelper db = new DatabaseHelper();
-                    b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
-                    if (b == null) return null;
-                    if (b.Applicazione == null || b.Applicazione.Id == 0)
-                        b.LoadModel();
-                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
-                        b.Applicazione.LoadCampi();
-                }
+                    db = new DatabaseHelper();
+
+                b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
+                if (b == null) return null;
+                if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel(db);
+                if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(db);
 
                 int colIdx = 0;
                 int colSec = 0;

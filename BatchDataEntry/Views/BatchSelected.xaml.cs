@@ -2,6 +2,7 @@
 using System.Windows;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.Views
 {
@@ -18,32 +19,27 @@ namespace BatchDataEntry.Views
         private void dataGridRecords_Loaded(object sender, RoutedEventArgs e)
         {
             Batch b;
-            DatabaseHelperSqlServer dbsql;
-            DatabaseHelper db;
+            AbsDbHelper db = null;
             if (Properties.Settings.Default.CurrentBatch == 0) return;
 
             try
             {
                 if (Properties.Settings.Default.UseSQLServer)
                 {
-                    dbsql = new DatabaseHelperSqlServer(
+                    db = new DatabaseHelperSqlServer(
                         Properties.Settings.Default.SqlUser,
                         Properties.Settings.Default.SqlPassword,
                         Properties.Settings.Default.SqlServerAddress,
-                        Properties.Settings.Default.SqlDbName);
-                    b = dbsql.GetBatchById(Properties.Settings.Default.CurrentBatch);
-                    if (b == null) return;
-                    if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel(dbsql);
-                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(dbsql);
+                        Properties.Settings.Default.SqlDbName);                  
                 }
                 else
-                {
                     db = new DatabaseHelper();
-                    b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
-                    if (b == null) return;
-                    if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel();
-                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi();
-                }
+
+                b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
+                if (b == null) return;
+                if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel(db);
+                if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(db);
+
                 dataGridRecords.SelectedIndex = (b.UltimoIndicizzato > 1) ? b.UltimoIndicizzato - 1 : b.UltimoIndicizzato;
             }
             catch (Exception ex)

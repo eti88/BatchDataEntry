@@ -7,7 +7,6 @@ namespace BatchDataEntry.Interfaces
     // Modello voce + campo integrati in un unica interfaccia per agevolarne l'implementazione a livello di codice in quanto fanno praticamente la stessa cosa
     public interface ICampo
     {
-        // Attributi per il modello campo
         int Id { get; set; }
         string Nome { get; set; }
         int Posizione { get; set; }
@@ -20,13 +19,5 @@ namespace BatchDataEntry.Interfaces
         int IdModello { get; set; }
         bool Riproponi { get; set; }
         bool IsDisabilitato { get; set; }
-
-        // Attributi aggiuntivi incorporati per il modello voce
-        string Valore { get; set; }
-        AbsSuggestion ElementoSelezionato { get; set; }
-        string ElementoSelezionatoValore { get; set; }
-        List<AbsSuggestion> QueryProvider { get; set; }
-
-        void QueryProviderSelector();
     }
 }

@@ -35,11 +35,11 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(2)]
         public void InsertTest1()
         {
-            Campo c1 = new Campo("testCampo",false,"aaaa",true);
+            Campo c1 = new Campo(1, "campo1abc", 0, string.Empty, string.Empty, true, false, Helpers.EnumTypeOfCampo.Normale, 1, false, false);
             Modello mTmp = db.GetFirstModello();
             Assert.IsNotNull(mTmp);
             c1.IdModello = mTmp.Id;
-            Campo c2 = new Campo("testCampo", false, "aaaa", true);
+            Campo c2 = new Campo(1, "campo2abc", 0, string.Empty, string.Empty, true, false, Helpers.EnumTypeOfCampo.Normale, 1, false, false);
             c2.IdModello = mTmp.Id;
             int insertId = db.Insert(c1);
             Assert.IsTrue(insertId > 0);

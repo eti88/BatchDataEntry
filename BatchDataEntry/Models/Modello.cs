@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using BatchDataEntry.Helpers;
-
-
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.Models
 {
@@ -181,17 +180,7 @@ namespace BatchDataEntry.Models
             this.MyMemento = new MementoModello(m.Nome, m.OrigineCsv, m.Campi, m.PathFileCsv, m.Separatore, m.StartFocusColumn);
         }
 
-        public void LoadCampi()
-        {
-            if (this.Id > 0)
-            {
-                DatabaseHelper db = new DatabaseHelper();
-                ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", this.Id));
-                this.Campi = tmpc;
-            }
-        }
-
-        public void LoadCampi(DatabaseHelperSqlServer db)
+        public void LoadCampi(AbsDbHelper db)
         {
             if (this.Id > 0)
             {

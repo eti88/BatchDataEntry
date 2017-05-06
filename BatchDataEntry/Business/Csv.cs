@@ -28,16 +28,24 @@ namespace BatchDataEntry.Business
 
         public static void AddRows(string fullPath, IEnumerable records)
         {
-            using (CsvFileWriter writer = new CsvFileWriter(fullPath))
+            try
             {
-                writer._separator = ';';
-                foreach (var record in records)
+                using (CsvFileWriter writer = new CsvFileWriter(fullPath))
                 {
-                    CsvRow row = new CsvRow();
-                    row.Add(record.ToString());
-                    writer.WriteRow(row);
+                    writer._separator = ';';
+                    foreach (var record in records)
+                    {
+                        CsvRow row = new CsvRow();
+                        row.Add(record.ToString());                       
+                        writer.WriteRow(row);
+                    }
                 }
             }
+            catch(Exception e)
+            {
+                throw e;
+            }
+            
         }
 
         public static List<string> ReadRows(string fullPath, char separator)

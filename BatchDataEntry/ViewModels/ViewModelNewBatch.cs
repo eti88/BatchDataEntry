@@ -5,7 +5,6 @@ using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Configuration;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -14,6 +13,7 @@ using System.Windows;
 using BatchDataEntry.Business;
 using NLog;
 using Batch = BatchDataEntry.Models.Batch;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -24,7 +24,7 @@ namespace BatchDataEntry.ViewModels
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private bool _alreadyExist;
         private bool _saved = false;
-        private DatabaseHelperSqlServer dbsql = null;
+        private AbsDbHelper db = null;
 
         private bool _isVisible = false;
         public bool IsVisible
@@ -122,7 +122,6 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-
         private bool CanSave
         {
             get
@@ -163,12 +162,12 @@ namespace BatchDataEntry.ViewModels
             IsVisible = false;
         }
 
-        public ViewModelNewBatch(DatabaseHelperSqlServer dbs)
+        public ViewModelNewBatch(AbsDbHelper dbs)
         {
             CurrentBatch = new Batch();
             _alreadyExist = false;
-            dbsql = dbs;
-            PopulateComboboxModels(dbs);
+            db = dbs;
+            PopulateComboboxModels();
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
@@ -176,12 +175,12 @@ namespace BatchDataEntry.ViewModels
             IsVisible = false;
         }
 
-        public ViewModelNewBatch(Batch batch, DatabaseHelperSqlServer dbs)
+        public ViewModelNewBatch(Batch batch, AbsDbHelper dbs)
         {
             CurrentBatch = batch;
             _alreadyExist = true;
-            dbsql = dbs;
-            PopulateComboboxModels(dbs);
+            db = dbs;
+            PopulateComboboxModels();
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.ProgressChanged += ProgressChanged;
             backgroundWorker.DoWork += DoWork;
@@ -213,49 +212,32 @@ namespace BatchDataEntry.ViewModels
             IsVisible = true;
             Progress = 0;
             MaxValue = 100;
-
-            DatabaseHelper db = new DatabaseHelper();
-
             if (_alreadyExist)
             {
                 // Il batch è già esistente e quindi si effettua un update              
-                Batch batch = new Batch(CurrentBatch);
-                if (dbsql == null)
-                    db.Update(batch);
-                else
-                    dbsql.Update(batch);
-                RaisePropertyChanged("Batches");             
+                Batch batch = new Batch(CurrentBatch, db);
+                db.Update(batch);          
             }
             else
             {
-                Batch batch = new Batch(CurrentBatch);
-                if (dbsql == null)
-                    db.Insert(batch);
-                else
-                    dbsql.Insert(batch);
-                RaisePropertyChanged("Batches");
+                Batch batch = new Batch(CurrentBatch, db);
+                db.Insert(batch);     
             }
-
+            RaisePropertyChanged("Batches");
             backgroundWorker.RunWorkerAsync();
             _saved = true;
         }
 
         public void PopulateComboboxModels()
         {
-            DatabaseHelper db = new DatabaseHelper();      
+            if (db == null) return;
             Models = db.IEnumerableModelli();
-            RaisePropertyChanged("Models");
-        }
-
-        public void PopulateComboboxModels(DatabaseHelperSqlServer dbs)
-        { 
-            Models = dbs.IEnumerableModelli();
             RaisePropertyChanged("Models");
         }
 
         #region CacheFilesInit
 
-        public bool FillCacheDb(DatabaseHelper db, DatabaseHelperSqlServer dbs, Batch b)
+        public bool FillCacheDb(DatabaseHelper dbcache, AbsDbHelper dbdata, Batch b)
         {
             List<string> files = new List<string>();
             // Genera il file di cache partendo dal file csv invece che dalla lista all'interno della cartella.
@@ -265,11 +247,10 @@ namespace BatchDataEntry.ViewModels
                 Console.WriteLine(@"### USO GENERAZIONE Automatica ###");
                 #endif
 
-                if(CurrentBatch.Applicazione.Id == 0 && dbs == null) CurrentBatch.LoadModel();
-                else if(CurrentBatch.Applicazione.Id == 0) CurrentBatch.LoadModel(dbs);
+                if(CurrentBatch.Applicazione.Id == 0 && dbdata == null) CurrentBatch.LoadModel(dbdata);
+                else if(CurrentBatch.Applicazione.Id == 0) CurrentBatch.LoadModel(dbdata);
                 if (!CurrentBatch.Applicazione.OrigineCsv) return false;
-                if(CurrentBatch.Applicazione.Campi.Count == 0 && dbs == null) CurrentBatch.Applicazione.LoadCampi();
-                else if (CurrentBatch.Applicazione.Campi.Count == 0) CurrentBatch.Applicazione.LoadCampi(dbs);
+                if(CurrentBatch.Applicazione.Campi.Count == 0) CurrentBatch.Applicazione.LoadCampi(dbdata);
                 int indexColumn = 0;
 
                 for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)
@@ -316,7 +297,7 @@ namespace BatchDataEntry.ViewModels
                             string colName = b.Applicazione.Campi.ElementAt(z).Nome;
                             
                             string celValue = (z < cells.Length && !string.IsNullOrEmpty(cells[z])) ? cells[z] : "";
-                            doc.Voci.Add(new Campo(colName, celValue));
+                            doc.Voci.Add(Record.Create(b.Applicazione.Campi.ElementAt(z), z, celValue));
                         }
 
                     }
@@ -332,7 +313,7 @@ namespace BatchDataEntry.ViewModels
 
                 for (int i = 0; i < documents.Count; i++)
                 {
-                    db.InsertRecordDocumento(b, documents[i]);
+                    dbcache.InsertRecordDocumento(b, documents[i]);
                     backgroundWorker.ReportProgress(i);
                 }
             }
@@ -383,14 +364,13 @@ namespace BatchDataEntry.ViewModels
                     {                     
                         for (int z = 0; z < b.Applicazione.Campi.Count; z++)
                         {
-                            string colName = b.Applicazione.Campi.ElementAt(z).Nome;
                             string valore = (string.IsNullOrEmpty(b.Applicazione.Campi.ElementAt(z).ValorePredefinito))
                                 ? ""
                                 : b.Applicazione.Campi.ElementAt(z).ValorePredefinito;
-                            doc.Voci.Add(new Campo(colName, valore));
+                            doc.Voci.Add(Record.Create(b.Applicazione.Campi.ElementAt(z), z, valore));
                         }
-                    } 
-                    db.InsertRecordDocumento(b, doc);
+                    }
+                    dbcache.InsertRecordDocumento(b, doc);
                     backgroundWorker.ReportProgress(i);
                     lastId++;
                 }
@@ -408,11 +388,8 @@ namespace BatchDataEntry.ViewModels
         {
             try
             {
-                if (dbsql == null && batch.Applicazione == null || batch.Applicazione.Id == 0) batch.LoadModel();
-                else if(dbsql != null && batch.Applicazione == null || batch.Applicazione.Id == 0) batch.LoadModel(dbsql);
-
-                if (dbsql == null && batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0) batch.Applicazione.LoadCampi();
-                else if (dbsql != null && batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0) batch.Applicazione.LoadCampi(dbsql);
+                if (batch.Applicazione == null || batch.Applicazione.Id == 0) batch.LoadModel(db);
+                if (batch.Applicazione.Campi == null || batch.Applicazione.Campi.Count == 0) batch.Applicazione.LoadCampi(db);
 
                 List<string> campi = new List<string>();
                 for (int i = 0; i < batch.Applicazione.Campi.Count; i++)
@@ -425,7 +402,7 @@ namespace BatchDataEntry.ViewModels
                     bool res = false;
 
                     dbc.CreateCacheDb(campi);
-                    res = FillCacheDb(dbc, dbsql, batch);
+                    res = FillCacheDb(dbc, db, batch);
                     if (!res)
                     {
                         Task.Factory.StartNew(() =>
@@ -454,7 +431,7 @@ namespace BatchDataEntry.ViewModels
                 }else if (File.Exists(pathCacheDb))
                 {
                     // Appende al db cache i nuovi pdf
-                    FillCacheDb(dbc, dbsql, batch);
+                    FillCacheDb(dbc, db, batch);
                 }
 
                 if (CheckOutputDirFiles(batch.DirectoryOutput))

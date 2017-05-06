@@ -39,21 +39,6 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private string _value;
-        public string Valore
-        {
-            get
-            {
-                return _value;
-            }
-            set
-            {
-                if (_value != value)
-                    _value = value;
-                OnPropertyChanged("Valore");
-            }
-        }
-
         private int _pos;
         public int Posizione
         {
@@ -92,20 +77,6 @@ namespace BatchDataEntry.Models
                 {
                     _predefval = value;
                     OnPropertyChanged("ValorePredefinito");
-                }
-            }
-        }
-
-        private string _sourceTableAutocomplete;
-        public string SourceTableAutocomplete
-        {
-            get { return _sourceTableAutocomplete; }
-            set
-            {
-                if (value != _sourceTableAutocomplete)
-                {
-                    _sourceTableAutocomplete = value;
-                    OnPropertyChanged("SourceTableAutocomplete");
                 }
             }
         }
@@ -204,75 +175,28 @@ namespace BatchDataEntry.Models
                 } }
         }
 
-        private AbsSuggestion _selected;
-        public AbsSuggestion ElementoSelezionato {
-            get { return _selected; }
+        private int _sourceTableColumn;
+        public int SourceTableColumn
+        {
+            get { return _sourceTableColumn; }
             set
             {
-                if (value != _selected)
+                if (value != _sourceTableColumn)
                 {
-                    _selected = value;
-                    OnPropertyChanged("ElementoSelezionato");
+                    _sourceTableColumn = value;
+                    OnPropertyChanged("SourceTableColumn");
                 }
             }
         }
 
-        private string _selectedValue;
-        public string ElementoSelezionatoValore {
-            get { return _selectedValue; }
-            set
-            {
-                if (value != _selectedValue)
-                {
-                    _selectedValue = value;
-                    OnPropertyChanged("ElementoSelezionatoValore");
-                }
-            }
-        }
-
-        private List<AbsSuggestion> _qprov;
-        public List<AbsSuggestion> QueryProvider {
-            get { return _qprov; }
-            set
-            {
-                if (value != _qprov)
-                {
-                    _qprov = value;
-                    OnPropertyChanged("QueryProvider");
-                }
-            }
-        }
-
-        private int _sourceTableColumn { get; set; }
         /*
          SalvaValori permette di tenere traccia dei dati nel medesimo campo velocizzando
          futuri inserimenti.
          */
 
-        public Campo(string nome, string valore)
-        {
-            Id = 0;
-            Nome = nome;
-            Valore = valore;
-            Posizione = -1;
-            ValorePredefinito = string.Empty;
-            TabellaSorgente = string.Empty;
-            IndicePrimario = false;
-            IndiceSecondario = false;
-            TipoCampo = EnumTypeOfCampo.Normale;
-            IdModello = 0;
-            Riproponi = false;
-            IsDisabilitato = false;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<AbsSuggestion>();
-            SetConfigBasedOnType();
-        }
-
         public Campo() {
             Id = 0;
             Nome = string.Empty;
-            Valore = string.Empty;
             Posizione = -1;
             ValorePredefinito = string.Empty;
             TabellaSorgente = string.Empty;
@@ -282,234 +206,26 @@ namespace BatchDataEntry.Models
             IdModello = 0;
             Riproponi = false;
             IsDisabilitato = false;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<AbsSuggestion>();
             SetConfigBasedOnType();
         }
 
-        /// <summary>
-        /// Costruttore per il campo concepito per il tipo Normale
-        /// senza passare il valore dell'id
-        /// </summary>
-        /// <param name="nome">Nome del campo</param>
-        /// <param name="posizione">Posizione del campo</param>
-        /// <param name="valorePredefinito">Valore predefinito del campo</param>
-        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
-        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
-        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
-        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
-        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
-        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
-        public Campo(string nome, int posizione, string valorePredefinito, bool isIndicePrimario, 
-            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool isDisabilitato) {
-            Id = 0;
-            Nome = nome;
-            Valore = string.Empty;
-            Posizione = posizione;
-            ValorePredefinito = valorePredefinito;
-            TabellaSorgente = string.Empty;
-            IndicePrimario = isIndicePrimario;
-            IndiceSecondario = isIndiceSecondario;
-            TipoCampo = campo;
-            IdModello = idmodello;
-            Riproponi = riproponi;
-            IsDisabilitato = isDisabilitato;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<AbsSuggestion>();
-            SetConfigBasedOnType();
-        }
-
-        /// <summary>
-        /// Costruttore per il campo concepito per il tipo Normale e Sqlite
-        /// </summary>
-        /// <param name="id">Id del campo</param>
-        /// <param name="nome">Nome del campo</param>
-        /// <param name="posizione">Posizione del campo</param>
-        /// <param name="valorePredefinito">Valore predefinito del campo</param>
-        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
-        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
-        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
-        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
-        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
-        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
-        public Campo(int id, string nome, int posizione, string valorePredefinito, bool isIndicePrimario,
-            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
-            bool isDisabilitato)
-        {
+        public Campo(int id, string nome, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) {
             Id = id;
             Nome = nome;
-            Valore = string.Empty;
             Posizione = posizione;
-            ValorePredefinito = valorePredefinito;
-            TabellaSorgente = string.Empty;
-            IndicePrimario = isIndicePrimario;
-            IndiceSecondario = isIndiceSecondario;
+            ValorePredefinito = valorepredef;
+            TabellaSorgente = tabella;
+            IndicePrimario = primario;
+            IndiceSecondario = secondario;
             TipoCampo = campo;
             IdModello = idmodello;
             Riproponi = riproponi;
-            IsDisabilitato = isDisabilitato;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<AbsSuggestion>();
-            SetConfigBasedOnType();
-        }
-
-        /// <summary>
-        /// Costruttore per campo Normale e Sqlite con Valore
-        /// </summary>
-        /// /// <param name="id">Id del campo</param>
-        /// <param name="nome">Nome del campo</param>
-        /// <param name="val">Valore associato al campo</param>
-        /// <param name="posizione">Posizione del campo</param>
-        /// <param name="valorePredefinito">Valore predefinito del campo</param>
-        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
-        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
-        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
-        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
-        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
-        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
-        public Campo(int id, string nome, string val, int posizione, string valorePredefinito, bool isIndicePrimario,
-            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
-            bool isDisabilitato)
-        {
-            Id = id;
-            Nome = nome;
-            Valore = val;
-            Posizione = posizione;
-            ValorePredefinito = valorePredefinito;
-            TabellaSorgente = string.Empty;
-            IndicePrimario = isIndicePrimario;
-            IndiceSecondario = isIndiceSecondario;
-            TipoCampo = campo;
-            IdModello = idmodello;
-            Riproponi = riproponi;
-            IsDisabilitato = isDisabilitato;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            QueryProvider = new List<AbsSuggestion>();
-            SetConfigBasedOnType();
-        }
-
-        /// <summary>
-        /// Costruttore per campo Db Sql (senza id)
-        /// </summary>
-        /// <param name="nome">Nome del campo</param>
-        /// <param name="posizione">Posizione del campo</param>
-        /// <param name="valorePredefinito">Valore predefinito del campo</param>
-        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
-        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
-        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
-        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
-        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
-        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
-        /// <param name="sourcetab">Tabella di riferimento per il database</param>
-        /// <param name="sourcetabcol">Indica la colonna della sourcetab da proporre come autocompletamento</param>
-        public Campo(string nome, int posizione, string valorePredefinito, bool isIndicePrimario,
-            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
-            bool isDisabilitato, string sourcetab, int sourcetabcol = 1)
-        {
-            Id = 0;
-            Nome = nome;
-            Valore = string.Empty;
-            Posizione = posizione;
-            ValorePredefinito = valorePredefinito;
-            TabellaSorgente = sourcetab;
-            IndicePrimario = isIndicePrimario;
-            IndiceSecondario = isIndiceSecondario;
-            TipoCampo = campo;
-            IdModello = idmodello;
-            Riproponi = riproponi;
-            IsDisabilitato = isDisabilitato;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            _sourceTableColumn = sourcetabcol;
-            QueryProvider = new List<AbsSuggestion>();
-            SetConfigBasedOnType();
-        }
- 
-        /// <summary>
-        /// Costruttore per campo Db Sql
-        /// </summary>
-        /// <param name="id">Id del campo</param>
-        /// <param name="nome">Nome del campo</param>
-        /// <param name="posizione">Posizione del campo</param>
-        /// <param name="valorePredefinito">Valore predefinito del campo</param>
-        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
-        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
-        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
-        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
-        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
-        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
-        /// <param name="sourcetab">Tabella di riferimento per il database</param>
-        /// <param name="sourcetabcol">Indica la colonna della sourcetab da proporre come autocompletamento</param>
-        public Campo(int id, string nome, int posizione, string valorePredefinito, bool isIndicePrimario,
-            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
-            bool isDisabilitato, string sourcetab, int sourcetabcol = 1)
-        {
-            Id = id;
-            Nome = nome;
-            Valore = string.Empty;
-            Posizione = posizione;
-            ValorePredefinito = valorePredefinito;
-            TabellaSorgente = sourcetab;
-            IndicePrimario = isIndicePrimario;
-            IndiceSecondario = isIndiceSecondario;
-            TipoCampo = campo;
-            IdModello = idmodello;
-            Riproponi = riproponi;
-            IsDisabilitato = isDisabilitato;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            _sourceTableColumn = sourcetabcol;
-            QueryProvider = new List<AbsSuggestion>();
-            SetConfigBasedOnType();
-        }
-
-        /// <summary>
-        /// Costruttore per campo Db Sql con Valore
-        /// </summary>
-        /// <param name="id">Id del campo</param>
-        /// <param name="nome">Nome del campo</param>
-        /// <param name="val">Valore associato al campo</param>
-        /// <param name="posizione">Posizione del campo</param>
-        /// <param name="valorePredefinito">Valore predefinito del campo</param>
-        /// <param name="isIndicePrimario">Imposta il campo come indice primario (unico)</param>
-        /// <param name="isIndiceSecondario">Imposta il campo come indice secondario (unico)</param>
-        /// <param name="campo">Imposta l'enumeratore della tipologia del campo</param>
-        /// <param name="idmodello">Imposta l'id del modello a cui associare il campo</param>
-        /// <param name="riproponi">Permette di riproporre l'ultimo valore inserito in questo campo per l'inserimento successivo</param>
-        /// <param name="isDisabilitato">Abilita o disabilita il campo</param>
-        /// <param name="sourcetab">Tabella di riferimento per il database</param>
-        /// <param name="sourcetabcol">Indica la colonna della sourcetab da proporre come autocompletamento</param>
-        public Campo(int id, string nome, string val, int posizione, string valorePredefinito, bool isIndicePrimario,
-            bool isIndiceSecondario, EnumTypeOfCampo campo, int idmodello, bool riproponi,
-            bool isDisabilitato, string sourcetab, int sourcetabcol = 1)
-        {
-            Id = id;
-            Nome = nome;
-            Valore = val;
-            Posizione = posizione;
-            ValorePredefinito = valorePredefinito;
-            TabellaSorgente = sourcetab;
-            IndicePrimario = isIndicePrimario;
-            IndiceSecondario = isIndiceSecondario;
-            TipoCampo = campo;
-            IdModello = idmodello;
-            Riproponi = riproponi;
-            IsDisabilitato = isDisabilitato;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            _sourceTableColumn = sourcetabcol;
-            QueryProvider = new List<AbsSuggestion>();
-            SetConfigBasedOnType();
+            IsDisabilitato = disabilitato;
         }
 
         public Campo(Campo campo) {
             Id = campo.Id;
             Nome = campo.Nome;
-            Valore = campo.Valore;
             Posizione = campo.Posizione;
             ValorePredefinito = campo.ValorePredefinito;
             TabellaSorgente = campo.TabellaSorgente;
@@ -519,10 +235,6 @@ namespace BatchDataEntry.Models
             IdModello = campo.IdModello;
             Riproponi = campo.Riproponi;
             IsDisabilitato = campo.IsDisabilitato;
-            ElementoSelezionato = null;
-            ElementoSelezionatoValore = string.Empty;
-            _sourceTableColumn = campo._sourceTableColumn;
-            QueryProvider = campo.QueryProvider;
         }
 
         public void SetConfigBasedOnType()
@@ -579,25 +291,6 @@ namespace BatchDataEntry.Models
         public override string ToString()
         {
             return String.Format("{this.Id},{this.TipoCampo},{this.Nome},{this.Valore}),{this.SalvaValori}");
-        }
-
-        public async void QueryProviderSelector()
-        {
-            if (TipoCampo == EnumTypeOfCampo.Normale) return;
-            if(TipoCampo == EnumTypeOfCampo.AutocompletamentoCsv)
-            {
-                var csv = new CsvSuggestionProvider();
-                QueryProvider = (List<AbsSuggestion>)csv.ListOfSuggestions;
-            }else if(TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
-            {
-                QueryProvider = await DbSuggestionProvider.GetRecords(Posizione);
-            }
-            else if(TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
-            {
-                if (string.IsNullOrWhiteSpace(TabellaSorgente) || _sourceTableColumn < 1)
-                    throw new Exception("QueryProviderSelector mancano argomenti");
-                QueryProvider = await DbSqlSuggestionProvider.GetRecords(this.Posizione, SourceTableAutocomplete, _sourceTableColumn);
-            }
         }
     }
 }

@@ -60,7 +60,7 @@ namespace BatchDataEntry.Helpers
             cmdInsert.Parameters.Add(new SqlParameter("@ValorePredefinito", System.Data.SqlDbType.VarChar,255));
             cmdInsert.Parameters["@ValorePredefinito"].Value = c.ValorePredefinito;
             cmdInsert.Parameters.Add(new SqlParameter("@SourceTable", System.Data.SqlDbType.VarChar, 255));
-            cmdInsert.Parameters["@SourceTable"].Value = c.SourceTableAutocomplete;
+            cmdInsert.Parameters["@SourceTable"].Value = c.TabellaSorgente;
             cmdInsert.Parameters.Add(new SqlParameter("@IndicePrimario", System.Data.SqlDbType.Bit));
             cmdInsert.Parameters["@IndicePrimario"].Value = c.IndicePrimario;
             cmdInsert.Parameters.Add(new SqlParameter("@TipoCampo", System.Data.SqlDbType.Int));
@@ -257,7 +257,7 @@ namespace BatchDataEntry.Helpers
             }
         }
 
-        public void DeleteReference(string query)
+        public override void DeleteReference(string query)
         {
             if (cnn == null || string.IsNullOrWhiteSpace(query)) return;
             SqlCommand cmdInsert = new SqlCommand(query, this.cnn);
@@ -287,7 +287,7 @@ namespace BatchDataEntry.Helpers
                 { "Posizione", c.Posizione.ToString() },
                 { "SalvaValori", Convert.ToInt32(c.SalvaValori).ToString() },
                 { "ValorePredefinito", c.ValorePredefinito },
-                { "SourceTable", c.SourceTableAutocomplete },
+                { "SourceTable", c.TabellaSorgente },
                 { "IndicePrimario", Convert.ToInt32(c.IndicePrimario).ToString() },
                 { "TipoCampo", ((int)c.TipoCampo).ToString() },
                 { "IdModello", c.IdModello.ToString() },
@@ -372,7 +372,7 @@ namespace BatchDataEntry.Helpers
                     c.Posizione = Convert.ToInt32(reader["Posizione"]);
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
-                    c.SourceTableAutocomplete = Convert.ToString(reader["SourceTable"]);
+                    c.TabellaSorgente = Convert.ToString(reader["SourceTable"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
@@ -488,7 +488,7 @@ namespace BatchDataEntry.Helpers
                         Posizione = Convert.ToInt32(reader["Posizione"]),
                         SalvaValori = Convert.ToBoolean(reader["SalvaValori"]),
                         ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
-                        SourceTableAutocomplete = Convert.ToString(reader["SourceTable"]),
+                        TabellaSorgente = Convert.ToString(reader["SourceTable"]),
                         IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
                         IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
                         TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]),
@@ -614,7 +614,7 @@ namespace BatchDataEntry.Helpers
                         Posizione = Convert.ToInt32(reader["Posizione"]),
                         SalvaValori = Convert.ToBoolean(reader["SalvaValori"]),
                         ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
-                        SourceTableAutocomplete = Convert.ToString(reader["SourceTable"]),
+                        TabellaSorgente = Convert.ToString(reader["SourceTable"]),
                         IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
                         IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
                         TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]),
@@ -850,7 +850,7 @@ namespace BatchDataEntry.Helpers
                     c.Posizione = Convert.ToInt32(reader["Posizione"]);
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
-                    c.SourceTableAutocomplete = Convert.ToString(reader["SourceTable"]);
+                    c.TabellaSorgente = Convert.ToString(reader["SourceTable"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
@@ -926,5 +926,6 @@ namespace BatchDataEntry.Helpers
             }
             return suggestions;
         }
+  
     }
 }

@@ -4,12 +4,13 @@ using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Views;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.ViewModels
 {
     public class ViewModelApplicazione : ViewModelBase
     {
-        private DatabaseHelperSqlServer dbsql;
+        private AbsDbHelper db;
         private Modello _intermediate;
         private RelayCommand _addNewModel;
         private RelayCommand _deleteModel;
@@ -22,13 +23,13 @@ namespace BatchDataEntry.ViewModels
         public ViewModelApplicazione()
         {
             Modelli = new ObservableCollection<Modello>();
-            LoadModels();
+            LoadModels(null);
         }
 
-        public ViewModelApplicazione(DatabaseHelperSqlServer db)
+        public ViewModelApplicazione(AbsDbHelper dbs)
         {
             Modelli = new ObservableCollection<Modello>();
-            dbsql = db;
+            db = dbs;
             LoadModels(db);
         }
 
@@ -110,17 +111,9 @@ namespace BatchDataEntry.ViewModels
             get { return SelectedModel != null; }
         }
 
-        public void LoadModels()
+        public void LoadModels(AbsDbHelper db)
         {
-            var db = new DatabaseHelper();
-            if(Modelli == null) Modelli = new ObservableCollection<Modello>();
-            if(Modelli.Count > 0) Modelli.Clear();
-            Modelli = db.GetModelloRecords();
-            RaisePropertyChanged("Modelli");
-        }
-
-        public void LoadModels(DatabaseHelperSqlServer db)
-        {
+            if (db == null) return;
             if (Modelli == null) Modelli = new ObservableCollection<Modello>();
             if (Modelli.Count > 0) Modelli.Clear();
             Modelli = db.GetModelloRecords();
@@ -131,15 +124,10 @@ namespace BatchDataEntry.ViewModels
         {
             var nuovoModello = new NuovoModello();
             var m = new Modello();
-            if(dbsql == null)
-                nuovoModello.DataContext = new ViewModelNuovoModello(m, false);
-            else
-                nuovoModello.DataContext = new ViewModelNuovoModello(dbsql, m, false);
+            nuovoModello.DataContext = new ViewModelNuovoModello(db, m, false);
             var res = nuovoModello.ShowDialog();
             if (res == true)
-            {
                 Modelli.Add(m);
-            }
             RaisePropertyChanged("Modelli");
         }
 
@@ -148,17 +136,9 @@ namespace BatchDataEntry.ViewModels
             if (SelectedModel != null && SelectedModel.Id >= 0)
             {
                 Modello tmp = new Modello(SelectedModel);
-                if (dbsql == null)
-                {
-                    var db = new DatabaseHelper();
-                    db.Delete(@"Modello", String.Format("Id = {0}", tmp.Id));
-                }
-                else
-                {
-                    dbsql.DeleteReference(string.Format(@"DELETE FROM Campi WHERE IdModello = {0}", tmp.Id));
-                    dbsql.DeleteReference(string.Format(@"DELETE FROM Batch WHERE IdModello = {0}", tmp.Id));
-                    dbsql.DeleteFromTable(@"Modelli", String.Format("Id = {0}", tmp.Id));
-                }
+                db.DeleteReference(string.Format(@"DELETE FROM Campi WHERE IdModello = {0}", tmp.Id));
+                db.DeleteReference(string.Format(@"DELETE FROM Batch WHERE IdModello = {0}", tmp.Id));
+                db.DeleteFromTable(@"Modelli", String.Format("Id = {0}", tmp.Id));              
                 Modelli.Remove(SelectedModel);
                 RaisePropertyChanged("Modelli");
             }
@@ -167,15 +147,9 @@ namespace BatchDataEntry.ViewModels
         private void ModifyItem()
         {
             var nuovoModello = new NuovoModello();
-            if (dbsql == null)
-                nuovoModello.DataContext = new ViewModelNuovoModello(_intermediate, true);
-            else
-                nuovoModello.DataContext = new ViewModelNuovoModello(dbsql, _intermediate, true);
+            nuovoModello.DataContext = new ViewModelNuovoModello(db, _intermediate, true);
             nuovoModello.ShowDialog();
-            if (dbsql == null)
-                LoadModels();
-            else
-                LoadModels(dbsql);
+            LoadModels(db);
             RaisePropertyChanged("Modelli");
         }
 
@@ -184,7 +158,7 @@ namespace BatchDataEntry.ViewModels
             if (SelectedModel != null)
             {
                 var campiView = new CampiV();
-                campiView.DataContext = new ViewModelCampi(dbsql, SelectedModel.Id);
+                campiView.DataContext = new ViewModelCampi(db, SelectedModel.Id);
                 campiView.ShowDialog();
             }
         }
@@ -202,27 +176,15 @@ namespace BatchDataEntry.ViewModels
             var db = new DatabaseHelper();
             copy.Nome = String.Format("{0} - Copia", copy.Nome);
             int newId;
-            ObservableCollection<Campo> _campi;
-            if (dbsql == null)
-            {
-                newId = db.InsertRecordModello(copy);
-                _campi = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + SelectedModel.Id);
-            }
-            else
-            {
-                newId = dbsql.Insert(copy);
-                _campi = dbsql.CampoQuery("SELECT * FROM Campi WHERE IdModello = " + SelectedModel.Id);
-            }
+            newId = db.Insert(copy);
+            var _campi = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + SelectedModel.Id);
 
             if (_campi == null) throw new Exception("Retrive Data (_campi) for copy model failed!");
             foreach (var campo in _campi)
             {
                 campo.IdModello = newId;
                 campo.Id = 0;
-                if (dbsql == null)
-                    db.InsertRecordCampo(campo);
-                else
-                    dbsql.Insert(campo);
+                db.Insert(campo);
             }
             copy.Id = newId;
             Modelli.Add(copy);

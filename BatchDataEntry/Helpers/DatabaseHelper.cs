@@ -313,6 +313,21 @@ namespace BatchDataEntry.Helpers
             return returnCode;
         }
 
+        public bool Delete(String query)
+        {
+            Boolean returnCode = true;
+            try
+            {
+                this.ExecuteNonQuery(query);
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+                returnCode = false;
+            }
+            return returnCode;
+        }
+
         /// <summary>
         ///     Allows the programmer to easily insert into the DB
         /// </summary>
@@ -700,7 +715,7 @@ namespace BatchDataEntry.Helpers
             int b = Convert.ToInt32(d.IsIndexed);
             values.Add("isIndicizzato", b.ToString());
 
-            foreach (Campo col in d.Voci)
+            foreach (Record col in d.Voci)
             {
                 if(string.IsNullOrEmpty(col.Valore))
                     values.Add(col.Nome, string.Empty);
@@ -1340,6 +1355,20 @@ namespace BatchDataEntry.Helpers
             try
             {
                 Delete(tableName, @"Id > 0");
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+        }
+
+        public override void DeleteReference(string v)
+        {
+            // ES: DELETE FROM Campi WHERE IdModello = x
+            if (string.IsNullOrWhiteSpace(v)) return;
+            try
+            {
+                Delete(v);
             }
             catch (Exception e)
             {

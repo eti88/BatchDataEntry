@@ -1,12 +1,6 @@
 ﻿using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
-using BatchDataEntry.ViewModels;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BatchDataEntry.ViewModels.Tests
 {
@@ -46,30 +40,11 @@ namespace BatchDataEntry.ViewModels.Tests
         public void ViewModelNuovaColonnaTest2()
         {
             Assert.IsNotNull(dbsql);
-            Campo c = new Campo("campo1234", false, string.Empty, true);
+            Campo c = new Campo(1, "campo12345", 0, string.Empty, string.Empty, true, false, Helpers.EnumTypeOfCampo.Normale, 1, false, false);
             ViewModelNuovaColonna vm2 = new ViewModelNuovaColonna(c, false, dbsql);
             Assert.IsNotNull(vm2);
             Assert.IsNotNull(vm2.SelectedCampo);
         }
-
-        //[Test(), Order(4)]
-        //public void AddNewItemTest()
-        //{
-        //    Assert.IsNotNull(dbsql);
-        //    Campo c = new Campo("campo1234fdkshfd", false, string.Empty, true);
-        //    ViewModelNuovaColonna vm2 = new ViewModelNuovaColonna(c, false, dbsql);
-        //    vm2.SelectedCampo = c;
-        //    try
-        //    {
-        //        vm2.AddNewItem();
-        //    }
-        //    catch (NullReferenceException)
-        //    {
-
-        //    }
-        //    Campo resp = dbsql.CampoQuery(string.Format("SELECT * FROM Campi WHERE Nome = {0}", c.Nome)).First();
-        //    Assert.IsNotNull(resp);
-        //    Assert.IsTrue(resp.Nome.Equals(c.Nome));
-        //}
+        
     }
 }

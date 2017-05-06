@@ -15,11 +15,14 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Label Name="lblTitle" Grid.Column="1">Percoso:</Label>
-        <TextBox Name="txtPath" Grid.Column="1" Grid.Row="1" MinWidth="250"></TextBox>
-
-        <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0,15,0,0">
+        <Label Name="lblTitleOld" Grid.Column="1" Grid.Row="0">Percoso da sostituire:</Label>
+        <TextBox Name="txtPathOld" Grid.Column="1" Grid.Row="1" MinWidth="250"></TextBox>
+        <Label Name="lblTitleNew" Grid.Column="1" Grid.Row="2">Nuovo percoso:</Label>
+        <TextBox Name="txtPathNew" Grid.Column="1" Grid.Row="3" MinWidth="250"></TextBox>
+        <WrapPanel Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0,15,0,0">
             <Button IsDefault="True" Name="btnDialogOk" Click="btnDialogOk_Click" MinWidth="60" Margin="0,0,10,0">Ok</Button>
             <Button IsCancel="True" MinWidth="60">Cancel</Button>
         </WrapPanel>

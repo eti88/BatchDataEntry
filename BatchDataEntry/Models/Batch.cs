@@ -1,6 +1,6 @@
 ﻿using System;
 using BatchDataEntry.Helpers;
-
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.Models
 {
@@ -257,7 +257,7 @@ namespace BatchDataEntry.Models
             UltimoDocumentoEsportato = "0";
         }
 
-        public Batch(Batch b)
+        public Batch(Batch b, AbsDbHelper db)
         {
             if(b == null) return;
             this.Id = b.Id;
@@ -267,10 +267,7 @@ namespace BatchDataEntry.Models
             this.DirectoryOutput = b.DirectoryOutput;
             this.IdModello = b.IdModello;
             if (this.IdModello > 0)
-            {
-                DatabaseHelper db = new DatabaseHelper();
                 this.Applicazione = db.GetModelloById(b.IdModello);
-            }
 
             this.NumDoc = b.NumDoc;
             this.NumPages = b.NumPages;
@@ -281,16 +278,8 @@ namespace BatchDataEntry.Models
             this.UltimoDocumentoEsportato = b.UltimoDocumentoEsportato;
         }
 
-        public void LoadModel()
-        {
-            if (this.IdModello > 0)
-            {
-                DatabaseHelper db = new DatabaseHelper();
-                this.Applicazione = db.GetModelloById(this.IdModello);
-            }
-        }
 
-        public void LoadModel(DatabaseHelperSqlServer db)
+        public void LoadModel(AbsDbHelper db)
         {
             if (this.IdModello > 0)
                 this.Applicazione = db.GetModelloById(this.IdModello);

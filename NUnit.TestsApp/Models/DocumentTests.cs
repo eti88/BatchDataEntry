@@ -1,10 +1,4 @@
 ﻿using NUnit.Framework;
-using BatchDataEntry.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BatchDataEntry.Models.Tests
 {
@@ -19,42 +13,13 @@ namespace BatchDataEntry.Models.Tests
         }
 
         [Test()]
-        public void DocumentTest()
-        {
-            Document doc = new Document(new Batch(), new Dictionary<int, string>());
-            Assert.IsNotNull(doc);
-        }
-
-        [Test()]
-        public void DocumentTest1()
-        {
-            Document doc = new Document(1, "aaaa", @"C:\\doc1.pdf", false);
-            Assert.IsNotNull(doc);
-        }
-
-        [Test()]
-        public void DocumentTest2()
-        {
-            Document doc = new Document(1, "aaaa", @"C:\\doc1.pdf", false);
-            Document dco2 = new Document(doc);
-            Assert.IsNotNull(dco2);
-        }
-
-        [Test()]
-        public void DocumentTest3()
-        {
-            Document doc = new Document();
-            Assert.IsNotNull(doc);
-        }
-
-        [Test()]
         public void AddInputsToPanelTest()
         {
             Document doc = new Document(1, "aaaa", @"C:\\doc1.pdf", false);
             Batch b = new Batch("aaa", TipoFileProcessato.Pdf, @"C:\\input", @"C:\\out");
             Modello m = new Modello("bbb", false, new System.Collections.ObjectModel.ObservableCollection<Campo>());
-            Campo c1 = new Campo("campo1", false, string.Empty, true);
-            Campo c2 = new Campo("campo1", false, string.Empty, true);
+            Campo c1 = new Campo(1, "campo1", 0, string.Empty, string.Empty, true, false, Helpers.EnumTypeOfCampo.Normale, 1, false, false);
+            Campo c2 = new Campo(1, "campo2", 0, string.Empty, string.Empty, false, false, Helpers.EnumTypeOfCampo.Normale, 1, false, false);
             m.Campi.Add(c1);
             m.Campi.Add(c2);
             b.Applicazione = m;

@@ -4,6 +4,7 @@ using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Views;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -12,7 +13,7 @@ namespace BatchDataEntry.ViewModels
 #region Attr
         private readonly int _idModello;
         private Campo _intermediate;
-        protected DatabaseHelperSqlServer dbsql;
+        protected AbsDbHelper db;
       
         private ObservableCollection<Campo> _clos;
         private Campo _selectedCampo;
@@ -91,35 +92,20 @@ namespace BatchDataEntry.ViewModels
             Colonne = new ObservableCollection<Campo>();
         }
 
-        public ViewModelCampi(DatabaseHelperSqlServer dbc)
+        public ViewModelCampi(AbsDbHelper dbc)
         {
             Colonne = new ObservableCollection<Campo>();
-            dbsql = dbc;
+            db = dbc;
         }
 
-        public ViewModelCampi(int idModello)
-        {           
-            GetColonneFromDb(idModello);
+        public ViewModelCampi(AbsDbHelper dbc, int idModello)
+        {
+            db = dbc;
+            GetColonneFromDb(db, idModello);
             _idModello = idModello;
         }
 
-        public ViewModelCampi(DatabaseHelperSqlServer dbc, int idModello)
-        {
-            dbsql = dbc;
-            GetColonneFromDb(dbsql, idModello);
-            _idModello = idModello;
-        }
-
-        public void GetColonneFromDb(int idModello)
-        {
-            var db = new DatabaseHelper();
-            if(this.Colonne == null) this.Colonne = new ObservableCollection<Campo>();
-            if(this.Colonne.Count > 0) this.Colonne.Clear();
-            this.Colonne = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + idModello);
-            RaisePropertyChanged("Colonne");
-        }
-
-        public void GetColonneFromDb(DatabaseHelperSqlServer db, int idModello)
+        public void GetColonneFromDb(AbsDbHelper db, int idModello)
         {
             if (this.Colonne == null) this.Colonne = new ObservableCollection<Campo>();
             if (this.Colonne.Count > 0) this.Colonne.Clear();
@@ -132,10 +118,7 @@ namespace BatchDataEntry.ViewModels
             var colonna = new NuovaColonna();
             var campo = new Campo();
             campo.IdModello = _idModello;
-            if(dbsql == null)
-                colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols, null);
-            else
-                colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols, dbsql);
+            colonna.DataContext = new ViewModelNuovaColonna(campo, false, _countCols, db);
             var result = colonna.ShowDialog();
             if (result == true)
                 Colonne.Add(campo);
@@ -147,15 +130,8 @@ namespace BatchDataEntry.ViewModels
             if (SelectedCampo != null && SelectedCampo.Id >= 0)
             {
                 Campo tmp = new Campo(SelectedCampo);
-                if(dbsql == null)
-                {
-                    var db = new DatabaseHelper();
-                    db.Delete(@"Campo", String.Format("Id = {0}", tmp.Id));
-                }
-                else
-                {
-                    dbsql.DeleteFromTable(@"Campi", String.Format("Id = {0}", tmp.Id));
-                }   
+                db.DeleteFromTable(@"Campo", String.Format("Id = {0}", tmp.Id));
+
                 Colonne.Remove(SelectedCampo); 
                 RaisePropertyChanged("Colonne");
             }
@@ -164,15 +140,9 @@ namespace BatchDataEntry.ViewModels
         private void UpdateItem()
         {
             var colonna = new NuovaColonna();
-            if(dbsql == null)
-                colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true, null);
-            else
-                colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true, dbsql);
+            colonna.DataContext = new ViewModelNuovaColonna(_intermediate, true, db);
             colonna.ShowDialog();
-            if(dbsql == null)
-                GetColonneFromDb(_idModello);
-            else
-                GetColonneFromDb(dbsql ,_idModello);
+            GetColonneFromDb(db ,_idModello);
             RaisePropertyChanged("Colonne");
         }
     }

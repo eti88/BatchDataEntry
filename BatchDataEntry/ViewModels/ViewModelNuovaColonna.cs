@@ -3,12 +3,13 @@ using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Collections.Generic;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.ViewModels
 {
     public class ViewModelNuovaColonna : ViewModelBase
     {
-        private DatabaseHelperSqlServer dbsql;
+        private AbsDbHelper db;
         private bool alreadyExist = false;
 
         private List<string> _srcTables;
@@ -87,52 +88,42 @@ namespace BatchDataEntry.ViewModels
             SrcTables = new List<string>();
         }
 
-        public ViewModelNuovaColonna(DatabaseHelperSqlServer db)
+        public ViewModelNuovaColonna(AbsDbHelper db)
         {
             this.alreadyExist = false;
-            SrcTables = db.GetTableList();
+            if(db is DatabaseHelperSqlServer)
+                SrcTables = ((DatabaseHelperSqlServer)db).GetTableList();
         }
 
-        public ViewModelNuovaColonna(Campo c, bool needUpdate, DatabaseHelperSqlServer dbq)
+        public ViewModelNuovaColonna(Campo c, bool needUpdate, AbsDbHelper dbq)
         {
-            DatabaseHelper dblite;
             Modello mod;
             this.SelectedCampo = c;
             this.alreadyExist = needUpdate;
-            if (dbq != null)
-            {
-                dbsql = dbq;
-                mod = dbsql.GetModelloById(c.IdModello);
-                SrcTables = dbsql.GetTableList();
-            }
+            db = dbq;
+            mod = db.GetModelloById(c.IdModello);
+            if (db is DatabaseHelperSqlServer)
+                SrcTables = ((DatabaseHelperSqlServer)db).GetTableList();
             else
-            {
-                dblite = new DatabaseHelper();
-                mod = dblite.GetModelloById(c.IdModello);
                 SrcTables = new List<string>();
-            }
+
             this.NomeTabella = mod.Nome;                      
         }
 
-        public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount, DatabaseHelperSqlServer dbq)
+        public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount, AbsDbHelper dbq)
         {
             DatabaseHelper dblite;
             Modello mod;
 
             this.SelectedCampo = c;
             this.alreadyExist = needUpdate;
-            if (dbq != null)
-            {
-                dbsql = dbq;
-                mod = dbsql.GetModelloById(c.IdModello);
-                SrcTables = dbsql.GetTableList();
-            }
+            db = dbq;
+            mod = db.GetModelloById(c.IdModello);
+            if (db is DatabaseHelperSqlServer)
+                SrcTables = ((DatabaseHelperSqlServer)db).GetTableList();
             else
-            {
-                dblite = new DatabaseHelper();
-                mod = dblite.GetModelloById(c.IdModello);
                 SrcTables = new List<string>();
-            }
+
             this.SelectedCampo.Posizione = colCount++;
             this.NomeTabella = mod.Nome;            
         }
@@ -141,19 +132,14 @@ namespace BatchDataEntry.ViewModels
 
         public void AddNewItem()
         {
-            DatabaseHelper dbsqlite = new DatabaseHelper();
             Campo m = new Campo(SelectedCampo);
             int lastId = -1;
 
-            if(dbsql == null && alreadyExist)
-                dbsqlite.UpdateRecordCampo(m);
-            else if(dbsql == null && !alreadyExist)
-                lastId = dbsqlite.InsertRecordCampo(m);
-            else if (alreadyExist)
-                dbsql.Update(m);
-            else
-                lastId = dbsql.Insert(m);
-
+            if(alreadyExist)
+                db.Update(m);
+            else if(!alreadyExist)
+                lastId = db.Insert(m);
+ 
             if (lastId != -1)
             {
                 SelectedCampo.Id = lastId;

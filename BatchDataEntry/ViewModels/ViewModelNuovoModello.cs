@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -9,7 +10,7 @@ namespace BatchDataEntry.ViewModels
     {
         #region Attr
 
-        private DatabaseHelperSqlServer dbsql;
+        private AbsDbHelper db;
         private bool alreadyExist = false;
 
         private Modello _selectedModel;
@@ -69,50 +70,31 @@ namespace BatchDataEntry.ViewModels
             this.alreadyExist = false;
         }
 
-        public ViewModelNuovoModello(DatabaseHelperSqlServer dbs)
+        public ViewModelNuovoModello(AbsDbHelper dbs)
         {
             this.alreadyExist = false;
-            dbsql = dbs;
+            db = dbs;
         }
 
-        public ViewModelNuovoModello(Modello modello, bool needUpdate)
+        public ViewModelNuovoModello(AbsDbHelper dbs ,Modello modello, bool needUpdate)
         {
             this.SelectedModel = modello;
             this.alreadyExist = needUpdate;
-        }
-
-        public ViewModelNuovoModello(DatabaseHelperSqlServer dbs ,Modello modello, bool needUpdate)
-        {
-            this.SelectedModel = modello;
-            this.alreadyExist = needUpdate;
-            dbsql = dbs;
+            db = dbs;
         }
 
         #endregion
 
         public void AddNewItem()
         {
-            DatabaseHelper db = null;
-            if(dbsql == null) 
-                db = new DatabaseHelper();
-
             Modello m = new Modello(SelectedModel);
             int lastId = -1;
 
             if (alreadyExist)
-            {
-                if (dbsql == null)
-                    db.UpdateRecordModello(m);
-                else
-                    dbsql.Update(m);
-            }               
+                    db.Update(m);             
             else
             {
-                if (dbsql == null)
-                    lastId = db.InsertRecordModello(m);
-                else
-                    lastId = dbsql.Insert(m);
-
+                lastId = db.Insert(m);
                 if(lastId == -1)
                     return;
                 SelectedModel.Id = lastId;

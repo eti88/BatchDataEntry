@@ -70,7 +70,6 @@ namespace BatchDataEntry.ViewModels
                     ColumnList.Add(new ExportColumn(columnNames[i]));
             }
             RaisePropertyChanged("Columns");
-            LastExportedIndex = -1;
         }
 
         public void GenerateCsv()
@@ -106,7 +105,8 @@ namespace BatchDataEntry.ViewModels
 
                     tmpRecords.Add(record.ToString());
                 }
-                Csv.AddRows(_destination, tmpRecords);      
+
+                Csv.AddRows(_destination, tmpRecords);
             }
             catch (Exception e)
             {

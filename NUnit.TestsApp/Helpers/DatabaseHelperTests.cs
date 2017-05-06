@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using BatchDataEntry.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,6 +6,8 @@ using System.IO;
 using BatchDataEntry.Models;
 using BatchDataEntry.Components;
 using System.Collections.ObjectModel;
+using BatchDataEntry.Suggestions;
+using BatchDataEntry.Abstracts;
 
 namespace BatchDataEntry.Helpers.Tests
 {
@@ -23,13 +24,13 @@ namespace BatchDataEntry.Helpers.Tests
             cacheTestDb = new DatabaseHelper(Path.Combine(@"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles", @"cacheTest.db3"));
             testDb.InitTabs();
             cacheTestDb.CreateCacheDb(new List<string>());
-            testDb.InsertRecordBatch(new Batch("utest", TipoFileProcessato.Pdf, @"C:\\Input", @"C:\\Output"));
+            testDb.Insert(new Batch("utest", TipoFileProcessato.Pdf, @"C:\\Input", @"C:\\Output"));
             Modello m = new Modello();
             m.Nome = "utestModel";
             m.OrigineCsv = false;
-            testDb.InsertRecordModello(m);
-            testDb.InsertRecordCampo(new Campo("campo1", false, "ciao", true));
-            cacheTestDb.InsertRecordAutocompletamento(new Autocompletamento(0, "valore1"));
+            testDb.Insert(m);
+            testDb.Insert(new Campo(1, "campo1", 0, string.Empty, string.Empty, true, false, Helpers.EnumTypeOfCampo.Normale, 1, false, false));
+            cacheTestDb.Insert(new SuggestionSingleColumn(0, "valore1"));
         }
 
         [Test(), Order(1)]
@@ -82,7 +83,7 @@ namespace BatchDataEntry.Helpers.Tests
             Batch b = new Batch("utest", TipoFileProcessato.Pdf, @"C:\\Input", @"C:\\Output");
             b.Id = 1;
             b.Nome = "aaaaa";
-            testDb.UpdateRecordBatch(b);
+            testDb.Update(b);
             Batch expected = testDb.GetBatchById(1);
             Assert.IsNotNull(expected);
             Assert.IsTrue(expected.Nome.Equals("aaaaa"));
@@ -91,14 +92,14 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(8)]
         public void UpdateRecordCampoTest()
         {
-            Campo c = new Campo("campo1", false, "ciao", true);
+            Campo c = new Campo(1, "campo1", 0, string.Empty, string.Empty, true, false, Helpers.EnumTypeOfCampo.Normale, 1, false, false);
             c.Id= 1;
             c.Nome = "bbbb";
-            c.IsDisabled = true;
-            testDb.UpdateRecordCampo(c);
+            c.IsDisabilitato = true;
+            testDb.Update(c);
             Campo expected = testDb.GetCampoById(1);
             Assert.IsNotNull(expected);
-            Assert.IsTrue(expected.Nome.Equals("bbbb") && expected.IsDisabled == true);
+            Assert.IsTrue(expected.Nome.Equals("bbbb") && expected.IsDisabilitato == true);
         }
 
         [Test(), Order(9)]
@@ -110,7 +111,7 @@ namespace BatchDataEntry.Helpers.Tests
             m.OrigineCsv = true;
             m.Separatore = ";";
             m.PathFileCsv = "D:\\test\\aaa.csv";
-            testDb.UpdateRecordModello(m);
+            testDb.Update(m);
             Modello expected = testDb.GetModelloById(1);
             Assert.IsNotNull(expected);
             Assert.IsTrue(expected.OrigineCsv == true && expected.Separatore.Equals(";") && expected.PathFileCsv.Equals("D:\\test\\aaa.csv"));
@@ -146,7 +147,7 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(14)]
         public void GetAutocompleteListTest()
         {
-            List<string> suggestions = cacheTestDb.GetAutocompleteList(0);
+            List<AbsSuggestion> suggestions = cacheTestDb.GetAutocompleteList(0);
             Assert.IsNotNull(suggestions);
             Assert.IsTrue(suggestions.Count > 0);
         }
@@ -154,7 +155,7 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(15)]
         public void GetAutocompleteListObTest()
         {
-            ObservableCollection<Suggestion> suggestions = cacheTestDb.GetAutocompleteListOb(0);
+            ObservableCollection<AbsSuggestion> suggestions = cacheTestDb.GetAutocompleteListOb(0);
             Assert.IsNotNull(suggestions);
             Assert.IsTrue(suggestions.Count > 0);
         }

@@ -62,7 +62,6 @@
     <Compile Include="Business\UtilityTests.cs" />
     <Compile Include="Helpers\DatabaseHelperSqlServerTests.cs" />
     <Compile Include="Helpers\DatabaseHelperTests.cs" />
-    <Compile Include="Models\BatchTests.cs" />
     <Compile Include="Models\CampoTests.cs" />
     <Compile Include="Models\DbCredentialTests.cs" />
     <Compile Include="Models\DocumentTests.cs" />
