@@ -108,6 +108,11 @@ namespace BatchDataEntry.ViewModels
             DocFiles.CurrentIndex = indexRowVal;
             DocFile = new Document(db ,Batch, DocFiles.Current);
             DocFile.AddInputsToPanel(Batch, _db);
+            // Inverte il valore per l'abilitazione del campo
+            foreach (Campo c in DocFile.Voci)
+            {
+                c.IsDisabilitato = !c.IsDisabilitato;
+            }
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
             PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
@@ -139,6 +144,12 @@ namespace BatchDataEntry.ViewModels
             }
             DocFile = new Document(db, Batch, DocFiles.Current);
             DocFile.AddInputsToPanel(Batch, _db);
+            // Inverte il valore per l'abilitazione del campo
+            foreach (Campo c in DocFile.Voci)
+            {
+                c.IsDisabilitato = !c.IsDisabilitato;            
+            }
+
             PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
@@ -236,6 +247,13 @@ namespace BatchDataEntry.ViewModels
                     if (!string.IsNullOrEmpty(repeatValues[i]))
                         DocFile.Voci.ElementAt(i).Valore = repeatValues[i];
                 }
+
+                // Inverte il valore per l'abilitazione del campo
+                foreach (Campo c in DocFile.Voci)
+                {
+                    c.IsDisabilitato = !c.IsDisabilitato;
+                }
+
                 PdfWrapper.OpenFile(DocFile.Path);
             }
 
@@ -255,6 +273,13 @@ namespace BatchDataEntry.ViewModels
                     if (!string.IsNullOrEmpty(repeatValues[i]))
                         DocFile.Voci.ElementAt(i).Valore = repeatValues[i];
                 }
+
+                // Inverte il valore per l'abilitazione del campo
+                foreach (Campo c in DocFile.Voci)
+                {
+                    c.IsDisabilitato = !c.IsDisabilitato;
+                }
+
                 PdfWrapper.OpenFile(DocFile.Path);
             }
             

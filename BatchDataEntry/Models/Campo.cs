@@ -1,15 +1,11 @@
-﻿using BatchDataEntry.Abstracts;
-using BatchDataEntry.Helpers;
+﻿using BatchDataEntry.Helpers;
 using BatchDataEntry.Interfaces;
-using BatchDataEntry.Providers;
-using BatchDataEntry.Suggestions;
 using System;
-using System.Collections.Generic;
 
 namespace BatchDataEntry.Models
 {
 
-    public class Campo : BaseModel, ICampo
+    public class Campo : BaseModel
     {   
         private int _id;
         public int Id
@@ -194,7 +190,7 @@ namespace BatchDataEntry.Models
          futuri inserimenti.
          */
 
-        public Campo() {
+        public Campo(){
             Id = 0;
             Nome = string.Empty;
             Posizione = -1;
@@ -206,7 +202,6 @@ namespace BatchDataEntry.Models
             IdModello = 0;
             Riproponi = false;
             IsDisabilitato = false;
-            SetConfigBasedOnType();
         }
 
         public Campo(int id, string nome, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) {
@@ -282,7 +277,7 @@ namespace BatchDataEntry.Models
             resutl = (resutl * 7) + this.IndiceSecondario.GetHashCode();
             resutl = (resutl * 7) + this.TipoCampo.GetHashCode();
             resutl = (resutl * 7) + this.IdModello.GetHashCode();
-            resutl = (resutl * 7) + this.TabellaSorgente.GetHashCode();
+            resutl = (resutl * 7) + ((string.IsNullOrEmpty(this.TabellaSorgente)) ? 0 : this.TabellaSorgente.GetHashCode());
             resutl = (resutl * 7) + this.Riproponi.GetHashCode();
             resutl = (resutl * 7) + this.IsDisabilitato.GetHashCode();
             return resutl;

@@ -112,7 +112,6 @@ namespace BatchDataEntry.ViewModels
 
         public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount, AbsDbHelper dbq)
         {
-            DatabaseHelper dblite;
             Modello mod;
 
             this.SelectedCampo = c;

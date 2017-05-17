@@ -69,11 +69,11 @@ namespace BatchDataEntry.ViewModels.Tests
         //    Assert.IsNotNull(dbc);
         //    Assert.IsNotNull(vm2);
         //    Modello m = dbc.GetFirstModello();
-        //    Campo c = dbc.CampoQuery(string.Format("SELECT * FROM Campi WHRE IdModello = {0}", m.Id)).FirstOrDefault();
+        //    Campo c = dbc.CampoQuery(string.Format("SELECT * FROM Campo WHRE IdModello = {0}", m.Id)).FirstOrDefault();
         //    vm2.SelectedCampo = c;
         //    Assert.IsNotNull(vm2.SelectedCampo);
         //    vm2.DelItem();
-        //    Assert.IsTrue(dbc.CampoQuery(string.Format(@"SELECT COUNT(Id) FROM Campi WHERE IdModello = {0}",m.Id)).Count == 0);
+        //    Assert.IsTrue(dbc.CampoQuery(string.Format(@"SELECT COUNT(Id) FROM Campo WHERE IdModello = {0}",m.Id)).Count == 0);
         //}
     }
 }

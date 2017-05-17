@@ -5,14 +5,26 @@ using BatchDataEntry.Suggestions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WpfControls.Editors;
+using System.Collections;
 
 namespace BatchDataEntry.Providers
 {
     /// <summary>
     /// Recupera le occorrenze per l'autocompletamento dal database mssql
     /// </summary>
-    public class DbSqlSuggestionProvider : AbsDbSuggestions
+    public class DbSqlSuggestionProvider : AbsDbSuggestions, ISuggestionProvider
     {
+
+        public IEnumerable<AbsSuggestion> ListOfSuggestions { get; set; }
+
+        public DbSqlSuggestionProvider()
+        {
+            // Bisogna recuperare le infoz
+            var suggestions = GetRecords();
+            ListOfSuggestions = suggestions;
+        }
+
         public static async Task<List<AbsSuggestion>> GetRecords(int idcol, string sourceTable, int tableCol)
         {
             Batch b;
@@ -57,6 +69,11 @@ namespace BatchDataEntry.Providers
             {
                 return new List<AbsSuggestion>();
             }
+        }
+
+        public IEnumerable GetSuggestions(string filter)
+        {
+            throw new NotImplementedException();
         }
     }
 }

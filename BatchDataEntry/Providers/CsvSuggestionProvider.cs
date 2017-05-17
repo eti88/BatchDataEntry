@@ -34,7 +34,7 @@ namespace BatchDataEntry.Providers
                 AbsDbHelper db = null;
                 if (Properties.Settings.Default.UseSQLServer)
                 {
-                    var dbsql = new DatabaseHelperSqlServer(Properties.Settings.Default.SqlUser, Properties.Settings.Default.SqlPassword,
+                    db = new DatabaseHelperSqlServer(Properties.Settings.Default.SqlUser, Properties.Settings.Default.SqlPassword,
                      Properties.Settings.Default.SqlServerAddress, Properties.Settings.Default.SqlDbName);  
                 }
                 else
@@ -50,7 +50,7 @@ namespace BatchDataEntry.Providers
                 foreach (var c in b.Applicazione.Campi)
                 {
                     if (c.IndicePrimario) colIdx = c.Posizione;
-                    if (c.IndiceSecondario) colSec = c.Posizione;
+                    else if (c.IndiceSecondario) colSec = c.Posizione;
                 }
                 IEnumerable<AbsSuggestion> task;
                 if (colSec == 0)
@@ -109,10 +109,13 @@ namespace BatchDataEntry.Providers
         public IEnumerable GetSuggestions(string filter)
         {
             if (string.IsNullOrWhiteSpace(filter) && ListOfSuggestions == null) return null;
+            if (this.ListOfSuggestions.Count() == 0)
+                return null;
             IEnumerable<AbsSuggestion> results = new List<AbsSuggestion>();
-            if(this.ListOfSuggestions.GetType().GetElementType() is SuggestionDoubleColumn)
+
+            if (this.ListOfSuggestions.ElementAt(0) is SuggestionDoubleColumn)
                 results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionDoubleColumn)item).ColumnA) && ((SuggestionDoubleColumn)item).ColumnA.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase)).ToList();
-            else if(this.ListOfSuggestions.GetType().GetElementType() is SuggestionSingleColumn)
+            else if (this.ListOfSuggestions.ElementAt(0) is SuggestionSingleColumn)
                 results = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionSingleColumn)item).Valore) && ((SuggestionSingleColumn)item).Valore.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase)).ToList();
             return results.ToList();
         }

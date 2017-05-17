@@ -21,6 +21,8 @@
     
     <Window.Resources>
         <providers:CsvSuggestionProvider x:Key="CsvSuggestionProvider"/>
+        <providers:DbSqlSuggestionProvider x:Key="DbSqlSuggestionProvider"/>
+        <providers:DbSuggestionProvider x:Key="DbSuggestionProvider"/>
         <DataTemplate x:Key="SuggestionTemplate">
             <Grid>
                 <StackPanel Orientation="Horizontal">
@@ -32,61 +34,81 @@
         <!-- normal template -->
         <DataTemplate x:Key="TextBoxDataTemplate">
             <StackPanel Margin="5,0,5,0">
-            <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
+            <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
             <TextBox
-                Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                IsEnabled="{Binding Path=IsDisabled}"
+                Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                IsEnabled="{Binding Path=IsDisabilitato}"
                 VerticalAlignment="Center"
                 Height="30"/>
             </StackPanel>
         </DataTemplate>
-        <!-- db template -->
         <DataTemplate x:Key="AutocompleteDbDataTemplate">
             <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
-                <TextBox
-                    IsEnabled="{Binding Path=IsDisabled}"
-                    VerticalAlignment="Center"
+                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+                <!-- autocompletetextbox -->
+                <editors:AutoCompleteTextBox
+                    IsEnabled="{Binding Path=IsDisabilitato}"
+                    Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    DisplayMember="Valore"
                     Height="30"
                     Width="352"
-                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteItemsSource="{Binding dbQueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                    wpfTextBoxAutoComplete:AutoCompleteBehavior.AutoCompleteStringComparison="InvariantCultureIgnoreCase"
-                    ></TextBox>
-                <!--
-                <controls1:AutoCompleteBox
-                    IsEnabled="{Binding Path=IsDisabled}"
-                    VerticalAlignment="Center"
-                    Height="30"
-                    Width="352"
-                    ItemsSource="{Binding dbQueryProvider, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    MinimumPrefixLength="3"
-                    IsTextCompletionEnabled="False"
-                    ></controls1:AutoCompleteBox> -->
+                    Provider="{StaticResource ResourceKey=DbSuggestionProvider}"
+                    ItemTemplate="{StaticResource ResourceKey=SuggestionTemplate}">
+                    <editors:AutoCompleteTextBox.SelectedItem>
+                        <Binding Path="ElementoSelezionato" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"></Binding>
+                    </editors:AutoCompleteTextBox.SelectedItem>
+                    <editors:AutoCompleteTextBox.LoadingContent>
+                        <TextBox Text="Loading..." Margin="5" FontSize="14"></TextBox>
+                    </editors:AutoCompleteTextBox.LoadingContent>
+                </editors:AutoCompleteTextBox>
+                <!-- end -->
             </StackPanel>
         </DataTemplate>
+        <!-- db template -->
+        <DataTemplate x:Key="AutocompleteDbSqlDataTemplate">
+            <StackPanel Margin="5,0,5,0">
+                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+                <!-- autocompletetextbox -->
+                <editors:AutoCompleteTextBox
+                    IsEnabled="{Binding Path=IsDisabilitato}"
+                    Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    DisplayMember="Valore"
+                    Height="30"
+                    Width="352"
+                    Provider="{StaticResource ResourceKey=DbSqlSuggestionProvider}"
+                    ItemTemplate="{StaticResource ResourceKey=SuggestionTemplate}">
+                    <editors:AutoCompleteTextBox.SelectedItem>
+                        <Binding Path="ElementoSelezionato" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"></Binding>
+                    </editors:AutoCompleteTextBox.SelectedItem>
+                    <editors:AutoCompleteTextBox.LoadingContent>
+                        <TextBox Text="Loading..." Margin="5" FontSize="14"></TextBox>
+                    </editors:AutoCompleteTextBox.LoadingContent>
+                </editors:AutoCompleteTextBox>
+                <!-- end -->
+            </StackPanel>
+        </DataTemplate>
+        
         <!-- csv template -->
         <DataTemplate x:Key="AutocompleteCsvDataTemplate">
             <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Key, Mode=OneTime}" FontSize="14"/>
+                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
                 <!-- autocompletetextbox -->
                 <editors:AutoCompleteTextBox
-                    IsEnabled="{Binding Path=IsDisabled}"
-                    Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsEnabled="{Binding IsDisabilitato, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     DisplayMember="ColumnA"
                     Height="30"
                     Width="352"
                     Provider="{StaticResource ResourceKey=CsvSuggestionProvider}"
                     ItemTemplate="{StaticResource ResourceKey=SuggestionTemplate}">
                     <editors:AutoCompleteTextBox.SelectedItem>
-                        <Binding Path="AutoSelectedItem" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"></Binding>
+                        <Binding Path="ElementoSelezionato" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"></Binding>
                     </editors:AutoCompleteTextBox.SelectedItem>
                     <editors:AutoCompleteTextBox.LoadingContent>
                         <TextBox Text="Loading..." Margin="5" FontSize="14"></TextBox>
                     </editors:AutoCompleteTextBox.LoadingContent>
                     <editors:AutoCompleteTextBox.InputBindings>
-                        <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.TextboxCmd}" CommandParameter="{Binding AutoSelectedItem}"></KeyBinding>
+                        <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.TextboxCmd}" CommandParameter="{Binding ElementoSelezionato}"></KeyBinding>
                     </editors:AutoCompleteTextBox.InputBindings>
                 </editors:AutoCompleteTextBox>
                 <!-- end -->

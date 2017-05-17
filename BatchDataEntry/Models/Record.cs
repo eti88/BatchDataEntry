@@ -74,7 +74,6 @@ namespace BatchDataEntry.Models
 
         public Record(int id, string nome, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) : base(id, nome, posizione, valorepredef, tabella, primario, secondario, campo, idmodello, riproponi, disabilitato)
         {
-            // TODO: Verificare che effettivamente venga chiamato il costruttore padre
             Valore = string.Empty;
             SourceTableColumn = 1;
             QueryProvider = new List<AbsSuggestion>();
@@ -84,7 +83,6 @@ namespace BatchDataEntry.Models
 
         public Record(int id, string nome, string valore, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) : base(id, nome, posizione, valorepredef, tabella, primario, secondario, campo, idmodello, riproponi, disabilitato)
         {
-            // TODO: Verificare che effettivamente venga chiamato il costruttore padre
             Valore = valore;
             SourceTableColumn = 1;
             QueryProvider = new List<AbsSuggestion>();
@@ -141,7 +139,8 @@ namespace BatchDataEntry.Models
             rec.TabellaSorgente = c.TabellaSorgente;
             if (c.SourceTableColumn < 1) c.SourceTableColumn = 1;
             rec.SourceTableColumn = c.SourceTableColumn;
-            rec.QueryProviderSelector();
+            if(rec.SalvaValori)
+                rec.QueryProviderSelector();
             return rec;
         }
 

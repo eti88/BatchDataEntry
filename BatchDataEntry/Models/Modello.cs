@@ -184,7 +184,7 @@ namespace BatchDataEntry.Models
         {
             if (this.Id > 0)
             {
-                ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campi WHERE IdModello={0}", this.Id));
+                ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", this.Id));
                 this.Campi = tmpc;
             }
         }

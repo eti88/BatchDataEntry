@@ -75,7 +75,7 @@ namespace BatchDataEntry.Helpers.Tests
         {
             Campo c = db.GetFirstCampo();
             Assert.IsNotNull(c);
-            db.DeleteFromTable("Campi", string.Format( @"Id = '{0}'", c.Id));
+            db.DeleteFromTable("Campo", string.Format( @"Id = '{0}'", c.Id));
             Campo c2 = db.GetFirstCampo();
             Assert.IsTrue(c.Id != c2.Id);
         }
@@ -169,7 +169,7 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(15)]
         public void CampoQueryTest()
         {
-            ObservableCollection<Campo> campi = db.CampoQuery("SELECT * FROM Campi WHERE Id > 1");
+            ObservableCollection<Campo> campi = db.CampoQuery("SELECT * FROM Campo WHERE Id > 1");
             Assert.IsNotNull(campi);
             Assert.IsTrue(campi.Count > 0);
         }
@@ -177,7 +177,7 @@ namespace BatchDataEntry.Helpers.Tests
         [Test(), Order(16)]
         public void ModelloQueryTest()
         {
-            ObservableCollection<Modello> modelli = db.ModelloQuery("SELECT * FROM Modelli WHERE Id > 1");
+            ObservableCollection<Modello> modelli = db.ModelloQuery("SELECT * FROM Modello WHERE Id > 1");
             Assert.IsNotNull(modelli);
             Assert.IsTrue(modelli.Count > 0);
         }
@@ -207,7 +207,7 @@ namespace BatchDataEntry.Helpers.Tests
         [TearDown]
         public void DropValue()
         {
-            db.DropAllRowsFromTable("Modelli");
+            db.DropAllRowsFromTable("Modello");
             db.DropAllRowsFromTable("Campi");
             db.DropAllRowsFromTable("Batch");
         }

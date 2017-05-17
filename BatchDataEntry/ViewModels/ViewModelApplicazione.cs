@@ -136,9 +136,9 @@ namespace BatchDataEntry.ViewModels
             if (SelectedModel != null && SelectedModel.Id >= 0)
             {
                 Modello tmp = new Modello(SelectedModel);
-                db.DeleteReference(string.Format(@"DELETE FROM Campi WHERE IdModello = {0}", tmp.Id));
+                db.DeleteReference(string.Format(@"DELETE FROM Campo WHERE IdModello = {0}", tmp.Id));
                 db.DeleteReference(string.Format(@"DELETE FROM Batch WHERE IdModello = {0}", tmp.Id));
-                db.DeleteFromTable(@"Modelli", String.Format("Id = {0}", tmp.Id));              
+                db.DeleteFromTable(@"Modello", String.Format("Id = {0}", tmp.Id));              
                 Modelli.Remove(SelectedModel);
                 RaisePropertyChanged("Modelli");
             }

@@ -45,7 +45,7 @@
                 <ComboBox Grid.Column="1" Grid.Row="2" x:Name="CmbTable" Height="30" 
                           IsSynchronizedWithCurrentItem="True"
                           ItemsSource="{Binding Path=SrcTables, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          SelectedItem="{Binding Path=SelectedCampo.SourceTableAutocomplete, Mode=TwoWay}">
+                          SelectedItem="{Binding Path=SelectedCampo.TabellaSorgente, Mode=TwoWay}">
                 </ComboBox>
                 <!-- Row 3 -->
                 <TextBlock Grid.Column="0" Grid.Row="3" x:Name="labelNome" Text="Nome"/>
@@ -68,7 +68,7 @@
                 <CheckBox Grid.Column="1" Grid.Row="6" x:Name="checkBoxIsSecondary" IsChecked="{Binding Path=SelectedCampo.IndiceSecondario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Chiave secondaria" Foreground="DarkCyan" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Unchecked="checkBoxIsSecondary_Unchecked" Checked="checkBoxIsSecondary_Checked" HorizontalAlignment="Left"/>
                 <!-- Row 7 -->
                 <CheckBox Grid.Column="0" Grid.Row="7" x:Name="checkBoxPartialSave" IsChecked="{Binding Path=SelectedCampo.Riproponi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Riproponi valore" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" HorizontalContentAlignment="Stretch"/>
-                <CheckBox Grid.Column="1" Grid.Row="7" x:Name="checkBoxDisableColumn" IsChecked="{Binding Path=SelectedCampo.IsDisabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo non modificabile" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" Checked="checkBoxDisableColumn_Checked" Unchecked="checkBoxDisableColumn_Unchecked" HorizontalAlignment="Left"/>
+                <CheckBox Grid.Column="1" Grid.Row="7" x:Name="checkBoxDisableColumn" IsChecked="{Binding Path=SelectedCampo.IsDisabilitato, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo non modificabile" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" Checked="checkBoxDisableColumn_Checked" Unchecked="checkBoxDisableColumn_Unchecked" HorizontalAlignment="Left"/>
             </Grid>
             <!--    <CheckBox x:Name="checkBoxSalvaValori" IsChecked="{Binding Path=SelectedCampo.SalvaValori, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo Autocompletante" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"/> -->
         </DockPanel>

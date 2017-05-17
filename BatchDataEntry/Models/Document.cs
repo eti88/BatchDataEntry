@@ -85,32 +85,42 @@ namespace BatchDataEntry.Models
             this.Voci = new ObservableCollection<Record>();
         }
 
-        public Document(AbsDbHelper db,Batch b, Dictionary<int, string> dictionary)
+        public Document(AbsDbHelper db, Batch b, Dictionary<int, string> dictionary)
         {
             this.Voci = new ObservableCollection<Record>();
             if(b.Applicazione.Id == 0) b.Applicazione.LoadCampi(db);
             if(b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(db);
-            int h = 0;
-            for (int i = 0; i < dictionary.Count; i++)
-            {
-                KeyValuePair<int, string> row = dictionary.ElementAt(i);
-                if (i == 0) this.Id = Convert.ToInt32(row.Value);
-                if(i == 1) this.FileName = row.Value;
-                if(i == 2) this.Path = row.Value;
-                if (i == 3) this.IsIndexed = GetBool(row.Value);
-                if (i > 3)
-                {
-                    Record r = null;
-                    if (!string.IsNullOrEmpty(row.Value))
-                        r = Record.Create(b.Applicazione.Campi.ElementAt(h), h, row.Value);
-                    else
-                        r = Record.Create(b.Applicazione.Campi.ElementAt(h), h);
 
-                    if (r == null) throw new Exception("Record creation error");
-                    this.Voci.Add(r);
-                    h++;
-                }       
+            try
+            {
+                int h = 0;
+                for (int i = 0; i < dictionary.Count; i++)
+                {
+                    KeyValuePair<int, string> row = dictionary.ElementAt(i);
+                    if (i == 0) this.Id = Convert.ToInt32(row.Value);
+                    else if (i == 1) this.FileName = row.Value;
+                    else if (i == 2) this.Path = row.Value;
+                    else if (i == 3) this.IsIndexed = GetBool(row.Value);
+                    else if (i > 3)
+                    {
+                        Record r = null;
+                        if (!string.IsNullOrEmpty(row.Value))
+                            r = Record.Create(b.Applicazione.Campi.ElementAt(h), h, row.Value);
+                        else
+                            r = Record.Create(b.Applicazione.Campi.ElementAt(h), h);
+
+                        if (r == null) throw new Exception("Record creation error");
+                        this.Voci.Add(r);
+                        h++;
+                    }
+                }
             }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            
         }
 
         public Document(int id, string name, string path, bool indexed)
