@@ -6,11 +6,13 @@ namespace BatchDataEntry.Abstracts
 {
     public abstract class AbsDbSuggestions
     {
-        public static Task<List<string>> GetRecords(int idCol) {
+        public IEnumerable<AbsSuggestion> ListOfSuggestions { get; set; }
+
+        public static IEnumerable<string> GetRecords(int idCol) {
             throw new NotImplementedException();
         }
 
-        private static async Task<List<string>> GetList(AbsDbHelper db, int column)
+        private static IEnumerable<string> GetList(AbsDbHelper db, int column)
         {
             throw new NotImplementedException();
         }

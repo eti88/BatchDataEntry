@@ -200,9 +200,6 @@
     <Reference Include="WpfControls">
       <HintPath>..\..\WpfControls\WpfControls.CS\bin\Debug\WpfControls.dll</HintPath>
     </Reference>
-    <Reference Include="WPFTextBoxAutoComplete, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WPFTextBoxAutoComplete.1.0.2\lib\net40\WPFTextBoxAutoComplete.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -270,6 +267,9 @@
     <Compile Include="Views\CampiV.xaml.cs">
       <DependentUpon>CampiV.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\components\ControlDictionaryAutocompleteRelation.xaml.cs">
+      <DependentUpon>ControlDictionaryAutocompleteRelation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\DialogNumeration.xaml.cs">
       <DependentUpon>DialogNumeration.xaml</DependentUpon>
     </Compile>
@@ -312,6 +312,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CampiV.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\components\ControlDictionaryAutocompleteRelation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -16,7 +16,6 @@ namespace BatchDataEntry.ViewModels.Tests
         DatabaseHelperSqlServer dbc;
         ViewModelCampi vm;
         ViewModelCampi vm2;
-        ViewModelCampi vm3;
         ViewModelCampi vm4;
 
 

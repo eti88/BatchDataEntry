@@ -61,6 +61,13 @@ namespace BatchDataEntry.Helpers
             cmdInsert.Parameters["@ValorePredefinito"].Value = c.ValorePredefinito;
             cmdInsert.Parameters.Add(new SqlParameter("@SourceTable", System.Data.SqlDbType.VarChar, 255));
             cmdInsert.Parameters["@SourceTable"].Value = c.TabellaSorgente;
+            // TODO: Inserire colonna per la posizione della colonna per l'autocompletamneto da visualizzare
+            /*
+             Da aggiungere SrcTableColumns nel vm-nuova colonna
+             */
+            // TODO: Inserire sottotabella linkata a una colonna per avere la lista degli altri campi da richiamare (autocompletamento complesso)
+            //TODO: Inserire funzione per l'autocompletamento complesso (richiamato tramite invio nel xaml dell'autocompletamento dbsql)(Evento)
+            //TODO: Aggiungere dictonary per mappare nel campo i valori campo,colonna_tabella (<int, int>)
             cmdInsert.Parameters.Add(new SqlParameter("@IndicePrimario", System.Data.SqlDbType.Bit));
             cmdInsert.Parameters["@IndicePrimario"].Value = c.IndicePrimario;
             cmdInsert.Parameters.Add(new SqlParameter("@TipoCampo", System.Data.SqlDbType.Int));

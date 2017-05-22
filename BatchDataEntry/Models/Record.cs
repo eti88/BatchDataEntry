@@ -2,7 +2,6 @@
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Providers;
 using System;
-using System.Collections.Generic;
 
 namespace BatchDataEntry.Models
 {
@@ -51,16 +50,16 @@ namespace BatchDataEntry.Models
             }
         }
 
-        private List<AbsSuggestion> _qprov;
-        public List<AbsSuggestion> QueryProvider
+        private AbsDbSuggestions _suggestionsProvider;
+        public AbsDbSuggestions SuggestionsProvider
         {
-            get { return _qprov; }
+            get { return _suggestionsProvider; }
             set
             {
-                if (value != _qprov)
+                if (value != _suggestionsProvider)
                 {
-                    _qprov = value;
-                    OnPropertyChanged("QueryProvider");
+                    _suggestionsProvider = value;
+                    OnPropertyChanged("SuggestionsProvider");
                 }
             }
         }
@@ -68,26 +67,26 @@ namespace BatchDataEntry.Models
         public Record() : base() {
             Valore = string.Empty;
             ElementoSelezionato = null;
-            QueryProvider = new List<AbsSuggestion>();
             SourceTableColumn = 1;
+            SuggestionsProvider = null;
         }
 
         public Record(int id, string nome, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) : base(id, nome, posizione, valorepredef, tabella, primario, secondario, campo, idmodello, riproponi, disabilitato)
         {
             Valore = string.Empty;
             SourceTableColumn = 1;
-            QueryProvider = new List<AbsSuggestion>();
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
+            SuggestionsProvider = null;
         }
 
         public Record(int id, string nome, string valore, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) : base(id, nome, posizione, valorepredef, tabella, primario, secondario, campo, idmodello, riproponi, disabilitato)
         {
             Valore = valore;
             SourceTableColumn = 1;
-            QueryProvider = new List<AbsSuggestion>();
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
+            SuggestionsProvider = null;
         }
 
         public Record(Record rec)
@@ -105,7 +104,7 @@ namespace BatchDataEntry.Models
             IsDisabilitato = rec.IsDisabilitato;
             Valore = rec.Valore;
             SourceTableColumn = rec.SourceTableColumn;
-            QueryProvider = rec.QueryProvider;
+            SuggestionsProvider = null;
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
         }
@@ -182,21 +181,18 @@ namespace BatchDataEntry.Models
 
         public async void QueryProviderSelector()
         {
-            if (TipoCampo == EnumTypeOfCampo.Normale) return;
-            if (TipoCampo == EnumTypeOfCampo.AutocompletamentoCsv)
+            if (TipoCampo == EnumTypeOfCampo.Normale || TipoCampo == EnumTypeOfCampo.AutocompletamentoCsv) return;
+            if (TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
             {
-                var csv = new CsvSuggestionProvider();
-                QueryProvider = (List<AbsSuggestion>)csv.ListOfSuggestions;
-            }
-            else if (TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
-            {
-                QueryProvider = await DbSuggestionProvider.GetRecords(Posizione);
+                var au = new DbSuggestionProvider(this.Posizione);
+                SuggestionsProvider = au;
             }
             else if (TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
             {
                 if (string.IsNullOrWhiteSpace(TabellaSorgente) || SourceTableColumn < 1)
-                    throw new Exception("QueryProviderSelector mancano argomenti");
-                QueryProvider = await DbSqlSuggestionProvider.GetRecords(this.Posizione, TabellaSorgente, SourceTableColumn);
+                    throw new Exception("SuggestionsProvider mancano argomenti");
+                var au = new DbSqlSuggestionProvider(this.Posizione, TabellaSorgente, SourceTableColumn);
+                SuggestionsProvider = au;
             }
         }
     }

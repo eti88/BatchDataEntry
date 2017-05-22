@@ -4,9 +4,9 @@ using BatchDataEntry.Models;
 using BatchDataEntry.Suggestions;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using WpfControls.Editors;
 using System.Collections;
+using System.Linq;
 
 namespace BatchDataEntry.Providers
 {
@@ -16,33 +16,34 @@ namespace BatchDataEntry.Providers
     public class DbSqlSuggestionProvider : AbsDbSuggestions, ISuggestionProvider
     {
 
-        public IEnumerable<AbsSuggestion> ListOfSuggestions { get; set; }
-
-        public DbSqlSuggestionProvider()
+        public DbSqlSuggestionProvider(int pos, string tab, int tabCol)
         {
-            // Bisogna recuperare le infoz
-            var suggestions = GetRecords();
+            var suggestions = GetRecords(pos, tab, tabCol);
             ListOfSuggestions = suggestions;
         }
 
-        public static async Task<List<AbsSuggestion>> GetRecords(int idcol, string sourceTable, int tableCol)
+        public static IEnumerable<AbsSuggestion> GetRecords(int idcol, string sourceTable, int tableCol)
         {
             Batch b;
             if (Properties.Settings.Default.CurrentBatch == 0) return new List<AbsSuggestion>();
             try
             {
-                if (!Properties.Settings.Default.UseSQLServer) return new List<AbsSuggestion>();
-
-                    var dbsql = new DatabaseHelperSqlServer(Properties.Settings.Default.SqlUser, Properties.Settings.Default.SqlPassword,
+                AbsDbHelper db = null;
+                if (Properties.Settings.Default.UseSQLServer)
+                {
+                    db = new DatabaseHelperSqlServer(Properties.Settings.Default.SqlUser, Properties.Settings.Default.SqlPassword,
                      Properties.Settings.Default.SqlServerAddress, Properties.Settings.Default.SqlDbName);
-                    b = dbsql.GetBatchById(Properties.Settings.Default.CurrentBatch);
-                    if (b == null) return new List<AbsSuggestion>();
-                    if (b.Applicazione == null || b.Applicazione.Id == 0)
-                        b.LoadModel(dbsql);
-                    if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0)
-                        b.Applicazione.LoadCampi(dbsql);          
+                }
+                else
+                    db = new DatabaseHelper();
+
+                b = db.GetBatchById(Properties.Settings.Default.CurrentBatch);
+                if (b == null) return null;
+                if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel(db);
+                if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(db);
+
                 int pos = b.Applicazione.Campi[idcol].Posizione;
-                var task = await GetList(dbsql, sourceTable, tableCol);
+                IEnumerable<AbsSuggestion> task = GetList(db, sourceTable, tableCol);
                 return task;
             }
             catch (Exception e)
@@ -54,15 +55,16 @@ namespace BatchDataEntry.Providers
             }
         }
 
-        private static async Task<List<AbsSuggestion>> GetList(DatabaseHelperSqlServer db, string sourceTable, int column)
+        private static List<AbsSuggestion> GetList(AbsDbHelper db, string sourceTable, int column)
         {
             try
             {
                 var lst = new List<AbsSuggestion>();
-                await Task.Factory.StartNew(() =>
+                if (db is DatabaseHelperSqlServer)
                 {
-                    lst = db.GetAutocompleteList(sourceTable, column);
-                });
+                    var tmpdb = db as DatabaseHelperSqlServer;
+                    lst = tmpdb.GetAutocompleteList(sourceTable, column);
+                }
                 return lst;
             }
             catch (Exception)
@@ -73,7 +75,13 @@ namespace BatchDataEntry.Providers
 
         public IEnumerable GetSuggestions(string filter)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(filter) && ListOfSuggestions == null) return null;
+            if (ListOfSuggestions.Count() == 0)
+                return null;
+
+            IEnumerable<AbsSuggestion> res = new List<AbsSuggestion>();
+            res = this.ListOfSuggestions.Where(item => !string.IsNullOrEmpty(((SuggestionSingleColumn)item).Valore) && ((SuggestionSingleColumn)item).Valore.StartsWith(filter, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            return res;
         }
     }
 }

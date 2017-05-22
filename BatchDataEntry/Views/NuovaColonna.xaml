@@ -8,14 +8,20 @@
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
         xmlns:av="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         mc:Ignorable="d"
-        Title="{Binding Path=NomeTabella, StringFormat='Nuovo Campo nel modello {0}'}" Height="500" Width="663.383" MinHeight="500" MaxHeight="500" MinWidth="400" MaxWidth="500" Icon="/BatchDataEntry;component/Mesh-100.ico">
+        Title="{Binding Path=NomeTabella, 
+        StringFormat='Nuovo Campo nel modello {0}'}" 
+        Height="500" Width="700" MinHeight="500" MaxHeight="500" MinWidth="700" MaxWidth="500" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.Resources>
         <viewModels:ViewModelNuovaColonna x:Key="ViewModelNuovaColonna"/>
     </Window.Resources>
     <Grid Margin="5,15,5,5">
-        <DockPanel LastChildFill="True">
-            <StackPanel DockPanel.Dock="Bottom" Height="45" VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
-                <Button x:Name="buttonSalvaModel" Click="ButtonSalvaModel_OnClicknClick" Content="Salva" Command="{Binding Path=SaveModelCmd}" VerticalAlignment="Center" Style="{StaticResource GenericButton}" HorizontalAlignment="Right"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Column="0" LastChildFill="True">
+            <StackPanel DockPanel.Dock="Bottom" Height="45" VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,10,0">
+                <Button x:Name="buttonSalvaModel" Click="ButtonSalvaModel_OnClicknClick" Content="Salva" Command="{Binding Path=SaveModelCmd}" VerticalAlignment="Center" Style="{StaticResource GenericButton}" HorizontalAlignment="Left" Margin="0,5" Width="88"/>
             </StackPanel>
             
             <Grid DockPanel.Dock="Top">
@@ -71,6 +77,31 @@
                 <CheckBox Grid.Column="1" Grid.Row="7" x:Name="checkBoxDisableColumn" IsChecked="{Binding Path=SelectedCampo.IsDisabilitato, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo non modificabile" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" Checked="checkBoxDisableColumn_Checked" Unchecked="checkBoxDisableColumn_Unchecked" HorizontalAlignment="Left"/>
             </Grid>
             <!--    <CheckBox x:Name="checkBoxSalvaValori" IsChecked="{Binding Path=SelectedCampo.SalvaValori, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo Autocompletante" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"/> -->
+        </DockPanel>
+        <DockPanel Grid.Column="1" LastChildFill="True">
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+                <!-- row 1-->
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="Colonna Tabella DB"/>
+                <ComboBox x:Name="cmbColumbTableSource" Grid.Column="1" Grid.Row="0"
+                          Height="30"  Width="100" HorizontalAlignment="Left"
+                          IsSynchronizedWithCurrentItem="True"
+                          ItemsSource="{Binding Path=SrcTableColumns, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding Path=SelectedCampo.SourceTableColumn, Mode=TwoWay}"/>
+            </Grid>
         </DockPanel>
     </Grid>
 </Window>
