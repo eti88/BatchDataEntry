@@ -224,6 +224,7 @@
     <Compile Include="Helpers\IClosableViewModel.cs" />
     <Compile Include="Helpers\ListControlTemplateSelector.cs" />
     <Compile Include="Helpers\MyAttachedBehaviors.cs" />
+    <Compile Include="Helpers\PassThroughConverter.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\ScrollIntoViewBehavior.cs" />
     <Compile Include="Interfaces\ICampo.cs" />

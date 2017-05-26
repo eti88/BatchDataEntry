@@ -324,6 +324,50 @@ namespace BatchDataEntry.ViewModels
             RaisePropertyChanged("ViewModelDocumento");
         }
 
+        public void EnterActionFunctionSql(object parameter)
+        {
+            if (parameter == null) return;
+            var lstVal = parameter as List<object>;
+
+            int pos = Convert.ToInt32(lstVal[0]);
+            var sugg = lstVal[1] as SuggestionSingleColumn;
+
+            if (sugg == null) return;
+
+            #if DEBUG
+            Console.WriteLine(string.Format("Record {0} SelectedValue {1}", pos,sugg.Valore));
+            #endif
+
+            if (string.IsNullOrEmpty(sugg.Valore)) return;
+      
+            var trow = GetTableRow(Batch.Applicazione.Campi[pos].TabellaSorgente, Batch.Applicazione.Campi[pos].SourceTableColumn, sugg.Valore);
+            if (trow.Count == 0 || trow.Count != DocFile.Voci.Count) return;
+            string reftab = Batch.Applicazione.Campi[pos].TabellaSorgente;
+            foreach (Record r in DocFile.Voci)
+            {
+                if (r.TabellaSorgente == reftab)
+                    r.Valore = trow.ElementAt(r.SourceTableColumn);
+            }
+        }
+        
+        /// <summary>
+        /// Ricerca nella tabella del database mssql il record corrispondente e restituisce la lista
+        /// sotto forma di lista.
+        /// </summary>
+        /// <param name="table">Nome della tabella</param>
+        /// <param name="column">Colonna nel quale cercare il valore</param>
+        /// <param name="text">Testo da cercare</param>
+        /// <returns>Lista ordinata (per colonna) dei valori contenuti nella row</returns>
+        public List<string> GetTableRow(string table, int column, string text)
+        {
+            var row = new List<string>();
+            if(db != null && db is DatabaseHelperSqlServer)
+            {
+
+            }
+            return row;
+        }
+
         private void ZoomInPdf()
         {
             PdfWrapper?.ZoomIn();
@@ -407,6 +451,19 @@ namespace BatchDataEntry.ViewModels
                     _textboxCmd = new RelayCommand((param) => EnterActionFunction(param));
                 }
                 return _textboxCmd;
+            }
+        }
+
+        private RelayCommand _textboxSqlCmd;
+        public ICommand TextboxSqlCmd
+        {
+            get
+            {
+                if (_textboxSqlCmd == null)
+                {
+                    _textboxSqlCmd = new RelayCommand((param) => EnterActionFunctionSql(param));
+                }
+                return _textboxSqlCmd;
             }
         }
 
