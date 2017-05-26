@@ -45,7 +45,7 @@ namespace BatchDataEntry.Helpers
         public override int Insert(Campo c)
         {
             if (cnn == null || c == null) return -1;
-            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Campo(Nome, Posizione, SalvaValori, ValorePredefinito, IndicePrimario, TipoCampo, IdModello, Riproponi,Disabilitato, IndiceSecondario) VALUES (@Nome, @Posizione, @SalvaValori, @ValorePredefinito, @IndicePrimario, @TipoCampo, @IdModello, @Riproponi, @Disabilitato, @IndiceSecondario)", this.cnn)
+            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Campo(Nome, Posizione, SalvaValori, ValorePredefinito, IndicePrimario, TipoCampo, IdModello, Riproponi,Disabilitato, IndiceSecondario, SourceTableColumn) VALUES (@Nome, @Posizione, @SalvaValori, @ValorePredefinito, @IndicePrimario, @TipoCampo, @IdModello, @Riproponi, @Disabilitato, @IndiceSecondario, @SourceTableColumn)", this.cnn)
             {
                 CommandType = System.Data.CommandType.Text
             };
@@ -60,14 +60,7 @@ namespace BatchDataEntry.Helpers
             cmdInsert.Parameters.Add(new SqlParameter("@ValorePredefinito", System.Data.SqlDbType.VarChar,255));
             cmdInsert.Parameters["@ValorePredefinito"].Value = c.ValorePredefinito;
             cmdInsert.Parameters.Add(new SqlParameter("@SourceTable", System.Data.SqlDbType.VarChar, 255));
-            cmdInsert.Parameters["@SourceTable"].Value = c.TabellaSorgente;
-            // TODO: Inserire colonna per la posizione della colonna per l'autocompletamneto da visualizzare
-            /*
-             Da aggiungere SrcTableColumns nel vm-nuova colonna
-             */
-            // TODO: Inserire sottotabella linkata a una colonna per avere la lista degli altri campi da richiamare (autocompletamento complesso)
-            //TODO: Inserire funzione per l'autocompletamento complesso (richiamato tramite invio nel xaml dell'autocompletamento dbsql)(Evento)
-            //TODO: Aggiungere dictonary per mappare nel campo i valori campo,colonna_tabella (<int, int>)
+            cmdInsert.Parameters["@SourceTable"].Value = c.TabellaSorgente;          
             cmdInsert.Parameters.Add(new SqlParameter("@IndicePrimario", System.Data.SqlDbType.Bit));
             cmdInsert.Parameters["@IndicePrimario"].Value = c.IndicePrimario;
             cmdInsert.Parameters.Add(new SqlParameter("@TipoCampo", System.Data.SqlDbType.Int));
@@ -80,6 +73,8 @@ namespace BatchDataEntry.Helpers
             cmdInsert.Parameters["@Disabilitato"].Value = c.IsDisabilitato;
             cmdInsert.Parameters.Add(new SqlParameter("@IndiceSecondario", System.Data.SqlDbType.Bit));
             cmdInsert.Parameters["@IndiceSecondario"].Value = c.IndiceSecondario;
+            cmdInsert.Parameters.Add(new SqlParameter("@SourceTableColumn", System.Data.SqlDbType.Int));
+            cmdInsert.Parameters["@SourceTableColumn"].Value = c.SourceTableColumn;
 
             try
             {
@@ -288,20 +283,19 @@ namespace BatchDataEntry.Helpers
         {
             if (cnn == null || c == null) return;
             if (c.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
-            Dictionary<string, string> values = new Dictionary<string, string>
-            {
-                { "Nome", c.Nome },
-                { "Posizione", c.Posizione.ToString() },
-                { "SalvaValori", Convert.ToInt32(c.SalvaValori).ToString() },
-                { "ValorePredefinito", c.ValorePredefinito },
-                { "SourceTable", c.TabellaSorgente },
-                { "IndicePrimario", Convert.ToInt32(c.IndicePrimario).ToString() },
-                { "TipoCampo", ((int)c.TipoCampo).ToString() },
-                { "IdModello", c.IdModello.ToString() },
-                { "Riproponi", Convert.ToInt32(c.Riproponi).ToString() },
-                { "Disabilitato", Convert.ToInt32(c.IsDisabilitato).ToString() },
-                { "IndiceSecondario", Convert.ToInt32(c.IndiceSecondario).ToString() }
-            };
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            values.Add("Nome", c.Nome);
+            values.Add("Posizione", c.Posizione.ToString());
+            values.Add("SalvaValori", Convert.ToInt32(c.SalvaValori).ToString());
+            values.Add("ValorePredefinito", c.ValorePredefinito);
+            values.Add("IndicePrimario", Convert.ToInt32(c.IndicePrimario).ToString());
+            values.Add("TipoCampo", ((int)c.TipoCampo).ToString());
+            values.Add("IdModello", c.IdModello.ToString());
+            values.Add("Riproponi", Convert.ToInt32(c.Riproponi).ToString());
+            values.Add("Disabilitato", Convert.ToInt32(c.IsDisabilitato).ToString());
+            values.Add("IndiceSecondario", Convert.ToInt32(c.IndiceSecondario).ToString());
+            values.Add("SourceTable", c.TabellaSorgente);
+            values.Add("SourceTableColumn", Convert.ToInt32(c.SourceTableColumn).ToString());
             UpdateRaw("Campo", values, string.Format("Id={0}", c.Id));
         }
 
@@ -362,7 +356,8 @@ namespace BatchDataEntry.Helpers
         }
 
         public override Campo GetCampoById(int id) {
-            if (cnn == null) return null;
+            Campo c = new Campo();
+            if (cnn == null) return c;
             string sql = string.Format("SELECT * FROM Campo WHERE Id = {0}", id);
 
             SqlCommand cmd = new SqlCommand(sql, cnn);
@@ -371,7 +366,7 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
-                Campo c = new Campo();
+                
                 while (reader.Read())
                 {
                     c.Id = Convert.ToInt32(reader["Id"]);
@@ -380,6 +375,7 @@ namespace BatchDataEntry.Helpers
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.TabellaSorgente = Convert.ToString(reader["SourceTable"]);
+                    c.SourceTableColumn = Convert.ToInt32(reader["SourceTableColumn"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
@@ -388,7 +384,6 @@ namespace BatchDataEntry.Helpers
                     c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
                 }
                 reader.Close();
-                return c;
             }
             catch (Exception e)
             {
@@ -398,7 +393,7 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Close();
             }
-            return null;
+            return c;
         }
 
         public override Modello GetModelloById(int id) {
@@ -496,6 +491,7 @@ namespace BatchDataEntry.Helpers
                         SalvaValori = Convert.ToBoolean(reader["SalvaValori"]),
                         ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]),
                         TabellaSorgente = Convert.ToString(reader["SourceTable"]),
+                        SourceTableColumn = Convert.ToInt32(reader["SourceTableColumn"]),
                         IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]),
                         IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]),
                         TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]),
@@ -621,6 +617,7 @@ namespace BatchDataEntry.Helpers
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.TabellaSorgente = Convert.ToString(reader["SourceTable"]);
+                    c.SourceTableColumn = Convert.ToInt32(reader["SourceTableColumn"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
@@ -856,6 +853,7 @@ namespace BatchDataEntry.Helpers
                     c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
                     c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
                     c.TabellaSorgente = Convert.ToString(reader["SourceTable"]);
+                    c.SourceTableColumn = Convert.ToInt32(reader["SourceTableColumn"]);
                     c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
                     c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
                     c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
@@ -893,7 +891,6 @@ namespace BatchDataEntry.Helpers
                     string tabName = row[2] as string;
                     res.Add(tabName);
                 }
-                return res;
             }
             catch (Exception e)
             {
@@ -903,7 +900,42 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Close();
             }
-            return null;
+            return res;
+        }
+
+        public Dictionary<string, int> GetColumns(string table)
+        {
+            Dictionary<string, int> dres = new Dictionary<string, int>();
+            if (cnn == null) return dres;
+            if (string.IsNullOrEmpty(table)) return dres;
+            
+            string query = string.Format("select column_name from information_schema.columns where table_name = '{0}'", table);
+
+            try
+            {
+                cnn.Open();
+                //DataTable schemaTables = cnn.GetSchema();
+
+                SqlCommand cmd = new SqlCommand(query, cnn);
+                int i = 0;
+                var reader = cmd.ExecuteReader();
+                while(reader.Read())
+                {
+                    dres.Add(Convert.ToString(reader["column_name"]), i);
+                    i++;
+                }
+
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return dres;
         }
 
         public List<AbsSuggestion> GetAutocompleteList(string tableName, int columnTable)

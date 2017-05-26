@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Abstracts;
+using System.Collections.Generic;
 
 namespace BatchDataEntry.Models
 {
@@ -121,82 +122,81 @@ namespace BatchDataEntry.Models
 
         public Modello()
         {
-            this.Id = 0;
-            this.Nome = string.Empty;
-            this.OrigineCsv = false;
-            this.Campi = new ObservableCollection<Campo>();
-            this.PathFileCsv = string.Empty;
-            this.Separatore = string.Empty;
-            this.StartFocusColumn = -1;
-            this.CsvColumn = -1;
-
+            Id = 0;
+            Nome = string.Empty;
+            OrigineCsv = false;
+            Campi = new ObservableCollection<Campo>();
+            PathFileCsv = string.Empty;
+            Separatore = string.Empty;
+            StartFocusColumn = -1;
+            CsvColumn = -1;
         }
 
         public Modello(string nome, bool orig, ObservableCollection<Campo> campi)
         {
-            this.Nome = nome;
-            this.OrigineCsv = orig;
-            this.Campi = campi;
-            this.PathFileCsv = string.Empty;
-            this.Separatore = string.Empty;
-            this.StartFocusColumn = 0;
-            this.CsvColumn = -1;
+            Nome = nome;
+            OrigineCsv = orig;
+            Campi = campi;
+            PathFileCsv = string.Empty;
+            Separatore = string.Empty;
+            StartFocusColumn = 0;
+            CsvColumn = -1;
         }
 
         public Modello(int id, string nome, bool orig, ObservableCollection<Campo> campi)
         {
-            this.Id = id;
-            this.Nome = nome;
-            this.OrigineCsv = orig;
-            this.Campi = campi;
-            this.PathFileCsv = string.Empty;
-            this.Separatore = string.Empty;
-            this.StartFocusColumn = 0;
-            this.CsvColumn = -1;
+            Id = id;
+            Nome = nome;
+            OrigineCsv = orig;
+            Campi = campi;
+            PathFileCsv = string.Empty;
+            Separatore = string.Empty;
+            StartFocusColumn = 0;
+            CsvColumn = -1;
         }
 
         public Modello(int id, string nome, bool orig, ObservableCollection<Campo> campi, string path, string sep)
         {
-            this.Id = id;
-            this.Nome = nome;
-            this.OrigineCsv = orig;
-            this.Campi = campi;
-            this.PathFileCsv = path;
-            this.Separatore = sep;
-            this.MyMemento = new MementoModello(nome, orig, campi, path, sep, this.StartFocusColumn);
+            Id = id;
+            Nome = nome;
+            OrigineCsv = orig;
+            Campi = campi;
+            PathFileCsv = path;
+            Separatore = sep;
+            MyMemento = new MementoModello(nome, orig, campi, path, sep, StartFocusColumn);
         }
 
         public Modello(Modello m)
         {
             if(m == null) return;
-            this.Id = m.Id;
-            this.Nome = m.Nome;
-            this.OrigineCsv = m.OrigineCsv;
-            this.Campi = m.Campi;
-            this.PathFileCsv = m.PathFileCsv;
-            this.Separatore = m.Separatore;
-            this.StartFocusColumn = m.StartFocusColumn;
-            this.CsvColumn = m.CsvColumn;
-            this.MyMemento = new MementoModello(m.Nome, m.OrigineCsv, m.Campi, m.PathFileCsv, m.Separatore, m.StartFocusColumn);
+            Id = m.Id;
+            Nome = m.Nome;
+            OrigineCsv = m.OrigineCsv;
+            Campi = m.Campi;
+            PathFileCsv = m.PathFileCsv;
+            Separatore = m.Separatore;
+            StartFocusColumn = m.StartFocusColumn;
+            CsvColumn = m.CsvColumn;
+            MyMemento = new MementoModello(m.Nome, m.OrigineCsv, m.Campi, m.PathFileCsv, m.Separatore, m.StartFocusColumn);
         }
 
         public void LoadCampi(AbsDbHelper db)
         {
-            if (this.Id > 0)
+            if (Id > 0)
             {
-                ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", this.Id));
-                this.Campi = tmpc;
+                ObservableCollection<Campo> tmpc = db.CampoQuery(string.Format("SELECT * FROM Campo WHERE IdModello={0}", Id));
+                Campi = tmpc;
             }
         }
 
         public void Revert()
         {
-            this.Nome = this.MyMemento.nome;
-            this.OrigineCsv = this.MyMemento.origine;
-            this.Campi = this.MyMemento.campi;
-            this.PathFileCsv = this.MyMemento.filecsv;
-            this.Separatore = this.MyMemento.separatore;
-            this.StartFocusColumn = this.MyMemento.focus;
+            Nome = MyMemento.nome;
+            OrigineCsv = MyMemento.origine;
+            Campi = MyMemento.campi;
+            PathFileCsv = MyMemento.filecsv;
+            Separatore = MyMemento.separatore;
+            StartFocusColumn = MyMemento.focus;
         }
 
         public override bool Equals(object obj)
@@ -208,17 +208,17 @@ namespace BatchDataEntry.Models
                 return false;
 
             Modello modello = obj as Modello;
-            if (this.Id != modello.Id)
+            if (Id != modello.Id)
                 return false;
-            if (this.Nome != modello.Nome)
+            if (Nome != modello.Nome)
                 return false;
-            if (this.OrigineCsv != modello.OrigineCsv)
+            if (OrigineCsv != modello.OrigineCsv)
                 return false;
-            if (this.Campi != modello.Campi)
+            if (Campi != modello.Campi)
                 return false;
-            if (this.PathFileCsv != modello.PathFileCsv)
+            if (PathFileCsv != modello.PathFileCsv)
                 return false;
-            if (this.Separatore != modello.Separatore)
+            if (Separatore != modello.Separatore)
                 return false;
 
             return true;
@@ -226,18 +226,18 @@ namespace BatchDataEntry.Models
 
         public override int GetHashCode()
         {
-            int resutl = this.Id.GetHashCode();
-            resutl += string.IsNullOrEmpty(this.Nome) ? 0 : this.Nome.GetHashCode();
-            resutl += (this.OrigineCsv) ? 1 : 0;
+            int resutl = Id.GetHashCode();
+            resutl += string.IsNullOrEmpty(Nome) ? 0 : Nome.GetHashCode();
+            resutl += (OrigineCsv) ? 1 : 0;
             resutl += (Campi == null) ? 0 : 1;
-            resutl += string.IsNullOrEmpty(this.PathFileCsv) ? 0 : this.PathFileCsv.GetHashCode();
-            resutl += string.IsNullOrEmpty(this.Separatore) ? 0 : this.Separatore.GetHashCode();
+            resutl += string.IsNullOrEmpty(PathFileCsv) ? 0 : PathFileCsv.GetHashCode();
+            resutl += string.IsNullOrEmpty(Separatore) ? 0 : Separatore.GetHashCode();
             return resutl;
         }
 
         public override string ToString()
         {
-            return String.Format("[{0}, {1}, {2}, {3}, {4}, c: {5}, focus: {6}]", this.Id, this.Nome, this.OrigineCsv, this.PathFileCsv, this.Separatore, Campi.Count, this.StartFocusColumn);
+            return String.Format("[{0}, {1}, {2}, {3}, {4}, c: {5}, focus: {6}]", Id, Nome, OrigineCsv, PathFileCsv, Separatore, Campi.Count, StartFocusColumn);
         }
     }
 
@@ -252,12 +252,12 @@ namespace BatchDataEntry.Models
 
         public MementoModello(string _nome, bool _origine, ObservableCollection<Campo> _campi, string _file, string _sep, int _foc)
         {
-            this.nome = _nome;
-            this.origine = _origine;
-            this.campi = _campi;
-            this.filecsv = _file;
-            this.separatore = _sep;
-            this.focus = _foc;
+            nome = _nome;
+            origine = _origine;
+            campi = _campi;
+            filecsv = _file;
+            separatore = _sep;
+            focus = _foc;
         }
     }
 }

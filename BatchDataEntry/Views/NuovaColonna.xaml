@@ -10,26 +10,23 @@
         mc:Ignorable="d"
         Title="{Binding Path=NomeTabella, 
         StringFormat='Nuovo Campo nel modello {0}'}" 
-        Height="500" Width="700" MinHeight="500" MaxHeight="500" MinWidth="700" MaxWidth="500" Icon="/BatchDataEntry;component/Mesh-100.ico">
+        Height="498" Width="400" MinHeight="500" MaxHeight="500" MinWidth="400" Icon="/BatchDataEntry;component/Mesh-100.ico" SizeToContent="WidthAndHeight">
     <Window.Resources>
         <viewModels:ViewModelNuovaColonna x:Key="ViewModelNuovaColonna"/>
     </Window.Resources>
     <Grid Margin="5,15,5,5">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-        </Grid.ColumnDefinitions>
-        <DockPanel Grid.Column="0" LastChildFill="True">
+        <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Bottom" Height="45" VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,10,0">
                 <Button x:Name="buttonSalvaModel" Click="ButtonSalvaModel_OnClicknClick" Content="Salva" Command="{Binding Path=SaveModelCmd}" VerticalAlignment="Center" Style="{StaticResource GenericButton}" HorizontalAlignment="Left" Margin="0,5" Width="88"/>
             </StackPanel>
-            
+
             <Grid DockPanel.Dock="Top">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
@@ -54,8 +51,17 @@
                           SelectedItem="{Binding Path=SelectedCampo.TabellaSorgente, Mode=TwoWay}">
                 </ComboBox>
                 <!-- Row 3 -->
-                <TextBlock Grid.Column="0" Grid.Row="3" x:Name="labelNome" Text="Nome"/>
-                <TextBox Grid.Column="1" Grid.Row="3" x:Name="textBoxNome" Style="{StaticResource generalTextbox}">
+                <TextBlock Grid.Column="0" Grid.Row="3" Text="Colonna Tabella DB"/>
+                <ComboBox x:Name="cmbColumbTableSource" Grid.Column="1" Grid.Row="3"
+                          Height="30"  Width="100" HorizontalAlignment="Left"
+                          IsSynchronizedWithCurrentItem="True"
+                          DisplayMemberPath="Key"
+                          SelectedValuePath="Value"
+                          ItemsSource="{Binding Path=TableColumnsDictionary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding Path=SelectedTableColumn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <!-- Row 4 -->
+                <TextBlock Grid.Column="0" Grid.Row="4" x:Name="labelNome" Text="Nome"/>
+                <TextBox Grid.Column="1" Grid.Row="4" x:Name="textBoxNome" Style="{StaticResource generalTextbox}">
                     <TextBox.Text>
                         <Binding Path="SelectedCampo.Nome" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
@@ -65,43 +71,22 @@
                     </TextBox.Text>
                 </TextBox>
                 <!-- Row 4 Messaggio di errore-->
-                <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Text="{Binding Path=(Validation.Errors).CurrentItem.ErrorContent, ElementName=textBoxNome}" Height="29" Width="305" Foreground="Red"/>
+                <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Text="{Binding Path=(Validation.Errors).CurrentItem.ErrorContent, ElementName=textBoxNome}" Height="29" Width="305" Foreground="Red"/>
                 <!-- Row 5 -->
-                <Label Grid.Column="0" Grid.Row="5" x:Name="labelValPredefinito" Content="Valore predefinito"/>
-                <TextBox Grid.Column="1" Grid.Row="5" x:Name="textBoxValPre" Text="{Binding SelectedCampo.ValorePredefinito}" Style="{StaticResource generalTextbox}"/>
+                <Label Grid.Column="0" Grid.Row="6" x:Name="labelValPredefinito" Content="Valore predefinito"/>
+                <TextBox Grid.Column="1" Grid.Row="6" x:Name="textBoxValPre" Text="{Binding SelectedCampo.ValorePredefinito}" Style="{StaticResource generalTextbox}"/>
                 <!-- Row 6 -->
-                <CheckBox Grid.Column="0" Grid.Row="6" x:Name="checkBoxIsPrimary" IsChecked="{Binding Path=SelectedCampo.IndicePrimario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Chiave primaria" Foreground="OrangeRed" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Checked="checkBoxIsPrimary_Checked" Unchecked="checkBoxIsPrimary_Unchecked" HorizontalContentAlignment="Stretch"/>
-                <CheckBox Grid.Column="1" Grid.Row="6" x:Name="checkBoxIsSecondary" IsChecked="{Binding Path=SelectedCampo.IndiceSecondario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Chiave secondaria" Foreground="DarkCyan" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Unchecked="checkBoxIsSecondary_Unchecked" Checked="checkBoxIsSecondary_Checked" HorizontalAlignment="Left"/>
+                <CheckBox Grid.Column="0" Grid.Row="7" x:Name="checkBoxIsPrimary" IsChecked="{Binding Path=SelectedCampo.IndicePrimario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Chiave primaria" Foreground="OrangeRed" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Checked="checkBoxIsPrimary_Checked" Unchecked="checkBoxIsPrimary_Unchecked" HorizontalContentAlignment="Stretch"/>
+                <CheckBox Grid.Column="1" Grid.Row="7" x:Name="checkBoxIsSecondary" IsChecked="{Binding Path=SelectedCampo.IndiceSecondario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Chiave secondaria" Foreground="DarkCyan" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Unchecked="checkBoxIsSecondary_Unchecked" Checked="checkBoxIsSecondary_Checked" HorizontalAlignment="Left"/>
                 <!-- Row 7 -->
-                <CheckBox Grid.Column="0" Grid.Row="7" x:Name="checkBoxPartialSave" IsChecked="{Binding Path=SelectedCampo.Riproponi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Riproponi valore" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" HorizontalContentAlignment="Stretch"/>
-                <CheckBox Grid.Column="1" Grid.Row="7" x:Name="checkBoxDisableColumn" IsChecked="{Binding Path=SelectedCampo.IsDisabilitato, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo non modificabile" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" Checked="checkBoxDisableColumn_Checked" Unchecked="checkBoxDisableColumn_Unchecked" HorizontalAlignment="Left"/>
+                <CheckBox Grid.Column="0" Grid.Row="8" x:Name="checkBoxPartialSave" IsChecked="{Binding Path=SelectedCampo.Riproponi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Riproponi valore" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" HorizontalContentAlignment="Stretch"/>
+                <CheckBox Grid.Column="1" Grid.Row="8" x:Name="checkBoxDisableColumn" IsChecked="{Binding Path=SelectedCampo.IsDisabilitato, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo non modificabile" Margin="10, 0" Height="35" VerticalContentAlignment="Center" Width="221" Unchecked="checkBoxDisableColumn_Unchecked" HorizontalAlignment="Left"/>
             </Grid>
             <!--    <CheckBox x:Name="checkBoxSalvaValori" IsChecked="{Binding Path=SelectedCampo.SalvaValori, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Campo Autocompletante" Margin="10,0" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center"/> -->
         </DockPanel>
-        <DockPanel Grid.Column="1" LastChildFill="True">
-            <Grid DockPanel.Dock="Top">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                </Grid.RowDefinitions>
-                <!-- row 1-->
-                <TextBlock Grid.Column="0" Grid.Row="0" Text="Colonna Tabella DB"/>
-                <ComboBox x:Name="cmbColumbTableSource" Grid.Column="1" Grid.Row="0"
-                          Height="30"  Width="100" HorizontalAlignment="Left"
-                          IsSynchronizedWithCurrentItem="True"
-                          ItemsSource="{Binding Path=SrcTableColumns, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          SelectedItem="{Binding Path=SelectedCampo.SourceTableColumn, Mode=TwoWay}"/>
-            </Grid>
-        </DockPanel>
+        
+        
+        
+        
     </Grid>
 </Window>

@@ -1,5 +1,4 @@
 ﻿using BatchDataEntry.Helpers;
-using BatchDataEntry.Interfaces;
 using System;
 
 namespace BatchDataEntry.Models
@@ -185,11 +184,6 @@ namespace BatchDataEntry.Models
             }
         }
 
-        /*
-         SalvaValori permette di tenere traccia dei dati nel medesimo campo velocizzando
-         futuri inserimenti.
-         */
-
         public Campo(){
             Id = 0;
             Nome = string.Empty;
@@ -202,6 +196,7 @@ namespace BatchDataEntry.Models
             IdModello = 0;
             Riproponi = false;
             IsDisabilitato = false;
+            SourceTableColumn = 0;
         }
 
         public Campo(int id, string nome, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) {
@@ -216,6 +211,7 @@ namespace BatchDataEntry.Models
             IdModello = idmodello;
             Riproponi = riproponi;
             IsDisabilitato = disabilitato;
+            SourceTableColumn = 0;
         }
 
         public Campo(Campo campo) {
@@ -224,6 +220,7 @@ namespace BatchDataEntry.Models
             Posizione = campo.Posizione;
             ValorePredefinito = campo.ValorePredefinito;
             TabellaSorgente = campo.TabellaSorgente;
+            SourceTableColumn = campo.SourceTableColumn;
             IndicePrimario = campo.IndicePrimario;
             IndiceSecondario = campo.IndiceSecondario;
             TipoCampo = campo.TipoCampo;

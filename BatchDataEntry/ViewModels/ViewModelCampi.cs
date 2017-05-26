@@ -5,6 +5,7 @@ using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Views;
 using BatchDataEntry.Abstracts;
+using System.Collections.Generic;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -14,13 +15,14 @@ namespace BatchDataEntry.ViewModels
         private readonly int _idModello;
         private Campo _intermediate;
         protected AbsDbHelper db;
-      
+
         private ObservableCollection<Campo> _clos;
         private Campo _selectedCampo;
         private int _countCols
         {
             get { return Colonne.Count; }
         }
+        
         public ObservableCollection<Campo> Colonne
         {
             get { return _clos; }
@@ -43,7 +45,7 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("SelectedCampo");
             }
         }
-
+        
         private RelayCommand _update;
         private RelayCommand _delitem;
         private RelayCommand _addnew;

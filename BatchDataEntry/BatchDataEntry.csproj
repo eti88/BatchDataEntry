@@ -267,9 +267,6 @@
     <Compile Include="Views\CampiV.xaml.cs">
       <DependentUpon>CampiV.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\components\ControlDictionaryAutocompleteRelation.xaml.cs">
-      <DependentUpon>ControlDictionaryAutocompleteRelation.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\DialogNumeration.xaml.cs">
       <DependentUpon>DialogNumeration.xaml</DependentUpon>
     </Compile>
@@ -312,10 +309,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CampiV.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\components\ControlDictionaryAutocompleteRelation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -18,18 +18,10 @@ namespace BatchDataEntry.Views
         private void ButtonSalvaModel_OnClicknClick(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
-            //this.Close();
-        }
-
-        private void checkBoxDisableColumn_Checked(object sender, RoutedEventArgs e)
-        {
-            //checkBoxSalvaValori.IsEnabled = false;
-            //checkBoxPartialSave.IsEnabled = false;
         }
 
         private void checkBoxDisableColumn_Unchecked(object sender, RoutedEventArgs e)
         {
-            //checkBoxSalvaValori.IsEnabled = true;
             checkBoxPartialSave.IsEnabled = true;
         }
 
@@ -65,6 +57,7 @@ namespace BatchDataEntry.Views
                 {
                     case "AutocompletamentoDbSql":
                         CmbTable.IsEnabled = true;
+                        cmbColumbTableSource.IsEnabled = true;
                         break;
                     default:
                         if(CmbTable != null)
@@ -72,6 +65,8 @@ namespace BatchDataEntry.Views
                             CmbTable.IsEnabled = false;
                             CmbTable.SelectedIndex = -1;
                             CmbTable.SelectedItem = null;
+                            cmbColumbTableSource.IsEnabled = false;
+                            cmbColumbTableSource.SelectedIndex = -1;
                         }    
                         break;
                 }

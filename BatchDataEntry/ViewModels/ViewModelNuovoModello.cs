@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Abstracts;
@@ -26,6 +25,8 @@ namespace BatchDataEntry.ViewModels
                 }
             }
         }
+
+        // Commands
 
         private RelayCommand _addNew;
         public ICommand SaveModelCmd

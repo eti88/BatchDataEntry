@@ -4,12 +4,13 @@ using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System.Collections.Generic;
 using BatchDataEntry.Abstracts;
+using System.Linq;
 
 namespace BatchDataEntry.ViewModels
 {
     public class ViewModelNuovaColonna : ViewModelBase
     {
-        private AbsDbHelper db;
+        private AbsDbHelper db;      
         private bool alreadyExist = false;
 
         private List<string> _srcTables;
@@ -22,6 +23,24 @@ namespace BatchDataEntry.ViewModels
                 {
                     _srcTables = value;
                     RaisePropertyChanged("SrcTables");
+                }
+            }
+        }
+
+        private string _selectedAutoTab;
+        public string SelectedAutoTable
+        {
+            get { return _selectedAutoTab; }
+            set
+            {
+                if (_selectedAutoTab != value)
+                {
+                    _selectedAutoTab = value;
+                    RaisePropertyChanged("SelectedAutoTable");
+                    TableColumnsDictionary = PopulateCmbTabColonne(db, SelectedAutoTable);
+                    if (!string.IsNullOrEmpty(SelectedAutoTable))
+                        SelectedCampo.TabellaSorgente = SelectedAutoTable;
+                    SelectedTableColumn = new KeyValuePair<string, int>();
                 }
             }
         }
@@ -50,6 +69,36 @@ namespace BatchDataEntry.ViewModels
                 {
                     _nometab = value;
                     RaisePropertyChanged("NomeTabella");
+                }
+            }
+        }
+
+        private Dictionary<string, int> _tableColumnsDictionary;
+        public Dictionary<string, int> TableColumnsDictionary
+        {
+            get { return _tableColumnsDictionary; }
+            set
+            {
+                if (_tableColumnsDictionary != value)
+                {
+                    _tableColumnsDictionary = value;
+                    RaisePropertyChanged("TableColumnsDictionary");
+                    SelectedTableColumn = new KeyValuePair<string, int>();
+                }
+            }
+        }
+
+        private KeyValuePair<string, int> _selectedTableColumn;
+        public KeyValuePair<string, int> SelectedTableColumn
+        {
+            get { return _selectedTableColumn; }
+            set
+            {
+                if (_selectedTableColumn.Value != value.Value)
+                {
+                    _selectedTableColumn = value;
+                    RaisePropertyChanged("SelectedTableColumn");
+                    SelectedCampo.SourceTableColumn = _selectedTableColumn.Value;
                 }
             }
         }
@@ -107,7 +156,10 @@ namespace BatchDataEntry.ViewModels
             else
                 SrcTables = new List<string>();
 
-            this.NomeTabella = mod.Nome;                      
+            this.NomeTabella = mod.Nome;
+            SelectedAutoTable = SelectedCampo.TabellaSorgente;
+            TableColumnsDictionary = PopulateCmbTabColonne(db, SelectedAutoTable);
+            SelectedTableColumn = TableColumnsDictionary.FirstOrDefault(p => p.Value == SelectedCampo.SourceTableColumn);
         }
 
         public ViewModelNuovaColonna(Campo c, bool needUpdate, int colCount, AbsDbHelper dbq)
@@ -124,10 +176,24 @@ namespace BatchDataEntry.ViewModels
                 SrcTables = new List<string>();
 
             this.SelectedCampo.Posizione = colCount++;
-            this.NomeTabella = mod.Nome;            
+            this.NomeTabella = mod.Nome;
+            SelectedAutoTable = SelectedCampo.TabellaSorgente;
+            TableColumnsDictionary = PopulateCmbTabColonne(db, SelectedAutoTable);
+            SelectedTableColumn = TableColumnsDictionary.FirstOrDefault(p => p.Value == SelectedCampo.SourceTableColumn);
         }
 
         #endregion
+
+        private Dictionary<string, int> PopulateCmbTabColonne(AbsDbHelper dbc, string table)
+        {
+            var res = new Dictionary<string, int>();
+            
+            if (dbc != null && dbc is DatabaseHelperSqlServer && !string.IsNullOrEmpty(table))
+            {
+                res = ((DatabaseHelperSqlServer)dbc).GetColumns(table);
+            }
+            return res;
+        }
 
         public void AddNewItem()
         {
