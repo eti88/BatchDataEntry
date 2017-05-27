@@ -279,10 +279,5 @@ namespace BatchDataEntry.Models
             resutl = (resutl * 7) + this.IsDisabilitato.GetHashCode();
             return resutl;
         }
-
-        public override string ToString()
-        {
-            return String.Format("{this.Id},{this.TipoCampo},{this.Nome},{this.Valore}),{this.SalvaValori}");
-        }
     }
 }

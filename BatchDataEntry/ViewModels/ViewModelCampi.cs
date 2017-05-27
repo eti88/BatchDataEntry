@@ -41,7 +41,10 @@ namespace BatchDataEntry.ViewModels
             set
             {
                 _selectedCampo = value;
-                _intermediate = new Campo(SelectedCampo);
+                if (SelectedCampo != null)
+                    _intermediate = new Campo(SelectedCampo);
+                else
+                    return;
                 RaisePropertyChanged("SelectedCampo");
             }
         }

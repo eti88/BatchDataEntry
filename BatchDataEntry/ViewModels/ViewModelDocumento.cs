@@ -201,10 +201,6 @@ namespace BatchDataEntry.ViewModels
             // controllare se bisogna salvare il valore inserito per l'autocomletamento in base al tipo di database usato
             foreach (var col in DocFile.Voci)
             {        
-                /*
-                 * TODO: Se richiesto modificarne il funzionamento
-                 * Attualmente se si uitlizza il server mssql non è implementata una funzione di aggiunta dei valori all'autocompletamento
-                 */
                 try
                 {
                     if (col.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
@@ -215,7 +211,7 @@ namespace BatchDataEntry.ViewModels
                             auto.Colonna = col.Id;
                             auto.Valore = col.Valore;
                             _db.Insert(auto);
-                        }  
+                        }
                     }
                 }
                 catch (Exception ex)
