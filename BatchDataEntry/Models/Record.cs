@@ -67,14 +67,12 @@ namespace BatchDataEntry.Models
         public Record() : base() {
             Valore = string.Empty;
             ElementoSelezionato = null;
-            SourceTableColumn = 1;
             SuggestionsProvider = null;
         }
 
         public Record(int id, string nome, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) : base(id, nome, posizione, valorepredef, tabella, primario, secondario, campo, idmodello, riproponi, disabilitato)
         {
             Valore = string.Empty;
-            SourceTableColumn = 1;
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
             SuggestionsProvider = null;
@@ -83,7 +81,6 @@ namespace BatchDataEntry.Models
         public Record(int id, string nome, string valore, int posizione, string valorepredef, string tabella, bool primario, bool secondario, EnumTypeOfCampo campo, int idmodello, bool riproponi, bool disabilitato) : base(id, nome, posizione, valorepredef, tabella, primario, secondario, campo, idmodello, riproponi, disabilitato)
         {
             Valore = valore;
-            SourceTableColumn = 1;
             ElementoSelezionato = null;
             ElementoSelezionatoValore = string.Empty;
             SuggestionsProvider = null;
@@ -136,7 +133,6 @@ namespace BatchDataEntry.Models
             rec.IdModello = c.IdModello;
             rec.IsDisabilitato = c.IsDisabilitato;
             rec.TabellaSorgente = c.TabellaSorgente;
-            if (c.SourceTableColumn < 1) c.SourceTableColumn = 1;
             rec.SourceTableColumn = c.SourceTableColumn;
             if(rec.SalvaValori)
                 rec.QueryProviderSelector();
@@ -173,7 +169,6 @@ namespace BatchDataEntry.Models
             rec.IdModello = c.IdModello;
             rec.IsDisabilitato = c.IsDisabilitato;
             rec.TabellaSorgente = c.TabellaSorgente;
-            if (c.SourceTableColumn < 1) c.SourceTableColumn = 1;
             rec.SourceTableColumn = c.SourceTableColumn;
             rec.QueryProviderSelector();
             return rec;
@@ -189,7 +184,7 @@ namespace BatchDataEntry.Models
             }
             else if (TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
             {
-                if (string.IsNullOrWhiteSpace(TabellaSorgente) || SourceTableColumn < 1)
+                if (string.IsNullOrWhiteSpace(TabellaSorgente))
                     throw new Exception("SuggestionsProvider mancano argomenti");
                 var au = new DbSqlSuggestionProvider(this.Posizione, TabellaSorgente, SourceTableColumn);
                 SuggestionsProvider = au;

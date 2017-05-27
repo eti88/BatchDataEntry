@@ -341,12 +341,12 @@ namespace BatchDataEntry.ViewModels
             if (string.IsNullOrEmpty(sugg.Valore)) return;
       
             var trow = GetTableRow(Batch.Applicazione.Campi[pos].TabellaSorgente, Batch.Applicazione.Campi[pos].SourceTableColumn, sugg.Valore);
-            if (trow.Count == 0 || trow.Count != DocFile.Voci.Count) return;
+            if (trow.Count == 0) return;
             string reftab = Batch.Applicazione.Campi[pos].TabellaSorgente;
             foreach (Record r in DocFile.Voci)
             {
                 if (r.TabellaSorgente == reftab)
-                    r.Valore = trow.ElementAt(r.SourceTableColumn);
+                    r.Valore = trow.ElementAt(r.SourceTableColumn).ToString(); 
             }
         }
         
@@ -363,7 +363,8 @@ namespace BatchDataEntry.ViewModels
             var row = new List<string>();
             if(db != null && db is DatabaseHelperSqlServer)
             {
-
+                var columns = ((DatabaseHelperSqlServer)db).GetColumns(table);
+                row = ((DatabaseHelperSqlServer)db).GetRecord(table, columns, column, text);
             }
             return row;
         }

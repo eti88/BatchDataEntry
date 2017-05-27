@@ -879,8 +879,8 @@ namespace BatchDataEntry.Helpers
         // Funzione per ritornare la lista di tabelle presenti nel server
         public List<string> GetTableList()
         {
-            if (cnn == null) return null;
             List<string> res = new List<string>();
+            if (cnn == null) return res;
 
             try
             {
@@ -901,6 +901,38 @@ namespace BatchDataEntry.Helpers
                 cnn.Close();
             }
             return res;
+        }
+
+        public List<string> GetRecord(string table, Dictionary<string, int> columns, int selectedCol, string val)
+        {
+            var rec = new List<string>();
+            if (cnn == null) return rec;
+
+            try
+            {
+                cnn.Open();
+                string sql = string.Format("SELECT * FROM {0} WHERE {1} = '{2}'", 
+                    table , 
+                    columns.FirstOrDefault(x => x.Value == selectedCol).Key, 
+                    val);
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                var reader = cmd.ExecuteReader();
+                reader.Read();
+
+                foreach(KeyValuePair<string, int> k in columns)
+                {
+                    rec.Add(reader[k.Value].ToString());
+                }
+                reader.Close();
+            }catch(Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return rec;
         }
 
         public Dictionary<string, int> GetColumns(string table)
@@ -951,7 +983,6 @@ namespace BatchDataEntry.Helpers
                 while (reader.Read())
                     suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader[columnTable])));
                 reader.Close();
-                //return suggestions;
             }
             catch (Exception e)
             {
