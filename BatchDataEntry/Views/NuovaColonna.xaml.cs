@@ -67,10 +67,19 @@ namespace BatchDataEntry.Views
                             CmbTable.SelectedItem = null;
                             cmbColumbTableSource.IsEnabled = false;
                             cmbColumbTableSource.SelectedIndex = -1;
-                        }    
+                        }                      
                         break;
                 }
             }
+        }
+
+        private void Window_Initialized(object sender, EventArgs e)
+        {
+            if (CmbTipoCampo == null) return;
+            if(CmbTable != null && CmbTipoCampo.SelectedValue.ToString() == "Normale")
+                CmbTable.IsEnabled = false;
+            if(cmbColumbTableSource != null && CmbTipoCampo.SelectedValue.ToString() == "Normale")
+                cmbColumbTableSource.IsEnabled = false;
         }
     }
 }

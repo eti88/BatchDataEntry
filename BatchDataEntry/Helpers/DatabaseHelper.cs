@@ -346,6 +346,10 @@ namespace BatchDataEntry.Helpers
             }
             columns = columns.Substring(0, columns.Length - 1);
             values = values.Substring(0, values.Length - 1);
+            #if DEBUG
+            Console.WriteLine(String.Format("Columns: {0} \n Values: {1}\n", columns, values));
+            #endif
+
             try
             {
                 #if DEBUG
@@ -635,10 +639,10 @@ namespace BatchDataEntry.Helpers
                     values.Add(b.Applicazione.Campi.ElementAt(i).Nome, d.Voci[i].Valore);
             }
 
-            foreach (Campo col in d.Voci)
-            {
+            //foreach (Campo col in d.Voci)
+            //{
                 
-            }
+            //}
          
             bool r = Insert("Documenti", values);
             if (r)

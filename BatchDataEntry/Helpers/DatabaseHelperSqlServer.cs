@@ -726,6 +726,9 @@ namespace BatchDataEntry.Helpers
                     CommandType = System.Data.CommandType.Text
                 };
                 result = Convert.ToInt32(cmd.ExecuteScalar());
+            }catch(System.Data.SqlClient.SqlException e)
+            {
+                logger.Warn(e.ToString());
             }
             catch (Exception e)
             {

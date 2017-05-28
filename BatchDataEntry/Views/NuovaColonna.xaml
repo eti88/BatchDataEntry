@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         Title="{Binding Path=NomeTabella, 
         StringFormat='Nuovo Campo nel modello {0}'}" 
-        Height="498" Width="400" MinHeight="500" MaxHeight="500" MinWidth="400" Icon="/BatchDataEntry;component/Mesh-100.ico" SizeToContent="WidthAndHeight">
+        Height="498" Width="400" MinHeight="500" MaxHeight="500" MinWidth="400" Icon="/BatchDataEntry;component/Mesh-100.ico" SizeToContent="WidthAndHeight" Initialized="Window_Initialized">
     <Window.Resources>
         <viewModels:ViewModelNuovaColonna x:Key="ViewModelNuovaColonna"/>
     </Window.Resources>

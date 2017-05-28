@@ -240,17 +240,17 @@ namespace BatchDataEntry.ViewModels
         public bool FillCacheDb(DatabaseHelper dbcache, AbsDbHelper dbdata, Batch b)
         {
             List<string> files = new List<string>();
+            if (CurrentBatch.Applicazione.Id == 0 && dbdata == null) CurrentBatch.LoadModel(dbdata);
+            else if (CurrentBatch.Applicazione.Id == 0) CurrentBatch.LoadModel(dbdata);
+            if (!CurrentBatch.Applicazione.OrigineCsv) return false;
+            if (CurrentBatch.Applicazione.Campi.Count == 0) CurrentBatch.Applicazione.LoadCampi(dbdata);
+
             // Genera il file di cache partendo dal file csv invece che dalla lista all'interno della cartella.
             if (IndexType.Contains("Automatica"))
             {
                 #if DEBUG
                 Console.WriteLine(@"### USO GENERAZIONE Automatica ###");
                 #endif
-
-                if(CurrentBatch.Applicazione.Id == 0 && dbdata == null) CurrentBatch.LoadModel(dbdata);
-                else if(CurrentBatch.Applicazione.Id == 0) CurrentBatch.LoadModel(dbdata);
-                if (!CurrentBatch.Applicazione.OrigineCsv) return false;
-                if(CurrentBatch.Applicazione.Campi.Count == 0) CurrentBatch.Applicazione.LoadCampi(dbdata);
                 int indexColumn = 0;
 
                 for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)
@@ -267,10 +267,8 @@ namespace BatchDataEntry.ViewModels
                 List<Document> documents = new List<Document>();
                 for (int i = 0; i < lines.Count; i++)
                 {
-                    Document doc = new Document()
-                    {
-                        Id = i + 1
-                    };
+                    Document doc = new Document();
+                    doc.Id = i + 1;
                     try
                     {
                         string[] cells = lines[i].Split(b.Applicazione.Separatore[0]);
@@ -282,15 +280,16 @@ namespace BatchDataEntry.ViewModels
                             return false;
                         }
 
+                        // Il nome del file corrisponde all'index (primario) impostato nel modello!
                         string cleanValue = cells[indexColumn].Replace("'", "");
                         string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(cleanValue));
-                        if (db.Count(queryCheck) > 0) continue;
+                        if (dbcache.Count(queryCheck) > 0) continue;
                         doc.FileName = cleanValue;
 
                         doc.FileName = cells[indexColumn];
                         string absPath = Path.Combine(CurrentBatch.DirectoryInput, cleanValue.Contains(".pdf") ? cleanValue : String.Format("{0}.pdf", cleanValue));
                         doc.Path = absPath;
-                        doc.IsIndexed = false;
+                        doc.IsIndexed = true;
 
                         for (int z = 0; z < b.Applicazione.Campi.Count; z++)
                         {
@@ -309,6 +308,11 @@ namespace BatchDataEntry.ViewModels
                         throw;
                     }
                     documents.Add(doc);
+                    // Copia del pdf corrispondente nella cartella di output
+                    if (!string.IsNullOrEmpty(CurrentBatch.PatternNome))
+                        Utility.CopiaPdf(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
+                    else
+                        Utility.CopiaPdf(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
                 }
 
                 for (int i = 0; i < documents.Count; i++)
@@ -340,7 +344,7 @@ namespace BatchDataEntry.ViewModels
                 int lastId = 0;
                 try
                 {
-                    lastId = db.Count(@"SELECT seq FROM SQLITE_SEQUENCE WHERE name='Documenti'");                    
+                    lastId = dbcache.Count(@"SELECT seq FROM SQLITE_SEQUENCE WHERE name='Documenti'");                    
                 }
                 catch (Exception)
                 {
@@ -351,15 +355,14 @@ namespace BatchDataEntry.ViewModels
                 for (int i = 0; i < files.Count; i++)
                 {
                     string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(files[i]));
-                    if (db.Count(queryCheck) > 0) continue;
+                    if (dbcache.Count(queryCheck) > 0) continue;
 
-                    Document doc = new Document()
-                    {
-                        Id = lastId + 1,
-                        FileName = Path.GetFileNameWithoutExtension(files[i]),
-                        Path = files[i],
-                        IsIndexed = false
-                    };
+                    Document doc = new Document();
+                    doc.Id = lastId + 1;
+                    doc.FileName = Path.GetFileNameWithoutExtension(files[i]);
+                    doc.Path = files[i];
+                    doc.IsIndexed = false;
+
                     if (!b.Applicazione.OrigineCsv)
                     {                     
                         for (int z = 0; z < b.Applicazione.Campi.Count; z++)
