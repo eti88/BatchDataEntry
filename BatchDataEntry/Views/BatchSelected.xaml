@@ -39,6 +39,7 @@
                   ItemsSource="{Binding Path=DataSource, IsAsync=True, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
                   IsReadOnly="True" 
                   CanUserDeleteRows="True"
+                  CanUserSortColumns="False"
                   SelectedIndex="{Binding Path=SelectedRowIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="White" Loaded="dataGridRecords_Loaded">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
