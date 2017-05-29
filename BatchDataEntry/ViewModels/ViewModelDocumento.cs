@@ -107,7 +107,7 @@ namespace BatchDataEntry.ViewModels
             }
             DocFiles.CurrentIndex = indexRowVal;
             DocFile = new Document(db ,Batch, DocFiles.Current);
-            DocFile.AddInputsToPanel(Batch, _db);
+            DocFile.AddInputsToPanel(Batch, db, _db, DocFiles.Current);
             // Inverte il valore per l'abilitazione del campo
             foreach (Campo c in DocFile.Voci)
             {
@@ -143,7 +143,7 @@ namespace BatchDataEntry.ViewModels
                 return;
             }
             DocFile = new Document(db, Batch, DocFiles.Current);
-            DocFile.AddInputsToPanel(Batch, _db);
+            DocFile.AddInputsToPanel(Batch, db, _db, DocFiles.Current);
             // Inverte il valore per l'abilitazione del campo
             foreach (Campo c in DocFile.Voci)
             {
@@ -237,7 +237,7 @@ namespace BatchDataEntry.ViewModels
             {
                 DocFile = new Document(db, Batch, DocFiles.MovePrevious);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
-                    DocFile.AddInputsToPanel(Batch, _db);
+                    DocFile.AddInputsToPanel(Batch, db, _db, DocFiles.Current);
                 for (int i = 0; i < repeatValues.Length; i++)
                 {
                     if (!string.IsNullOrEmpty(repeatValues[i]))
@@ -263,7 +263,7 @@ namespace BatchDataEntry.ViewModels
             {
                 DocFile = new Document(db, Batch, DocFiles.MoveNext);
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
-                    DocFile.AddInputsToPanel(Batch, _db);
+                    DocFile.AddInputsToPanel(Batch, db, _db, DocFiles.Current);
                 for (int i = 0; i < repeatValues.Length; i++)
                 {
                     if (!string.IsNullOrEmpty(repeatValues[i]))

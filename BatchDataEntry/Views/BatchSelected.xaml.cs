@@ -3,6 +3,7 @@ using System.Windows;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Abstracts;
+using System.Threading;
 
 namespace BatchDataEntry.Views
 {
@@ -39,8 +40,12 @@ namespace BatchDataEntry.Views
                 if (b == null) return;
                 if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel(db);
                 if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(db);
-
-                dataGridRecords.SelectedIndex = (b.UltimoIndicizzato > 1) ? b.UltimoIndicizzato - 1 : b.UltimoIndicizzato;
+                Thread td = new Thread(() => {
+                    Thread.Sleep(500);
+                    SetSelectedGridRow((b.UltimoIndicizzato == 0) ? 0 : (b.UltimoIndicizzato - 1));
+                });
+                td.SetApartmentState(ApartmentState.STA);
+                td.Start();
             }
             catch (Exception ex)
             {
@@ -49,6 +54,10 @@ namespace BatchDataEntry.Views
 #endif
                 return;
             }
+        }
+
+        public void SetSelectedGridRow(int index) {
+            Dispatcher.Invoke(new Action(() => { dataGridRecords.SelectedIndex = index; }));
         }
     }
 }

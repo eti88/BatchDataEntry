@@ -141,14 +141,25 @@ namespace BatchDataEntry.Models
             this.Voci = new ObservableCollection<Record>();
         }
 
-        public void AddInputsToPanel(Batch b, AbsDbHelper db)
+        public void AddInputsToPanel(Batch b, AbsDbHelper db, DatabaseHelper dcache, Dictionary<int, string> dictionary)
         {
-            var voci = new ObservableCollection<Record>();
-            foreach (Campo campo in b.Applicazione.Campi)
+            if (this.Voci != null && this.Voci.Count > 0) return;
+            int h = 0;
+            for (int i = 0; i < dictionary.Count; i++)
             {
-                voci.Add(Record.Create(campo, campo.Posizione));
+                if (i > 3)
+                {
+                    KeyValuePair<int, string> row = dictionary.ElementAt(i);
+                    //voci.Add(Record.Create(campo, campo.Posizione));
+                    Record r = null;
+                    if (!string.IsNullOrEmpty(row.Value))
+                        r = Record.Create(b.Applicazione.Campi.ElementAt(h), h, row.Value);
+                    else
+                        r = Record.Create(b.Applicazione.Campi.ElementAt(h), h);
+                    this.Voci.Add(r);
+                    h++;
+                }
             }
-            this.Voci = voci;
         }
 
         private bool GetBool(string val)
