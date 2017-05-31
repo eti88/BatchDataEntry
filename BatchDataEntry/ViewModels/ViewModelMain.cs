@@ -140,6 +140,19 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private RelayCommand _showToolsWindowCmd;
+        public ICommand ShowToolsWindowCmd
+        {
+            get
+            {
+                if (_showToolsWindowCmd == null)
+                {
+                    _showToolsWindowCmd = new RelayCommand(param => this.ToolsWindowOpen());
+                }
+                return _showToolsWindowCmd;
+            }
+        }
+
         private bool CanEdit
         {
             get { return (SelectedBatch != null); }
@@ -149,14 +162,22 @@ namespace BatchDataEntry.ViewModels
         public ViewModelMain()
         {
             this.Batches = new ObservableCollection<Batch>();
-            if (Properties.Settings.Default.UseSQLServer)
-                db = new DatabaseHelperSqlServer(
-                    Properties.Settings.Default.SqlUser,
-                    Properties.Settings.Default.SqlPassword,
-                    Properties.Settings.Default.SqlServerAddress,
-                    Properties.Settings.Default.SqlDbName);
-            else
+            try
+            {
+                if (Properties.Settings.Default.UseSQLServer)
+                    db = new DatabaseHelperSqlServer(
+                        Properties.Settings.Default.SqlUser,
+                        Properties.Settings.Default.SqlPassword,
+                        Properties.Settings.Default.SqlServerAddress,
+                        Properties.Settings.Default.SqlDbName);
+                else
+                    db = new DatabaseHelper();
+            }
+            catch(Exception e)
+            {
+                logger.Error(e);
                 db = new DatabaseHelper();
+            }         
             LoadBatches(db);
         }
 
@@ -241,6 +262,12 @@ namespace BatchDataEntry.ViewModels
         {
             var settingsWindow = new SettingsApp();
             settingsWindow.Show();
+        }
+
+        private void ToolsWindowOpen()
+        {
+            var toolsWindow = new Views.Tools();
+            toolsWindow.Show();
         }
     }
 }

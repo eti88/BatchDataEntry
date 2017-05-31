@@ -19,6 +19,7 @@
         <DockPanel LastChildFill="True">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="Impostazioni" Command="{Binding ShowSettingsWindowCmd}"/>
+                <MenuItem Header="Tools" Command="{Binding ShowToolsWindowCmd}" />
                 <MenuItem Header="Log" Click="ButtonLog_OnClick"/>
                 <MenuItem Header="About" Command="{Binding ShowAboutWindowCmd}"/>
             </Menu>

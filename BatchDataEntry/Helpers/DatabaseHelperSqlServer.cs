@@ -23,20 +23,39 @@ namespace BatchDataEntry.Helpers
 
         public DatabaseHelperSqlServer(string user, string password, string serverUrl, string databaseName, int timeout = 30)
         {
-            cnn = new SqlConnection(string.Format("user id={0};password={1};server={2};Trusted_Connection=yes;database={3};connection timeout={4};MultipleActiveResultSets=True", user, password, serverUrl, databaseName, timeout));
+            try
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+                builder.DataSource = serverUrl;
+                builder.UserID = user;
+                builder.Password = password;
+                builder.InitialCatalog = databaseName;
+                builder.ConnectTimeout = timeout;
+                builder.MultipleActiveResultSets = true;
+                cnn = new SqlConnection(builder.ConnectionString);
+            }
+            catch(Exception e)
+            {
+                logger.Error(e);
+            }
         }
 
-        public static bool IsServerConnected(string connectionString)
+        public static bool IsServerConnected(SqlConnectionStringBuilder bui)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(bui.ConnectionString))
             {
                 try
                 {
                     connection.Open();
                     return true;
                 }
-                catch (SqlException)
+                catch (SqlException e)
                 {
+                    logger.Error(e);
+                    return false;
+                }catch(Exception e)
+                {
+                    logger.Error(e);
                     return false;
                 }
             }

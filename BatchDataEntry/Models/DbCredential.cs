@@ -1,5 +1,6 @@
 ﻿using BatchDataEntry.Helpers;
 using System;
+using System.Data.SqlClient;
 using System.Security;
 using System.Windows;
 
@@ -129,8 +130,15 @@ namespace BatchDataEntry.Models
                 string.IsNullOrWhiteSpace(Password) ||
                 string.IsNullOrWhiteSpace(Address) ||
                 string.IsNullOrWhiteSpace(Dbname)) return false;
-            string cnn = string.Format("user id={0};password={1};server={2};Trusted_Connection=yes;database={3};connection timeout={4};MultipleActiveResultSets=True", User, Password, Address, Dbname, 15);
-            return DatabaseHelperSqlServer.IsServerConnected(cnn);
+
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+            builder.DataSource = Address;
+            builder.UserID = User;
+            builder.Password = Password;
+            builder.InitialCatalog = Dbname;
+            builder.ConnectTimeout = 30;
+            builder.MultipleActiveResultSets = true;
+            return DatabaseHelperSqlServer.IsServerConnected(builder);
         }
     }
 }

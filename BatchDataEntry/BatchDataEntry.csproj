@@ -259,6 +259,7 @@
     <Compile Include="ViewModels\ViewModelNewBatch.cs" />
     <Compile Include="ViewModels\ViewModelNuovaColonna.cs" />
     <Compile Include="ViewModels\ViewModelNuovoModello.cs" />
+    <Compile Include="ViewModels\ViewModelTools.cs" />
     <Compile Include="Views\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
@@ -293,6 +294,9 @@
       <DependentUpon>SettingsApp.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ViewModelSettings.cs" />
+    <Compile Include="Views\Tools.xaml.cs">
+      <DependentUpon>Tools.xaml</DependentUpon>
+    </Compile>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -357,6 +361,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SettingsApp.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Tools.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
