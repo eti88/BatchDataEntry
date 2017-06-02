@@ -118,5 +118,29 @@ namespace BatchDataEntry.Properties {
                 this["SqlPassword"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastAssociato {
+            get {
+                return ((string)(this["LastAssociato"]));
+            }
+            set {
+                this["LastAssociato"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastNegozio {
+            get {
+                return ((string)(this["LastNegozio"]));
+            }
+            set {
+                this["LastNegozio"] = value;
+            }
+        }
     }
 }

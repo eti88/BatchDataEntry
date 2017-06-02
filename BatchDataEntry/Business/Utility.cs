@@ -7,6 +7,7 @@ using BatchDataEntry.Models;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Collections;
+using System.Globalization;
 
 namespace BatchDataEntry.Business
 {
@@ -161,6 +162,62 @@ namespace BatchDataEntry.Business
         public static string RemovePatternFromString(string origin, string pattern)
         {
             return origin.Replace(pattern, "");
+        }
+
+        public static bool IsNotVoid(string text)
+        {
+            bool res;
+            if (string.IsNullOrEmpty(text) || string.IsNullOrWhiteSpace(text))
+                res = false;
+            else
+                res = true;
+            return res;
+        }
+
+        public static bool IsValidTelephone(string num)
+        {
+            return IsNumeric(num) && num.Length == 10; //TODO: inserire unittest
+        }
+
+        public static bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                if (char.IsSymbol(email[0])) return false;
+                if (!email.Contains("@")) return false;
+                char c = email[email.IndexOf('@') - 1];
+                char d = email[email.IndexOf('@') + 1];
+                if (char.IsSymbol(c) || c == '.' || c == ';' || c == ':' || c == '-') return false;
+                if (char.IsSymbol(d) || d == '.' || d == ';' || d == ':' || d == '-') return false;
+                if (email.Contains(" ")) return false;
+                if (email.Contains("..")) return false;
+                if (!addr.Host.Contains(".")) return false;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool IsValidDate(string date, string dateFormat)
+        {
+            bool res = false;
+            DateTime dt;
+            if (DateTime.TryParseExact(date, dateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+            {
+                res = true;
+            }
+            return res;
+        }
+
+        private static bool IsNumeric(object Expression)
+        {
+            double retNum;
+
+            bool isNum = Double.TryParse(Convert.ToString(Expression), System.Globalization.NumberStyles.Any, System.Globalization.NumberFormatInfo.InvariantInfo, out retNum);
+            return isNum;
         }
     }
 }

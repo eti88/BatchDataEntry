@@ -406,31 +406,6 @@ namespace BatchDataEntry.ViewModels
 
                     dbc.CreateCacheDb(campi);
                     res = FillCacheDb(dbc, db, batch);
-                    if (!res)
-                    {
-                        Task.Factory.StartNew(() =>
-                        {
-                            if (!File.Exists(pathCacheDb))
-                                return;
-                            
-                            bool isLocked = true;
-
-                            while (isLocked)
-                            {
-                                try
-                                {
-                                    File.Delete(pathCacheDb);
-                                    Thread.Sleep(5000);
-                                    isLocked = false;
-                                }
-                                catch (System.IO.IOException) { }                          
-                            }
-                                File.Delete(pathCacheDb);
-                        });
-                        logger.Error("Creazione batch interrotta funzione FillCacheDb fallita." );
-                        return;
-                    }
-
                 }else if (File.Exists(pathCacheDb))
                 {
                     // Appende al db cache i nuovi pdf

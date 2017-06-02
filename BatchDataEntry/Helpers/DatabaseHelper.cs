@@ -15,6 +15,7 @@ using Modello = BatchDataEntry.Models.Modello;
 using BatchDataEntry.Suggestions;
 using BatchDataEntry.Interfaces;
 using BatchDataEntry.Abstracts;
+using BatchDataEntry.ViewModels;
 
 namespace BatchDataEntry.Helpers
 {
@@ -1065,6 +1066,53 @@ namespace BatchDataEntry.Helpers
                 cnn.Close();
             }
             return null;
+        }
+
+        public List<FidelityClient> GetRecords()
+        {
+            var res = new List<FidelityClient>();
+            var cnn = new SQLiteConnection(dbConnection);
+            string sql = "SELECT * FROM Documenti";
+            try
+            {
+                cnn.Open();
+                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
+                SQLiteDataReader reader = myCmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    FidelityClient record = new FidelityClient();
+                    record.FileName = Convert.ToString(reader["FileName"]);
+                    record.Card = Convert.ToString(reader["FidelityCard"]);
+                    record.Cognome = Convert.ToString(reader["Cognome"]);
+                    record.Nome = Convert.ToString(reader["Nome"]);
+                    record.Indirizzo = Convert.ToString(reader["Indirizzo"]);
+                    record.Civico = Convert.ToString(reader["Civico"]);
+                    record.Localita = Convert.ToString(reader["Localita"]);
+                    record.Provincia = Convert.ToString(reader["Provincia"]);
+                    record.Cap = Convert.ToString(reader["Cap"]);
+                    record.Prefisso = Convert.ToString(reader["Prefisso"]);
+                    record.Telefono = Convert.ToString(reader["Telefono"]);
+                    record.Cellulare = Convert.ToString(reader["Cellulare"]);
+                    record.Email = Convert.ToString(reader["Email"]);
+                    record.DataNascita = Convert.ToString(reader["DataDiNascita"]);
+                    record.Luogo = Convert.ToString(reader["Luogo"]);
+
+                    res.Add(record);
+                }
+
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                ErrorCatch(e);
+            }
+            finally
+            {
+                cnn.Close();
+            }
+
+            return res;
         }
 
         public List<Document> GetDocumentsListPartial(string query)

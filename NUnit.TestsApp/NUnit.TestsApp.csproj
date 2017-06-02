@@ -78,6 +78,8 @@
     <Compile Include="ViewModels\ViewModelNewBatchTests.cs" />
     <Compile Include="ViewModels\ViewModelNuovaColonnaTests.cs" />
     <Compile Include="ViewModels\ViewModelNuovoModelloTests.cs" />
+    <Compile Include="Models\ColumnCheckTests.cs" />
+    <Compile Include="ViewModels\ViewModelToolsTests.cs" />
     <Compile Include="Views\ViewModelSettingsTests.cs" />
   </ItemGroup>
   <ItemGroup>
