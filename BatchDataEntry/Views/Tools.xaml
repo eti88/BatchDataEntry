@@ -44,7 +44,8 @@
                 <StackPanel DockPanel.Dock="Top">
                     <Label Content="Formato data:" />
                     <TextBox Text="{Binding DateFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="30" Margin="5" VerticalContentAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding GenerateOutputFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Genera file contenente errori" Height="30" VerticalAlignment="Center" Margin="5,17,5,5"/>
+                    <CheckBox IsChecked="{Binding GenerateOutputFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Genera file contenente errori" Height="30" VerticalAlignment="Center" Margin="5,17,5,5" VerticalContentAlignment="Center"/>
+                    <CheckBox IsChecked="{Binding CheckEmpty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Controlla campi vuoti" Height="30" VerticalAlignment="Center" Margin="5" VerticalContentAlignment="Center"/>
                 </StackPanel>
                 <Button DockPanel.Dock="Bottom" Content="Check" Height="30" Margin="5" Command="{Binding Path=CheckCommand}" VerticalContentAlignment="Center" VerticalAlignment="Bottom"/>
             </DockPanel>

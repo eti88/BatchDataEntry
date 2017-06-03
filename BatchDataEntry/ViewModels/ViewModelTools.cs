@@ -72,6 +72,24 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
+        private bool _checkEmptyVal;
+        public bool CheckEmpty
+        {
+            get
+            {
+                return _checkEmptyVal;
+            }
+            set
+            {
+                if (_checkEmptyVal != value)
+                {
+                    _checkEmptyVal = value;
+                    RaisePropertyChanged("CheckEmpty");
+                }
+
+            }
+        }
+
         private ObservableCollection<ErrorRecord> _errorRecordList;
         public ObservableCollection<ErrorRecord> ErrorRecordList
         {
@@ -170,6 +188,7 @@ namespace BatchDataEntry.ViewModels
         public ViewModelTools() {
             DateFormat = "yyyy-MM-dd"; // Set default date format
             GenerateOutputFile = false;
+            CheckEmpty = true;
             ErrorRecordList = new ObservableCollection<ErrorRecord>();
 
             var settings = Properties.Settings.Default;
@@ -221,59 +240,17 @@ namespace BatchDataEntry.ViewModels
         }
 
         private void Check(string path)
-        {
-            string tagEmpty = "Vuoto";
-            string tagTel = "Numero";
-            string tagEmail = "FormatoErr";
-            string tagData = "DataErr";
-
-            string msgEmpty = "Il campo è vuoto";
-            string msgTel = "Il numero di telefono non è di 10 cifre / contiene caratteri o simboli";
-            string msgEmail = "Formato email non valido";
-            string msgData = "Formato data non valida";
-            
+        {         
             if (File.Exists(path)) File.Delete(path);
             using(var file = new StreamWriter(path, true))
             {
                 file.WriteLine("File\tCampo\tValore\tTag\tMessaggio");
                 foreach(FidelityClient r in Records)
                 {
-                    if (!Utility.IsNotVoid(r.Card)) file.WriteLine(Line(r.FileName, "FidelityCard", r.Card, tagEmpty, msgEmpty));
-                    if (!Utility.IsNotVoid(r.Cognome)) file.WriteLine(Line(r.FileName, "Cognome", r.Cognome, tagEmpty, msgEmpty));
-                    if (!Utility.IsNotVoid(r.Indirizzo)) file.WriteLine(Line(r.FileName, "Indirizzo", r.Indirizzo, tagEmpty, msgEmpty));
-                    if (!Utility.IsNotVoid(r.Civico)) file.WriteLine(Line(r.FileName, "Civico", r.Civico, tagEmpty, msgEmpty));
-                    if (!Utility.IsNotVoid(r.Localita)) file.WriteLine(Line(r.FileName, "Localita", r.Localita, tagEmpty, msgEmpty));
-                    if (!Utility.IsNotVoid(r.Provincia)) file.WriteLine(Line(r.FileName, "Provincia", r.Provincia, tagEmpty, msgEmpty));
-                    if (!Utility.IsNotVoid(r.Cap)) file.WriteLine(Line(r.FileName, "Cap", r.Cap, tagEmpty, msgEmpty));
-                    if (!Utility.IsNotVoid(r.Prefisso)) file.WriteLine(Line(r.FileName, "Prefisso", r.Prefisso, tagEmpty, msgEmpty));
-                    if (!Utility.IsNotVoid(r.Telefono)) file.WriteLine(Line(r.FileName, "Telefono", r.Telefono, tagEmpty, msgEmpty));
-
-                    if (!Utility.IsNotVoid(r.Cellulare)) {
-                        file.WriteLine(Line(r.FileName, "Cellulare", r.Cellulare, tagEmpty, msgEmpty));
-                    }
-                    else
+                    foreach(ErrorRecord err in r.Checks(CheckEmpty, DateFormat))
                     {
-                        if (!Utility.IsValidTelephone(r.Cellulare)) file.WriteLine(Line(r.FileName, "Cellulare", r.Cellulare, tagTel, msgTel));
+                        file.WriteLine(err.ToString());
                     }
-
-                    if (!Utility.IsNotVoid(r.Email))
-                    {
-                        file.WriteLine(Line(r.FileName, "Email", r.Email, tagEmpty, msgEmpty));
-                    }
-                    else
-                    {
-                        if (!Utility.IsValidEmail(r.Email)) file.WriteLine(Line(r.FileName, "Email", r.Email, tagEmail, msgEmail));
-                    }
-
-                    if (!Utility.IsNotVoid(r.DataNascita)) {
-                        file.WriteLine(Line(r.FileName, "DataNascita", r.Card, tagEmpty, msgEmpty));
-                    }
-                    else
-                    {
-                        if (!Utility.IsValidDate(r.DataNascita, DateFormat)) file.WriteLine(Line(r.FileName, "DataNascita", r.DataNascita, tagData, msgData));
-                    }
-
-                    if (!Utility.IsNotVoid(r.Luogo)) file.WriteLine(Line(r.FileName, "Luogo", r.Luogo, tagEmpty, msgEmpty));
                 }
             }
         }
@@ -447,6 +424,7 @@ namespace BatchDataEntry.ViewModels
             get { return _cognome; }
             set
             {
+                if(value.Length <= 30)
                 _cognome = value;
             }
         }
@@ -457,7 +435,8 @@ namespace BatchDataEntry.ViewModels
             get { return _nome; }
             set
             {
-                _nome = value;
+                if (value.Length <= 30)
+                    _nome = value;
             }
         }
 
@@ -467,7 +446,8 @@ namespace BatchDataEntry.ViewModels
             get { return _indirizzo; }
             set
             {
-                _indirizzo = value;
+                if (value.Length <= 50)
+                    _indirizzo = value;
             }
         }
 
@@ -477,7 +457,8 @@ namespace BatchDataEntry.ViewModels
             get { return _civico; }
             set
             {
-                _civico = value;
+                if (value.Length <= 5)
+                    _civico = value;
             }
         }
 
@@ -487,7 +468,8 @@ namespace BatchDataEntry.ViewModels
             get { return _localita; }
             set
             {
-                _localita = value;
+                if (value.Length <= 50)
+                    _localita = value;
             }
         }
 
@@ -497,7 +479,8 @@ namespace BatchDataEntry.ViewModels
             get { return _provincia; }
             set
             {
-                _provincia = value;
+                if (value.Length <= 2)
+                    _provincia = value;
             }
         }
 
@@ -507,7 +490,8 @@ namespace BatchDataEntry.ViewModels
             get { return _cap; }
             set
             {
-                _cap = value;
+                if (value.Length <= 5)
+                    _cap = value;
             }
         }
 
@@ -517,7 +501,8 @@ namespace BatchDataEntry.ViewModels
             get { return _prefisso; }
             set
             {
-                _prefisso = value;
+                if (value.Length <= 4)
+                    _prefisso = value;
             }
         }
 
@@ -527,7 +512,8 @@ namespace BatchDataEntry.ViewModels
             get { return _telefono; }
             set
             {
-                _telefono = value;
+                if (value.Length <= 15)
+                    _telefono = value;
             }
         }
 
@@ -537,7 +523,8 @@ namespace BatchDataEntry.ViewModels
             get { return _cellulare; }
             set
             {
-                _cellulare = value;
+                if (value.Length <= 15)
+                    _cellulare = value;
             }
         }
 
@@ -547,7 +534,8 @@ namespace BatchDataEntry.ViewModels
             get { return _email; }
             set
             {
-                _email = value;
+                if (value.Length <= 30)
+                    _email = value;
             }
         }
 
@@ -557,7 +545,7 @@ namespace BatchDataEntry.ViewModels
             get { return _datanascita; }
             set
             {
-                _datanascita = value;
+                    _datanascita = value;
             }
         }
 
@@ -567,7 +555,8 @@ namespace BatchDataEntry.ViewModels
             get { return _luogo; }
             set
             {
-                _luogo = value;
+                if (value.Length <= 30)
+                    _luogo = value;
             }
         }
 
@@ -656,8 +645,14 @@ namespace BatchDataEntry.ViewModels
 
         public bool PubbDiretta;
         public bool AccettaSMS;
-        public bool AccettaEmail; 
+        public bool AccettaEmail;
         #endregion
+
+        // Consts
+        private const string TAGEmpty = "VUOTO";
+        private const string TAGTel = "NUMERO";
+        private const string TAGEmail = "EMAIL";
+        private const string TAGData = "DATA";
 
         public FidelityClient()
         {
@@ -719,6 +714,35 @@ namespace BatchDataEntry.ViewModels
             AccettaEmail = AccettaPubblicita(this.Email);
         }
 
+        //Checks
+        public List<ErrorRecord> Checks(bool checkVoid, string dateformat)
+        {
+            var errors = new List<ErrorRecord>();
+            if(checkVoid)
+            {
+                if (!Utility.IsNotVoid(this.Card)) errors.Add(new ErrorRecord(this.FileName, "FidelityCard", this.Card, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Cognome)) errors.Add(new ErrorRecord(this.FileName, "Cognome", this.Cognome, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Indirizzo)) errors.Add(new ErrorRecord(this.FileName, "Indirizzo", this.Indirizzo, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Civico)) errors.Add(new ErrorRecord(this.FileName, "Civico", this.Civico, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Localita)) errors.Add(new ErrorRecord(this.FileName, "Localita", this.Localita, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Provincia)) errors.Add(new ErrorRecord(this.FileName, "Provincia", this.Provincia, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Cap)) errors.Add(new ErrorRecord(this.FileName, "Cap", this.Cap, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Prefisso)) errors.Add(new ErrorRecord(this.FileName, "Prefisso", this.Prefisso, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Telefono)) errors.Add(new ErrorRecord(this.FileName, "Telefono", this.Telefono, TAGEmpty));
+
+                if (!Utility.IsNotVoid(this.Cellulare)) errors.Add(new ErrorRecord(this.FileName, "Cellulare", this.Cellulare, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Email)) errors.Add(new ErrorRecord(this.FileName, "Email", this.Email, TAGEmpty));
+                if (!Utility.IsNotVoid(this.DataNascita)) errors.Add(new ErrorRecord(this.FileName, "DataNascita", this.DataNascita, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Luogo)) errors.Add(new ErrorRecord(this.FileName, "Luogo", this.Luogo, TAGEmpty));
+            }
+
+            if (!Utility.IsValidTelephone(this.Cellulare)) errors.Add(new ErrorRecord(this.FileName, "Cellulare", this.Cellulare, TAGTel));
+            if (!Utility.IsValidEmail(this.Email)) errors.Add(new ErrorRecord(this.FileName, "Email", this.Email, TAGEmail));
+            if (!Utility.IsValidDate(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, TAGData));
+
+            return errors;
+        }
+
         // Controlla se i campi hanno un valore e nel caso imposta la pubblicità Diretta
         public bool AccettaPubblicita(string indirizzo, string cv, string localita, string provincia)
         {
@@ -751,37 +775,37 @@ namespace BatchDataEntry.ViewModels
             sb.Append("\t");
             sb.Append(Card.PadRight(13));
             sb.Append("\t");
-            sb.Append(Cognome.PadRight(30));
+            sb.Append(Cognome);
             sb.Append("\t");
-            sb.Append(Nome.PadRight(30));
+            sb.Append(Nome);
             sb.Append("\t");
-            sb.Append(Indirizzo.PadRight(50));
+            sb.Append(Indirizzo);
             sb.Append("\t");
-            sb.Append(Civico.PadRight(5));
+            sb.Append(Civico);
             sb.Append("\t");
-            sb.Append(Localita.PadRight(50));
+            sb.Append(Localita);
             sb.Append("\t");
-            sb.Append(Provincia.PadRight(2));
+            sb.Append(Provincia);
             sb.Append("\t");
-            sb.Append(Cap.PadRight(5));
+            sb.Append(Cap);
             sb.Append("\t");
             sb.Append(ConvertiBool(PubbDiretta));
             sb.Append("\t");
-            sb.Append(Prefisso.PadRight(4));
+            sb.Append(Prefisso);
             sb.Append("\t");
-            sb.Append(Telefono.PadRight(15));
+            sb.Append(Telefono);
             sb.Append("\t");
-            sb.Append(Cellulare.PadRight(15));
+            sb.Append(Cellulare);
             sb.Append("\t");
             sb.Append(ConvertiBool(AccettaSMS));
             sb.Append("\t");
-            sb.Append(Email.PadRight(30));
+            sb.Append(Email);
             sb.Append("\t");
             sb.Append(ConvertiBool(AccettaEmail));
             sb.Append("\t");
-            sb.Append(DataNascita.PadRight(10));
+            sb.Append(DataNascita);
             sb.Append("\t");
-            sb.Append(Luogo.PadRight(30));
+            sb.Append(Luogo);
             sb.Append("\t");
             sb.Append(Sesso);
             sb.Append("\t");
@@ -876,6 +900,11 @@ namespace BatchDataEntry.ViewModels
             NomeCampo = nome;
             ValoreCorrente = valore;
             TipoErrore = tipo;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}\t{1}\t{2}\t\t{3}", this.RecordNumber, this.NomeCampo, this.ValoreCorrente, this.TipoErrore);
         }
     }
 }
