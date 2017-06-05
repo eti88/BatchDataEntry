@@ -29,33 +29,45 @@ namespace BatchDataEntry.Helpers
 
         public DatabaseHelper()
         {
-           dbConnection = string.Format("Data Source={0}", Path.Combine(Directory.GetCurrentDirectory(), @"database.db3"));
+            string dtsource = Path.Combine(Directory.GetCurrentDirectory(), @"database.db3");
+            dbConnection = string.Format("Data Source={0}", UNCPathFormat(dtsource));
+            #if DEBUG
+            Console.WriteLine("CNN:" + dbConnection);
+            #endif
         }
 
         public DatabaseHelper(string path)
         {
-            dbConnection = string.Format("Data Source={0}", path);
+            string dtsource = UNCPathFormat(path);
+            dbConnection = string.Format("Data Source={0}", dtsource);
+            #if DEBUG
+            Console.WriteLine("CNN:" + dbConnection);
+            #endif
         }
 
         public DatabaseHelper(string dbname, string dbpath)
         {
-            dbConnection = string.Format("Data Source={0}", Path.Combine(dbpath, dbname));
+            string tmppath = Path.Combine(dbpath, dbname);
+            string dtsource = UNCPathFormat(tmppath);
+            dbConnection = string.Format("Data Source={0}", dtsource);
+            #if DEBUG
+            Console.WriteLine("CNN:" + dbConnection);
+            #endif
         }
 
-        public DatabaseHelper(Dictionary<string, string> connectionOpts)
+        private string UNCPathFormat(string intxt)
         {
-            string str = "";
-            foreach (KeyValuePair<string, string> row in connectionOpts)
+            if (intxt.StartsWith("\\"))
             {
-                str += string.Format("{0}={1};", row.Key, row.Value);
+                string tmp = intxt.Substring(2, intxt.Length - 2);
+                return @"\\\\" + tmp;
             }
-            str = str.Trim().Substring(0, str.Length - 1);
-            dbConnection = str;
+            else
+                return intxt;
         }
+#endregion
 
-        #endregion
-
-        #region DataTables
+#region DataTables
 
         /// <summary>
         /// Permette di recuperare sottoforma di Datatable una tabella dal database
@@ -140,9 +152,9 @@ namespace BatchDataEntry.Helpers
             return dt;
         }
 
-        #endregion
+#endregion
 
-        #region AzioniGeneriche
+#region AzioniGeneriche
 
         /// <summary>
         /// Permette di eseguire una query che ritorna un intero
@@ -278,9 +290,9 @@ namespace BatchDataEntry.Helpers
             }
             try
             {
-                #if DEBUG
+#if DEBUG
                 Console.WriteLine(String.Format("SQL: update {0} set {1} where {2};", tableName, vals, where));
-                #endif
+#endif
 
                 this.ExecuteNonQuery(String.Format("update {0} set {1} where {2};", tableName, vals, where));
             }
@@ -347,15 +359,15 @@ namespace BatchDataEntry.Helpers
             }
             columns = columns.Substring(0, columns.Length - 1);
             values = values.Substring(0, values.Length - 1);
-            #if DEBUG
+#if DEBUG
             Console.WriteLine(String.Format("Columns: {0} \n Values: {1}\n", columns, values));
-            #endif
+#endif
 
             try
             {
-                #if DEBUG
+#if DEBUG
                 Console.WriteLine(String.Format("SQL: insert into {0}({1}) values({2});", tableName, columns, values));
-                #endif
+#endif
 
                 this.ExecuteNonQuery(String.Format("insert into {0}({1}) values({2});", tableName, columns, values));             
             }
@@ -370,14 +382,14 @@ namespace BatchDataEntry.Helpers
         private void ErrorCatch(Exception e)
         {
             logger.Error(e.ToString);
-            #if DEBUG
+#if DEBUG
             Console.WriteLine(e.ToString());
-            #endif
+#endif
         }
 
-        #endregion
+#endregion
 
-        #region TableCreation
+#region TableCreation
 
         public void InitTabs()
         {
@@ -530,9 +542,9 @@ namespace BatchDataEntry.Helpers
             }
         }
 
-        #endregion
+#endregion
 
-        #region InsertTables
+#region InsertTables
 
         public override int Insert(Batch b)
         {
@@ -652,9 +664,9 @@ namespace BatchDataEntry.Helpers
             return -1;
         }
 
-        #endregion
+#endregion
 
-        #region UpdateTables
+#region UpdateTables
 
         public override void Update(Batch b)
         {
@@ -731,7 +743,7 @@ namespace BatchDataEntry.Helpers
             Update("Documenti", values, string.Format("Id={0}", d.Id));
         }
 
-        #endregion
+#endregion
 
         public override Batch GetBatchById(int id)
         {

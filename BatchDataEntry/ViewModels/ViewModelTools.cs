@@ -323,7 +323,6 @@ namespace BatchDataEntry.ViewModels
             Properties.Settings.Default.LastNegozio = CodiceNegozio;
 
             string dir = Path.GetDirectoryName(InputFilePath);
-            // TODO: aaaammgg del giorno in cui viene generato?
             string fileFID = string.Format("FID{0}{1}{2}.FID", CodiceAssociato, CodiceNegozio, DateTime.Now.ToString("yyyyMMdd"));
             string fileCHK = string.Format("FID{0}{1}{2}.CHK", CodiceAssociato, CodiceNegozio, DateTime.Now.ToString("yyyyMMdd"));
             GeneraCHK(dir, fileCHK);
