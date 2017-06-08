@@ -128,7 +128,7 @@ namespace BatchDataEntry.Models
             Campi = new ObservableCollection<Campo>();
             PathFileCsv = string.Empty;
             Separatore = string.Empty;
-            StartFocusColumn = -1;
+            StartFocusColumn = 0;
             CsvColumn = -1;
         }
 
