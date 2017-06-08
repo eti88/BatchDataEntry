@@ -15,10 +15,9 @@ namespace BatchDataEntry.ViewModels.Tests
     [TestFixture()]
     public class ViewModelExportTests
     {
-        ViewModelExport vm;
-        static string local_path = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles";
-        static string sampleCsvFile = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\origin";
-        static string output_file_name = @"exported.csv";
+        //static string local_path = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles";
+        //static string sampleCsvFile = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\origin";
+        //static string output_file_name = @"exported.csv";
 
         [Test(), Order(1)]
         public void ViewModelExportTest()

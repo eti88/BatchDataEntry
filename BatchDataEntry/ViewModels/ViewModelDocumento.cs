@@ -28,6 +28,7 @@ namespace BatchDataEntry.ViewModels
         private int _selectElementFocus;
         private string[] repeatValues;
         private MoonPdfPanel _PdfWrapper;
+        
 
         public Document DocFile
         {
@@ -78,6 +79,34 @@ namespace BatchDataEntry.ViewModels
         {
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasPrevious; }
         }
+        private CacheDocumentReceiver cdr;
+
+        // Events
+        public void InitEvents()
+        {
+            if (DocFile == null) return;
+            if(Batch.TipoFile == TipoFileProcessato.Tiff)
+            {
+                cdr = new CacheDocumentReceiver();
+                cdr.Connect();
+
+                List<string> tmp = new List<string>();
+                if(DocFiles.hasPrevious)
+                {
+                    Document t = new Document(db, Batch, DocFiles[DocFiles.CurrentIndex - 1]);
+                    tmp.Add(t.Path);
+                }
+
+                tmp.Add(new Document(db, Batch, DocFiles[DocFiles.CurrentIndex]).Path);
+
+                if (DocFiles.hasNext)
+                {
+                    Document t = new Document(db, Batch, DocFiles[DocFiles.CurrentIndex + 1]);
+                    tmp.Add(t.Path);
+                }
+                cdr.FireDocChanged(tmp);
+            }
+        }
 
         public ViewModelDocumento()
         {
@@ -87,6 +116,7 @@ namespace BatchDataEntry.ViewModels
             }
             Batch = new Batch();
             repeatValues = new string[10];
+            
         }
 
         public ViewModelDocumento(Batch _currentBatch, int indexRowVal, AbsDbHelper dbc)
@@ -114,7 +144,10 @@ namespace BatchDataEntry.ViewModels
                 c.IsDisabilitato = !c.IsDisabilitato;
             }
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
-            PdfWrapper.OpenFile(DocFile.Path);
+            if(File.Exists(DocFile.TmpPath))
+                PdfWrapper.OpenFile(DocFile.TmpPath);
+            else
+                PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
             PdfWrapper.PageRowDisplay = PageRowDisplayType.ContinuousPageRows;
             RaisePropertyChanged("DocFile");
@@ -122,6 +155,7 @@ namespace BatchDataEntry.ViewModels
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;
             Properties.Settings.Default.Save();
+            InitEvents();
         }
 
         public ViewModelDocumento(Batch _currentBatch, AbsDbHelper dbc)
@@ -150,7 +184,10 @@ namespace BatchDataEntry.ViewModels
                 c.IsDisabilitato = !c.IsDisabilitato;            
             }
 
-            PdfWrapper.OpenFile(DocFile.Path);
+            if (File.Exists(DocFile.TmpPath))
+                PdfWrapper.OpenFile(DocFile.TmpPath);
+            else
+                PdfWrapper.OpenFile(DocFile.Path);
             PdfWrapper.ViewType = ViewType.SinglePage;
             PdfWrapper.Background = System.Windows.Media.Brushes.LightGray;
             PdfWrapper.PageRowDisplay = PageRowDisplayType.ContinuousPageRows;
@@ -158,7 +195,36 @@ namespace BatchDataEntry.ViewModels
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;
-            Properties.Settings.Default.Save();           
+            Properties.Settings.Default.Save();
+            InitEvents();
+        }
+
+        public void GenerateTmpFiles()
+        {
+            try
+            {
+                if (cdr != null)
+                {
+                    List<string> tmp = new List<string>();
+                    if (DocFiles.hasPrevious)
+                    {
+                        tmp.Add(new Document(db, Batch, DocFiles[DocFiles.CurrentIndex - 1]).Path);
+                    }
+
+                    tmp.Add(new Document(db, Batch, DocFiles[DocFiles.CurrentIndex]).Path);
+
+                    if (DocFiles.hasNext)
+                    {
+                        tmp.Add(new Document(db, Batch, DocFiles[DocFiles.CurrentIndex + 1]).Path);
+                    }
+
+                    cdr.FireDocChanged(tmp);
+            }
+            }
+            catch(Exception e)
+            {
+                logger.Error(e);
+            }        
         }
 
         private void LoadDocsList()
@@ -236,6 +302,11 @@ namespace BatchDataEntry.ViewModels
             if (DocFiles.hasPrevious)
             {
                 DocFile = new Document(db, Batch, DocFiles.MovePrevious);
+                if(Batch.TipoFile == TipoFileProcessato.Tiff)
+                {
+                    GenerateTmpFiles();
+                }
+
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, db, _db, DocFiles.Current);
                 for (int i = 0; i < repeatValues.Length; i++)
@@ -249,8 +320,10 @@ namespace BatchDataEntry.ViewModels
                 {
                     c.IsDisabilitato = !c.IsDisabilitato;
                 }
-
-                PdfWrapper.OpenFile(DocFile.Path);
+                if(File.Exists(DocFile.TmpPath))
+                    PdfWrapper.OpenFile(DocFile.TmpPath);
+                else
+                    PdfWrapper.OpenFile(DocFile.Path);
             }
 
             RaisePropertyChanged("DocFile");
@@ -262,6 +335,11 @@ namespace BatchDataEntry.ViewModels
             if (DocFiles.hasNext)
             {
                 DocFile = new Document(db, Batch, DocFiles.MoveNext);
+                if (Batch.TipoFile == TipoFileProcessato.Tiff)
+                {
+                    GenerateTmpFiles();
+                }
+
                 if (DocFile.Voci == null || DocFile.Voci.Count == 0)
                     DocFile.AddInputsToPanel(Batch, db, _db, DocFiles.Current);
                 for (int i = 0; i < repeatValues.Length; i++)
@@ -276,7 +354,10 @@ namespace BatchDataEntry.ViewModels
                     c.IsDisabilitato = !c.IsDisabilitato;
                 }
 
-                PdfWrapper.OpenFile(DocFile.Path);
+                if (File.Exists(DocFile.TmpPath))
+                    PdfWrapper.OpenFile(DocFile.TmpPath);
+                else
+                    PdfWrapper.OpenFile(DocFile.Path);
             }
             
             RaisePropertyChanged("DocFile");
@@ -519,5 +600,5 @@ namespace BatchDataEntry.ViewModels
         }
 
         #endregion
-    }
+    }  
 }

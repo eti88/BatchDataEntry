@@ -219,5 +219,12 @@ namespace BatchDataEntry.Business
             bool isNum = Double.TryParse(Convert.ToString(Expression), System.Globalization.NumberStyles.Any, System.Globalization.NumberFormatInfo.InvariantInfo, out retNum);
             return isNum;
         }
+
+        public static string GetTmpPathFile(string file)
+        {
+            string filename = Path.GetFileNameWithoutExtension(file);
+            string tmppath = Path.GetTempPath();
+            return Path.Combine(tmppath, string.Format("{0}.pdf", filename));
+        }
     }
 }

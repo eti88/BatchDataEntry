@@ -21,7 +21,7 @@ namespace BatchDataEntry.ViewModels.Tests
         protected DatabaseHelperSqlServer dbsql;
         private static string UnitTestPath = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles";
         private static string UnitTestPath2 = @"C:\Users\etien\Documents\Visual Studio 2015\Projects\BatchDataEntry\NUnit.TestsApp\bin\testFiles\sub";
-        private static string _DBNAME_ = @"unitTest.db3";
+        //private static string _DBNAME_ = @"unitTest.db3";
 
         [SetUp]
         public void InitDb()

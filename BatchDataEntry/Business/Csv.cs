@@ -41,9 +41,9 @@ namespace BatchDataEntry.Business
                     }
                 }
             }
-            catch(Exception e)
+            catch(Exception)
             {
-                throw e;
+                throw;
             }
             
         }
@@ -210,8 +210,6 @@ namespace BatchDataEntry.Business
                         }
                         writer.WriteRow(r);
                     }
-                    writer.Close();
-                    writer.Dispose();
                 }             
                 return true;
             }
@@ -243,8 +241,6 @@ namespace BatchDataEntry.Business
                         }
                         writer.WriteRow(r);
                     }
-                    writer.Close();
-                    writer.Dispose();
                 }
                 return true;
             }

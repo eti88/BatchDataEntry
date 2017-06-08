@@ -488,7 +488,7 @@ namespace BatchDataEntry.ViewModels
             }
             catch (Exception ex)
             {
-                Response.Write(ex.Message);
+                logger.Error(ex.Message);
             }
 
 

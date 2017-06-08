@@ -174,7 +174,7 @@ namespace BatchDataEntry.Models
             return rec;
         }
 
-        public async void QueryProviderSelector()
+        public void QueryProviderSelector()
         {
             if (TipoCampo == EnumTypeOfCampo.Normale || TipoCampo == EnumTypeOfCampo.AutocompletamentoCsv) return;
             if (TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)

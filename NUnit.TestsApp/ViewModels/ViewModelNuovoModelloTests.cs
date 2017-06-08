@@ -19,7 +19,6 @@ namespace BatchDataEntry.ViewModels.Tests
         ViewModelNuovoModello vm;
         ViewModelNuovoModello vm2;
         ViewModelNuovoModello vm3;
-        ViewModelNuovoModello vm4;
 
         [SetUp]
         public void ViewModelNuovoModelloTest()

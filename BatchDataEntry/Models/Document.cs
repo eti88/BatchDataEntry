@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Abstracts;
+using BatchDataEntry.Business;
 
 namespace BatchDataEntry.Models
 {
@@ -45,6 +46,11 @@ namespace BatchDataEntry.Models
                     _path = value;
                 OnPropertyChanged("Path");
             }
+        }
+
+        public string TmpPath
+        {
+            get { return Utility.GetTmpPathFile(this.Path); }
         }
 
         private bool _isIndexed;
@@ -121,6 +127,27 @@ namespace BatchDataEntry.Models
             }
 
             
+        }
+
+        // Utilizzato per alcuni unit test
+        public Document(Dictionary<int, string> dictionary)
+        {
+            this.Voci = new ObservableCollection<Record>();
+            try
+            {
+                for (int i = 0; i < dictionary.Count; i++)
+                {
+                    KeyValuePair<int, string> row = dictionary.ElementAt(i);
+                    if (i == 0) this.Id = Convert.ToInt32(row.Value);
+                    else if (i == 1) this.FileName = row.Value;
+                    else if (i == 2) this.Path = row.Value;
+                    else if (i == 3) this.IsIndexed = GetBool(row.Value);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         public Document(int id, string name, string path, bool indexed)

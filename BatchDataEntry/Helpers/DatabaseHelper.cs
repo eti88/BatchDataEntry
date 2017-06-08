@@ -80,13 +80,15 @@ namespace BatchDataEntry.Helpers
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             try
             {
-                string cmd = String.Format("SELECT * FROM {0}", tablename);
+                string cmd = "SELECT * FROM @tablename";
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(cnn);
-                myCmd.CommandText = cmd;
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                dt.Load(reader);
-                reader.Close();
+                using (SQLiteCommand myCmd = new SQLiteCommand(cmd, cnn)) {
+                    myCmd.Parameters.AddWithValue("@tablename", tablename);
+
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    dt.Load(reader);
+                    reader.Close();
+                }
             }
             catch (Exception e)
             {
@@ -102,17 +104,19 @@ namespace BatchDataEntry.Helpers
         public DataTable GetDataTableDocumenti()
         {
             DataTable dt = new DataTable();
-
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             try
             {
-                string cmd = String.Format("SELECT * FROM {0}", "Documenti");
+                string cmd = String.Format("SELECT * FROM Documenti");              
+                
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(cnn);
-                myCmd.CommandText = cmd;
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                dt.Load(reader);
-                reader.Close();
+
+                using (SQLiteCommand myCmd = new SQLiteCommand(cmd, cnn))
+                {
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    dt.Load(reader);
+                    reader.Close();
+                }
             }
             catch (Exception e)
             {
@@ -135,11 +139,12 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(cnn);
-                myCmd.CommandText = sqlcmd;
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                dt.Load(reader);
-                reader.Close();
+                using (SQLiteCommand myCmd = new SQLiteCommand(sqlcmd, cnn))
+                {
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    dt.Load(reader);
+                    reader.Close();
+                }
             }
             catch (Exception e)
             {
@@ -168,8 +173,10 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                SQLiteCommand cmd = new SQLiteCommand(sql, cnn);
-                result = Convert.ToInt32(cmd.ExecuteScalar());
+                using (SQLiteCommand cmd = new SQLiteCommand(sql, cnn))
+                {
+                    result = Convert.ToInt32(cmd.ExecuteScalar());
+                }
             }
             catch (Exception e)
             {
@@ -195,10 +202,10 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                SQLiteCommand mycommand = new SQLiteCommand(cnn);
-                mycommand.CommandText = sql;
-                rowsUpdated = mycommand.ExecuteNonQuery();
-                cnn.Close();
+                using (SQLiteCommand mycommand = new SQLiteCommand(sql,cnn))
+                {
+                    rowsUpdated = mycommand.ExecuteNonQuery();
+                }
             }
             catch (Exception e)
             {
@@ -207,7 +214,6 @@ namespace BatchDataEntry.Helpers
             finally
             {
                 cnn.Close();
-                cnn.Dispose();
             }
 
             return rowsUpdated;
@@ -225,17 +231,17 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                SQLiteCommand mycommand = new SQLiteCommand(cnn);
-                mycommand.CommandText = sql;
-                object value = mycommand.ExecuteScalar();
-                cnn.Close();
-                if (value != null)
+                using (SQLiteCommand mycommand = new SQLiteCommand(sql,cnn))
                 {
-                    return value.ToString();
-                }
-                else
-                {
-                    return "";
+                    object value = mycommand.ExecuteScalar();
+                    if (value != null)
+                    {
+                        return value.ToString();
+                    }
+                    else
+                    {
+                        return "";
+                    }
                 }
             }
             catch (Exception e)
@@ -246,7 +252,6 @@ namespace BatchDataEntry.Helpers
             finally
             {
                 cnn.Close();
-                cnn.Dispose();
             }
         }
 
@@ -513,6 +518,7 @@ namespace BatchDataEntry.Helpers
 
             }
             sqlCmd.Append(")");
+            logger.Info("Query creazione tabella docuemnti: " + sqlCmd.ToString());
 #if DEBUG
             Console.WriteLine(sqlCmd);
 #endif
@@ -748,30 +754,33 @@ namespace BatchDataEntry.Helpers
         public override Batch GetBatchById(int id)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT * FROM Batch WHERE Id = {0}", id);
+            string sql = string.Format("SELECT * FROM Batch WHERE Id = @Id");
+            Batch b = new Batch();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                Batch b = new Batch();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    b.Id = Convert.ToInt32(reader["Id"]);
-                    b.Nome = Convert.ToString(reader["Nome"]);
-                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
-                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
-                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
-                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
-                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
-                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
-                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
-                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
-                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
-                }
-                reader.Close();
+                    myCmd.Parameters.AddWithValue("@Id", id);
+
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        b.Id = Convert.ToInt32(reader["Id"]);
+                        b.Nome = Convert.ToString(reader["Nome"]);
+                        b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                        b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                        b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                        b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                        b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                        b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                        b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                        b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                        b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                        b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                    }
+                    reader.Close();
+                }               
                 return b;
             }
             catch (Exception e)
@@ -788,29 +797,31 @@ namespace BatchDataEntry.Helpers
         public override Campo GetCampoById(int id)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT * FROM Campo WHERE Id = {0}", id);
+            string sql = "SELECT * FROM Campo WHERE Id = @Id";
+            Campo c = new Campo();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                Campo c = new Campo();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    c.Id = Convert.ToInt32(reader["Id"]);
-                    c.Nome = Convert.ToString(reader["Nome"]);
-                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
-                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
-                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
-                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
-                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
-                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
-                }
-                reader.Close();
+                    myCmd.Parameters.AddWithValue("@Id", id);
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        c.Id = Convert.ToInt32(reader["Id"]);
+                        c.Nome = Convert.ToString(reader["Nome"]);
+                        c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                        c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                        c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                        c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                        c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
+                        c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
+                        c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                        c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                        c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
+                    }
+                    reader.Close();
+                }                  
                 return c;
             }
             catch (Exception e)
@@ -827,25 +838,27 @@ namespace BatchDataEntry.Helpers
         public override Modello GetModelloById(int id)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT * FROM Modello WHERE Id = {0}", id);
+            string sql = "SELECT * FROM Modello WHERE Id = @Id";
+            Modello m = new Modello();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                Modello m = new Modello();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    m.Id = Convert.ToInt32(reader["Id"]);
-                    m.Nome = Convert.ToString(reader["Nome"]);
-                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
-                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
-                    m.Separatore = Convert.ToString(reader["Separatore"]);
-                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
-                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                    myCmd.Parameters.AddWithValue("@Id", id);
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        m.Id = Convert.ToInt32(reader["Id"]);
+                        m.Nome = Convert.ToString(reader["Nome"]);
+                        m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                        m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                        m.Separatore = Convert.ToString(reader["Separatore"]);
+                        m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                        m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                    }
+                    reader.Close();
                 }
-                reader.Close();
                 return m;
             }
             catch (Exception e)
@@ -862,32 +875,34 @@ namespace BatchDataEntry.Helpers
         public Dictionary<int, string> GetDocumento(int id)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT * FROM Documenti WHERE Id = {0}", id);
+            string sql = "SELECT * FROM Documenti WHERE Id = @Id";
+            Dictionary<int, string> doc = new Dictionary<int, string>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                Dictionary<int, string> doc = new Dictionary<int, string>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    int i = 0;
-                    doc.Add(i, Convert.ToString(reader["Id"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["FileName"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["Path"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
-                    i++;
-
-                    for (int z = i; z < reader.FieldCount; z++)
+                    myCmd.Parameters.AddWithValue("@Id", id);
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
                     {
-                        doc.Add(z, Convert.ToString(reader[z]));
+                        int i = 0;
+                        doc.Add(i, Convert.ToString(reader["Id"]));
+                        i++;
+                        doc.Add(i, Convert.ToString(reader["FileName"]));
+                        i++;
+                        doc.Add(i, Convert.ToString(reader["Path"]));
+                        i++;
+                        doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
+                        i++;
+
+                        for (int z = i; z < reader.FieldCount; z++)
+                        {
+                            doc.Add(z, Convert.ToString(reader[z]));
+                        }
                     }
+                    reader.Close();
                 }
-                reader.Close();
                 return doc;
             }
             catch (Exception e)
@@ -909,30 +924,32 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    Dictionary<int, string> doc = new Dictionary<int, string>();
-                    int i = 0;
-                    doc.Add(i, Convert.ToString(reader["Id"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["FileName"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["Path"]));
-                    i++;
-                    doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
-                    i++;
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
 
-                    for (int z = i; z < reader.FieldCount; z++)
+                    while (reader.Read())
                     {
-                        doc.Add(z, Convert.ToString(reader[z]));
+                        Dictionary<int, string> doc = new Dictionary<int, string>();
+                        int i = 0;
+                        doc.Add(i, Convert.ToString(reader["Id"]));
+                        i++;
+                        doc.Add(i, Convert.ToString(reader["FileName"]));
+                        i++;
+                        doc.Add(i, Convert.ToString(reader["Path"]));
+                        i++;
+                        doc.Add(i, Convert.ToString(reader["isIndicizzato"]));
+                        i++;
 
+                        for (int z = i; z < reader.FieldCount; z++)
+                        {
+                            doc.Add(z, Convert.ToString(reader[z]));
+
+                        }
+                        ret.Add(doc);
                     }
-                    ret.Add(doc);
-                }
-                reader.Close();
+                    reader.Close();
+                }  
                 return ret;
             }
             catch (Exception e)
@@ -949,18 +966,19 @@ namespace BatchDataEntry.Helpers
         public List<AbsSuggestion> GetAutocompleteList(int column)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT Valore FROM Autocompletamento WHERE Colonna = {0}", column);
+            string sql = "SELECT Valore FROM Autocompletamento WHERE Colonna = @column";
+            var suggestions = new List<AbsSuggestion>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                var suggestions = new List<AbsSuggestion>();
+                using(SQLiteCommand myCmd = new SQLiteCommand(sql, cnn)) {
+                    myCmd.Parameters.AddWithValue("@column", column);
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                        suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader["Valore"])));
 
-                while (reader.Read())
-                    suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader["Valore"])));
-
-                reader.Close();
+                    reader.Close();
+                }
                 return suggestions;
             }
             catch (Exception e)
@@ -977,18 +995,22 @@ namespace BatchDataEntry.Helpers
         public ObservableCollection<AbsSuggestion> GetAutocompleteListOb(int column)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            string sql = string.Format("SELECT Valore FROM Autocompletamento WHERE Colonna = {0}", column);
+            string sql = "SELECT Valore FROM Autocompletamento WHERE Colonna = @column";
+            var suggestions = new ObservableCollection<AbsSuggestion>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                var suggestions = new ObservableCollection<AbsSuggestion>();
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
+                {
+                    myCmd.Parameters.AddWithValue("@column", column);
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    
+                    while (reader.Read())
+                        suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader["Valore"])));
 
-                while (reader.Read())
-                    suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader["Valore"])));
-
-                reader.Close();
+                    reader.Close();
+                }
+                   
                 return suggestions;
             }
             catch (Exception e)
@@ -1006,32 +1028,34 @@ namespace BatchDataEntry.Helpers
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Batch";
+            ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    Batch b = new Batch();
-                    b.Id = Convert.ToInt32(reader["Id"]);
-                    b.Nome = Convert.ToString(reader["Nome"]);
-                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
-                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
-                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
-                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
-                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
-                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
-                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
-                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
-                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
-                    batches.Add(b);
-                }
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
 
-                reader.Close();
+                    while (reader.Read())
+                    {
+                        Batch b = new Batch();
+                        b.Id = Convert.ToInt32(reader["Id"]);
+                        b.Nome = Convert.ToString(reader["Nome"]);
+                        b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                        b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                        b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                        b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                        b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                        b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                        b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                        b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                        b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                        b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                        batches.Add(b);
+                    }
+
+                    reader.Close();
+                }      
                 return batches;
             }
             catch (Exception e)
@@ -1049,24 +1073,25 @@ namespace BatchDataEntry.Helpers
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Documenti";
+            List<Document> docs = new List<Document>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                List<Document> docs = new List<Document>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    Document doc = new Document();
-                    doc.Id = Convert.ToInt32(reader["Id"]);
-                    doc.FileName = Convert.ToString(reader["FileName"]);
-                    doc.Path = Convert.ToString(reader["Path"]);
-                    doc.IsIndexed = Convert.ToBoolean(reader["isIndicizzato"]);
-                    docs.Add(doc);
-                }
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Document doc = new Document();
+                        doc.Id = Convert.ToInt32(reader["Id"]);
+                        doc.FileName = Convert.ToString(reader["FileName"]);
+                        doc.Path = Convert.ToString(reader["Path"]);
+                        doc.IsIndexed = Convert.ToBoolean(reader["isIndicizzato"]);
+                        docs.Add(doc);
+                    }
 
-                reader.Close();
+                    reader.Close();
+                } 
                 return docs;
             }
             catch (Exception e)
@@ -1088,32 +1113,33 @@ namespace BatchDataEntry.Helpers
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    FidelityClient record = new FidelityClient();
-                    record.FileName = Convert.ToString(reader["FileName"]);
-                    record.Card = Convert.ToString(reader["FidelityCard"]);
-                    record.Cognome = Convert.ToString(reader["Cognome"]);
-                    record.Nome = Convert.ToString(reader["Nome"]);
-                    record.Indirizzo = Convert.ToString(reader["Indirizzo"]);
-                    record.Civico = Convert.ToString(reader["Civico"]);
-                    record.Localita = Convert.ToString(reader["Localita"]);
-                    record.Provincia = Convert.ToString(reader["Provincia"]);
-                    record.Cap = Convert.ToString(reader["Cap"]);
-                    record.Prefisso = Convert.ToString(reader["Prefisso"]);
-                    record.Telefono = Convert.ToString(reader["Telefono"]);
-                    record.Cellulare = Convert.ToString(reader["Cellulare"]);
-                    record.Email = Convert.ToString(reader["Email"]);
-                    record.DataNascita = Convert.ToString(reader["DataDiNascita"]);
-                    record.Luogo = Convert.ToString(reader["Luogo"]);
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
 
-                    res.Add(record);
+                    while (reader.Read())
+                    {
+                        FidelityClient record = new FidelityClient();
+                        record.FileName = Convert.ToString(reader["FileName"]);
+                        record.Card = Convert.ToString(reader["FidelityCard"]);
+                        record.Cognome = Convert.ToString(reader["Cognome"]);
+                        record.Nome = Convert.ToString(reader["Nome"]);
+                        record.Indirizzo = Convert.ToString(reader["Indirizzo"]);
+                        record.Civico = Convert.ToString(reader["Civico"]);
+                        record.Localita = Convert.ToString(reader["Localita"]);
+                        record.Provincia = Convert.ToString(reader["Provincia"]);
+                        record.Cap = Convert.ToString(reader["Cap"]);
+                        record.Prefisso = Convert.ToString(reader["Prefisso"]);
+                        record.Telefono = Convert.ToString(reader["Telefono"]);
+                        record.Cellulare = Convert.ToString(reader["Cellulare"]);
+                        record.Email = Convert.ToString(reader["Email"]);
+                        record.DataNascita = Convert.ToString(reader["DataDiNascita"]);
+                        record.Luogo = Convert.ToString(reader["Luogo"]);
+
+                        res.Add(record);
+                    }
+                    reader.Close();
                 }
-
-                reader.Close();
             }
             catch (Exception e)
             {
@@ -1123,32 +1149,32 @@ namespace BatchDataEntry.Helpers
             {
                 cnn.Close();
             }
-
             return res;
         }
 
         public List<Document> GetDocumentsListPartial(string query)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-            
+            List<Document> docs = new List<Document>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(query, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                List<Document> docs = new List<Document>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(query, cnn))
                 {
-                    Document doc = new Document();
-                    doc.Id = Convert.ToInt32(reader["Id"]);
-                    doc.FileName = Convert.ToString(reader["FileName"]);
-                    doc.Path = Convert.ToString(reader["Path"]);
-                    doc.IsIndexed = Convert.ToBoolean(reader["isIndicizzato"]);
-                    docs.Add(doc);
-                }
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
 
-                reader.Close();
+                    while (reader.Read())
+                    {
+                        Document doc = new Document();
+                        doc.Id = Convert.ToInt32(reader["Id"]);
+                        doc.FileName = Convert.ToString(reader["FileName"]);
+                        doc.Path = Convert.ToString(reader["Path"]);
+                        doc.IsIndexed = Convert.ToBoolean(reader["isIndicizzato"]);
+                        docs.Add(doc);
+                    }
+
+                    reader.Close();
+                }    
                 return docs;
             }
             catch (Exception e)
@@ -1166,31 +1192,33 @@ namespace BatchDataEntry.Helpers
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Campo";
+            ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    Campo c = new Campo();
-                    c.Id = Convert.ToInt32(reader["Id"]);
-                    c.Nome = Convert.ToString(reader["Nome"]);
-                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
-                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
-                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
-                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
-                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
-                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
-                    campi.Add(c);
-                }
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
 
-                reader.Close();
+                    while (reader.Read())
+                    {
+                        Campo c = new Campo();
+                        c.Id = Convert.ToInt32(reader["Id"]);
+                        c.Nome = Convert.ToString(reader["Nome"]);
+                        c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                        c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                        c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                        c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                        c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
+                        c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
+                        c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                        c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                        c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
+                        campi.Add(c);
+                    }
+
+                    reader.Close();
+                }        
                 return campi;
             }
             catch (Exception e)
@@ -1208,27 +1236,28 @@ namespace BatchDataEntry.Helpers
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Modello";
+            ObservableCollection<Modello> models = new ObservableCollection<Modello>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                ObservableCollection<Modello> models = new ObservableCollection<Modello>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    Modello m = new Modello();
-                    m.Id = Convert.ToInt32(reader["Id"]);
-                    m.Nome = Convert.ToString(reader["Nome"]);
-                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
-                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
-                    m.Separatore = Convert.ToString(reader["Separatore"]);
-                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
-                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
-                    models.Add(m);
-                }
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
 
-                reader.Close();
+                    while (reader.Read())
+                    {
+                        Modello m = new Modello();
+                        m.Id = Convert.ToInt32(reader["Id"]);
+                        m.Nome = Convert.ToString(reader["Nome"]);
+                        m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                        m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                        m.Separatore = Convert.ToString(reader["Separatore"]);
+                        m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                        m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                        models.Add(m);
+                    }
+                    reader.Close();
+                }                
                 return models;
             }
             catch (Exception e)
@@ -1245,33 +1274,33 @@ namespace BatchDataEntry.Helpers
         public override ObservableCollection<Batch> BatchQuery(string query)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-
+            ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(query, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                ObservableCollection<Batch> batches = new ObservableCollection<Batch>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(query, cnn))
                 {
-                    Batch b = new Batch();
-                    b.Id = Convert.ToInt32(reader["Id"]);
-                    b.Nome = Convert.ToString(reader["Nome"]);
-                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
-                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
-                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
-                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
-                    b.NumPages = Convert.ToInt32(reader["NumPages"]);
-                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
-                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
-                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
-                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
-                    batches.Add(b);
-                }
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Batch b = new Batch();
+                        b.Id = Convert.ToInt32(reader["Id"]);
+                        b.Nome = Convert.ToString(reader["Nome"]);
+                        b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                        b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                        b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                        b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                        b.NumDoc = Convert.ToInt32(reader["NumDoc"]);
+                        b.NumPages = Convert.ToInt32(reader["NumPages"]);
+                        b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                        b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                        b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                        b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                        batches.Add(b);
+                    }
 
-                reader.Close();
+                    reader.Close();
+                } 
                 return batches;
             }
             catch (Exception e)
@@ -1288,31 +1317,32 @@ namespace BatchDataEntry.Helpers
         public override ObservableCollection<Campo> CampoQuery(string query)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+            ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(query, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                ObservableCollection<Campo> campi = new ObservableCollection<Campo>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(query, cnn))
                 {
-                    Campo c = new Campo();
-                    c.Id = Convert.ToInt32(reader["Id"]);
-                    c.Nome = Convert.ToString(reader["Nome"]);
-                    c.Posizione = Convert.ToInt32(reader["Posizione"]);
-                    c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
-                    c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
-                    c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
-                    c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
-                    c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
-                    c.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
-                    c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
-                    campi.Add(c);
-                }
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Campo c = new Campo();
+                        c.Id = Convert.ToInt32(reader["Id"]);
+                        c.Nome = Convert.ToString(reader["Nome"]);
+                        c.Posizione = Convert.ToInt32(reader["Posizione"]);
+                        c.SalvaValori = Convert.ToBoolean(reader["SalvaValori"]);
+                        c.ValorePredefinito = Convert.ToString(reader["ValorePredefinito"]);
+                        c.IndicePrimario = Convert.ToBoolean(reader["IndicePrimario"]);
+                        c.IndiceSecondario = Convert.ToBoolean(reader["IndiceSecondario"]);
+                        c.TipoCampo = (EnumTypeOfCampo)Convert.ToInt32(reader["TipoCampo"]);
+                        c.IdModello = Convert.ToInt32(reader["IdModello"]);
+                        c.Riproponi = Convert.ToBoolean(reader["Riproponi"]);
+                        c.IsDisabilitato = Convert.ToBoolean(reader["Disabilitato"]);
+                        campi.Add(c);
+                    }
 
-                reader.Close();
+                    reader.Close();
+                }    
                 return campi;
             }
             catch (Exception e)
@@ -1329,28 +1359,27 @@ namespace BatchDataEntry.Helpers
         public override ObservableCollection<Modello> ModelloQuery(string query)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-
+            ObservableCollection<Modello> models = new ObservableCollection<Modello>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(query, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                ObservableCollection<Modello> models = new ObservableCollection<Modello>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(query, cnn))
                 {
-                    Modello m = new Modello();
-                    m.Id = Convert.ToInt32(reader["Id"]);
-                    m.Nome = Convert.ToString(reader["Nome"]);
-                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
-                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
-                    m.Separatore = Convert.ToString(reader["Separatore"]);
-                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
-                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
-                    models.Add(m);
-                }
-
-                reader.Close();
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Modello m = new Modello();
+                        m.Id = Convert.ToInt32(reader["Id"]);
+                        m.Nome = Convert.ToString(reader["Nome"]);
+                        m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                        m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                        m.Separatore = Convert.ToString(reader["Separatore"]);
+                        m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                        m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                        models.Add(m);
+                    }
+                    reader.Close();
+                }      
                 return models;
             }
             catch (Exception e)
@@ -1368,27 +1397,28 @@ namespace BatchDataEntry.Helpers
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             string sql = "SELECT * FROM Modello";
+            List<Modello> models = new List<Modello>();
             try
             {
                 cnn.Open();
-                SQLiteCommand myCmd = new SQLiteCommand(sql, cnn);
-                SQLiteDataReader reader = myCmd.ExecuteReader();
-                List<Modello> models = new List<Modello>();
-
-                while (reader.Read())
+                using (SQLiteCommand myCmd = new SQLiteCommand(sql, cnn))
                 {
-                    Modello m = new Modello();
-                    m.Id = Convert.ToInt32(reader["Id"]);
-                    m.Nome = Convert.ToString(reader["Nome"]);
-                    m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
-                    m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
-                    m.Separatore = Convert.ToString(reader["Separatore"]);
-                    m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
-                    m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
-                    models.Add(m);
-                }
+                    SQLiteDataReader reader = myCmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Modello m = new Modello();
+                        m.Id = Convert.ToInt32(reader["Id"]);
+                        m.Nome = Convert.ToString(reader["Nome"]);
+                        m.OrigineCsv = Convert.ToBoolean(reader["OrigineCsv"]);
+                        m.PathFileCsv = Convert.ToString(reader["PathFileCsv"]);
+                        m.Separatore = Convert.ToString(reader["Separatore"]);
+                        m.StartFocusColumn = Convert.ToInt32(reader["FocusColumn"]);
+                        m.CsvColumn = Convert.ToInt32(reader["CsvColumn"]);
+                        models.Add(m);
+                    }
 
-                reader.Close();
+                    reader.Close();
+                } 
                 return models.AsEnumerable();
             }
             catch (Exception e)

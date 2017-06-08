@@ -218,15 +218,13 @@ namespace BatchDataEntry.Helpers
             }
             StringBuilder sqlTxt = new StringBuilder();
             sqlTxt.AppendFormat("UPDATE {0} SET {1} WHERE {2};", table, frmtVals.ToString(), where);
-
-            SqlCommand cmdUpdate = new SqlCommand(sqlTxt.ToString(), this.cnn)
-            {
-                CommandType = System.Data.CommandType.Text
-            };
             try
             {
                 cnn.Open();
-                cmdUpdate.ExecuteNonQuery();
+                using (SqlCommand cmdUpdate = new SqlCommand(sqlTxt.ToString(), this.cnn))
+                {
+                    cmdUpdate.ExecuteNonQuery();
+                }
             }
             catch (Exception e)
             {
@@ -281,12 +279,13 @@ namespace BatchDataEntry.Helpers
         public override void DeleteReference(string query)
         {
             if (cnn == null || string.IsNullOrWhiteSpace(query)) return;
-            SqlCommand cmdInsert = new SqlCommand(query, this.cnn);
-
             try
             {
                 cnn.Open();
-                cmdInsert.ExecuteNonQuery();
+                using(SqlCommand cmdInsert = new SqlCommand(query, this.cnn))
+                {
+                    cmdInsert.ExecuteNonQuery();
+                }
             }
             catch (Exception e)
             {
@@ -336,31 +335,31 @@ namespace BatchDataEntry.Helpers
         
         public override Batch GetBatchById(int id) {
             if (cnn == null) return null;
-            string sql = string.Format("SELECT * FROM Batch WHERE Id = {0}", id);
+            string sql = "SELECT * FROM Batch WHERE Id = @id";
+            Batch b = new Batch();
 
-            SqlCommand cmd = new SqlCommand(sql, cnn)
-            {
-                CommandType = System.Data.CommandType.Text
-            };
             try
             {
                 cnn.Open();
-                SqlDataReader reader = cmd.ExecuteReader();
-                Batch b = new Batch();
-                while (reader.Read())
+                using (SqlCommand cmd = new SqlCommand(sql, cnn))
                 {
-                    b.Id = Convert.ToInt32(reader["Id"]);
-                    b.Nome = Convert.ToString(reader["Nome"]);
-                    b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
-                    b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
-                    b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
-                    b.IdModello = Convert.ToInt32(reader["IdModello"]);
-                    b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
-                    b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
-                    b.PatternNome = Convert.ToString(reader["PatternNome"]);
-                    b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
-                }
-                reader.Close();
+                    cmd.Parameters.AddWithValue("@id", id);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        b.Id = Convert.ToInt32(reader["Id"]);
+                        b.Nome = Convert.ToString(reader["Nome"]);
+                        b.TipoFile = (TipoFileProcessato)Convert.ToInt32(reader["TipoFile"]);
+                        b.DirectoryInput = Convert.ToString(reader["DirectoryInput"]);
+                        b.DirectoryOutput = Convert.ToString(reader["DirectoryOutput"]);
+                        b.IdModello = Convert.ToInt32(reader["IdModello"]);
+                        b.DocCorrente = Convert.ToInt32(reader["DocCorrente"]);
+                        b.UltimoIndicizzato = Convert.ToInt32(reader["UltimoIndicizzato"]);
+                        b.PatternNome = Convert.ToString(reader["PatternNome"]);
+                        b.UltimoDocumentoEsportato = Convert.ToString(reader["UltimoDocumentoEsportato"]);
+                    }
+                    reader.Close();
+                } 
                 return b;
             }
             catch (Exception e)
