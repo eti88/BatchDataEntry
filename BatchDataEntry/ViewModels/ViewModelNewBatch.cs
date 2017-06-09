@@ -405,8 +405,6 @@ namespace BatchDataEntry.ViewModels
                 }
                 List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
                 files = Directory.GetFiles(b.DirectoryInput, "*.tif").ToList();
-                if (files.Count == 0) return false;
-                files = files.CustomSort().ToList();
 
                 // Recuper l'ultimo indice inserto se il batch è già esistente
                 int lastId = 0;
@@ -444,19 +442,27 @@ namespace BatchDataEntry.ViewModels
                             {
                                 string newname = string.Format("{0}{1}.pdf", b.PatternNome, doc.FileName);
                                 File.Move(doc.Path, Path.Combine(CurrentBatch.DirectoryOutput, newname));
+                                doc.Path = Path.Combine(CurrentBatch.DirectoryOutput, newname);
                             }
                             else
                             {
                                 string newname = string.Format("{0}{1}.tif", b.PatternNome, doc.FileName);
                                 File.Move(doc.Path, Path.Combine(CurrentBatch.DirectoryOutput, newname));
+                                doc.Path = Path.Combine(CurrentBatch.DirectoryOutput, newname);
                             }
                         }
                         else
                         {
                             if (b.TipoFile == TipoFileProcessato.Pdf)
+                            {
                                 File.Move(doc.Path, Path.Combine(CurrentBatch.DirectoryOutput, Path.Combine(CurrentBatch.DirectoryOutput, doc.FileName + ".pdf")));
+                                doc.Path = Path.Combine(CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
+                            }  
                             else
+                            {
                                 File.Move(doc.Path, Path.Combine(CurrentBatch.DirectoryOutput, Path.Combine(CurrentBatch.DirectoryOutput, doc.FileName + ".tif")));
+                                doc.Path = Path.Combine(CurrentBatch.DirectoryOutput, doc.FileName + ".tif");
+                            }
                         }
                     }
                     else
@@ -464,20 +470,31 @@ namespace BatchDataEntry.ViewModels
                         if (!string.IsNullOrEmpty(CurrentBatch.PatternNome))
                         {
                             if (b.TipoFile == TipoFileProcessato.Pdf)
+                            {
                                 Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
-                            else
+                                doc.Path = Path.Combine(CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
+                            }                         
+                            else{
                                 Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".tif"));
+                                doc.Path = Path.Combine(CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".tif"));
+                            }  
                         }
                         else
                         {
                             if (b.TipoFile == TipoFileProcessato.Pdf)
+                            {
                                 Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
-                            else
+                                doc.Path = Path.Combine(CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
+                            } 
+                            else{
                                 Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".tif");
+                                doc.Path = Path.Combine(CurrentBatch.DirectoryOutput, doc.FileName + ".tif");
+                            }    
                         }
                     }
 
                     dbcache.InsertRecordDocumento(b, doc);
+                    lastId++;
                     backgroundWorker.ReportProgress(x);
                 }
             }
@@ -567,7 +584,7 @@ namespace BatchDataEntry.ViewModels
                 // Il nome del file corrisponde all'index (primario) impostato nel modello!
                 string cleanValue = cells[indexColumn].Replace("'", "");
                 string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(cleanValue));
-                if (dbcache.Count(queryCheck) == 0) return null;
+                if (dbcache.Count(queryCheck) > 0) return null;
                 doc.FileName = cleanValue;
 
                 doc.FileName = cells[indexColumn];
@@ -611,7 +628,7 @@ namespace BatchDataEntry.ViewModels
                 //ean;filename
                 string codiceEAN = (cells[0].Length == 13) ? cells[0] : ("0" + cells[0]);
                 string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(codiceEAN));
-                if (dbcache.Count(queryCheck) == 0) return null;
+                if (dbcache.Count(queryCheck) > 0) return null;
                 doc.FileName = codiceEAN; // Il documento prende il nome del codice ean
 
                 string absPath = Path.Combine(CurrentBatch.DirectoryInput, cells[1].Contains(".tif") ? cells[1] : String.Format("{0}.tif", cells[1]));
