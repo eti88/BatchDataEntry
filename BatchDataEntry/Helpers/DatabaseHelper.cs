@@ -518,10 +518,10 @@ namespace BatchDataEntry.Helpers
 
             }
             sqlCmd.Append(")");
-            logger.Info("Query creazione tabella docuemnti: " + sqlCmd.ToString());
-#if DEBUG
+            
+            #if DEBUG
             Console.WriteLine(sqlCmd);
-#endif
+            #endif
             try
             {
                 this.ExecuteNonQuery(sqlCmd.ToString());

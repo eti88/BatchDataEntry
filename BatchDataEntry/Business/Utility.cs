@@ -136,7 +136,7 @@ namespace BatchDataEntry.Business
             return Math.Pow(number, 3);
         }
 
-        public static void CopiaPdf(string source_file, string destination_path, string newFileName)
+        public static void CopiaFile(string source_file, string destination_path, string newFileName)
         {
             string destination = Path.Combine(destination_path, newFileName);
             if(!File.Exists(destination))
@@ -176,7 +176,7 @@ namespace BatchDataEntry.Business
 
         public static bool IsValidTelephone(string num)
         {
-            return IsNumeric(num) && num.Length == 10; //TODO: inserire unittest
+            return IsNumeric(num) && num.Length == 10;
         }
 
         public static bool IsValidEmail(string email)

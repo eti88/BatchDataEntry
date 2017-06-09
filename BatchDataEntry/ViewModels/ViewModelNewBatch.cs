@@ -260,18 +260,29 @@ namespace BatchDataEntry.ViewModels
             List<string> files = new List<string>();
             if (CurrentBatch.Applicazione.Id == 0 && dbdata == null) CurrentBatch.LoadModel(dbdata);
             else if (CurrentBatch.Applicazione.Id == 0) CurrentBatch.LoadModel(dbdata);
-            if (!CurrentBatch.Applicazione.OrigineCsv) {
-                MessageBox.Show("Nessun Csv specificato!\nGenerazione Db vuoto...");
-                return false;
-            }
             if (CurrentBatch.Applicazione.Campi.Count == 0) CurrentBatch.Applicazione.LoadCampi(dbdata);
+
+            /*
+             Modificare modalità normale e eurborico
+                - normale
+                - eurobrico: incompleto
+             */
 
             // Genera il file di cache partendo dal file csv invece che dalla lista all'interno della cartella.
             if (IndexType.Contains("Automatica"))
             {
+                /*
+                 Per funzionare richiede un Csv in input e popola il database in base al contenuto del csv
+                 */
                 #if DEBUG
                 Console.WriteLine(@"### USO GENERAZIONE Automatica ###");
                 #endif
+                if (!CurrentBatch.Applicazione.OrigineCsv)
+                {
+                    logger.Error("Richiesto file CSV per la modalità Automatica");
+                    return false;
+                }
+                    
                 int indexColumn = 0;
 
                 for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)
@@ -285,29 +296,48 @@ namespace BatchDataEntry.ViewModels
                 
                 List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
                 MaxValue = lines.Count;
-                List<Document> documents = new List<Document>();
+
                 for (int i = 0; i < lines.Count; i++)
                 {
                     // Creo il documento
                     var doc = GenerateDocument(lines[i], i, b, dbcache, indexColumn);
-                    if (doc == null) continue;
-                    documents.Add(doc);
-                    if (doc.Equals(new Document())) return false;
+                    if (doc == null)
+                    {
+                        logger.Error("Documento " + i + " errore generazione [null]");
+                        continue;
+                    }
+                    else if (doc.Equals(new Document()))
+                    {
+                        logger.Warn("Il documento " + i + " risulta un documento vuoto");
+                    }
+                                    
                     // Copia del pdf corrispondente nella cartella di output
                     if (!string.IsNullOrEmpty(CurrentBatch.PatternNome))
-                        Utility.CopiaPdf(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
+                    {
+                        if(b.TipoFile == TipoFileProcessato.Pdf)
+                            Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
+                        else
+                            Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".tif"));
+                    }
                     else
-                        Utility.CopiaPdf(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
-                }
-
-                for (int i = 0; i < documents.Count; i++)
-                {
-                    dbcache.InsertRecordDocumento(b, documents[i]);
+                    {
+                        if(b.TipoFile == TipoFileProcessato.Pdf)
+                            Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
+                        else
+                            Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".tif");
+                    }
+                        
+                    dbcache.InsertRecordDocumento(b, doc);
                     backgroundWorker.ReportProgress(i);
                 }
             }
             else if (IndexType.Contains("Manuale"))
             {
+                /*
+                 La modalità manuale: Controlla la directory sorgente popola in database di cache in base ai file
+                 TIFF o PDF (in base alla selezione).
+                 */
+
                 #if DEBUG
                 Console.WriteLine(@"### USO GENERAZIONE Manuale ###");
                 #endif
@@ -363,7 +393,8 @@ namespace BatchDataEntry.ViewModels
                     backgroundWorker.ReportProgress(i);
                     lastId++;
                 }
-            }else if (IndexType.Contains("Eurobrico")) {
+            }
+            else if (IndexType.Contains("Eurobrico")) {
                 #if DEBUG
                 Console.WriteLine(@"### USO GENERAZIONE Eurobrico ###");
                 #endif
@@ -372,7 +403,6 @@ namespace BatchDataEntry.ViewModels
                     MessageBox.Show("Il file Csv deve essere composto da codice ean;filename");
                     return false;
                 }
-
                 List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
                 files = Directory.GetFiles(b.DirectoryInput, "*.tif").ToList();
                 if (files.Count == 0) return false;
@@ -391,38 +421,64 @@ namespace BatchDataEntry.ViewModels
                 }
 
                 if (files.Count() != lines.Count()) MessageBox.Show(string.Format("Attenzione! File csv contine {0} records, Mentre la directory contiene {1} tif", lines.Count(), files.Count()));
-                /*
-			    aggiungere il codice ean nel modello e sostituire nome file es 00000001.tf con codiceEAN.tif 
-                */
-
-                for (int i = 0; i < files.Count; i++)
+                
+                for (int x = 0; x < lines.Count(); x++)
                 {
-                    string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(files[i]));
-                    if (dbcache.Count(queryCheck) > 0) continue;    // il file esiste già nel db
-
-                    string[] cells = lines[i].Split(CurrentBatch.Applicazione.Separatore[0]);
-                    if (cells.Count() != 2)
+                    var doc = GenerateDocumentEurob(lines[x], lastId, b, dbcache);
+                    if (doc == null)
                     {
-                        MessageBox.Show("Il file Csv deve essere composto da codice ean;filename");
-                        return false;
+                        logger.Error("Documento " + x + " errore generazione [null]");
+                        continue;
+                    }
+                    else if(doc.Equals(new Document()))
+                    {
+                        logger.Warn("Il documento " + x + " risulta un documento vuoto");
                     }
 
-                    string ean = "0" + cells[0]; // normalizza il codice
-                    string filename = cells[1];
-
-                    if(!filename.ToLower().EndsWith(".tif"))
+                    // Copia il file nella directory di output con il nome del file == codice ean
+                    if(b.DirectoryInput.Equals(b.DirectoryOutput))
                     {
-                        filename = string.Format("{0}.tif", filename);
+                        if (!string.IsNullOrEmpty(CurrentBatch.PatternNome))
+                        {
+                            if (b.TipoFile == TipoFileProcessato.Pdf)
+                            {
+                                string newname = string.Format("{0}{1}.pdf", b.PatternNome, doc.FileName);
+                                File.Move(doc.Path, Path.Combine(CurrentBatch.DirectoryOutput, newname));
+                            }
+                            else
+                            {
+                                string newname = string.Format("{0}{1}.tif", b.PatternNome, doc.FileName);
+                                File.Move(doc.Path, Path.Combine(CurrentBatch.DirectoryOutput, newname));
+                            }
+                        }
+                        else
+                        {
+                            if (b.TipoFile == TipoFileProcessato.Pdf)
+                                File.Move(doc.Path, Path.Combine(CurrentBatch.DirectoryOutput, Path.Combine(CurrentBatch.DirectoryOutput, doc.FileName + ".pdf")));
+                            else
+                                File.Move(doc.Path, Path.Combine(CurrentBatch.DirectoryOutput, Path.Combine(CurrentBatch.DirectoryOutput, doc.FileName + ".tif")));
+                        }
                     }
-
-                    // 
-                    File.Copy(Path.Combine(b.DirectoryInput, filename), Path.Combine(b.DirectoryOutput, string.Format("{0}.tif", ean)));
-                    // Genera documento
-                    Document doc = GenerateDocumentEuro(Path.Combine(b.DirectoryOutput, string.Format("{0}.tif", ean)), ean, lastId, b);
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(CurrentBatch.PatternNome))
+                        {
+                            if (b.TipoFile == TipoFileProcessato.Pdf)
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
+                            else
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".tif"));
+                        }
+                        else
+                        {
+                            if (b.TipoFile == TipoFileProcessato.Pdf)
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
+                            else
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".tif");
+                        }
+                    }
 
                     dbcache.InsertRecordDocumento(b, doc);
-                    backgroundWorker.ReportProgress(i);
-                    lastId++;
+                    backgroundWorker.ReportProgress(x);
                 }
             }
             else
@@ -430,7 +486,6 @@ namespace BatchDataEntry.ViewModels
                 MessageBox.Show("Metodo indicizzazione non selezionato");
                 return false;
             }
-    
             return true;
         }
 
@@ -539,33 +594,50 @@ namespace BatchDataEntry.ViewModels
             return doc;
         }
 
+        public Document GenerateDocumentEurob(string linerow, int i, Batch b, DatabaseHelper dbcache)
+        {
+            Document doc = new Document();
+            doc.Id = i + 1;
+            try
+            {
+                string[] cells = linerow.Split(';');
+
+                if (cells.Length != 2) // viene restituita la riga di partenza
+                {
+                    logger.Warn("Generazione documento alla linea " + i + " potrebbe generare errori.");
+                }
+
+                // Il nome del file corrisponde all'index (primario) impostato nel modello!
+                //ean;filename
+                string codiceEAN = (cells[0].Length == 13) ? cells[0] : ("0" + cells[0]);
+                string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(codiceEAN));
+                if (dbcache.Count(queryCheck) == 0) return null;
+                doc.FileName = codiceEAN; // Il documento prende il nome del codice ean
+
+                string absPath = Path.Combine(CurrentBatch.DirectoryInput, cells[1].Contains(".tif") ? cells[1] : String.Format("{0}.tif", cells[1]));
+                doc.Path = absPath;
+                doc.IsIndexed = false;
+                // Aggiungo il codice ean al documento
+                if (codiceEAN.Length != 13)
+                    logger.Warn("Codice ean con lunghezza diversa da 13");
+                doc.Voci.Add(Record.Create(b.Applicazione.Campi.ElementAt(0), 0, codiceEAN));
+            }
+            catch (Exception er)
+            {
+                logger.Error("### Init basato su file Csv esterno ### break at line: " + (i + 1));
+                logger.Error(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message));
+                ConsoleErrorPrint(string.Format("Error into string[] cells (Source Csv) [{0}] {1}", er.Source, er.Message), er);
+                throw er;
+            }
+            return doc;
+        }
+
         public Document GenerateDocument(string file, int id, Batch b)
         {
             Document doc = new Document();
             doc.Id = id + 1;
             doc.FileName = Path.GetFileNameWithoutExtension(file);
             doc.Path = file;
-            doc.IsIndexed = false;
-
-            if (!b.Applicazione.OrigineCsv)
-            {
-                for (int z = 0; z < b.Applicazione.Campi.Count; z++)
-                {
-                    string valore = (string.IsNullOrEmpty(b.Applicazione.Campi.ElementAt(z).ValorePredefinito))
-                        ? ""
-                        : b.Applicazione.Campi.ElementAt(z).ValorePredefinito;
-                    doc.Voci.Add(Record.Create(b.Applicazione.Campi.ElementAt(z), z, valore));
-                }
-            }
-            return doc;
-        }
-
-        public Document GenerateDocumentEuro(string file_out, string ean, int id, Batch b)
-        {
-            Document doc = new Document();
-            doc.Id = id + 1;
-            doc.FileName = ean;
-            doc.Path = file_out;
             doc.IsIndexed = false;
 
             if (!b.Applicazione.OrigineCsv)

@@ -289,9 +289,19 @@ namespace BatchDataEntry.ViewModels
             if (!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
             {
                 if (!string.IsNullOrEmpty(Batch.PatternNome))
-                    Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome, DocFile.FileName + ".pdf"));
+                {
+                    if (Batch.TipoFile == TipoFileProcessato.Pdf)
+                        Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome, DocFile.FileName + ".pdf"));
+                    else
+                        Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome, DocFile.FileName + ".tif"));
+                }
                 else
-                    Utility.CopiaPdf(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
+                {
+                    if (Batch.TipoFile == TipoFileProcessato.Pdf)
+                        Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
+                    else
+                        Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".tif");
+                }
             }
 
             MoveNextItem();

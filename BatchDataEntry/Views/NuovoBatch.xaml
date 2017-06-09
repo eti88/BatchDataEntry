@@ -6,6 +6,7 @@
         xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         xmlns:models="clr-namespace:BatchDataEntry.Models"
         xmlns:validators="clr-namespace:BatchDataEntry.Validators"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Nuovo Batch" Height="730" Width="450" MinHeight="730" Icon="/BatchDataEntry;component/Mesh-100.ico">
     <Window.Resources>
@@ -16,6 +17,9 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <system:String x:Key="ToolTipAuto">Popola il database di cache in base ai record presenti nel file csv. (non funziona se il csv non è impostato nel  modello)</system:String>
+        <system:String x:Key="ToolTipManual">Popola il database di cache in base ai file presenti nella directory di input.</system:String>
+        <system:String x:Key="ToolTipEuro">Richiede un file csv contente per ogni riga il codice ean e il nome del file.  (ean;filename)</system:String>
     </Window.Resources>
 
     <Grid>
@@ -91,9 +95,9 @@
                         <WrapPanel Grid.Column="0" Orientation="Vertical">
                             <Label Content="Tipo Indicizzazione" />
                             <ComboBox x:Name="comboBoxProcessingType" SelectedValue="{Binding IndexType, Mode=TwoWay}" Margin="10,0,10,10" Height="35" Width="180" VerticalAlignment="Top" VerticalContentAlignment="Center">
-                                <ComboBoxItem IsSelected="True">Automatica</ComboBoxItem>
-                                <ComboBoxItem>Manuale</ComboBoxItem>
-                                <ComboBoxItem>Eurobrico</ComboBoxItem>
+                                <ComboBoxItem IsSelected="True" ToolTip="{StaticResource ToolTipAuto}">Automatica</ComboBoxItem>
+                                <ComboBoxItem ToolTip="{StaticResource ToolTipManual}">Manuale</ComboBoxItem>
+                                <ComboBoxItem ToolTip="{StaticResource ToolTipEuro}">Eurobrico</ComboBoxItem>
                             </ComboBox>
                         </WrapPanel>
                         <WrapPanel Grid.Column="1" Orientation="Vertical">
