@@ -262,12 +262,6 @@ namespace BatchDataEntry.ViewModels
             else if (CurrentBatch.Applicazione.Id == 0) CurrentBatch.LoadModel(dbdata);
             if (CurrentBatch.Applicazione.Campi.Count == 0) CurrentBatch.Applicazione.LoadCampi(dbdata);
 
-            /*
-             Modificare modalità normale e eurborico
-                - normale
-                - eurobrico: incompleto
-             */
-
             // Genera il file di cache partendo dal file csv invece che dalla lista all'interno della cartella.
             if (IndexType.Contains("Automatica"))
             {

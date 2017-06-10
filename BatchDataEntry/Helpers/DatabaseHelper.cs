@@ -614,8 +614,6 @@ namespace BatchDataEntry.Helpers
                 bool r = Insert("Autocompletamento", values);
                 if (r)
                     return Convert.ToInt32(ExecuteScalar("SELECT MAX(Id) from Autocompletamento"));
-
-                return -1;
             }
             return -1;
         }

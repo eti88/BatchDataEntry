@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Abstracts;
-using BatchDataEntry.Business;
 
 namespace BatchDataEntry.Models
 {
@@ -46,11 +45,6 @@ namespace BatchDataEntry.Models
                     _path = value;
                 OnPropertyChanged("Path");
             }
-        }
-
-        public string TmpPath
-        {
-            get { return Utility.GetTmpPathFile(this.Path); }
         }
 
         private bool _isIndexed;
