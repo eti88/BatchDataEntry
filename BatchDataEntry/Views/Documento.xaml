@@ -21,6 +21,7 @@
     <Window.Resources>
         <providers:CsvSuggestionProvider x:Key="CsvSuggestionProvider"/>
         <helpers:PassThroughConverter  x:Key="passThroughConverter"/>
+        <helpers:ImageToBitmapSourceConverter x:Key="ImageConverter"/>
         <DataTemplate x:Key="SuggestionTemplateSingleColumn">
             <Grid>
                 <StackPanel Orientation="Horizontal">
@@ -136,16 +137,61 @@ AncestorType={x:Type Window}}, Path=DataContext.PdfWrapper, Mode=TwoWay, UpdateS
         </DataTemplate>
         <DataTemplate x:Key="TiffControlViewer">
             <Image x:Name="ImageDocumentCtrl"  Source="{Binding RelativeSource={RelativeSource FindAncestor, 
-AncestorType={x:Type Window}}, Path=DataContext.DocFile.Path, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False">
+AncestorType={x:Type Window}}, Path=DataContext.Image, Converter={StaticResource ImageConverter}, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False">
             </Image>
         </DataTemplate>
         <DataTemplate x:Key="DefaultControlViewer">
             <StackPanel Background="DarkGray">
-                <TextBox Text="Errore nella selezione del controllo per visualizzare il documentom, sicuro di avere impostato il tipo di file nel Batch?" Foreground="White" Margin="100" FontSize="20"/>
+                <TextBlock Text="Errore" Foreground="White" TextAlignment="Center"  Margin="100" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ToolbarDefaultCtrl">
+            <StackPanel Background="DarkGray">
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ToolbarPdfCtrl">
+            <StackPanel Orientation="Horizontal" Focusable="False">
+                <Button Height="26" Width="26" Background="White" 
+                        BorderBrush="Black" BorderThickness="1" 
+                        Margin="5,1,5,0" Command="{Binding RelativeSource={RelativeSource FindAncestor, 
+AncestorType={x:Type Window}}, Path=DataContext.ZoomInCmd}" Focusable="False">
+                    <StackPanel>
+                        <Image Source="../Img/Zoom In-26.png" Margin="1"></Image>
+                    </StackPanel>
+                </Button>
+                <Button Height="26" Width="26" Background="White" 
+                        BorderBrush="Black" BorderThickness="1" 
+                        Margin="5,1,5,0" Command="{Binding RelativeSource={RelativeSource FindAncestor, 
+AncestorType={x:Type Window}}, Path=DataContext.ZoomOutCmd}" Focusable="False">
+                    <StackPanel>
+                        <Image Source="../Img/Zoom Out-26.png" Margin="1"></Image>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ToolbarTiffCtrl">
+            <StackPanel Orientation="Horizontal" Focusable="False">
+                <Button Height="26" Width="26" Background="White" 
+                        BorderBrush="Black" BorderThickness="1" 
+                        Margin="5,1,5,0" Command="{Binding RelativeSource={RelativeSource FindAncestor, 
+                        AncestorType={x:Type Window}}, Path=DataContext.ImgZoomInCmd}" Focusable="False">
+                    <StackPanel>
+                        <Image Source="../Img/Zoom In-26.png" Margin="1"></Image>
+                    </StackPanel>
+                </Button>
+                <Button Height="26" Width="26" Background="White" 
+                        BorderBrush="Black" BorderThickness="1" 
+                        Margin="5,1,5,0" Command="{Binding RelativeSource={RelativeSource FindAncestor, 
+                        AncestorType={x:Type Window}}, Path=DataContext.ImgZoomOutCmd}" Focusable="False">
+                    <StackPanel>
+                        <Image Source="../Img/Zoom Out-26.png" Margin="1"></Image>
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </DataTemplate>
         <helpers:ListControlTemplateSelector x:Key="ListControlTemplateSelector"/>
         <helpers:ViewerControlTemplateSelector x:Key="ViewrTemplateSelector"/>
+        <helpers:ToolbarTemplateSelector x:Key="ToolbarTemplateSelector"/>
     </Window.Resources>
     <Grid Focusable="False">
         <Grid.ColumnDefinitions>
@@ -156,18 +202,9 @@ AncestorType={x:Type Window}}, Path=DataContext.DocFile.Path, Mode=OneWay, Updat
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal" Focusable="False">
-            <Button Height="26" Width="26" Background="White" BorderBrush="Black" BorderThickness="1" Margin="5,1,5,0" Command="{Binding ZoomInCmd}" Focusable="False">
-                <StackPanel>
-                    <Image Source="../Img/Zoom In-26.png" Margin="1"></Image>
-                </StackPanel>
-            </Button>
-            <Button Height="26" Width="26" Background="White" BorderBrush="Black" BorderThickness="1" Margin="5,1,5,0" Command="{Binding ZoomOutCmd}" Focusable="False">
-                <StackPanel>
-                    <Image Source="../Img/Zoom Out-26.png" Margin="1"></Image>
-                </StackPanel>
-            </Button>
-        </StackPanel>
+        
+        <!-- Selettore del tipo di toolbar da visualizzare -->
+        <ContentControl Grid.Column="0" Grid.Row="0" Content="{Binding Path=Batch}" ContentTemplateSelector="{StaticResource ToolbarTemplateSelector}"  Focusable="False"/>
         <!-- Selettore del tipo di documento da visualizzare -->
         <ContentControl Grid.Column="0" Grid.Row="1" Content="{Binding Path=Batch}" ContentTemplateSelector="{StaticResource ViewrTemplateSelector}"  Focusable="False"/>
         <!-- <ContentPresenter Grid.Column="0" Grid.Row="1" Content="{Binding Path=PdfWrapper, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AllowDrop="False" Focusable="False"/> -->

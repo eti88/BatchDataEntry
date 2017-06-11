@@ -14,6 +14,9 @@ using MoonPdfLib;
 using NLog;
 using BatchDataEntry.Suggestions;
 using BatchDataEntry.Abstracts;
+using System.Drawing;
+using System.Windows.Media.Imaging;
+using System.Drawing.Imaging;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -27,7 +30,9 @@ namespace BatchDataEntry.ViewModels
         private  Document _doc;
         private int _selectElementFocus;
         private string[] repeatValues;
-        private MoonPdfPanel _PdfWrapper;    
+        private MoonPdfPanel _PdfWrapper;
+        private Image _img;
+        private List<Image> _imgs;
 
         public Document DocFile
         {
@@ -69,6 +74,27 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("PdfWrapper");
             }
         }
+        public List<Image> Images
+        {
+            get { return _imgs; }
+            set
+            {
+                if (_imgs != value)
+                    _imgs = value;
+                RaisePropertyChanged("Images");
+            }
+        }
+        public Image Image
+        {
+            get { return _img; }
+            set
+            {
+                if (_img != value)
+                    _img = value;
+                RaisePropertyChanged("Image");
+            }
+        }
+
         private bool CanMoveNext
         {
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasNext; }
@@ -78,6 +104,7 @@ namespace BatchDataEntry.ViewModels
         {
             get { return DocFiles != null && DocFiles.Count > 0 && DocFiles.hasPrevious; }
         }
+        
 
         public ViewModelDocumento()
         {
@@ -114,10 +141,18 @@ namespace BatchDataEntry.ViewModels
             {
                 c.IsDisabilitato = !c.IsDisabilitato;
             }
-            
-            if(Batch.TipoFile == TipoFileProcessato.Pdf)
-                SetPdfWrapper(DocFile.Path);  
-            
+
+            if (Batch.TipoFile == TipoFileProcessato.Pdf)
+                SetPdfWrapper(DocFile.Path);
+            else if (Batch.TipoFile == TipoFileProcessato.Tiff)
+            {
+                Images = GetAllPages(DocFile.Path);
+                Image = Images.ElementAt(0); // Imposto la visualizzazione dell aprima pagina
+            }
+                
+
+
+
             RaisePropertyChanged("DocFile");
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
@@ -151,6 +186,11 @@ namespace BatchDataEntry.ViewModels
 
             if (Batch.TipoFile == TipoFileProcessato.Pdf)
                 SetPdfWrapper(DocFile.Path);
+            else if (Batch.TipoFile == TipoFileProcessato.Tiff)
+            {
+                Images = GetAllPages(DocFile.Path);
+                Image = Images.ElementAt(0); // Imposto la visualizzazione della prima pagina
+            }
 
             RaisePropertyChanged("DocFile");
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
@@ -166,6 +206,26 @@ namespace BatchDataEntry.ViewModels
             PdfWrapper.OpenFile(file);
             PdfWrapper.ViewType = ViewType.SinglePage;
             PdfWrapper.PageRowDisplay = PageRowDisplayType.ContinuousPageRows;
+        }
+
+        private List<Image> GetAllPages(string file)
+        {
+
+            List<Image> images = new List<Image>();
+            Bitmap bitmap = (Bitmap)Image.FromFile(file);
+            int count = bitmap.GetFrameCount(FrameDimension.Page);
+            for (int idx = 0; idx < count; idx++)
+            {
+                // save each frame to a bytestream
+                bitmap.SelectActiveFrame(FrameDimension.Page, idx);
+                MemoryStream byteStream = new MemoryStream();
+                bitmap.Save(byteStream, ImageFormat.Tiff);
+
+                // and then create a new Image from it
+                images.Add(Image.FromStream(byteStream));
+            }
+            bitmap.Dispose();
+            return images;
         }
 
         private void LoadDocsList()
@@ -408,6 +468,26 @@ namespace BatchDataEntry.ViewModels
             PdfWrapper?.GotoPreviousPage();
         }
 
+        private void ImageZoomIn()
+        {
+
+        }
+
+        private void ImageZoomOut()
+        {
+
+        }
+
+        private void ImageNextPage()
+        {
+
+        }
+
+        private void ImagePrevPage()
+        {
+
+        }
+
         #region Command
         private RelayCommand _cmdPrev;
         public ICommand CmdPrev
@@ -538,6 +618,58 @@ namespace BatchDataEntry.ViewModels
                     _PageUpCmd = new RelayCommand((param) => ScrollPageUpPdf());
                 }
                 return _PageUpCmd;
+            }
+        }
+
+        private RelayCommand _imgZoomInCmd;
+        public ICommand ImgZoomInCmd
+        {
+            get
+            {
+                if (_imgZoomInCmd == null)
+                {
+                    _imgZoomInCmd = new RelayCommand((param) => ImageZoomIn());
+                }
+                return _imgZoomInCmd;
+            }
+        }
+
+        private RelayCommand _imgZoomOutCmd;
+        public ICommand ImgZoomOutCmd
+        {
+            get
+            {
+                if (_imgZoomOutCmd == null)
+                {
+                    _imgZoomOutCmd = new RelayCommand((param) => ImageZoomOut());
+                }
+                return _imgZoomOutCmd;
+            }
+        }
+
+        private RelayCommand _imgPageNext;
+        public ICommand ImgPageNext
+        {
+            get
+            {
+                if (_imgPageNext == null)
+                {
+                    _imgPageNext = new RelayCommand((param) => ImageNextPage());
+                }
+                return _imgPageNext;
+            }
+        }
+
+        private RelayCommand _imgPagePrev;
+        public ICommand ImgPagePrev
+        {
+            get
+            {
+                if (_imgPagePrev == null)
+                {
+                    _imgPagePrev = new RelayCommand((param) => ImagePrevPage());
+                }
+                return _imgPagePrev;
             }
         }
 

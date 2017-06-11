@@ -11,6 +11,8 @@ namespace BatchDataEntry.Helpers
             FrameworkElement element = container as FrameworkElement;
 
             Batch b = item as Batch;
+            if(b == null) return element.FindResource("DefaultControlViewer") as DataTemplate;
+
             if (b.TipoFile == TipoFileProcessato.Pdf)
                 return element.FindResource("PdfControlViewer") as DataTemplate;
             else if (b.TipoFile == TipoFileProcessato.Tiff)

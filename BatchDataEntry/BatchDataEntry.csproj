@@ -222,11 +222,13 @@
     <Compile Include="Helpers\EnumBindingSourceExtension.cs" />
     <Compile Include="Helpers\EnumTypeOfCampo.cs" />
     <Compile Include="Helpers\IClosableViewModel.cs" />
+    <Compile Include="Helpers\ImageToBitmapSourceConverter.cs" />
     <Compile Include="Helpers\ListControlTemplateSelector.cs" />
     <Compile Include="Helpers\MyAttachedBehaviors.cs" />
     <Compile Include="Helpers\PassThroughConverter.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\ScrollIntoViewBehavior.cs" />
+    <Compile Include="Helpers\ToolbarTemplateSelector.cs" />
     <Compile Include="Helpers\ViewerControlTemplateSelector.cs" />
     <Compile Include="Interfaces\ICampo.cs" />
     <Compile Include="Interfaces\IDatabaseHelper.cs" />
