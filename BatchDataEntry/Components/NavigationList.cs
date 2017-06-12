@@ -8,7 +8,7 @@ namespace BatchDataEntry.Components
 {
     public class NavigationList<T> : List<T>
     {
-        private int _currentIndex = 0;
+        private static int _currentIndex = 0;
         public int CurrentIndex
         {
             get
@@ -33,12 +33,12 @@ namespace BatchDataEntry.Components
 
         public bool hasNext
         {
-          get { return (_currentIndex < this.Count - 1); }         
+          get { return (_currentIndex <= this.Count - 1); }         
         }
 
         public bool hasPrevious
         {
-            get { return (_currentIndex > 0); }
+            get { return (_currentIndex >= 0); }
         }
 
         public T MovePrevious
@@ -53,6 +53,11 @@ namespace BatchDataEntry.Components
         public T Current
         {
             get { return this[CurrentIndex]; }
+        }
+
+        public void Reset()
+        {
+            _currentIndex = 0;
         }
     }
 }

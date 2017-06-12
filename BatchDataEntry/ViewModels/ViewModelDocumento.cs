@@ -17,6 +17,7 @@ using BatchDataEntry.Abstracts;
 using System.Drawing;
 using System.Windows.Media.Imaging;
 using System.Drawing.Imaging;
+using System.Windows.Media;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -32,7 +33,9 @@ namespace BatchDataEntry.ViewModels
         private string[] repeatValues;
         private MoonPdfPanel _PdfWrapper;
         private Image _img;
-        private List<Image> _imgs;
+        private NavigationList<Image> _imgs;
+
+        private static bool resetIndex = false;
 
         public Document DocFile
         {
@@ -74,7 +77,7 @@ namespace BatchDataEntry.ViewModels
                 RaisePropertyChanged("PdfWrapper");
             }
         }
-        public List<Image> Images
+        public NavigationList<Image> Images
         {
             get { return _imgs; }
             set
@@ -146,7 +149,10 @@ namespace BatchDataEntry.ViewModels
                 SetPdfWrapper(DocFile.Path);
             else if (Batch.TipoFile == TipoFileProcessato.Tiff)
             {
-                Images = GetAllPages(DocFile.Path);
+                Images = new NavigationList<Image>();
+                var tmp = GetAllPages(DocFile.Path);
+                foreach (Image i in tmp)
+                    Images.Add(i);
                 Image = Images.ElementAt(0); // Imposto la visualizzazione dell aprima pagina
             }
                 
@@ -188,7 +194,10 @@ namespace BatchDataEntry.ViewModels
                 SetPdfWrapper(DocFile.Path);
             else if (Batch.TipoFile == TipoFileProcessato.Tiff)
             {
-                Images = GetAllPages(DocFile.Path);
+                Images = new NavigationList<Image>();
+                var tmp = GetAllPages(DocFile.Path);
+                foreach (Image i in tmp)
+                    Images.Add(i);
                 Image = Images.ElementAt(0); // Imposto la visualizzazione della prima pagina
             }
 
@@ -468,24 +477,43 @@ namespace BatchDataEntry.ViewModels
             PdfWrapper?.GotoPreviousPage();
         }
 
-        private void ImageZoomIn()
-        {
-
-        }
-
-        private void ImageZoomOut()
-        {
-
-        }
-
         private void ImageNextPage()
         {
+            if (Images.Count == 1) return;
+            Image tmp = null;
 
+            try
+            {
+                if (Images.hasNext)
+                    tmp = Images.MoveNext;
+
+                if (tmp != null)
+                    Image = tmp;
+            }
+            catch (Exception)
+            {
+                Image = Images.Current;
+            }
         }
 
         private void ImagePrevPage()
         {
+            if (Images.Count == 1) return;
+            Image tmp = null;
+            try
+            {
+                if (Images.hasPrevious)
+                {
+                    tmp = Images.MovePrevious;
+                }
 
+                if (tmp != null)
+                    Image = tmp;
+            }
+            catch (Exception)
+            {
+                Image = Images.Current; 
+            }
         }
 
         #region Command
@@ -621,32 +649,6 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private RelayCommand _imgZoomInCmd;
-        public ICommand ImgZoomInCmd
-        {
-            get
-            {
-                if (_imgZoomInCmd == null)
-                {
-                    _imgZoomInCmd = new RelayCommand((param) => ImageZoomIn());
-                }
-                return _imgZoomInCmd;
-            }
-        }
-
-        private RelayCommand _imgZoomOutCmd;
-        public ICommand ImgZoomOutCmd
-        {
-            get
-            {
-                if (_imgZoomOutCmd == null)
-                {
-                    _imgZoomOutCmd = new RelayCommand((param) => ImageZoomOut());
-                }
-                return _imgZoomOutCmd;
-            }
-        }
-
         private RelayCommand _imgPageNext;
         public ICommand ImgPageNext
         {
@@ -654,7 +656,7 @@ namespace BatchDataEntry.ViewModels
             {
                 if (_imgPageNext == null)
                 {
-                    _imgPageNext = new RelayCommand((param) => ImageNextPage());
+                    _imgPageNext = new RelayCommand(param => ImageNextPage());
                 }
                 return _imgPageNext;
             }
@@ -667,7 +669,7 @@ namespace BatchDataEntry.ViewModels
             {
                 if (_imgPagePrev == null)
                 {
-                    _imgPagePrev = new RelayCommand((param) => ImagePrevPage());
+                    _imgPagePrev = new RelayCommand(param => ImagePrevPage());
                 }
                 return _imgPagePrev;
             }

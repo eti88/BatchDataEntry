@@ -16,22 +16,28 @@ namespace BatchDataEntry.Helpers
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            Image myImage = (Image)value;
+            try
+            {
+                Image myImage = (Image)value;
 
-            var bitmap = new Bitmap(myImage);
-            IntPtr bmpPt = bitmap.GetHbitmap();
-            BitmapSource bitmapSource =
-             System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                   bmpPt,
-                   IntPtr.Zero,
-                   Int32Rect.Empty,
-                   BitmapSizeOptions.FromEmptyOptions());
+                var bitmap = new Bitmap(myImage);
+                IntPtr bmpPt = bitmap.GetHbitmap();
+                BitmapSource bitmapSource =
+                 System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                       bmpPt,
+                       IntPtr.Zero,
+                       Int32Rect.Empty,
+                       BitmapSizeOptions.FromEmptyOptions());
 
-            //freeze bitmapSource and clear memory to avoid memory leaks
-            bitmapSource.Freeze();
-            DeleteObject(bmpPt);
-
-            return bitmapSource;
+                //freeze bitmapSource and clear memory to avoid memory leaks
+                bitmapSource.Freeze();
+                DeleteObject(bmpPt);
+                return bitmapSource;
+            }
+            catch(Exception)
+            {
+                return Binding.DoNothing;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

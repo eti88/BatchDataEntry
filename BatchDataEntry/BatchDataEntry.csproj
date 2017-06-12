@@ -399,6 +399,8 @@
     <Resource Include="Img\Zoom In-26.png" />
     <Resource Include="Img\Zoom Out-26.png" />
     <Resource Include="Img\Mesh-100.ico" />
+    <Resource Include="Img\arrowLeft.png" />
+    <Resource Include="Img\arrowRight.png" />
     <Content Include="x64\SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

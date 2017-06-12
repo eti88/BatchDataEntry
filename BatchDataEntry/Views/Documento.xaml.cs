@@ -5,8 +5,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using TextBox = System.Windows.Controls.TextBox;
+using System.Linq;
+using System.Windows.Data;
 
 namespace BatchDataEntry.Views
 {
@@ -99,6 +103,52 @@ namespace BatchDataEntry.Views
                 Thread.Sleep(MILLISEC_UPDATE);
                 try { this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol))); } catch (Exception exc) { logger.Error(exc); }
             });
+        }
+
+        private void btnImageZoomIn_Click(object sender, RoutedEventArgs e)
+        {
+            var picbox = FindElementByName<Image>(DocSection, "ImageDocumentCtrl");
+            if(picbox != null)
+            {
+                double factor = 0.5;
+                picbox.Source = new TransformedBitmap((BitmapSource)picbox.Source, new ScaleTransform(factor, factor));
+            }
+        }
+
+        private void btnImageZoomOut_Click(object sender, RoutedEventArgs e)
+        {
+            var picbox = FindElementByName<Image>(DocSection, "ImageDocumentCtrl");
+            if (picbox != null)
+            {
+                double factor = - 0.5;
+                picbox.Source = new TransformedBitmap((BitmapSource)picbox.Source, new ScaleTransform(0, factor));
+            }
+        }
+
+        // Permette di trovare l'elemento ui dentro ai ContentControl
+        public T FindElementByName<T>(FrameworkElement element, string sChildName) where T : FrameworkElement
+        {
+            T childElement = null;
+            var nChildCount = VisualTreeHelper.GetChildrenCount(element);
+            for (int i = 0; i < nChildCount; i++)
+            {
+                FrameworkElement child = VisualTreeHelper.GetChild(element, i) as FrameworkElement;
+
+                if (child == null)
+                    continue;
+
+                if (child is T && child.Name.Equals(sChildName))
+                {
+                    childElement = (T)child;
+                    break;
+                }
+
+                childElement = FindElementByName<T>(child, sChildName);
+
+                if (childElement != null)
+                    break;
+            }
+            return childElement;
         }
     }   
 }
