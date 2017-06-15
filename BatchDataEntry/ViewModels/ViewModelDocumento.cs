@@ -149,16 +149,14 @@ namespace BatchDataEntry.ViewModels
                 SetPdfWrapper(DocFile.Path);
             else if (Batch.TipoFile == TipoFileProcessato.Tiff)
             {
-                Images = new NavigationList<Image>();
-                var tmp = GetAllPages(DocFile.Path);
-                foreach (Image i in tmp)
-                    Images.Add(i);
-                Image = Images.ElementAt(0); // Imposto la visualizzazione dell aprima pagina
+                //Images = new NavigationList<Image>();
+                //var tmp = GetAllPages(DocFile.Path);
+                //foreach (Image i in tmp)
+                //    Images.Add(i);
+                //Image = Images.ElementAt(0); // Imposto la visualizzazione dell aprima pagina
+                SetTiffWrapper(DocFile.Path);
             }
                 
-
-
-
             RaisePropertyChanged("DocFile");
             _selectElementFocus = Batch.Applicazione.StartFocusColumn;
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
@@ -194,11 +192,12 @@ namespace BatchDataEntry.ViewModels
                 SetPdfWrapper(DocFile.Path);
             else if (Batch.TipoFile == TipoFileProcessato.Tiff)
             {
-                Images = new NavigationList<Image>();
-                var tmp = GetAllPages(DocFile.Path);
-                foreach (Image i in tmp)
-                    Images.Add(i);
-                Image = Images.ElementAt(0); // Imposto la visualizzazione della prima pagina
+                //Images = new NavigationList<Image>();
+                //var tmp = GetAllPages(DocFile.Path);
+                //foreach (Image i in tmp)
+                //    Images.Add(i);
+                //Image = Images.ElementAt(0); // Imposto la visualizzazione della prima pagina
+                SetTiffWrapper(DocFile.Path);
             }
 
             RaisePropertyChanged("DocFile");
@@ -206,6 +205,16 @@ namespace BatchDataEntry.ViewModels
             repeatValues = Batch.Applicazione.Campi.Count > 0 ? new string[Batch.Applicazione.Campi.Count] : new string[1];
             Properties.Settings.Default.CurrentBatch = Batch.Id;
             Properties.Settings.Default.Save();
+        }
+
+        private void SetTiffWrapper(string file)
+        {
+            this.Images = new NavigationList<Image>();
+            var tmp = GetAllPages(file);
+            foreach (Image i in tmp)
+                Images.Add(i);
+            Image = Images.ElementAt(0); // Imposto la visualizzazione dell aprima pagina
+            RaisePropertyChanged("Image");
         }
 
         private void SetPdfWrapper(string file)
@@ -342,6 +351,8 @@ namespace BatchDataEntry.ViewModels
                 }
                 if(Batch.TipoFile == TipoFileProcessato.Pdf && PdfWrapper != null)
                     PdfWrapper.OpenFile(DocFile.Path);
+                else if(Batch.TipoFile == TipoFileProcessato.Tiff)
+                    SetTiffWrapper(DocFile.Path);
             }
 
             RaisePropertyChanged("DocFile");
@@ -369,6 +380,8 @@ namespace BatchDataEntry.ViewModels
 
                 if (Batch.TipoFile == TipoFileProcessato.Pdf && PdfWrapper != null)
                     PdfWrapper.OpenFile(DocFile.Path);
+                else if (Batch.TipoFile == TipoFileProcessato.Tiff)
+                    SetTiffWrapper(DocFile.Path);
             }
             
             RaisePropertyChanged("DocFile");

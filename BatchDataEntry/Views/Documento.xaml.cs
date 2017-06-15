@@ -105,26 +105,6 @@ namespace BatchDataEntry.Views
             });
         }
 
-        private void btnImageZoomIn_Click(object sender, RoutedEventArgs e)
-        {
-            var picbox = FindElementByName<Image>(DocSection, "ImageDocumentCtrl");
-            if(picbox != null)
-            {
-                double factor = 0.5;
-                picbox.Source = new TransformedBitmap((BitmapSource)picbox.Source, new ScaleTransform(factor, factor));
-            }
-        }
-
-        private void btnImageZoomOut_Click(object sender, RoutedEventArgs e)
-        {
-            var picbox = FindElementByName<Image>(DocSection, "ImageDocumentCtrl");
-            if (picbox != null)
-            {
-                double factor = - 0.5;
-                picbox.Source = new TransformedBitmap((BitmapSource)picbox.Source, new ScaleTransform(0, factor));
-            }
-        }
-
         // Permette di trovare l'elemento ui dentro ai ContentControl
         public T FindElementByName<T>(FrameworkElement element, string sChildName) where T : FrameworkElement
         {

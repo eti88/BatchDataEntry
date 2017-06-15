@@ -7,6 +7,7 @@
         xmlns:helpers="clr-namespace:BatchDataEntry.Helpers"
         xmlns:providers="clr-namespace:BatchDataEntry.Providers"
         xmlns:editors="http://wpfcontrols.com/"
+        xmlns:usercontrols="clr-namespace:BatchDataEntry.Views.UserControls"
         mc:Ignorable="d"
         x:Name="DocumentWindow"        
         Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" WindowState="Maximized" Icon="/BatchDataEntry;component/Mesh-100.ico" Loaded="DocumentWindow_Loaded">
@@ -136,8 +137,19 @@
 AncestorType={x:Type Window}}, Path=DataContext.PdfWrapper, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AllowDrop="False" Focusable="False"/>
         </DataTemplate>
         <DataTemplate x:Key="TiffControlViewer">
-            <Image x:Name="ImageDocumentCtrl"  Source="{Binding RelativeSource={RelativeSource FindAncestor, 
-AncestorType={x:Type Window}}, Path=DataContext.Image, Converter={StaticResource ImageConverter}, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Focusable="False"/>
+
+            <usercontrols:ZoomAndPanScrollViewerView Focusable="False"
+                Source="{Binding 
+                            RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, 
+                            Path=DataContext.Image, Converter={StaticResource ImageConverter}, Mode=TwoWay, 
+                            UpdateSourceTrigger=PropertyChanged}"
+            />
+            <!--
+            <Image 
+                x:Name="ImageDocumentCtrl"  
+                Source="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.Image, Converter={StaticResource ImageConverter}, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
+                Focusable="False"/>
+            -->
         </DataTemplate>
         <DataTemplate x:Key="DefaultControlViewer">
             <StackPanel Background="DarkGray">
@@ -145,7 +157,7 @@ AncestorType={x:Type Window}}, Path=DataContext.Image, Converter={StaticResource
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ToolbarDefaultCtrl">
-            <StackPanel Background="DarkGray">
+            <StackPanel Background="LightGray">
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ToolbarPdfCtrl">
@@ -171,7 +183,6 @@ AncestorType={x:Type Window}}, Path=DataContext.ZoomOutCmd}" Focusable="False">
         <DataTemplate x:Key="ToolbarTiffCtrl">
             <StackPanel Orientation="Horizontal" Focusable="False">
                 <!-- Navigation btn -->
-                <!-- TODO: da sostiutire Content con immagini -->
                 <Button x:Name="btnImagePrev" Height="26" Width="26" Background="White"
                         BorderBrush="Black" BorderThickness="1"
                         Margin="5,1,5,0" Command="{Binding RelativeSource={RelativeSource FindAncestor, 
@@ -190,27 +201,6 @@ AncestorType={x:Type Window}}, Path=DataContext.ZoomOutCmd}" Focusable="False">
                         <Image Source="../Img/arrowRight.png" Margin="1"></Image>
                     </StackPanel>
                 </Button>
-                <!-- zoom btn -->
-                <!--
-                <Button x:Name="btnImageZoomIn" Height="26" Width="26" Background="White" 
-                        BorderBrush="Black" BorderThickness="1" 
-                        Margin="5,1,5,0"
-                        Click="btnImageZoomIn_Click"
-                        Focusable="False">
-                    <StackPanel>
-                        <Image Source="../Img/Zoom In-26.png" Margin="1"></Image>
-                    </StackPanel>
-                </Button>
-                <Button x:Name="btnImageZoomOut"
-                        Height="26" Width="26" Background="White" 
-                        BorderBrush="Black" BorderThickness="1" 
-                        Margin="5,1,5,0" 
-                        Click="btnImageZoomOut_Click"
-                        Focusable="False">
-                    <StackPanel>
-                        <Image Source="../Img/Zoom Out-26.png" Margin="1"></Image>
-                    </StackPanel>
-                </Button> -->
             </StackPanel>
         </DataTemplate>
         <helpers:ListControlTemplateSelector x:Key="ListControlTemplateSelector"/>
