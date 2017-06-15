@@ -353,9 +353,9 @@ namespace BatchDataEntry.ViewModels
                     PdfWrapper.OpenFile(DocFile.Path);
                 else if(Batch.TipoFile == TipoFileProcessato.Tiff)
                     SetTiffWrapper(DocFile.Path);
+                RaisePropertyChanged("DocFile");
+                GC.Collect();
             }
-
-            RaisePropertyChanged("DocFile");
         }
 
         public void MoveNextItem()
@@ -382,9 +382,10 @@ namespace BatchDataEntry.ViewModels
                     PdfWrapper.OpenFile(DocFile.Path);
                 else if (Batch.TipoFile == TipoFileProcessato.Tiff)
                     SetTiffWrapper(DocFile.Path);
+
+                RaisePropertyChanged("DocFile");
+                GC.Collect();
             }
-            
-            RaisePropertyChanged("DocFile");
         }
         
         public void Interrompi()

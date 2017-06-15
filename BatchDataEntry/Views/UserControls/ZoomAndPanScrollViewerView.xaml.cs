@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -33,8 +34,10 @@ namespace BatchDataEntry.Views.UserControls
         {
             get { return base.GetValue(SourceProperty) as BitmapSource; }
             set {
-                base.SetValue(SourceProperty, value);
+                base.SetValue(SourceProperty, value);           
                 OnPropertyChanged("Source");
+                if (this.Source != null)
+                    SetCanvasDimension(this.Source.Width, this.Source.Height);
             }
         }
 
@@ -54,11 +57,6 @@ namespace BatchDataEntry.Views.UserControls
         {
             this.DataContext = this;
             InitializeComponent();
-            SetCanvasDimension(this.Source.Width, this.Source.Height);
-
-            //TODO: Quando cambia l'immagine bisogna reimpostare l'altezza e larghezza del canvas
-
-            //TODO: Impostare Fit immagine come default
         }
 
         // Reimposta le dimensioni del canvas in base alle dimensioni dell'immagine

@@ -11,6 +11,8 @@ using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using TextBox = System.Windows.Controls.TextBox;
 using System.Linq;
 using System.Windows.Data;
+using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace BatchDataEntry.Views
 {
@@ -19,28 +21,38 @@ namespace BatchDataEntry.Views
     /// </summary>
     public partial class Documento : Window
     {
-        private readonly int MILLISEC_UPDATE = 1000;
+        private readonly int MILLISEC_UPDATE = 800;
         private static Logger logger = LogManager.GetCurrentClassLogger();
+        BackgroundWorker bw;
+        private int st;
 
         public Documento()
         {
             InitializeComponent();
-            int st = (Properties.Settings.Default.StartFocusCol >= 0) ? Properties.Settings.Default.StartFocusCol : 0;
-            SetFocusOnSelectedTextBox(st);
+            st = (Properties.Settings.Default.StartFocusCol >= 0) ? Properties.Settings.Default.StartFocusCol : 0;
+            bw = new BackgroundWorker();
+            bw.WorkerReportsProgress = false;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
         }
 
         public void SetFocusOnSelectedTextBox(int pos = 0)
         {
             if (FieldItems.Items == null) return;
-
+            if (pos < 0) return;
             for (int i = 0; i < FieldItems.Items.Count; i++)
             {
+                //  Il focus è abilitato solo per i bottoni (indicizzazione, navigazione e stop) e per i campi definiti dal modello
                 if (i == pos)
                 {
-                    var cnt = FieldItems.ItemContainerGenerator.ContainerFromIndex(i);
-                    TextBox t2 = GetChild<TextBox>(cnt);
-                    t2.Focus();
-                    Keyboard.Focus(t2);
+                    ContentPresenter cp = FieldItems.ItemContainerGenerator.ContainerFromIndex(pos) as ContentPresenter;
+                    TextBox tb = FindVisualChild<TextBox>(cp);
+                    if (tb != null)
+                    {
+                        Console.WriteLine("Textbox pos: " + i);
+                        tb.Focus();
+                    }
+                    break;
                 }
             }
         }
@@ -50,31 +62,31 @@ namespace BatchDataEntry.Views
             this.Close();
         }
 
-        public T GetChild<T>(DependencyObject obj) where T : DependencyObject
+        public static T FindVisualChild<T>(DependencyObject depObj) where T : DependencyObject
         {
-            DependencyObject child = null;
-            for (Int32 i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            if (depObj != null)
             {
-                child = VisualTreeHelper.GetChild(obj, i);
-                if (child != null && child.GetType() == typeof(T))
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
                 {
-                    break;
-                }
-                else if (child != null)
-                {
-                    child = GetChild<T>(child);
-                    if (child != null && child.GetType() == typeof(T))
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child != null && child is T)
                     {
-                        break;
+                        return (T)child;
                     }
+
+                    T childItem = FindVisualChild<T>(child);
+                    if (childItem != null) return childItem;
                 }
             }
-            return child as T;
+            return null;
         }
 
         private void DocumentWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            SetFocusOnSelectedTextBox(10);
+            if (bw.IsBusy != true)
+            {
+                bw.RunWorkerAsync();
+            }
         }
 
         private void buttonNext_Click(object sender, RoutedEventArgs e)
@@ -82,8 +94,16 @@ namespace BatchDataEntry.Views
             Task.Factory.StartNew(() =>
             {
               Thread.Sleep(MILLISEC_UPDATE);
-                try { this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol))); }catch(Exception exc) { logger.Error(exc); }
-                
+                try {
+                    this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+                } catch(Exception exc) {
+                    logger.Error(exc);
+                }
+
+                if (bw.IsBusy != true)
+                {
+                    bw.RunWorkerAsync();
+                }
             });            
         }
 
@@ -92,7 +112,16 @@ namespace BatchDataEntry.Views
             Task.Factory.StartNew(() =>
             {
                 Thread.Sleep(MILLISEC_UPDATE);
-                try { this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol))); } catch (Exception exc) { logger.Error(exc); }
+                try {
+                    this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+                } catch (Exception exc) {
+                    Console.WriteLine(exc);
+                }
+
+                if (bw.IsBusy != true)
+                {
+                    bw.RunWorkerAsync();
+                }
             });
         }
 
@@ -101,7 +130,16 @@ namespace BatchDataEntry.Views
             Task.Factory.StartNew(() =>
             {
                 Thread.Sleep(MILLISEC_UPDATE);
-                try { this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol))); } catch (Exception exc) { logger.Error(exc); }
+                try {
+                    this.Dispatcher.BeginInvoke((Action)(() => SetFocusOnSelectedTextBox(Properties.Settings.Default.StartFocusCol)));
+                } catch (Exception exc) {
+                    logger.Error(exc);
+                }
+
+                if (bw.IsBusy != true)
+                {
+                    bw.RunWorkerAsync();
+                }
             });
         }
 
@@ -129,6 +167,21 @@ namespace BatchDataEntry.Views
                     break;
             }
             return childElement;
+        }
+
+        private void bw_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            Thread.Sleep(MILLISEC_UPDATE);
+        }
+
+        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle,
+                new Action(delegate ()
+                {
+                    SetFocusOnSelectedTextBox(st);
+                }));
         }
     }   
 }
