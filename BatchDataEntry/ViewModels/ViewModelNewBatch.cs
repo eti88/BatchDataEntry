@@ -368,20 +368,18 @@ namespace BatchDataEntry.ViewModels
                 {
                     string queryCheck = string.Format("SELECT Count(Id) FROM Documenti WHERE FileName = '{0}'", Path.GetFileNameWithoutExtension(files[i]));
                     if (dbcache.Count(queryCheck) > 0) continue;    // il file esiste già nel db
+                    string dirpages = files[i];
 
                     if(this.IsTiffSubdirs)
                     {
-                        List<string> pages = Directory.GetFiles(Path.Combine(b.DirectoryInput, files[i]), "*.tif").ToList();
+                        List<string> pages = Directory.GetFiles(dirpages, "*.tif").ToList(); // Percorsi completi di path
                         if (pages.Count == 0) continue;
-                        for(int z=0; z < pages.Count; z++)
-                        {
-                            pages[z] = Path.Combine(b.DirectoryInput, pages[z]);
-                        }
-                        mergeTiffPages(Path.Combine(b.DirectoryOutput, files[i]), pages.ToArray());
-                        files[i] = Path.Combine(b.DirectoryOutput, files[i]);
+                        string newfile = Path.Combine(b.DirectoryOutput, string.Format("{0}.tif", Path.GetFileNameWithoutExtension(dirpages)));
+                        mergeTiffPages(newfile, pages.ToArray());
+                        dirpages = newfile;
                     }   
                     // Genera documento
-                    Document doc = GenerateDocument(files[i], lastId, b);
+                    Document doc = GenerateDocument(dirpages, lastId, b);
 
                     dbcache.InsertRecordDocumento(b, doc);
                     backgroundWorker.ReportProgress(i);
@@ -530,16 +528,12 @@ namespace BatchDataEntry.ViewModels
                 else if (sourceFiles.Length >= 1)
                 {
                     System.Drawing.Image DestinationImage = (System.Drawing.Image)(new System.Drawing.Bitmap((string)sourceFiles[0]));
-
                     DestinationImage.Save(str_DestinationPath, codec, imagePararms);
-
                     imagePararms.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.SaveFlag, (long)System.Drawing.Imaging.EncoderValue.FrameDimensionPage);
-
 
                     for (int i = 0; i < sourceFiles.Length - 1; i++)
                     {
                         System.Drawing.Image img = (System.Drawing.Image)(new System.Drawing.Bitmap((string)sourceFiles[i]));
-
                         DestinationImage.SaveAdd(img, imagePararms);
                         img.Dispose();
                     }
@@ -548,9 +542,7 @@ namespace BatchDataEntry.ViewModels
                     DestinationImage.SaveAdd(imagePararms);
                     imagePararms.Dispose();
                     DestinationImage.Dispose();
-
                 }
-
             }
             catch (Exception ex)
             {
