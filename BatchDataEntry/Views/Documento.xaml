@@ -71,6 +71,8 @@
                 <!-- end -->
             </StackPanel>
         </DataTemplate>
+        <!-- -->
+        
         <!-- db template -->
         <DataTemplate x:Key="AutocompleteDbSqlDataTemplate">
             <StackPanel Margin="5,0,5,0">

@@ -247,6 +247,7 @@
     <Compile Include="Providers\DbSqlSuggestionProvider.cs" />
     <Compile Include="Providers\DbSuggestionProvider.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Suggestions\SuggestionLocalita.cs" />
     <Compile Include="Suggestions\SuggestionSingleColumn.cs" />
     <Compile Include="Validators\ColumnValidator.cs" />
     <Compile Include="Validators\NameValidator.cs" />

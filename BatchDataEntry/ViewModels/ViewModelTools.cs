@@ -15,6 +15,7 @@ namespace BatchDataEntry.ViewModels
 {
     public class ViewModelTools : ViewModelBase
     {
+        private static string CACHEFILE = @"cache.db3";
         private AbsDbHelper db;
         private bool needReload = false;
 
@@ -207,6 +208,11 @@ namespace BatchDataEntry.ViewModels
 
         // Carica il file sqlite nel modello FidelityCard
         public void LoadFile() {
+            FileAttributes attr = File.GetAttributes(InputFilePath);
+            if (attr.HasFlag(FileAttributes.Directory))
+                InputFilePath = Path.Combine(InputFilePath, CACHEFILE);
+            
+
             if(!string.IsNullOrEmpty(InputFilePath) && File.Exists(InputFilePath))
             {
                 db = new DatabaseHelper(InputFilePath);
@@ -726,18 +732,21 @@ namespace BatchDataEntry.ViewModels
                 if (!Utility.IsNotVoid(this.Localita)) errors.Add(new ErrorRecord(this.FileName, "Localita", this.Localita, TAGEmpty));
                 if (!Utility.IsNotVoid(this.Provincia)) errors.Add(new ErrorRecord(this.FileName, "Provincia", this.Provincia, TAGEmpty));
                 if (!Utility.IsNotVoid(this.Cap)) errors.Add(new ErrorRecord(this.FileName, "Cap", this.Cap, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Prefisso)) errors.Add(new ErrorRecord(this.FileName, "Prefisso", this.Prefisso, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Telefono)) errors.Add(new ErrorRecord(this.FileName, "Telefono", this.Telefono, TAGEmpty));
-
-                if (!Utility.IsNotVoid(this.Cellulare)) errors.Add(new ErrorRecord(this.FileName, "Cellulare", this.Cellulare, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Email)) errors.Add(new ErrorRecord(this.FileName, "Email", this.Email, TAGEmpty));
-                if (!Utility.IsNotVoid(this.DataNascita)) errors.Add(new ErrorRecord(this.FileName, "DataNascita", this.DataNascita, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Luogo)) errors.Add(new ErrorRecord(this.FileName, "Luogo", this.Luogo, TAGEmpty));
             }
 
-            if (!Utility.IsValidTelephone(this.Cellulare)) errors.Add(new ErrorRecord(this.FileName, "Cellulare", this.Cellulare, TAGTel));
-            if (!Utility.IsValidEmail(this.Email)) errors.Add(new ErrorRecord(this.FileName, "Email", this.Email, TAGEmail));
-            if (!Utility.IsValidDate(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, TAGData));
+            if (Utility.IsNotVoid(this.Cellulare)) {
+                if (!Utility.IsValidTelephone(this.Cellulare)) errors.Add(new ErrorRecord(this.FileName, "Cellulare", this.Cellulare, TAGTel));
+            }
+
+            if (Utility.IsNotVoid(this.Email))
+            {
+                if (!Utility.IsValidEmail(this.Email)) errors.Add(new ErrorRecord(this.FileName, "Email", this.Email, TAGEmail));
+            }
+
+            if (Utility.IsNotVoid(this.DataNascita)) {
+                if(!Utility.IsValidDate(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, TAGData));
+                if (Utility.IsValidDateRange(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, "ETA"));
+            }
 
             return errors;
         }

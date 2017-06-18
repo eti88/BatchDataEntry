@@ -219,5 +219,30 @@ namespace BatchDataEntry.Business
             bool isNum = Double.TryParse(Convert.ToString(Expression), System.Globalization.NumberStyles.Any, System.Globalization.NumberFormatInfo.InvariantInfo, out retNum);
             return isNum;
         }
+
+        public static bool IsValidDateRange(string date, string format = "dd-MM-yyyy")
+        {
+            try
+            {
+                DateTime startDate;
+                DateTime nowDate;
+                DateTime zeroTime = new DateTime(1, 1, 1);
+
+                DateTime.TryParseExact(date, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out startDate);
+                if (startDate == null) return false;
+                nowDate = DateTime.Now;
+
+                TimeSpan span = nowDate - startDate;
+                int years = (zeroTime + span).Year - 1;
+                #if DEBUG
+                Console.WriteLine(string.Format("D1: {0}, D2: {1} -> Years: {2}", startDate.ToString("dd-MM-yyyy"), nowDate.ToString("dd-MM-yyyy"), years));
+#endif
+                return (years < 18 || years > 80) ? false : true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }

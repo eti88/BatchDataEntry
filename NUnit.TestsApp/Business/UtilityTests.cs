@@ -130,6 +130,26 @@ namespace BatchDataEntry.Business.Tests
             Assert.AreEqual(Utility.RemovePatternFromString(a, pat), exp);
         }
 
+        [Test()]
+        public void IsValidDateRangeTest()
+        {
+            string datef = "dd-MM-yyyy";
+            string[] dts = {
+                "10-05-1900",
+                "06-01-1930",
+                "16-11-1960",
+                "15-12-1968",
+                "19-06-1988",
+                "04-12-1999",
+                "06-03-2003",
+                "15-08-2010" };
+            bool[] resp = { false, false, true, true, true, false, false, false };
+            for(int i=0; i < dts.Length; i++)
+            {
+                Assert.IsTrue(Utility.IsValidDateRange(dts[i], datef) == resp[i]);
+            }
+        }
+
         [TearDown]
         public void CleanDir()
         {
