@@ -38,6 +38,15 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
+        <DataTemplate x:Key="SuggestionLocalita">
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Path=Valore}"/>
+                    <TextBlock Text="{Binding Path=Pv}" Foreground="Gray" Padding="5,0,5,0"/>
+                    <TextBlock Text="{Binding Path=Cap}" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
         <!-- normal template -->
         <DataTemplate x:Key="TextBoxDataTemplate">
             <StackPanel Margin="5,0,5,0">
@@ -71,8 +80,29 @@
                 <!-- end -->
             </StackPanel>
         </DataTemplate>
-        <!-- -->
-        
+        <!-- db template località -->
+        <DataTemplate x:Key="AutocompleteDbLocalitaDataTemplate">
+            <StackPanel Margin="5,0,5,0">
+                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+                <!-- autocompletetextbox -->
+                <editors:AutoCompleteTextBox
+                    IsEnabled="{Binding Path=IsDisabilitato}"
+                    Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    DisplayMember="Valore"
+                    Height="30"
+                    Width="352"
+                    Provider="{Binding Path=SuggestionsProvider, Mode=OneWay}" 
+                    ItemTemplate="{StaticResource ResourceKey=SuggestionLocalita}">
+                    <editors:AutoCompleteTextBox.SelectedItem>
+                        <Binding Path="ElementoSelezionato" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"></Binding>
+                    </editors:AutoCompleteTextBox.SelectedItem>
+                    <editors:AutoCompleteTextBox.LoadingContent>
+                        <TextBox Text="Loading..." Margin="5" FontSize="14"></TextBox>
+                    </editors:AutoCompleteTextBox.LoadingContent>
+                </editors:AutoCompleteTextBox>
+                <!-- end -->
+            </StackPanel>
+        </DataTemplate>
         <!-- db template -->
         <DataTemplate x:Key="AutocompleteDbSqlDataTemplate">
             <StackPanel Margin="5,0,5,0">

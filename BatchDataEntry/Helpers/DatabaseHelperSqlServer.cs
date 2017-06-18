@@ -991,6 +991,13 @@ namespace BatchDataEntry.Helpers
             return dres;
         }
 
+        /// <summary>
+        /// Nel caso si cerchi di recuperare l'autocompletamento dalla tabella località utilizza un suggestion apposito
+        /// (per poter visualizzare correttamente le informazioni).
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="columnTable"></param>
+        /// <returns></returns>
         public List<AbsSuggestion> GetAutocompleteList(string tableName, int columnTable)
         {
             if (cnn == null) return null;
@@ -1001,8 +1008,17 @@ namespace BatchDataEntry.Helpers
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand(sql, cnn);
                 SqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
-                    suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader[columnTable])));
+                if(tableName.Equals("localita") || tableName.ToLower().Contains("localita"))
+                {
+                    while (reader.Read())
+                        suggestions.Add(new SuggestionLocalita(Convert.ToString(reader[1]), Convert.ToString(reader[2]), Convert.ToString(reader[3])));
+                }
+                else
+                {
+                    while (reader.Read())
+                        suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader[columnTable])));
+                }
+                
                 reader.Close();
             }
             catch (Exception e)
@@ -1015,6 +1031,6 @@ namespace BatchDataEntry.Helpers
             }
             return suggestions;
         }
-  
+
     }
 }
