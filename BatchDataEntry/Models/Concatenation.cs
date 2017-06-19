@@ -1,10 +1,5 @@
-﻿using BatchDataEntry.Helpers;
-using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BatchDataEntry.Models
 {
@@ -83,7 +78,8 @@ namespace BatchDataEntry.Models
 
         public Concatenation()
         {
-            Campi = new Dictionary<string, object>();
+            this.Campi = new Dictionary<string, object>();
+            this.CampiSelezionati = new Dictionary<string, object>();
         }
 
         public Concatenation(int id, string nome, int modello)
@@ -92,6 +88,7 @@ namespace BatchDataEntry.Models
             this.Nome = nome;
             this.Modello = modello;
             this.Campi = new Dictionary<string, object>();
+            this.CampiSelezionati = new Dictionary<string, object>();
         }
 
         public Concatenation(int id, string nome, int modello, Dictionary<string, object> campi)
@@ -100,6 +97,7 @@ namespace BatchDataEntry.Models
             this.Nome = nome;
             this.Modello = modello;
             this.Campi = campi;
+            this.CampiSelezionati = new Dictionary<string, object>();
         }
 
         public Concatenation(Concatenation c)
@@ -108,12 +106,18 @@ namespace BatchDataEntry.Models
             this.Nome = c.Nome;
             this.Modello = c.Modello;
             this.Campi = c.Campi;
+            this.CampiSelezionati = c.CampiSelezionati;
         }
 
-
-        public void LoadCampi(DatabaseHelperSqlServer db)
+        public string SerializeDictionary()
         {
-            //Campi = db.LoadConcatenations(Modello);
+            return JsonConvert.SerializeObject(this.CampiSelezionati);
+        }
+
+        public void DeserializeDictionary(string obj)
+        {
+            var tmp = JsonConvert.DeserializeObject<Dictionary<string, object>>(obj);
+            if (tmp != null) CampiSelezionati = tmp;
         }
     }
 }

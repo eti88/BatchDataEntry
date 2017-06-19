@@ -12,7 +12,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0">
-            <Button Content="Aggiungi" Width="110" HorizontalAlignment="Left"/>
+            <Button Content="Aggiungi" Width="110" HorizontalAlignment="Left" Command="{Binding Path=AddNewItemCommand}"/>
         </StackPanel>
         <ListBox Grid.Row="1" Background="#FFF3F3F3"
                  ItemsSource="{Binding Concatenazioni, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

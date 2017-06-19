@@ -203,6 +203,42 @@ namespace BatchDataEntry.Helpers
             return id;
         }
 
+        public int Insert(Concatenation concat)
+        {
+            if (cnn == null || concat == null) return -1;
+            SqlCommand cmdInsert = new SqlCommand(@"INSERT INTO Concatenazioni(Nome, Modello, Campi) VALUES (@Nome, @Modello, @Campi)", this.cnn)
+            {
+                CommandType = System.Data.CommandType.Text
+            };
+            int id = 0;
+
+            cmdInsert.Parameters.Add(new SqlParameter("@Nome", System.Data.SqlDbType.VarChar, 255));
+            cmdInsert.Parameters["@Nome"].Value = concat.Nome;
+            cmdInsert.Parameters.Add(new SqlParameter("@Modello", System.Data.SqlDbType.Int));
+            cmdInsert.Parameters["@Modello"].Value = concat.Modello;
+            cmdInsert.Parameters.Add(new SqlParameter("@Campi", System.Data.SqlDbType.Text));
+            cmdInsert.Parameters["@Campi"].Value = concat.SerializeDictionary();
+
+            try
+            {
+                cnn.Open();
+                cmdInsert.ExecuteNonQuery();
+
+                cmdInsert.Parameters.Clear();
+                cmdInsert.CommandText = "Select @@Identity";
+                id = Convert.ToInt32(cmdInsert.ExecuteScalar());
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return id;
+        }
+
         private void UpdateRaw(string table, Dictionary<string, string> values, string where) {
             StringBuilder frmtVals = new StringBuilder();
             if(values.Count >= 1)
@@ -333,6 +369,19 @@ namespace BatchDataEntry.Helpers
             UpdateRaw("Modello", values, string.Format("Id={0}", m.Id));
         }
         
+        public void Update(Concatenation concat)
+        {
+            if (cnn == null || concat == null) return;
+            if (concat.Id == 0) throw new Exception("Non è possibile eseguire il comando update su un record con Id=0");
+            Dictionary<string, string> values = new Dictionary<string, string>
+            {
+                { "Nome", concat.Nome },
+                { "Modello", concat.Modello.ToString() },
+                { "Campi", concat.SerializeDictionary() }
+            };
+            UpdateRaw("Concatenazioni", values, string.Format("Id={0}", concat.Id));
+        }
+
         public override Batch GetBatchById(int id) {
             if (cnn == null) return null;
             string sql = "SELECT * FROM Batch WHERE Id = @id";
@@ -1032,9 +1081,37 @@ namespace BatchDataEntry.Helpers
             return suggestions;
         }
 
-        public ObservableCollection<Campo> LoadConcatenations(int modello)
+        public ObservableCollection<Concatenation> LoadConcatenations(int modello)
         {
-            var res = new ObservableCollection<Campo>();
+            if (cnn == null) return null;
+            var res = new ObservableCollection<Concatenation>();
+            string sql = string.Format("SELECT * FROM Concatenazioni WHERE Modello = {0}", modello);
+            try
+            {
+                cnn.Open();
+                SqlCommand cmd = new SqlCommand(sql, cnn);
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var tmp = new Concatenation();
+                    tmp.Id = Convert.ToInt32(reader["Id"]);
+                    tmp.Nome = Convert.ToString(reader["Nome"]);
+                    tmp.Modello = modello;
+                    string serializedDict = Convert.ToString(reader["Campi"]);
+                    tmp.DeserializeDictionary(serializedDict);
+
+                    res.Add(tmp);
+                }
+                reader.Close();
+            }
+            catch(Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
 
             return res;
         }

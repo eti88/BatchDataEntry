@@ -1,4 +1,5 @@
-﻿using BatchDataEntry.Helpers;
+﻿using BatchDataEntry.Abstracts;
+using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace BatchDataEntry.ViewModels
 {
     public class ViewModelConcatenations : ViewModelBase
     {
+        private AbsDbHelper db;
+
         private ObservableCollection<Concatenation> _concat;
         public ObservableCollection<Concatenation> Concatenazioni
         {
@@ -42,13 +45,15 @@ namespace BatchDataEntry.ViewModels
             Concatenazioni.Add(new Concatenation(2, "Test 3", 0));
         }
 
-        public ViewModelConcatenations(int idmodello)
+        public ViewModelConcatenations(DatabaseHelperSqlServer _db, int idmodello)
         {
+            db = _db;
+            Concatenazioni = new ObservableCollection<Concatenation>();
 
         }
 
         private RelayCommand _addnew;
-        public ICommand addNewItemCommand
+        public ICommand AddNewItemCommand
         {
             get
             {
@@ -58,20 +63,9 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private RelayCommand _cmdDelItem;
-        public ICommand CmdDelItem
-        {
-            get
-            {
-                if (_cmdDelItem == null)
-                    _cmdDelItem = new RelayCommand(param => DeleteItem(param));
-                return _cmdDelItem;
-            }
-        }
-
         public void AddNewConcatItem()
         {
-
+            
         }
 
         public void DeleteItem(object elementId)

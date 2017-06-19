@@ -178,7 +178,7 @@ namespace BatchDataEntry.ViewModels
             if(SelectedModel != null)
             {
                 var concatview = new Concatenations();
-                concatview.DataContext = new ViewModelConcatenations();
+                concatview.DataContext = new ViewModelConcatenations(db, SelectedModel.Id);
                 concatview.ShowDialog();
             }
         }
