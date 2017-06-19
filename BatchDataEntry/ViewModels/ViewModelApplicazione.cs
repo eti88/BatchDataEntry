@@ -19,6 +19,7 @@ namespace BatchDataEntry.ViewModels
         private Modello _selectedModel;
         private RelayCommand _updateModel;
         private RelayCommand _buttonCopyCommand;
+        private RelayCommand _concatCommand;
 
         public ViewModelApplicazione()
         {
@@ -105,6 +106,15 @@ namespace BatchDataEntry.ViewModels
                 return _openCampiView;
             }
         }
+        public ICommand ConcatCommand
+        {
+            get
+            {
+                if (_concatCommand == null)
+                    _concatCommand = new RelayCommand(param => OpenConcatenationView(), param => CanModify);
+                return _concatCommand;
+            }
+        }
 
         private bool CanModify
         {
@@ -160,6 +170,16 @@ namespace BatchDataEntry.ViewModels
                 var campiView = new CampiV();
                 campiView.DataContext = new ViewModelCampi(db, SelectedModel.Id);
                 campiView.ShowDialog();
+            }
+        }
+
+        private void OpenConcatenationView()
+        {
+            if(SelectedModel != null)
+            {
+                var concatview = new Concatenations();
+                concatview.DataContext = new ViewModelConcatenations();
+                concatview.ShowDialog();
             }
         }
 

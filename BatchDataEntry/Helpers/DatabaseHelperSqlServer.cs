@@ -1032,5 +1032,11 @@ namespace BatchDataEntry.Helpers
             return suggestions;
         }
 
+        public ObservableCollection<Campo> LoadConcatenations(int modello)
+        {
+            var res = new ObservableCollection<Campo>();
+
+            return res;
+        }
     }
 }

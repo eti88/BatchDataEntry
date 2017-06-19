@@ -1,0 +1,21 @@
+﻿<Window x:Class="BatchDataEntry.Views.Concatenations"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BatchDataEntry.Views"
+        mc:Ignorable="d"
+        Title="Autocompletamenti concatenati" Height="300" Width="300" SizeToContent="WidthAndHeight">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <Button Content="Aggiungi" Width="110" HorizontalAlignment="Left"/>
+        </StackPanel>
+        <ListBox Grid.Row="1" Background="#FFF3F3F3"
+                 ItemsSource="{Binding Concatenazioni, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 ItemTemplate="{StaticResource ConcatenationItemTemplate}"/>
+    </Grid>
+</Window>

@@ -12,6 +12,7 @@
                 <ResourceDictionary Source="Views/Resources/Styles.xaml"/>
                 <ResourceDictionary Source="Views/Resources/DataTemplatesTextbox.xaml"/>
                 <ResourceDictionary Source="Views/Resources/Errors.xaml"/>
+                <ResourceDictionary Source="Views/Resources/DataTemplatesItems.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

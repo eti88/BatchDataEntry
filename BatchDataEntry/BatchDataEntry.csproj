@@ -148,6 +148,9 @@
     <Reference Include="MoonPdfLib">
       <HintPath>..\MoonPdfLib-0.3.0-x86\MoonPdfLib-0.3.0-x86\MoonPdfLib.dll</HintPath>
     </Reference>
+    <Reference Include="MultiSelectComboBox">
+      <HintPath>..\..\..\..\Visual Studio 2017\Projects\MultiSelectComboBox\MultiSelectComboBox\bin\Release\MultiSelectComboBox.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -237,6 +240,7 @@
     <Compile Include="Interfaces\ISuggestion.cs" />
     <Compile Include="Interfaces\ISuggestionProvider.cs" />
     <Compile Include="Models\BaseModel.cs" />
+    <Compile Include="Models\Concatenation.cs" />
     <Compile Include="Models\DbCredential.cs" />
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\ExportColumn.cs" />
@@ -257,6 +261,7 @@
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\ViewModelBatchSelected.cs" />
     <Compile Include="ViewModels\ViewModelCampi.cs" />
+    <Compile Include="ViewModels\ViewModelConcatenations.cs" />
     <Compile Include="ViewModels\ViewModelDocumento.cs" />
     <Compile Include="ViewModels\ViewModelExport.cs" />
     <Compile Include="ViewModels\ViewModelMain.cs" />
@@ -272,6 +277,9 @@
     </Compile>
     <Compile Include="Views\CampiV.xaml.cs">
       <DependentUpon>CampiV.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Concatenations.xaml.cs">
+      <DependentUpon>Concatenations.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DialogNumeration.xaml.cs">
       <DependentUpon>DialogNumeration.xaml</DependentUpon>
@@ -325,6 +333,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Concatenations.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\DialogNumeration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -365,6 +377,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\NuovoModello.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Resources\DataTemplatesItems.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -422,6 +438,7 @@
     <Resource Include="Img\Mesh-100.ico" />
     <Resource Include="Img\arrowLeft.png" />
     <Resource Include="Img\arrowRight.png" />
+    <Resource Include="Img\chain-icon.png" />
     <Content Include="x64\SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
