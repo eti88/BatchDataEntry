@@ -6,111 +6,13 @@
              Startup="Application_Startup"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-        <Style TargetType="DataGrid">
-            <Setter Property="ColumnHeaderStyle" Value="{DynamicResource ColumnHeaderStyle1}"/>
-        </Style>
-        <Style x:Key="ColumnHeaderStyle1" TargetType="DataGridColumnHeader">
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="Background" Value="CornflowerBlue"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="RoyalBlue"/>
-            <Setter Property="BorderThickness" Value="0.5"/>
-            <Setter Property="FontSize" Value="14" />
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="ToolTip" Value="Click to sort."/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style TargetType="TextBlock">
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontFamily" Value="Segoe UI"></Setter>
-            <Setter Property="Padding" Value="5,5,5,5"></Setter>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        <Style TargetType="TextBox">
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontFamily" Value="Segoe UI"></Setter>
-            <Setter Property="Padding" Value="5,5,5,5"></Setter>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        <Style x:Key="generalTextbox" TargetType="TextBox">
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontFamily" Value="Segoe UI"></Setter>
-        </Style>
-        <Style TargetType="ComboBox">
-            <Setter Property="Height" Value="35"/>
-            <Setter Property="FontSize" Value="14"/>
-        </Style>
-        <Style x:Key="OpenDirDialogButton" TargetType="Button">
-            <Setter Property="Width" Value="35"></Setter>
-            <Setter Property="Height" Value="30"></Setter>
-            <Setter Property="Margin" Value="0,5,0,0"></Setter>
-        </Style>
-        <Style x:Key="GenericButton" TargetType="Button">
-            <Setter Property="Width" Value="140"/>
-            <Setter Property="Height" Value="35"/>
-            <Setter Property="FontSize" Value="14"></Setter>
-            <Setter Property="Padding" Value="0,0,0,0"></Setter>
-            <Setter Property="FontWeight" Value="Normal"></Setter>
-        </Style>
-        <Style x:Key="redCircleError" TargetType="Ellipse">
-            <Setter Property="Width" Value="12"/>
-            <Setter Property="Height" Value="12"/>
-            <Setter Property="Fill" Value="Red"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        <Style x:Key="TextErrorImg" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="Heavy"/>
-            <Setter Property="FontSize" Value="8"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="TextAlignment" Value="Center"/>
-        </Style>
-        <Style x:Key="TextError" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="Red"/>
-            <Setter Property="Margin" Value="5,0,0,0"/>
-            <Setter Property="Padding" Value="0,5,0,0"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
-        <Style x:Key="ButtonMenu" TargetType="Button">
-            <Setter Property="Width" Value="90"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="0,0,20,0"/>
-            <Setter Property="BorderBrush" Value="#FFB0B0B0"/>
-            <Setter Property="Background" Value="#FFF3F3F3"></Setter>
-        </Style>
-        <Style x:Key="ButtonUndo" TargetType="Button">
-            <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#ccc"/>
-                    <Setter Property="Foreground" Value="#ccc"/>
-                </Trigger>
-            </Style.Triggers>
-            <Setter Property="Margin" Value="0,0,20,0"/>
-            <Setter Property="BorderBrush" Value="#FFB0B0B0"/>
-            <Setter Property="Background" Value="#FFF3F3F3"></Setter>
-        </Style>
-        <ControlTemplate x:Key="validationErrorTemplate">
-            <DockPanel>
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-                    <Grid Width="12" Height="12">
-                        <Ellipse Style="{StaticResource redCircleError}"></Ellipse>
-                        <TextBlock Style="{StaticResource TextErrorImg}" ToolTip="{Binding ElementName=ErrorAdorner, Path=AdornedElement.(Validation.Errors).CurrentItem.ErrorContent}">X</TextBlock>
-                    </Grid>
-                    <TextBlock Style="{StaticResource TextError}" Text="{Binding ElementName=ErrorAdorner, 
-                       Path=AdornedElement.(Validation.Errors).CurrentItem.ErrorContent}">
-                    </TextBlock>
-                </StackPanel>
-                <AdornedElementPlaceholder x:Name="ErrorAdorner" ></AdornedElementPlaceholder>
-            </DockPanel>
-        </ControlTemplate>
+        <!-- Resource dictionaries -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Views/Resources/Styles.xaml"/>
+                <ResourceDictionary Source="Views/Resources/DataTemplatesTextbox.xaml"/>
+                <ResourceDictionary Source="Views/Resources/Errors.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
