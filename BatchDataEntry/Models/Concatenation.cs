@@ -47,21 +47,6 @@ namespace BatchDataEntry.Models
             }
         }
 
-        // Non salvare nel db
-        private Dictionary<string, object> _campi;
-        public Dictionary<string, object> Campi
-        {
-            get { return _campi; }
-            set
-            {
-                if (_campi != value)
-                {
-                    _campi = value;
-                    OnPropertyChanged("Campi");
-                }
-            }
-        }
-
         private Dictionary<string, object> _campisel;
         public Dictionary<string, object> CampiSelezionati
         {
@@ -78,7 +63,6 @@ namespace BatchDataEntry.Models
 
         public Concatenation()
         {
-            this.Campi = new Dictionary<string, object>();
             this.CampiSelezionati = new Dictionary<string, object>();
         }
 
@@ -87,7 +71,6 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Nome = nome;
             this.Modello = modello;
-            this.Campi = new Dictionary<string, object>();
             this.CampiSelezionati = new Dictionary<string, object>();
         }
 
@@ -96,7 +79,6 @@ namespace BatchDataEntry.Models
             this.Id = id;
             this.Nome = nome;
             this.Modello = modello;
-            this.Campi = campi;
             this.CampiSelezionati = new Dictionary<string, object>();
         }
 
@@ -105,7 +87,6 @@ namespace BatchDataEntry.Models
             this.Id = c.Id;
             this.Nome = c.Nome;
             this.Modello = c.Modello;
-            this.Campi = c.Campi;
             this.CampiSelezionati = c.CampiSelezionati;
         }
 

@@ -2,27 +2,20 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:BatchDataEntry.Views.Resources">
     <DataTemplate x:Key="ConcatenationItemTemplate">
-        <Grid Margin="5" Background="#FFFBFBFB" Height="80">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="70"/>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <DockPanel LastChildFill="True" Height="100" Background="#FFFBFBFB" Margin="5">
             <Image
+                DockPanel.Dock="Left"
                 Grid.Column="0"
                 Margin="20,0,30,0"
                 Width="15" Height="70"
                 Source="/BatchDataEntry;component/Img/chain-icon.png"  
                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-            <StackPanel Grid.Column="1" Orientation="Vertical" Height="70">
+            <StackPanel DockPanel.Dock="Right" Orientation="Vertical" Height="90">
                 <TextBlock Text="{Binding Path=Id, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat=Id: {0}}"/>
                 <TextBlock Text="{Binding Path=Nome, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat=Nome: {0}}"/>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2" Orientation="Vertical" Height="70" Margin="55,0,10,0">
                 <TextBlock Text="{Binding Path=Modello, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat=Modello Id: {0}}"/>
             </StackPanel>
-        </Grid>
+        </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

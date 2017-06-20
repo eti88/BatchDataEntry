@@ -5,15 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BatchDataEntry.Views"
         xmlns:multiselectcombobox="clr-namespace:MultiSelectComboBox;assembly=MultiSelectComboBox"
+        xmlns:viewModels="clr-namespace:BatchDataEntry.ViewModels"
         mc:Ignorable="d"
-        Title="Autocompletamenti concatenati" Height="400" MinWidth="750" Width="750" SizeToContent="WidthAndHeight">
+        Title="Autocompletamenti concatenati" MinHeight="500" Height="500" MinWidth="750" Width="750" SizeToContent="WidthAndHeight">
+    <Window.DataContext>
+        <viewModels:ViewModelConcatenations></viewModels:ViewModelConcatenations>
+    </Window.DataContext>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="320"/>
             <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
@@ -23,7 +28,8 @@
                  ItemsSource="{Binding Concatenazioni, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  ItemTemplate="{StaticResource ConcatenationItemTemplate}"
                  IsSynchronizedWithCurrentItem="True"
-                 SelectedItem="{Binding SelectedConcat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                 SelectedItem="{Binding SelectedConcat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 HorizontalContentAlignment="Stretch"/>
 
         <!-- Template selected item -->
         <Grid Grid.Row="1" Grid.Column="1">
@@ -35,13 +41,13 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal">
                 <Label Content="Nome" Margin="0,0,17,0"/>
-                <TextBox Text="{Binding Path=SelectedConcat.Nome}" Width="250"/>
+                <TextBox Text="{Binding Path=SelectedConcat.Nome, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="250"/>
             </StackPanel>
             <multiselectcombobox:MultiSelectComboBox 
                     Grid.Row="2"
                     Width="250" Height="35" 
-                    ItemsSource="{Binding Path=SelectedConcat.Campi}"
-                    SelectedItems="{Binding Path=SelectedConcat.CampiSelezionati}"/>
+                    ItemsSource="{Binding Path=AllCampi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedItems="{Binding Path=SelectedConcat.CampiSelezionati, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             
             <!-- Bottoni funzioni -->
             <StackPanel Grid.Row="5" Orientation="Horizontal" Height="30" 

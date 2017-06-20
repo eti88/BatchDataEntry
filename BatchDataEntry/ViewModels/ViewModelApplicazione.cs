@@ -147,6 +147,7 @@ namespace BatchDataEntry.ViewModels
             {
                 Modello tmp = new Modello(SelectedModel);
                 db.DeleteReference(string.Format(@"DELETE FROM Campo WHERE IdModello = {0}", tmp.Id));
+                db.DeleteReference(string.Format(@"DELETE FROM Concatenazioni WHERE Modello = {0}", tmp.Id));
                 db.DeleteReference(string.Format(@"DELETE FROM Batch WHERE IdModello = {0}", tmp.Id));
                 db.DeleteFromTable(@"Modello", String.Format("Id = {0}", tmp.Id));              
                 Modelli.Remove(SelectedModel);
