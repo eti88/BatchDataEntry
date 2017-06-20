@@ -15,6 +15,11 @@ namespace BatchDataEntry.ViewModels
     {
         private AbsDbHelper db;
 
+        private bool CanEdit
+        {
+            get { return (SelectedConcat != null); }
+        }
+
         private ObservableCollection<Concatenation> _concat;
         public ObservableCollection<Concatenation> Concatenazioni
         {
@@ -29,14 +34,19 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        /*
-          Tabella: Concatenazioni
-          Colonne:
-            - Id int pk autoc
-            - Nome string
-            - Modello int
-            - List<Campi> // Per il salvataggio del db serializzare la lista solo di int 
-         */
+        private Concatenation _selectedConcat;
+        public Concatenation SelectedConcat
+        {
+            get { return _selectedConcat; }
+            set
+            {
+                if (_selectedConcat != value)
+                {
+                    _selectedConcat = value;
+                    RaisePropertyChanged("SelectedConcat");
+                }
+            }
+        }
 
         public ViewModelConcatenations() {
             Concatenazioni = new ObservableCollection<Concatenation>();
@@ -63,12 +73,42 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        public void AddNewConcatItem()
+        private RelayCommand _cmdmod;
+        public ICommand ModifyCommand
         {
-            
+            get
+            {
+                if (_cmdmod == null)
+                    _cmdmod = new RelayCommand(param => ModifyItem(), param => this.CanEdit);
+                return _cmdmod;
+            }
         }
 
-        public void DeleteItem(object elementId)
+        private RelayCommand _del;
+        public ICommand DeleteCommand
+        {
+            get
+            {
+                if (_del == null)
+                    _del = new RelayCommand(param => DeleteItem(), param => this.CanEdit);
+                return _del;
+            }
+        }
+
+        public void AddNewConcatItem()
+        {
+            if (Concatenazioni == null)
+                Concatenazioni = new ObservableCollection<Concatenation>();
+
+            Concatenazioni.Add(new Concatenation());
+        }
+
+        public void ModifyItem()
+        {
+
+        }
+
+        public void DeleteItem()
         {
 
         }

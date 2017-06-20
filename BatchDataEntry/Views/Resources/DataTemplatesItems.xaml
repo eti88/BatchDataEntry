@@ -1,14 +1,12 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:BatchDataEntry.Views.Resources"
-                    xmlns:multiselectcombobox="clr-namespace:MultiSelectComboBox;assembly=MultiSelectComboBox">
+                    xmlns:local="clr-namespace:BatchDataEntry.Views.Resources">
     <DataTemplate x:Key="ConcatenationItemTemplate">
-        <Grid Margin="5" Background="WhiteSmoke" Height="80">
+        <Grid Margin="5" Background="#FFFBFBFB" Height="80">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="70"/>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" MinWidth="450"/>
-                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Image
                 Grid.Column="0"
@@ -24,16 +22,6 @@
 
             <StackPanel Grid.Column="2" Orientation="Vertical" Height="70" Margin="55,0,10,0">
                 <TextBlock Text="{Binding Path=Modello, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat=Modello Id: {0}}"/>
-                <multiselectcombobox:MultiSelectComboBox 
-                    Width="400" Height="35" 
-                    HorizontalAlignment="Left"
-                    ItemsSource="{Binding Path=Campi}"
-                    SelectedItems="{Binding Path=CampiSelezionati}"/>
-            </StackPanel>
-
-            <StackPanel Grid.Column="3" Orientation="Vertical" DockPanel.Dock="Right">
-                <Button Content="Modifica"/>
-                <Button Content="Elimina" />
             </StackPanel>
         </Grid>
     </DataTemplate>

@@ -4,18 +4,51 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BatchDataEntry.Views"
+        xmlns:multiselectcombobox="clr-namespace:MultiSelectComboBox;assembly=MultiSelectComboBox"
         mc:Ignorable="d"
-        Title="Autocompletamenti concatenati" Height="300" Width="300" SizeToContent="WidthAndHeight">
+        Title="Autocompletamenti concatenati" Height="400" MinWidth="750" Width="750" SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0">
-            <Button Content="Aggiungi" Width="110" HorizontalAlignment="Left" Command="{Binding Path=AddNewItemCommand}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="400"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
+            <Button Content="Aggiungi" Width="110" Margin="2" HorizontalAlignment="Left" Command="{Binding Path=AddNewItemCommand}"/>
         </StackPanel>
-        <ListBox Grid.Row="1" Background="#FFF3F3F3"
+        <ListBox Grid.Row="1" Grid.Column="0" Background="#FFF3F3F3"
                  ItemsSource="{Binding Concatenazioni, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 ItemTemplate="{StaticResource ConcatenationItemTemplate}"/>
+                 ItemTemplate="{StaticResource ConcatenationItemTemplate}"
+                 IsSynchronizedWithCurrentItem="True"
+                 SelectedItem="{Binding SelectedConcat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- Template selected item -->
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <Label Content="Nome" Margin="0,0,17,0"/>
+                <TextBox Text="{Binding Path=SelectedConcat.Nome}" Width="250"/>
+            </StackPanel>
+            <multiselectcombobox:MultiSelectComboBox 
+                    Grid.Row="2"
+                    Width="250" Height="35" 
+                    ItemsSource="{Binding Path=SelectedConcat.Campi}"
+                    SelectedItems="{Binding Path=SelectedConcat.CampiSelezionati}"/>
+            
+            <!-- Bottoni funzioni -->
+            <StackPanel Grid.Row="5" Orientation="Horizontal" Height="30" 
+                        VerticalAlignment="Bottom" Margin="10">
+                <Button Content="Modifica" Margin="0,0,10,0" Width="70" Command="{Binding Path=ModifyCommand}"/>
+                <Button Content="Elimina" Width="70"  Command="{Binding Path=DeleteCommand}"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
