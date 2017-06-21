@@ -35,8 +35,6 @@ namespace BatchDataEntry.ViewModels
         private Image _img;
         private NavigationList<Image> _imgs;
 
-        private static bool resetIndex = false;
-
         public Document DocFile
         {
             get { return _doc; }
@@ -149,11 +147,6 @@ namespace BatchDataEntry.ViewModels
                 SetPdfWrapper(DocFile.Path);
             else if (Batch.TipoFile == TipoFileProcessato.Tiff)
             {
-                //Images = new NavigationList<Image>();
-                //var tmp = GetAllPages(DocFile.Path);
-                //foreach (Image i in tmp)
-                //    Images.Add(i);
-                //Image = Images.ElementAt(0); // Imposto la visualizzazione dell aprima pagina
                 SetTiffWrapper(DocFile.Path);
             }
                 
@@ -192,11 +185,6 @@ namespace BatchDataEntry.ViewModels
                 SetPdfWrapper(DocFile.Path);
             else if (Batch.TipoFile == TipoFileProcessato.Tiff)
             {
-                //Images = new NavigationList<Image>();
-                //var tmp = GetAllPages(DocFile.Path);
-                //foreach (Image i in tmp)
-                //    Images.Add(i);
-                //Image = Images.ElementAt(0); // Imposto la visualizzazione della prima pagina
                 SetTiffWrapper(DocFile.Path);
             }
 

@@ -43,9 +43,8 @@ namespace BatchDataEntry.Views.UserControls
 
         private static void SourcePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
     {
-            ZoomAndPanScrollViewerView thiscontrol = sender as ZoomAndPanScrollViewerView;
 
-            if (thiscontrol != null)
+            if (sender is ZoomAndPanScrollViewerView thiscontrol)
             {
                 BitmapSource bitmap = e.NewValue as BitmapSource;
                 thiscontrol.Source = bitmap;

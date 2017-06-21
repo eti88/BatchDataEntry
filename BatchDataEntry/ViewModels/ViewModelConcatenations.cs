@@ -71,7 +71,6 @@ namespace BatchDataEntry.ViewModels
             Concatenazioni = new ObservableCollection<Concatenation>();
 
             AllCampi = new Dictionary<string, object>();
-            //SubCampi = new Dictionary<string, object>();
         }
 
         public ViewModelConcatenations(DatabaseHelperSqlServer _db, int idmodello)
