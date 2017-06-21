@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -811,7 +812,8 @@ namespace BatchDataEntry.ViewModels
             sb.Append("\t");
             sb.Append(ConvertiBool(AccettaEmail));
             sb.Append("\t");
-            sb.Append(DataNascita);
+            DateTime dtemp = DateTime.ParseExact(DataNascita, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            sb.Append(dtemp.ToString("yyyy-MM-dd"));
             sb.Append("\t");
             sb.Append(Luogo);
             sb.Append("\t");
