@@ -58,7 +58,7 @@
                     <Label Content="Codice associato"/>
                     <TextBox Text="{Binding CodiceAssociato, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="30" Margin="5" VerticalContentAlignment="Center"/>
                     <Label Content="Codice cliente"/>
-                    <TextBox Text="{Binding CodiceCliente, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="30" Margin="5" VerticalContentAlignment="Center"/>
+                    <TextBox Text="{Binding CodiceNegozio, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="30" Margin="5" VerticalContentAlignment="Center"/>
                 </StackPanel>
                 <Button DockPanel.Dock="Bottom" Content="Genera" Height="30" Margin="5" Command="{Binding Path=GenerateCommand}" VerticalAlignment="Bottom"/>
             </DockPanel>

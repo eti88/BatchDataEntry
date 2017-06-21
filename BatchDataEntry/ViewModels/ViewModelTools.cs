@@ -187,7 +187,7 @@ namespace BatchDataEntry.ViewModels
         }
         
         public ViewModelTools() {
-            DateFormat = "yyyy-MM-dd"; // Set default date format
+            DateFormat = "dd-MM-yyyy"; // Set default date format
             GenerateOutputFile = false;
             CheckEmpty = true;
             ErrorRecordList = new ObservableCollection<ErrorRecord>();
