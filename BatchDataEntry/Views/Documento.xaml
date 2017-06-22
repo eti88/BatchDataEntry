@@ -8,6 +8,7 @@
         xmlns:providers="clr-namespace:BatchDataEntry.Providers"
         xmlns:usercontrols="clr-namespace:BatchDataEntry.Views.UserControls"
         xmlns:editors="http://wpfcontrols.com/"
+        xmlns:ctrls="clr-namespace:BatchDataEntry.Components"
         mc:Ignorable="d"
         x:Name="DocumentWindow"        
         Title="{Binding Path=DocFile.FileName}" Height="650" Width="800" WindowState="Maximized" Icon="/BatchDataEntry;component/Mesh-100.ico" Loaded="DocumentWindow_Loaded">
@@ -31,8 +32,19 @@
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
                 <TextBox
-                Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 IsEnabled="{Binding Path=IsDisabilitato}"
+                Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                VerticalAlignment="Center"
+                Height="30"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="TextBoxDataFormatTemplate">
+            <StackPanel Margin="5,0,5,0">
+                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+                <ctrls:MaskedDateTextbox
+                IsEnabled="{Binding Path=IsDisabilitato}"
+                InputMask="ii-ii-iiii"
+                Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 VerticalAlignment="Center"
                 Height="30"/>
             </StackPanel>

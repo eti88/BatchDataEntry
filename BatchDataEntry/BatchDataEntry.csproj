@@ -214,6 +214,7 @@
     <Compile Include="Business\CsvFileWriter.cs" />
     <Compile Include="Business\CsvRow.cs" />
     <Compile Include="Business\Utility.cs" />
+    <Compile Include="Components\MaskedDateTextbox.cs" />
     <Compile Include="Components\NavigationList.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Helpers\DatabaseHelperSqlServer.cs" />
