@@ -6,6 +6,7 @@
         AutocompletamentoCsv = 1,
         AutocompletamentoDbSqlite = 2,
         AutocompletamentoDbSql = 3,
-        Data = 4
+        Data = 4,
+        AutocompletamentoLocalita = 5    
     }
 }

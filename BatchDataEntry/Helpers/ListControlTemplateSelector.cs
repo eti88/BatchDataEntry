@@ -19,6 +19,8 @@ namespace BatchDataEntry.Helpers
                 return element.FindResource("AutocompleteDbSqlDataTemplate") as DataTemplate;
             else if(voce.TipoCampo == EnumTypeOfCampo.Data)
                 return element.FindResource("TextBoxDataFormatTemplate") as DataTemplate;
+            else if (voce.TipoCampo == EnumTypeOfCampo.AutocompletamentoLocalita)
+                return element.FindResource("AutocompleteDbLocalitaDataTemplate") as DataTemplate;
             else
                 return element.FindResource("TextBoxDataTemplate") as DataTemplate;
         }

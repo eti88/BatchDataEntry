@@ -1047,6 +1047,7 @@ namespace BatchDataEntry.Helpers
         /// <param name="tableName"></param>
         /// <param name="columnTable"></param>
         /// <returns></returns>
+        //TODO: Da modificare gestione recuper tipo di suggestion
         public List<AbsSuggestion> GetAutocompleteList(string tableName, int columnTable)
         {
             if (cnn == null) return null;

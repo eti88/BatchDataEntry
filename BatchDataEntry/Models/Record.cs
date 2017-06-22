@@ -176,7 +176,7 @@ namespace BatchDataEntry.Models
 
         public void QueryProviderSelector()
         {
-            if (TipoCampo == EnumTypeOfCampo.Normale || TipoCampo == EnumTypeOfCampo.AutocompletamentoCsv) return;
+            if (TipoCampo == EnumTypeOfCampo.Normale || TipoCampo == EnumTypeOfCampo.Data || TipoCampo == EnumTypeOfCampo.AutocompletamentoCsv) return;
             if (TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
             {
                 var au = new DbSuggestionProvider(this.Posizione);
@@ -187,6 +187,12 @@ namespace BatchDataEntry.Models
                 if (string.IsNullOrWhiteSpace(TabellaSorgente))
                     throw new Exception("SuggestionsProvider mancano argomenti");
                 var au = new DbSqlSuggestionProvider(this.Posizione, TabellaSorgente, SourceTableColumn);
+                SuggestionsProvider = au;
+            }else if(TipoCampo == EnumTypeOfCampo.AutocompletamentoLocalita)
+            {
+                if (string.IsNullOrWhiteSpace(TabellaSorgente))
+                    throw new Exception("SuggestionsProvider mancano argomenti");
+                var au = new DbSqlLocalitaSuggestionProvider(this.Posizione, TabellaSorgente, SourceTableColumn);
                 SuggestionsProvider = au;
             }
         }

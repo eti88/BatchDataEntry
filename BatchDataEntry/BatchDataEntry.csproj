@@ -243,6 +243,7 @@
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\ExportColumn.cs" />
     <Compile Include="Models\Record.cs" />
+    <Compile Include="Providers\DbSqlLocalitaSuggestionProvider.cs" />
     <Compile Include="Suggestions\SuggestionDoubleColumn.cs" />
     <Compile Include="Models\TipoFileProcessato.cs" />
     <Compile Include="Providers\CsvSuggestionProvider.cs" />

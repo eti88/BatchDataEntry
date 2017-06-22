@@ -38,6 +38,7 @@
                 Height="30"/>
             </StackPanel>
         </DataTemplate>
+        <!-- normal data masked template -->
         <DataTemplate x:Key="TextBoxDataFormatTemplate">
             <StackPanel Margin="5,0,5,0">
                 <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
@@ -82,7 +83,8 @@
                     DisplayMember="Valore"
                     Height="30"
                     Width="352"
-                    Provider="{Binding Path=SuggestionsProvider, Mode=OneWay}" 
+                    Tag="{Binding Path=Posizione}"
+                    Provider="{Binding Path=SuggestionsProvider, Mode=OneWay}"                  
                     ItemTemplate="{StaticResource ResourceKey=SuggestionLocalita}">
                     <editors:AutoCompleteTextBox.SelectedItem>
                         <Binding Path="ElementoSelezionato" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"></Binding>
@@ -90,6 +92,16 @@
                     <editors:AutoCompleteTextBox.LoadingContent>
                         <TextBox Text="Loading..." Margin="5" FontSize="14"></TextBox>
                     </editors:AutoCompleteTextBox.LoadingContent>
+                    <editors:AutoCompleteTextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.TextboxSqlCmd}">
+                            <KeyBinding.CommandParameter>
+                                <MultiBinding Converter="{StaticResource PassThroughConverter }">
+                                    <Binding  Path="Tag" RelativeSource="{RelativeSource FindAncestor, AncestorType=editors:AutoCompleteTextBox}"/>
+                                    <Binding  Path="SelectedItem" RelativeSource="{RelativeSource FindAncestor, AncestorType=editors:AutoCompleteTextBox}"/>
+                                </MultiBinding>
+                            </KeyBinding.CommandParameter>
+                        </KeyBinding>
+                    </editors:AutoCompleteTextBox.InputBindings>
                 </editors:AutoCompleteTextBox>
                 <!-- end -->
             </StackPanel>
