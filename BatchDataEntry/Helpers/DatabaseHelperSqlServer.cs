@@ -1041,14 +1041,13 @@ namespace BatchDataEntry.Helpers
         }
 
         /// <summary>
-        /// Nel caso si cerchi di recuperare l'autocompletamento dalla tabella località utilizza un suggestion apposito
+        /// Nel caso si cerchi di recuperare l'autocompletamento dalla località utilizza un suggestion apposito
         /// (per poter visualizzare correttamente le informazioni).
         /// </summary>
         /// <param name="tableName"></param>
         /// <param name="columnTable"></param>
         /// <returns></returns>
-        //TODO: Da modificare gestione recuper tipo di suggestion
-        public List<AbsSuggestion> GetAutocompleteList(string tableName, int columnTable)
+        public List<AbsSuggestion> GetAutocompleteList(string tableName, int columnTable, EnumTypeOfCampo type)
         {
             if (cnn == null) return null;
             var suggestions = new List<AbsSuggestion>();
@@ -1058,17 +1057,18 @@ namespace BatchDataEntry.Helpers
                 cnn.Open();
                 SqlCommand cmd = new SqlCommand(sql, cnn);
                 SqlDataReader reader = cmd.ExecuteReader();
-                if(tableName.Equals("localita") || tableName.ToLower().Contains("localita"))
+
+                while (reader.Read())
                 {
-                    while (reader.Read())
+                    if (type == EnumTypeOfCampo.AutocompletamentoLocalita)
+                    {
                         suggestions.Add(new SuggestionLocalita(Convert.ToString(reader[1]), Convert.ToString(reader[2]), Convert.ToString(reader[3])));
-                }
-                else
-                {
-                    while (reader.Read())
+                    }
+                    else
+                    {
                         suggestions.Add(new SuggestionSingleColumn(Convert.ToString(reader[columnTable])));
+                    }
                 }
-                
                 reader.Close();
             }
             catch (Exception e)

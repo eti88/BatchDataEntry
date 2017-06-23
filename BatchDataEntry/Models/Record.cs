@@ -182,17 +182,11 @@ namespace BatchDataEntry.Models
                 var au = new DbSuggestionProvider(this.Posizione);
                 SuggestionsProvider = au;
             }
-            else if (TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSql)
+            else
             {
                 if (string.IsNullOrWhiteSpace(TabellaSorgente))
                     throw new Exception("SuggestionsProvider mancano argomenti");
-                var au = new DbSqlSuggestionProvider(this.Posizione, TabellaSorgente, SourceTableColumn);
-                SuggestionsProvider = au;
-            }else if(TipoCampo == EnumTypeOfCampo.AutocompletamentoLocalita)
-            {
-                if (string.IsNullOrWhiteSpace(TabellaSorgente))
-                    throw new Exception("SuggestionsProvider mancano argomenti");
-                var au = new DbSqlLocalitaSuggestionProvider(this.Posizione, TabellaSorgente, SourceTableColumn);
+                var au = new DbSqlSuggestionProvider(this.Posizione, TabellaSorgente, SourceTableColumn, this.TipoCampo);
                 SuggestionsProvider = au;
             }
         }

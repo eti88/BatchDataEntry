@@ -420,7 +420,13 @@ namespace BatchDataEntry.ViewModels
             var lstVal = parameter as List<object>;
 
             int pos = Convert.ToInt32(lstVal[0]);
-            var sugg = lstVal[1] as SuggestionSingleColumn;
+            AbsSuggestion sugg;
+            if (lstVal[1] is SuggestionLocalita)
+                sugg = lstVal[1] as SuggestionLocalita;
+            else if (lstVal[1] is SuggestionDoubleColumn)
+                sugg = lstVal[1] as SuggestionDoubleColumn;
+            else
+                sugg = lstVal[1] as SuggestionSingleColumn;
 
             if (sugg == null) return;
 
@@ -429,8 +435,12 @@ namespace BatchDataEntry.ViewModels
             #endif
 
             if (string.IsNullOrEmpty(sugg.Valore)) return;
-      
-            var trow = GetTableRow(Batch.Applicazione.Campi[pos].TabellaSorgente, Batch.Applicazione.Campi[pos].SourceTableColumn, sugg.Valore);
+            List<string> trow = new List<string>();
+            if (sugg is SuggestionLocalita)
+                trow = GetTableRow("Localita", 1, sugg.Valore);
+            else
+                trow = GetTableRow(Batch.Applicazione.Campi[pos].TabellaSorgente, Batch.Applicazione.Campi[pos].SourceTableColumn, sugg.Valore);
+
             if (trow.Count == 0) return;
             string reftab = Batch.Applicazione.Campi[pos].TabellaSorgente;
             foreach (Record r in DocFile.Voci)

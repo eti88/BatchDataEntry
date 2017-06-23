@@ -49,7 +49,6 @@ namespace BatchDataEntry.Views
                     TextBox tb = FindVisualChild<TextBox>(cp);
                     if (tb != null)
                     {
-                        Console.WriteLine("Textbox pos: " + i);
                         tb.Focus();
                     }
                     break;
