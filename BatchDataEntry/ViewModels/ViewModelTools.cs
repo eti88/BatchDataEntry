@@ -1,13 +1,16 @@
 ﻿using BatchDataEntry.Abstracts;
 using BatchDataEntry.Business;
+using BatchDataEntry.Components;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
+using BatchDataEntry.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
@@ -16,9 +19,11 @@ namespace BatchDataEntry.ViewModels
 {
     public class ViewModelTools : ViewModelBase
     {
-        private static string CACHEFILE = @"cache.db3";
-        private AbsDbHelper db;
+        //private static string CACHEFILE = @"cache.db3";
+        private AbsDbHelper dbinfo;
+        private DatabaseHelper dbcache;
         private bool needReload = false;
+        private Batch _batch;
 
         private String _dtformat;
         public String DateFormat
@@ -112,6 +117,8 @@ namespace BatchDataEntry.ViewModels
 
         public List<FidelityClient> Records { get; set; }
 
+        private NavigationList<Dictionary<int, string>> DocumentsWithErrors;
+
         private string _associato;
         public string CodiceAssociato
         {
@@ -186,12 +193,46 @@ namespace BatchDataEntry.ViewModels
                 return _reloadCommand;
             }
         }
-        
-        public ViewModelTools() {
+
+        private RelayCommand _correctCommand;
+        public ICommand CorrectCommand
+        {
+            get
+            {
+                if (_correctCommand == null)
+                {
+                    _correctCommand = new RelayCommand(param => this.StartErrorCorrection(), param => this.CanCorrect);
+                }
+                return _correctCommand;
+            }
+        }
+
+        private bool CanCorrect
+        {
+            get { return (DocumentsWithErrors != null) && DocumentsWithErrors.Count > 0; }
+        }
+
+        public ViewModelTools()
+        {
+
+        }
+
+        public ViewModelTools(AbsDbHelper db) {
             DateFormat = "dd-MM-yyyy"; // Set default date format
             GenerateOutputFile = false;
             CheckEmpty = true;
             ErrorRecordList = new ObservableCollection<ErrorRecord>();
+            dbinfo = db;
+            /* bisogna inserire una parte di vista per recuperare il modello dell'eurobrico e (relativo recupero dei campi) per creare un batch
+             temporaneo per l'elaborazione*/
+            var tmods = dbinfo.GetModelloRecords();
+            Modello mod = tmods.SingleOrDefault(x => x.Nome.ToLower().Contains("eurobrico"));
+            if (mod == null) ErrorRecordList.Add(new ErrorRecord("Impossibile trovare modello eurobrico", "ERRORE", "ERRORE", "LOAD"));
+            _batch = new Batch();
+            _batch.IsTemp = true;
+            _batch.Nome = "TempBatch";
+            _batch.Applicazione = mod;
+            _batch.Applicazione.LoadCampi(dbinfo);
 
             var settings = Properties.Settings.Default;
             if(!string.IsNullOrEmpty(settings.LastAssociato))
@@ -200,6 +241,7 @@ namespace BatchDataEntry.ViewModels
             if (!string.IsNullOrEmpty(settings.LastNegozio))
                 CodiceNegozio = settings.LastNegozio;
 
+            DocumentsWithErrors = new NavigationList<Dictionary<int, string>>();
         }
 
         public void NeedReloadFile()
@@ -207,25 +249,39 @@ namespace BatchDataEntry.ViewModels
             needReload = true;
         }
 
+        private void CleanErrorList()
+        {
+            if (ErrorRecordList != null && ErrorRecordList.Count > 0)
+                ErrorRecordList.Clear();
+        }
+
         // Carica il file sqlite nel modello FidelityCard
         public void LoadFile() {
             FileAttributes attr = File.GetAttributes(InputFilePath);
             if (attr.HasFlag(FileAttributes.Directory))
-                InputFilePath = Path.Combine(InputFilePath, CACHEFILE);
-            
-
+            {
+                List<string> qfiles = Directory.GetFiles(InputFilePath, "*.*", SearchOption.AllDirectories).Where(s => s.EndsWith(".db3") || s.EndsWith(".sqlite")).ToList();
+                if (qfiles.Count == 0)
+                    MessageBox.Show("Impossibile recupeare database dalla directory selezionata");
+                else
+                    InputFilePath = qfiles.ElementAt(0);
+            }
+                
             if(!string.IsNullOrEmpty(InputFilePath) && File.Exists(InputFilePath))
             {
-                db = new DatabaseHelper(InputFilePath);
-                Records = ((DatabaseHelper)db).GetRecords();
+                dbcache = new DatabaseHelper(InputFilePath);
+                Records = dbcache.GetRecords();
                 needReload = false;
                 Log("# Caricati " + Records.Count + " records");
             }
+
+            _batch.DirectoryInput = Path.GetDirectoryName(dbcache.GetDocumento(1).ElementAt(1).Value);
+            _batch.DirectoryOutput = Path.GetDirectoryName(InputFilePath);
         }
 
         public void CheckFile() {
             if (ErrorRecordList.Count > 0) ErrorRecordList.Clear();
-            if (db == null || needReload) LoadFile();
+            if (dbcache == null || needReload) LoadFile();
 
             if(Records.Count > 0)
             {
@@ -243,11 +299,13 @@ namespace BatchDataEntry.ViewModels
                         Check();
                     }
                 }
+                DocumentsWithErrors = GetSublistDocumentWithErrors(ref _errorRecordList);
             }
         }
 
         private void Check(string path)
-        {         
+        {
+            CleanErrorList();
             if (File.Exists(path)) File.Delete(path);
             using(var file = new StreamWriter(path, true))
             {
@@ -267,6 +325,8 @@ namespace BatchDataEntry.ViewModels
             string tagEmpty = "Vuoto";
             string tagTel = "NumeroNonValido";
             string tagFormato = "ErroreFormato";
+
+            CleanErrorList();
 
             if (Records.Count > 0)
             {
@@ -317,7 +377,7 @@ namespace BatchDataEntry.ViewModels
 
         public void GeneraFiles() {
             if (ErrorRecordList.Count > 0) ErrorRecordList.Clear();
-            if (db == null || needReload) LoadFile();
+            if (dbcache == null || needReload) LoadFile();
 
             if (string.IsNullOrEmpty(CodiceAssociato) || string.IsNullOrEmpty(CodiceNegozio))
             {
@@ -328,6 +388,7 @@ namespace BatchDataEntry.ViewModels
             // Salvo i valori correnti
             Properties.Settings.Default.LastAssociato = CodiceAssociato;
             Properties.Settings.Default.LastNegozio = CodiceNegozio;
+            Properties.Settings.Default.Save();
 
             string dir = Path.GetDirectoryName(InputFilePath);
             string fileFID = string.Format("FID{0}{1}{2}.FID", CodiceAssociato, CodiceNegozio, DateTime.Now.ToString("yyyyMMdd"));
@@ -365,6 +426,50 @@ namespace BatchDataEntry.ViewModels
         private string Line(string num, string campo, string valore, string tipo, string msg)
         {
             return string.Format("[{0}]\t{1}\t{2}\t{3}\t{4}", num,campo,valore,tipo,msg);
+        }
+
+        public void StartErrorCorrection()
+        {
+            if(DocumentsWithErrors != null && DocumentsWithErrors.Count > 0)
+            {
+                var continua = new Documento();
+                continua.DataContext = new ViewModelDocumento(_batch, dbinfo, DocumentsWithErrors);
+                continua.ShowDialog();
+            }
+        }
+
+        private NavigationList<Dictionary<int, string>> GetSublistDocumentWithErrors(ref ObservableCollection<ErrorRecord> errors)
+        {
+            NavigationList<Dictionary<int, string>> sublist = new NavigationList<Dictionary<int, string>>();
+            NavigationList<Dictionary<int, string>> tmp = new NavigationList<Dictionary<int, string>>();
+            if (dbcache == null) LoadFile();
+            try
+            {
+                tmp = dbcache.GetDocuments();
+                List<string> derr = new List<string>();
+
+                foreach(var err in errors)
+                {
+                    if (!derr.Contains(err.RecordNumber))
+                        derr.Add(err.RecordNumber);
+                }
+
+                if(tmp.Count > 0 && derr.Count() > 0)
+                {
+                    // campo 1 per il nome
+                    foreach(string error in derr)
+                    {
+                        var found = tmp.Find(x => x[1] == error);
+                        sublist.Add(found);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log(e.ToString());
+                throw e;
+            }
+            return sublist;
         }
 
         [Conditional("DEBUG")]

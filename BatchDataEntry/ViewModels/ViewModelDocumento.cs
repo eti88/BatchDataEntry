@@ -157,6 +157,44 @@ namespace BatchDataEntry.ViewModels
             Properties.Settings.Default.Save();
         }
 
+        /// <summary>
+        /// Costruttore utilizzato per la correzione degli errori
+        /// </summary>
+        /// <param name="_currentBatch"></param>
+        /// <param name="dbc"></param>
+        /// <param name="SubDocList"></param>
+        public ViewModelDocumento(Batch _currentBatch, AbsDbHelper dbc, NavigationList<Dictionary<int, string>> SubDocList)
+        {
+            if (_currentBatch != null)
+                Batch = _currentBatch;
+            _db = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], Batch.DirectoryOutput);
+            db = dbc;
+            if (Batch.Applicazione == null || Batch.Applicazione.Id == 0) Batch.LoadModel(db);
+            if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0) Batch.Applicazione.LoadCampi(db);
+
+            if (SubDocList == null || SubDocList.Count == 0) return;
+            DocFiles = SubDocList;
+            
+            DocFile = new Document(db, Batch, DocFiles.Current);
+            DocFile.AddInputsToPanel(Batch, db, _db, DocFiles.Current);
+            // Inverte il valore per l'abilitazione del campo
+            foreach (Campo c in DocFile.Voci)
+            {
+                c.IsDisabilitato = !c.IsDisabilitato;
+            }
+
+            if (Batch.TipoFile == TipoFileProcessato.Pdf)
+                SetPdfWrapper(DocFile.Path);
+            else if (Batch.TipoFile == TipoFileProcessato.Tiff)
+            {
+                SetTiffWrapper(DocFile.Path);
+            }
+
+            RaisePropertyChanged("DocFile");
+            _selectElementFocus = Batch.Applicazione.StartFocusColumn;
+            repeatValues = new string[1];
+        }
+
         public ViewModelDocumento(Batch _currentBatch, AbsDbHelper dbc)
         {
             if (_currentBatch != null)
@@ -263,58 +301,61 @@ namespace BatchDataEntry.ViewModels
             _db.UpdateRecordDocumento(DocFile);
 
             // Salva il valore se bisogna riproporlo
-            for (int z = 0; z < Batch.Applicazione.Campi.Count; z++)
+            if(!Batch.IsTemp)
             {
-                if (Batch.Applicazione.Campi[z].Riproponi)
-                    repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Valore);
-            }
-            Batch.UltimoIndicizzato = DocFiles.CurrentIndex + 1;
-            db.Update(Batch);
-
-            // controllare se bisogna salvare il valore inserito per l'autocomletamento in base al tipo di database usato
-            foreach (var col in DocFile.Voci)
-            {        
-                try
+                for (int z = 0; z < Batch.Applicazione.Campi.Count; z++)
                 {
-                    if (col.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
-                    {
-                        if (!string.IsNullOrEmpty(col.Valore) && col.Id >= 0)
-                        {
-                            // Conreolla se è già presente l'autocompletamento nella tabella e in tal caso skip
-                            string query = string.Format("SELECT Count(Id) FROM Autocompletamento WHERE Colonna = {0} AND Valore = '{0}'", col.Id, col.Valore);
-                            if (_db.Count(query) > 0) continue;
+                    if (Batch.Applicazione.Campi[z].Riproponi)
+                        repeatValues[z] = string.Format(DocFile.Voci.ElementAt(z).Valore);
+                }
+                Batch.UltimoIndicizzato = DocFiles.CurrentIndex + 1;
+                db.Update(Batch);
 
-                            var auto = new SuggestionSingleColumn();
-                            auto.Colonna = col.Id;
-                            auto.Valore = col.Valore;
-                            _db.Insert(auto);
+                // controllare se bisogna salvare il valore inserito per l'autocomletamento in base al tipo di database usato
+                foreach (var col in DocFile.Voci)
+                {
+                    try
+                    {
+                        if (col.TipoCampo == EnumTypeOfCampo.AutocompletamentoDbSqlite)
+                        {
+                            if (!string.IsNullOrEmpty(col.Valore) && col.Id >= 0)
+                            {
+                                // Conreolla se è già presente l'autocompletamento nella tabella e in tal caso skip
+                                string query = string.Format("SELECT Count(Id) FROM Autocompletamento WHERE Colonna = {0} AND Valore = '{0}'", col.Id, col.Valore);
+                                if (_db.Count(query) > 0) continue;
+
+                                var auto = new SuggestionSingleColumn();
+                                auto.Colonna = col.Id;
+                                auto.Valore = col.Valore;
+                                _db.Insert(auto);
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        logger.Error("Errore aggiunta voce all'autocompletamento: " + ex.ToString());
+                    }
                 }
-                catch (Exception ex)
+
+                if (!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
                 {
-                    logger.Error("Errore aggiunta voce all'autocompletamento: " + ex.ToString());
+                    if (!string.IsNullOrEmpty(Batch.PatternNome))
+                    {
+                        if (Batch.TipoFile == TipoFileProcessato.Pdf)
+                            Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome, DocFile.FileName + ".pdf"));
+                        else
+                            Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome, DocFile.FileName + ".tif"));
+                    }
+                    else
+                    {
+                        if (Batch.TipoFile == TipoFileProcessato.Pdf)
+                            Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
+                        else
+                            Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".tif");
+                    }
                 }
             }
-
-            if (!File.Exists(Path.Combine(Batch.DirectoryOutput, DocFile.FileName)))
-            {
-                if (!string.IsNullOrEmpty(Batch.PatternNome))
-                {
-                    if (Batch.TipoFile == TipoFileProcessato.Pdf)
-                        Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome, DocFile.FileName + ".pdf"));
-                    else
-                        Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, string.Format("{0}{1}", Batch.PatternNome, DocFile.FileName + ".tif"));
-                }
-                else
-                {
-                    if (Batch.TipoFile == TipoFileProcessato.Pdf)
-                        Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".pdf");
-                    else
-                        Utility.CopiaFile(DocFile.Path, Batch.DirectoryOutput, DocFile.FileName + ".tif");
-                }
-            }
-
+            
             MoveNextItem();
         }
 
@@ -378,12 +419,14 @@ namespace BatchDataEntry.ViewModels
         
         public void Interrompi()
         {
-            Batch.DocCorrente = DocFiles.CurrentIndex + 1;
-
-            #if DEBUG
-            Console.WriteLine("Documento corrente: " + Batch.DocCorrente);
-            #endif
-            db.Update(Batch);
+            if(!Batch.IsTemp)
+            {
+                Batch.DocCorrente = DocFiles.CurrentIndex + 1;
+                #if DEBUG
+                Console.WriteLine("Documento corrente: " + Batch.DocCorrente);
+                #endif
+                db.Update(Batch);
+            }
             
             CloseWindow(true);
         }

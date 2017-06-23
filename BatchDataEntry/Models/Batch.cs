@@ -175,6 +175,7 @@ namespace BatchDataEntry.Models
                 }
             }
         }
+        public bool IsTemp = false;
 
         public Batch()
         {

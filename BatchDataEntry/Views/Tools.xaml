@@ -47,7 +47,10 @@
                     <CheckBox IsChecked="{Binding GenerateOutputFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Genera file contenente errori" Height="30" VerticalAlignment="Center" Margin="5,17,5,5" VerticalContentAlignment="Center"/>
                     <CheckBox IsChecked="{Binding CheckEmpty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Content="Controlla campi vuoti" Height="30" VerticalAlignment="Center" Margin="5" VerticalContentAlignment="Center"/>
                 </StackPanel>
-                <Button DockPanel.Dock="Bottom" Content="Check" Height="30" Margin="5" Command="{Binding Path=CheckCommand}" VerticalContentAlignment="Center" VerticalAlignment="Bottom"/>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                    <Button Content="Check" Width="140" Height="30" Margin="5" Command="{Binding Path=CheckCommand}" VerticalAlignment="Bottom"/>
+                    <Button  Content="Correggi" Width="140" Height="30" Margin="5" Command="{Binding Path=CorrectCommand}" VerticalAlignment="Bottom"/>
+                </StackPanel>
             </DockPanel>
             
         </GroupBox>

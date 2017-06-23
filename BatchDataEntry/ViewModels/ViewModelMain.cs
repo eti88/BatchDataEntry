@@ -267,6 +267,7 @@ namespace BatchDataEntry.ViewModels
         private void ToolsWindowOpen()
         {
             var toolsWindow = new Views.Tools();
+            toolsWindow.DataContext = new ViewModelTools(db);
             toolsWindow.Show();
         }
     }

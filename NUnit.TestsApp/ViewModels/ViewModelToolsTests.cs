@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using BatchDataEntry.Helpers;
 using System;
 using System.IO;
 
@@ -16,7 +17,7 @@ namespace BatchDataEntry.ViewModels.Tests
         [Test()]
         public void InitTest()
         {
-            vm = new ViewModelTools();
+            vm = new ViewModelTools(new Helpers.DatabaseHelper());
             vm.InputFilePath = Path.Combine(basepath, dbname); // Deve essere un sqlite
             vm.GenerateOutputFile = true;
             vm.CodiceAssociato = "00055";
