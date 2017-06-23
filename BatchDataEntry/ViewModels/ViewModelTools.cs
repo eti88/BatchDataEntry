@@ -917,8 +917,20 @@ namespace BatchDataEntry.ViewModels
             sb.Append("\t");
             sb.Append(ConvertiBool(AccettaEmail));
             sb.Append("\t");
-            DateTime dtemp = DateTime.ParseExact(DataNascita, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-            sb.Append(dtemp.ToString("yyyy-MM-dd"));
+            DateTime dtemp = new DateTime();
+            try
+            {
+                dtemp = DateTime.ParseExact(DataNascita, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            }
+            catch (Exception)
+            {
+                dtemp = new DateTime();
+            }
+            if (dtemp != new DateTime())
+                sb.Append(dtemp.ToString("yyyy-MM-dd"));
+            else
+                sb.Append("");
+
             sb.Append("\t");
             sb.Append(Luogo);
             sb.Append("\t");
