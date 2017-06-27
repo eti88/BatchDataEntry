@@ -88,7 +88,7 @@ namespace BatchDataEntry.ViewModels
         public void GetAllCampi(int idmod)
         {
             if (db == null) return;
-            string query = string.Format("SELECT * FROM Campo WHERE IdModello = {0} AND TipoCampo = {1}", idmod, (int)EnumTypeOfCampo.AutocompletamentoDbSql);
+            string query = string.Format("SELECT * FROM Campo WHERE (IdModello = {0} AND TipoCampo = {1}) OR (IdModello = {0} AND TipoCampo = {2})", idmod, (int)EnumTypeOfCampo.AutocompletamentoDbSql, (int)EnumTypeOfCampo.AutocompletamentoLocalita);
             var tmplist = db.CampoQuery(query);
             if (tmplist == null) return;
 

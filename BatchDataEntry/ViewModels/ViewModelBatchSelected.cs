@@ -378,7 +378,16 @@ namespace BatchDataEntry.ViewModels
         {
             if (SelectedRowIndex > 0 && _currentBatch != null)
             {
-                var continua = new Documento();
+                Documento continua;
+                if (db is DatabaseHelperSqlServer)
+                {
+                    var con = ((DatabaseHelperSqlServer)db).LoadConcatenations(CurrentBatch.Applicazione.Id);
+                    continua = new Documento(con.ToList());
+                }
+                else
+                {
+                    continua = new Documento();
+                }
                 var indexFile = (SelectedRowIndex > 0) ? SelectedRowIndex - 1 : SelectedRowIndex;
                 continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile, db);
                 continua.ShowDialog();
@@ -392,7 +401,16 @@ namespace BatchDataEntry.ViewModels
         {
             if (_currentBatch != null)
             {
-                var inserimento = new Documento();
+                Documento inserimento;
+                if (db is DatabaseHelperSqlServer)
+                {
+                    var con = ((DatabaseHelperSqlServer)db).LoadConcatenations(CurrentBatch.Applicazione.Id);
+                    inserimento = new Documento(con.ToList());
+                }
+                else
+                {
+                    inserimento = new Documento();
+                }
                 inserimento.DataContext = new ViewModelDocumento(_currentBatch, db);
                 try
                 {

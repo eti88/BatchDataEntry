@@ -15,9 +15,9 @@ using NLog;
 using BatchDataEntry.Suggestions;
 using BatchDataEntry.Abstracts;
 using System.Drawing;
-using System.Windows.Media.Imaging;
 using System.Drawing.Imaging;
-using System.Windows.Media;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -34,6 +34,7 @@ namespace BatchDataEntry.ViewModels
         private MoonPdfPanel _PdfWrapper;
         private Image _img;
         private NavigationList<Image> _imgs;
+        private List<Concatenation> _concatenations;
 
         public Document DocFile
         {
@@ -94,7 +95,7 @@ namespace BatchDataEntry.ViewModels
                     _img = value;
                 RaisePropertyChanged("Image");
             }
-        }
+        }     
 
         private bool CanMoveNext
         {
@@ -115,7 +116,7 @@ namespace BatchDataEntry.ViewModels
             }
             Batch = new Batch();
             repeatValues = new string[10];
-            
+            _concatenations = new List<Concatenation>();
         }
 
         public ViewModelDocumento(Batch _currentBatch, int indexRowVal, AbsDbHelper dbc)
@@ -126,8 +127,8 @@ namespace BatchDataEntry.ViewModels
             db = dbc;
             if (Batch.Applicazione == null || Batch.Applicazione.Id == 0) Batch.LoadModel(db);               
             if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0) Batch.Applicazione.LoadCampi(db);
-                
-            
+            LoadConcatenations(db, Batch.Applicazione.Id);
+
             LoadDocsList();
             if (DocFiles.CurrentIndex > DocFiles.Count)
             {
@@ -203,7 +204,8 @@ namespace BatchDataEntry.ViewModels
             db = dbc;
             if (Batch.Applicazione == null || Batch.Applicazione.Id == 0) Batch.LoadModel(db);
             if (Batch.Applicazione.Campi == null || Batch.Applicazione.Campi.Count == 0) Batch.Applicazione.LoadCampi(db);
-            
+            LoadConcatenations(db, Batch.Applicazione.Id);
+
             LoadDocsList();          
             DocFiles.CurrentIndex = GetId();
             if(DocFiles.CurrentIndex > DocFiles.Count)
@@ -295,9 +297,96 @@ namespace BatchDataEntry.ViewModels
             return Batch.UltimoIndicizzato;
         }
 
+        private void LoadConcatenations(AbsDbHelper _db, int idmodello)
+        {
+            
+            if (_db is DatabaseHelperSqlServer)
+            {
+                _concatenations = ((DatabaseHelperSqlServer)_db).LoadConcatenations(idmodello).ToList();
+                if(_concatenations == null)
+                    _concatenations = new List<Concatenation>();
+            }
+            else
+            {
+                _concatenations = new List<Concatenation>();
+            }
+
+        }
+
+        /// <summary>
+        /// Se il record corrisponde a una concatenazione viene popolato
+        /// la posizione minore definisce il punto di start, analogo per l'end.
+        /// se il campo concatenato non è quello di inizio o presente nella concatenazione bisogna impedire la popolazione dei campi
+        /// l'evento di concatenazione viene gestito dall'evento invio del autocompletetextbox
+        /// </summary>
+        /// <param name="r"></param>
+        private void HandleConcatenations(int pos, List<Concatenation> concats, AbsSuggestion suggestion) 
+        {
+            foreach (Concatenation concat in concats)
+            {
+                // Se il campo è contenuto in una concatenazione 
+                if (IsRecordInConcatenation(pos, concat))
+                {
+                    // Controllare che corrisponda al record di start
+                    if(concat.START_POS == pos)
+                    {
+                        List<string> trow = new List<string>();
+                        // Recupera il record corrispondente dalla tabella
+                        if (suggestion is SuggestionLocalita)
+                            trow = GetTableRow("Localita", 1, suggestion.Valore);
+                        else
+                            trow = GetTableRow(Batch.Applicazione.Campi[pos].TabellaSorgente, Batch.Applicazione.Campi[pos].SourceTableColumn, suggestion.Valore);
+
+                        if (trow.Count == 0) return;
+                        string reftab = Batch.Applicazione.Campi[pos].TabellaSorgente;
+
+                        foreach (Record r in DocFile.Voci)
+                        {
+                            if(IsRecordInConcatenation(r.Posizione, concat))
+                                r.Valore = trow.ElementAt(r.SourceTableColumn).ToString();
+                        }
+                    }             
+                    return;
+                }
+            }
+        }
+
+        private bool IsRecordInConcatenation(int pos, Concatenation concatenation)
+        {
+            foreach (KeyValuePair<string, object> c in concatenation.CampiSelezionati)
+            {
+                Campo campo;
+                try
+                {
+                    campo = JsonConvert.DeserializeObject<Campo>(c.Value.ToString());
+
+                    if (campo != null)
+                    {
+                        if (campo.Posizione == pos)
+                            return true;
+                        else
+                            continue;
+                    }
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+            return false;
+        }
+
         public void Indexes()
         {
             DocFile.IsIndexed = true;
+            foreach (Record rec in DocFile.Voci)
+            {
+                if (rec.TipoCampo == EnumTypeOfCampo.Data && rec.Valore.Equals("__-__-____"))
+                {
+                    rec.Valore = "";
+                }
+            }
+
             _db.UpdateRecordDocumento(DocFile);
 
             // Salva il valore se bisogna riproporlo
@@ -478,19 +567,7 @@ namespace BatchDataEntry.ViewModels
             #endif
 
             if (string.IsNullOrEmpty(sugg.Valore)) return;
-            List<string> trow = new List<string>();
-            if (sugg is SuggestionLocalita)
-                trow = GetTableRow("Localita", 1, sugg.Valore);
-            else
-                trow = GetTableRow(Batch.Applicazione.Campi[pos].TabellaSorgente, Batch.Applicazione.Campi[pos].SourceTableColumn, sugg.Valore);
-
-            if (trow.Count == 0) return;
-            string reftab = Batch.Applicazione.Campi[pos].TabellaSorgente;
-            foreach (Record r in DocFile.Voci)
-            {
-                if (r.TabellaSorgente == reftab)
-                    r.Valore = trow.ElementAt(r.SourceTableColumn).ToString(); 
-            }
+            HandleConcatenations(pos, this._concatenations, sugg);
         }
         
         /// <summary>

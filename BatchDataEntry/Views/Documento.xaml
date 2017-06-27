@@ -85,7 +85,7 @@
                     Width="352"
                     Tag="{Binding Path=Posizione}"
                     Provider="{Binding Path=SuggestionsProvider, Mode=OneWay}"                  
-                    ItemTemplate="{StaticResource ResourceKey=SuggestionLocalita}">
+                    ItemTemplate="{StaticResource ResourceKey=SuggestionLocalita}" KeyUp="AutoCompleteTextBox_KeyUp">
                     <editors:AutoCompleteTextBox.SelectedItem>
                         <Binding Path="ElementoSelezionato" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"></Binding>
                     </editors:AutoCompleteTextBox.SelectedItem>
@@ -243,7 +243,6 @@ AncestorType={x:Type Window}}, Path=DataContext.ZoomOutCmd}" Focusable="False">
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
         <!-- Selettore del tipo di toolbar da visualizzare -->
         <ContentControl x:Name="CntcBar" Grid.Column="0" Grid.Row="0" Content="{Binding Path=Batch}" ContentTemplateSelector="{StaticResource ToolbarTemplateSelector}"  Focusable="False"/>
         <!-- Selettore del tipo di documento da visualizzare -->

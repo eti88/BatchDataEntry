@@ -13,6 +13,9 @@ using System.Linq;
 using System.Windows.Data;
 using System.ComponentModel;
 using System.Windows.Threading;
+using System.Collections.Generic;
+using BatchDataEntry.Models;
+using WpfControls.Editors;
 
 namespace BatchDataEntry.Views
 {
@@ -25,6 +28,7 @@ namespace BatchDataEntry.Views
         private static Logger logger = LogManager.GetCurrentClassLogger();
         BackgroundWorker bw;
         private int st;
+        private List<Concatenation> _concatenations;
 
         public Documento()
         {
@@ -34,6 +38,21 @@ namespace BatchDataEntry.Views
             bw.WorkerReportsProgress = false;
             bw.DoWork += new DoWorkEventHandler(bw_DoWork);
             bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+        }
+
+        public Documento(List<Concatenation> concatenations)
+        {
+            InitializeComponent();
+            st = (Properties.Settings.Default.StartFocusCol >= 0) ? Properties.Settings.Default.StartFocusCol : 0;
+            bw = new BackgroundWorker();
+            bw.WorkerReportsProgress = false;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+
+            if (concatenations == null)
+                _concatenations = new List<Concatenation>();
+            else
+                _concatenations = concatenations;
         }
 
         public void SetFocusOnSelectedTextBox(int pos = 0)
@@ -84,7 +103,7 @@ namespace BatchDataEntry.Views
         {
             if (bw.IsBusy != true)
             {
-                bw.RunWorkerAsync();
+                bw.RunWorkerAsync(st);
             }
         }
 
@@ -101,7 +120,7 @@ namespace BatchDataEntry.Views
 
                 if (bw.IsBusy != true)
                 {
-                    bw.RunWorkerAsync();
+                    bw.RunWorkerAsync(st);
                 }
             });            
         }
@@ -119,7 +138,7 @@ namespace BatchDataEntry.Views
 
                 if (bw.IsBusy != true)
                 {
-                    bw.RunWorkerAsync();
+                    bw.RunWorkerAsync(st);
                 }
             });
         }
@@ -137,7 +156,7 @@ namespace BatchDataEntry.Views
 
                 if (bw.IsBusy != true)
                 {
-                    bw.RunWorkerAsync();
+                    bw.RunWorkerAsync(st);
                 }
             });
         }
@@ -171,16 +190,51 @@ namespace BatchDataEntry.Views
         private void bw_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-            Thread.Sleep(MILLISEC_UPDATE);
+            int val = (int) e.Argument;
+            if(val == st)
+                Thread.Sleep(MILLISEC_UPDATE);
+            e.Result = val;
         }
 
         private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            int steps = (int)e.Result;
+
             Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle,
                 new Action(delegate ()
                 {
-                    SetFocusOnSelectedTextBox(st);
+                    SetFocusOnSelectedTextBox(steps);
                 }));
+        }
+
+        private void AutoCompleteTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter) return;
+            if (bw == null) return;
+            if (FieldItems.Items == null) return;
+
+            if (bw.IsBusy != true)
+            {
+                if (_concatenations != null && _concatenations.Count > 0)
+                {
+                    // confrontare concatenazioni con box corrente per sapere la sua posizione (tag) e pescare la concatenazione correlata
+                    AutoCompleteTextBox tbox = sender as AutoCompleteTextBox;
+                    if (tbox == null) return;
+                    foreach (Concatenation concatenation in _concatenations)
+                    {
+                        concatenation.InitPositions();
+                        int position = Convert.ToInt32(tbox.Tag);
+                        if (concatenation.Positions.Contains(position))
+                        {
+                            #if DEBUG
+                            Console.WriteLine(string.Format("Set focus on {0} position", concatenation.END_POS));
+                            #endif
+                            bw.RunWorkerAsync(concatenation.END_POS + 1);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }   
 }

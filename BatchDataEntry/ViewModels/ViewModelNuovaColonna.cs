@@ -200,6 +200,9 @@ namespace BatchDataEntry.ViewModels
             Campo m = new Campo(SelectedCampo);
             int lastId = -1;
 
+            if (m.TipoCampo == EnumTypeOfCampo.AutocompletamentoLocalita)
+                m.SourceTableColumn = 1;
+
             if(alreadyExist)
                 db.Update(m);
             else if(!alreadyExist)

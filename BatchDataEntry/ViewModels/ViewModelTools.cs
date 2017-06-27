@@ -223,8 +223,7 @@ namespace BatchDataEntry.ViewModels
             CheckEmpty = true;
             ErrorRecordList = new ObservableCollection<ErrorRecord>();
             dbinfo = db;
-            /* bisogna inserire una parte di vista per recuperare il modello dell'eurobrico e (relativo recupero dei campi) per creare un batch
-             temporaneo per l'elaborazione*/
+            // Genero un batch temporaneo
             var tmods = dbinfo.GetModelloRecords();
             Modello mod = tmods.SingleOrDefault(x => x.Nome.ToLower().Contains("eurobrico"));
             if (mod == null) ErrorRecordList.Add(new ErrorRecord("Impossibile trovare modello eurobrico", "ERRORE", "ERRORE", "LOAD"));
