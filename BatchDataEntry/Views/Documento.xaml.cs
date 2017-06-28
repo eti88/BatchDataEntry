@@ -230,6 +230,7 @@ namespace BatchDataEntry.Views
                             Console.WriteLine(string.Format("Set focus on {0} position", concatenation.END_POS));
                             #endif
                             bw.RunWorkerAsync(concatenation.END_POS + 1);
+                            e.Handled = true;
                             break;
                         }
                     }

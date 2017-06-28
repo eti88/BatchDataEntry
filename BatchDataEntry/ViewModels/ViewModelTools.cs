@@ -259,7 +259,7 @@ namespace BatchDataEntry.ViewModels
             FileAttributes attr = File.GetAttributes(InputFilePath);
             if (attr.HasFlag(FileAttributes.Directory))
             {
-                List<string> qfiles = Directory.GetFiles(InputFilePath, "*.*", SearchOption.AllDirectories).Where(s => s.EndsWith(".db3") || s.EndsWith(".sqlite")).ToList();
+                List<string> qfiles = Directory.GetFiles(InputFilePath, "*.*", SearchOption.AllDirectories).Where(s => s.EndsWith(".db3")).ToList();
                 if (qfiles.Count == 0)
                     MessageBox.Show("Impossibile recupeare database dalla directory selezionata");
                 else
@@ -321,9 +321,6 @@ namespace BatchDataEntry.ViewModels
 
         private void Check()
         {
-            string tagEmpty = "Vuoto";
-            string tagTel = "NumeroNonValido";
-            string tagFormato = "ErroreFormato";
 
             CleanErrorList();
 
@@ -331,45 +328,13 @@ namespace BatchDataEntry.ViewModels
             {
                 foreach (FidelityClient r in Records)
                 {
-                    //ErrorRecord
-                    if (!Utility.IsNotVoid(r.Card)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "FidelityCard", r.Card, tagEmpty));
-                    if (!Utility.IsNotVoid(r.Cognome)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Cognome", r.Cognome, tagEmpty));
-                    if (!Utility.IsNotVoid(r.Indirizzo)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Indirizzo", r.Indirizzo, tagEmpty));
-                    if (!Utility.IsNotVoid(r.Civico)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Civico", r.Civico, tagEmpty));
-                    if (!Utility.IsNotVoid(r.Localita)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Localita", r.Localita, tagEmpty));
-                    if (!Utility.IsNotVoid(r.Provincia)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Provincia", r.Provincia, tagEmpty));
-                    if (!Utility.IsNotVoid(r.Cap)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Cap", r.Cap, tagEmpty));
-                    if (!Utility.IsNotVoid(r.Prefisso)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Prefisso", r.Prefisso, tagEmpty));
-                    if (!Utility.IsNotVoid(r.Telefono)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Telefono", r.Telefono, tagEmpty));
-
-                    if (!Utility.IsNotVoid(r.Cellulare))
+                    var errs = r.Checks(CheckEmpty, DateFormat);
+                    if(errs != null && errs.Count > 0)
                     {
-                        ErrorRecordList.Add(new ErrorRecord(r.FileName, "Cellulare", r.Cellulare, tagEmpty));
+                        foreach (ErrorRecord e in errs)
+                            ErrorRecordList.Add(e);
                     }
-                    else
-                    {
-                        if (!Utility.IsValidTelephone(r.Cellulare)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Cellulare", r.Cellulare, tagTel));
-                    }
-
-                    if (!Utility.IsNotVoid(r.Email))
-                    {
-                        ErrorRecordList.Add(new ErrorRecord(r.FileName, "Email", r.Email, tagEmpty));
-                    }
-                    else
-                    {
-                        if (!Utility.IsValidEmail(r.Email)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Email", r.Email, tagFormato));
-                    }
-
-                    if (!Utility.IsNotVoid(r.DataNascita))
-                    {
-                        ErrorRecordList.Add(new ErrorRecord(r.FileName, "DataNascita", r.Card, tagEmpty));
-                    }
-                    else
-                    {
-                        if (!Utility.IsValidDate(r.DataNascita, DateFormat)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "DataNascita", r.DataNascita, tagFormato));
-                    }
-
-                    if (!Utility.IsNotVoid(r.Luogo)) ErrorRecordList.Add(new ErrorRecord(r.FileName, "Luogo", r.Luogo, tagEmpty));
+                        
                 }
             }
         }
@@ -434,6 +399,8 @@ namespace BatchDataEntry.ViewModels
                 var continua = new Documento();
                 continua.DataContext = new ViewModelDocumento(_batch, dbinfo, DocumentsWithErrors);
                 continua.ShowDialog();
+                CleanErrorList();
+                LoadFile();
             }
         }
 
@@ -850,7 +817,7 @@ namespace BatchDataEntry.ViewModels
 
             if (Utility.IsNotVoid(this.DataNascita)) {
                 if(!Utility.IsValidDate(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, TAGData));
-                if (Utility.IsValidDateRange(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, "ETA"));
+                if (!Utility.IsValidDateRange(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, "ETA"));
             }
 
             return errors;

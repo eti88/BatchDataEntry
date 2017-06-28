@@ -236,7 +236,7 @@ namespace BatchDataEntry.Business
                 int years = (zeroTime + span).Year - 1;
                 #if DEBUG
                 Console.WriteLine(string.Format("D1: {0}, D2: {1} -> Years: {2}", startDate.ToString("dd-MM-yyyy"), nowDate.ToString("dd-MM-yyyy"), years));
-#endif
+                #endif
                 return (years < 18 || years > 80) ? false : true;
             }
             catch (Exception)
