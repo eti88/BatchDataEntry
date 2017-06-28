@@ -119,8 +119,6 @@ namespace BatchDataEntry.Models
             {
                 Console.WriteLine(e);
             }
-
-            
         }
 
         // Utilizzato per alcuni unit test
@@ -181,6 +179,24 @@ namespace BatchDataEntry.Models
                     h++;
                 }
             }
+        }
+
+        public Dictionary<int, string> DictionaryVersion()
+        {
+            Dictionary<int, string> dic = new Dictionary<int, string>();
+
+            dic.Add(0, this.Id.ToString());
+            dic.Add(1, this.FileName);
+            dic.Add(2, this.Path);
+            dic.Add(3, this.IsIndexed.ToString());
+            int x = 4;
+            foreach(Record voce in Voci)
+            {
+                dic.Add(x, voce.Valore);
+                x++;
+            }
+
+            return dic;
         }
 
         private bool GetBool(string val)

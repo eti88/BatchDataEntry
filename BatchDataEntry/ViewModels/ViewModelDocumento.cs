@@ -389,8 +389,10 @@ namespace BatchDataEntry.ViewModels
 
             _db.UpdateRecordDocumento(DocFile);
 
+            DocFiles[DocFiles.CurrentIndex] = DocFile.DictionaryVersion();
+
             // Salva il valore se bisogna riproporlo
-            if(!Batch.IsTemp)
+            if (!Batch.IsTemp)
             {
                 for (int z = 0; z < Batch.Applicazione.Campi.Count; z++)
                 {
