@@ -33,12 +33,12 @@ namespace BatchDataEntry.Components
 
         public bool hasNext
         {
-          get { return (_currentIndex <= this.Count - 1); }         
+          get { return (_currentIndex + 1) < this.Count; }         
         }
 
         public bool hasPrevious
         {
-            get { return (_currentIndex >= 0); }
+            get { return (_currentIndex - 1) >= 0; }
         }
 
         public T MovePrevious
