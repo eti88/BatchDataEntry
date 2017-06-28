@@ -29,37 +29,37 @@
         <helpers:ToolbarTemplateSelector x:Key="ToolbarTemplateSelector"/>
         <!-- normal template -->
         <DataTemplate x:Key="TextBoxDataTemplate">
-            <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+            <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="{Binding Nome, Mode=OneTime}" FontSize="12" Margin="0,0,5,0"/>
                 <TextBox
                 IsEnabled="{Binding Path=IsDisabilitato}"
                 Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 VerticalAlignment="Center"
                 Height="30"/>
-            </StackPanel>
+            </DockPanel>
         </DataTemplate>
         <!-- normal data masked template -->
         <DataTemplate x:Key="TextBoxDataFormatTemplate">
-            <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+            <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="{Binding Nome, Mode=OneTime}" FontSize="12" Margin="0,0,5,0"/>
                 <ctrls:MaskedDateTextbox
                 IsEnabled="{Binding Path=IsDisabilitato}"
+                VerticalContentAlignment="Center"
                 InputMask="ii-ii-iiii"
                 Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 VerticalAlignment="Center"
                 Height="30"/>
-            </StackPanel>
+            </DockPanel>
         </DataTemplate>
         <DataTemplate x:Key="AutocompleteDbDataTemplate">
-            <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+            <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="{Binding Nome, Mode=OneTime}" FontSize="12" Margin="0,0,5,0"/>
                 <!-- autocompletetextbox -->
                 <editors:AutoCompleteTextBox
                     IsEnabled="{Binding Path=IsDisabilitato}"
                     Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     DisplayMember="Valore"
                     Height="30"
-                    Width="352"
                     Provider="{Binding Path=SuggestionsProvider, Mode=OneWay}" 
                     ItemTemplate="{StaticResource ResourceKey=SuggestionTemplateSingleColumn}">
                     <editors:AutoCompleteTextBox.SelectedItem>
@@ -70,19 +70,18 @@
                     </editors:AutoCompleteTextBox.LoadingContent>
                 </editors:AutoCompleteTextBox>
                 <!-- end -->
-            </StackPanel>
+            </DockPanel>
         </DataTemplate>
         <!-- db template località -->
         <DataTemplate x:Key="AutocompleteDbLocalitaDataTemplate">
-            <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+            <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="{Binding Nome, Mode=OneTime}" FontSize="12" Margin="0,0,5,0"/>
                 <!-- autocompletetextbox -->
                 <editors:AutoCompleteTextBox
                     IsEnabled="{Binding Path=IsDisabilitato}"
                     Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     DisplayMember="Valore"
                     Height="30"
-                    Width="352"
                     Tag="{Binding Path=Posizione}"
                     Provider="{Binding Path=SuggestionsProvider, Mode=OneWay}"                  
                     ItemTemplate="{StaticResource ResourceKey=SuggestionLocalita}" KeyUp="AutoCompleteTextBox_KeyUp">
@@ -104,19 +103,18 @@
                     </editors:AutoCompleteTextBox.InputBindings>
                 </editors:AutoCompleteTextBox>
                 <!-- end -->
-            </StackPanel>
+            </DockPanel>
         </DataTemplate>
         <!-- db template -->
         <DataTemplate x:Key="AutocompleteDbSqlDataTemplate">
-            <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+            <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="{Binding Nome, Mode=OneTime}" FontSize="12" Margin="0,0,5,0"/>
                 <!-- autocompletetextbox -->
                 <editors:AutoCompleteTextBox
                     IsEnabled="{Binding Path=IsDisabilitato}"
                     Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     DisplayMember="Valore"
                     Height="30"
-                    Width="352"
                     Tag="{Binding Path=Posizione}"
                     Provider="{Binding Path=SuggestionsProvider, Mode=OneWay}"                  
                     ItemTemplate="{StaticResource ResourceKey=SuggestionTemplateSingleColumn}">
@@ -138,20 +136,19 @@
                     </editors:AutoCompleteTextBox.InputBindings>
                 </editors:AutoCompleteTextBox>
                 <!-- end -->
-            </StackPanel>
+            </DockPanel>
         </DataTemplate>
 
         <!-- csv template -->
         <DataTemplate x:Key="AutocompleteCsvDataTemplate">
-            <StackPanel Margin="5,0,5,0">
-                <Label Content="{Binding Nome, Mode=OneTime}" FontSize="14"/>
+            <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                <Label DockPanel.Dock="Left" Content="{Binding Nome, Mode=OneTime}" FontSize="12" Margin="0,0,5,0"/>
                 <!-- autocompletetextbox -->
                 <editors:AutoCompleteTextBox
                     IsEnabled="{Binding IsDisabilitato, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                     Text="{Binding Valore, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     DisplayMember="ColumnA"
                     Height="30"
-                    Width="352"
                     Provider="{StaticResource ResourceKey=CsvSuggestionProvider}"
                     ItemTemplate="{StaticResource ResourceKey=SuggestionTemplateDoubleColumn}">
                     <editors:AutoCompleteTextBox.SelectedItem>
@@ -165,7 +162,7 @@
                     </editors:AutoCompleteTextBox.InputBindings>
                 </editors:AutoCompleteTextBox>
                 <!-- end -->
-            </StackPanel>
+            </DockPanel>
         </DataTemplate>
         <DataTemplate x:Key="PdfControlViewer">
             <ContentPresenter Content="{Binding RelativeSource={RelativeSource FindAncestor, 
@@ -237,7 +234,7 @@ AncestorType={x:Type Window}}, Path=DataContext.ZoomOutCmd}" Focusable="False">
     <Grid x:Name="DocSection" Focusable="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="460"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
