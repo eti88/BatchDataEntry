@@ -234,6 +234,7 @@ namespace BatchDataEntry.ViewModels
             {
                 // Il batch è già esistente e quindi si effettua un update              
                 Batch batch = new Batch(CurrentBatch, db);
+                batch.UltimoIndicizzato = 0;
                 db.Update(batch);          
             }
             else
