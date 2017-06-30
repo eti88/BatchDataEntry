@@ -1005,6 +1005,57 @@ namespace BatchDataEntry.Helpers
             return rec;
         }
 
+        public List<string> GetRecord(string table, Dictionary<string, int> columns, List<int> selectedCols, List<string> vals)
+        {
+            var rec = new List<string>();
+            if (cnn == null) return rec;
+
+            try
+            {
+                cnn.Open();
+
+                StringBuilder sb = new StringBuilder();
+                sb.Append("SELECT * FROM ");
+                sb.Append(table);
+                sb.Append(" WHERE ");
+                int z = 0;
+
+                foreach(KeyValuePair<string, int> col in columns)
+                {
+                    if (selectedCols.Contains(col.Value))
+                    {
+                        sb.Append(col.Key + " = '" + vals.ElementAt(selectedCols.IndexOf(col.Value)) + "'");
+                        z++;
+                        if (z <= selectedCols.Count() - 1)
+                        {
+                            sb.Append(" AND ");
+                        }
+                    }
+
+                    
+                }
+
+                SqlCommand cmd = new SqlCommand(sb.ToString(), cnn);
+                var reader = cmd.ExecuteReader();
+                reader.Read();
+
+                foreach (KeyValuePair<string, int> k in columns)
+                {
+                    rec.Add(reader[k.Value].ToString());
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+            }
+            finally
+            {
+                cnn.Close();
+            }
+            return rec;
+        }
+
         public Dictionary<string, int> GetColumns(string table)
         {
             Dictionary<string, int> dres = new Dictionary<string, int>();
@@ -1062,7 +1113,7 @@ namespace BatchDataEntry.Helpers
                 {
                     if (type == EnumTypeOfCampo.AutocompletamentoLocalita)
                     {
-                        suggestions.Add(new SuggestionLocalita(Convert.ToString(reader[1]), Convert.ToString(reader[2]), Convert.ToString(reader[3])));
+                        suggestions.Add(new SuggestionLocalita(Convert.ToString(reader[1]), Convert.ToString(reader[3]), Convert.ToString(reader[2])));
                     }
                     else
                     {

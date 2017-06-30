@@ -723,7 +723,6 @@ namespace BatchDataEntry.ViewModels
 
         public void ChangePhatsIntoCacheDb()
         {
-            string oldPath = string.Empty;
             string newPath = string.Empty;
 
             DialogText dlgTxt = new DialogText();
@@ -741,7 +740,6 @@ namespace BatchDataEntry.ViewModels
                 documents = dbcache.GetDocumentsListPartial();           
                 foreach (var doc in documents)
                 {
-                    oldPath = Path.GetDirectoryName(doc.Path);
                     string file = Path.GetFileName(doc.Path);
                     doc.Path = Path.Combine(newPath, file);
                     dbcache.UpdateRecordDocumento(doc);

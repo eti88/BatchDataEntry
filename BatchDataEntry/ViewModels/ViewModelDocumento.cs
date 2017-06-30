@@ -333,7 +333,11 @@ namespace BatchDataEntry.ViewModels
                         List<string> trow = new List<string>();
                         // Recupera il record corrispondente dalla tabella
                         if (suggestion is SuggestionLocalita)
-                            trow = GetTableRow("Localita", 1, suggestion.Valore);
+                        {
+                            List<int> cols = new List<int> { 1, 2 };
+                            List<string> values = new List<string> { suggestion.Valore, ((SuggestionLocalita)suggestion).Cap};
+                            trow = GetTableRow("Localita", cols, values);
+                        }
                         else
                             trow = GetTableRow(Batch.Applicazione.Campi[pos].TabellaSorgente, Batch.Applicazione.Campi[pos].SourceTableColumn, suggestion.Valore);
 
@@ -584,6 +588,17 @@ namespace BatchDataEntry.ViewModels
         {
             var row = new List<string>();
             if(db != null && db is DatabaseHelperSqlServer)
+            {
+                var columns = ((DatabaseHelperSqlServer)db).GetColumns(table);
+                row = ((DatabaseHelperSqlServer)db).GetRecord(table, columns, column, text);
+            }
+            return row;
+        }
+
+        public List<string> GetTableRow(string table, List<int> column, List<string> text)
+        {
+            var row = new List<string>();
+            if (db != null && db is DatabaseHelperSqlServer)
             {
                 var columns = ((DatabaseHelperSqlServer)db).GetColumns(table);
                 row = ((DatabaseHelperSqlServer)db).GetRecord(table, columns, column, text);
