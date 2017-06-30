@@ -4,6 +4,7 @@ using BatchDataEntry.Components;
 using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Views;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,7 +20,7 @@ namespace BatchDataEntry.ViewModels
 {
     public class ViewModelTools : ViewModelBase
     {
-        //private static string CACHEFILE = @"cache.db3";
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private AbsDbHelper dbinfo;
         private DatabaseHelper dbcache;
         private bool needReload = false;
@@ -226,7 +227,7 @@ namespace BatchDataEntry.ViewModels
             // Genero un batch temporaneo
             var tmods = dbinfo.GetModelloRecords();
             Modello mod = tmods.SingleOrDefault(x => x.Nome.ToLower().Contains("eurobrico"));
-            if (mod == null) ErrorRecordList.Add(new ErrorRecord("Impossibile trovare modello eurobrico", "ERRORE", "ERRORE", "LOAD"));
+            if (mod == null) logger.Error("Impossibile trovare modello eurobrico [ViewTools Constructor]");
             _batch = new Batch();
             _batch.IsTemp = true;
             _batch.Nome = "TempBatch";
@@ -308,14 +309,9 @@ namespace BatchDataEntry.ViewModels
             if (File.Exists(path)) File.Delete(path);
             using(var file = new StreamWriter(path, true))
             {
-                file.WriteLine("File\tCampo\tValore\tTag\tMessaggio");
+                file.WriteLine("File\tErrori");
                 foreach(FidelityClient r in Records)
-                {
-                    foreach(ErrorRecord err in r.Checks(CheckEmpty, DateFormat))
-                    {
-                        file.WriteLine(err.ToString());
-                    }
-                }
+                        file.WriteLine(r.Checks(CheckEmpty, DateFormat).ToString());
             }
         }
 
@@ -328,13 +324,9 @@ namespace BatchDataEntry.ViewModels
             {
                 foreach (FidelityClient r in Records)
                 {
-                    var errs = r.Checks(CheckEmpty, DateFormat);
-                    if(errs != null && errs.Count > 0)
-                    {
-                        foreach (ErrorRecord e in errs)
-                            ErrorRecordList.Add(e);
-                    }
-                        
+                    var err = r.Checks(CheckEmpty, DateFormat);
+                    if(err != null)
+                        ErrorRecordList.Add(err);                      
                 }
             }
         }
@@ -726,10 +718,8 @@ namespace BatchDataEntry.ViewModels
         #endregion
 
         // Consts
-        private const string TAGEmpty = "VUOTO";
-        private const string TAGTel = "NUMERO";
-        private const string TAGEmail = "EMAIL";
-        private const string TAGData = "DATA";
+        private const string TAGEmpty = "[VUOTO]";
+        private const string TAGInvalid = "[INVALIDO]";
 
         public FidelityClient()
         {
@@ -792,34 +782,34 @@ namespace BatchDataEntry.ViewModels
         }
 
         //Checks
-        public List<ErrorRecord> Checks(bool checkVoid, string dateformat)
+        public ErrorRecord Checks(bool checkVoid, string dateformat)
         {
-            var errors = new List<ErrorRecord>();
+            var errors = new List<string>();
             if(checkVoid)
             {
-                if (!Utility.IsNotVoid(this.Card)) errors.Add(new ErrorRecord(this.FileName, "FidelityCard", this.Card, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Cognome)) errors.Add(new ErrorRecord(this.FileName, "Cognome", this.Cognome, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Indirizzo)) errors.Add(new ErrorRecord(this.FileName, "Indirizzo", this.Indirizzo, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Civico)) errors.Add(new ErrorRecord(this.FileName, "Civico", this.Civico, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Localita)) errors.Add(new ErrorRecord(this.FileName, "Localita", this.Localita, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Provincia)) errors.Add(new ErrorRecord(this.FileName, "Provincia", this.Provincia, TAGEmpty));
+                if (!Utility.IsNotVoid(this.Card))  errors.Add(string.Format("FidelityCard {0}", TAGEmpty));
+                if (!Utility.IsNotVoid(this.Cognome)) errors.Add(string.Format("Cognome {0}", TAGEmpty));
+                if (!Utility.IsNotVoid(this.Indirizzo)) errors.Add(string.Format("Indirizzo {0}", TAGEmpty));
+                if (!Utility.IsNotVoid(this.Civico)) errors.Add(string.Format("Civico {0}", TAGEmpty));
+                if (!Utility.IsNotVoid(this.Localita)) errors.Add(string.Format("Localita {0}", TAGEmpty));
+                if (!Utility.IsNotVoid(this.Provincia)) errors.Add(string.Format("Provincia {0}", TAGEmpty));
             }
 
             if (Utility.IsNotVoid(this.Cellulare)) {
-                if (!Utility.IsValidTelephone(this.Cellulare)) errors.Add(new ErrorRecord(this.FileName, "Cellulare", this.Cellulare, TAGTel));
+                if (!Utility.IsValidTelephone(this.Cellulare)) errors.Add(string.Format("Cellulare {0}", TAGInvalid));
             }
 
             if (Utility.IsNotVoid(this.Email))
             {
-                if (!Utility.IsValidEmail(this.Email)) errors.Add(new ErrorRecord(this.FileName, "Email", this.Email, TAGEmail));
+                if (!Utility.IsValidEmail(this.Email)) errors.Add(string.Format("Email {0}", TAGInvalid));
             }
 
             if (Utility.IsNotVoid(this.DataNascita)) {
-                if(!Utility.IsValidDate(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, TAGData));
-                if (!Utility.IsValidDateRange(this.DataNascita, dateformat)) errors.Add(new ErrorRecord(this.FileName, "DataDiNascita", this.DataNascita, "ETA"));
+                if(!Utility.IsValidDate(this.DataNascita, dateformat)) errors.Add(string.Format("DataDiNascita {0}", TAGInvalid));
+                if (!Utility.IsValidDateRange(this.DataNascita, dateformat)) errors.Add(string.Format("DataDiNascita {0}", TAGInvalid));
             }
 
-            return errors;
+            return (errors.Count > 0) ? new ErrorRecord(this.FileName, String.Join(", ", errors)) : null;
         }
 
         // Controlla se i campi hanno un valore e nel caso imposta la pubblicità Diretta
@@ -937,36 +927,8 @@ namespace BatchDataEntry.ViewModels
             }
         }
 
-        private string _nome;
-        public string NomeCampo
-        {
-            get { return _nome; }
-            set
-            {
-                if (value != _nome)
-                {
-                    _nome = value;
-                    OnPropertyChanged("NomeCampo");
-                }
-            }
-        }
-
-        private string _val;
-        public string ValoreCorrente
-        {
-            get { return _val; }
-            set
-            {
-                if (value != _val)
-                {
-                    _val = value;
-                    OnPropertyChanged("ValoreCorrente");
-                }
-            }
-        }
-
         private string _tipo;
-        public string TipoErrore
+        public string TipoErrori
         {
             get { return _tipo; }
             set
@@ -974,29 +936,25 @@ namespace BatchDataEntry.ViewModels
                 if (value != _tipo)
                 {
                     _tipo = value;
-                    OnPropertyChanged("TipoErrore");
+                    OnPropertyChanged("TipoErrori");
                 }
             }
         }
 
         public ErrorRecord() {
             RecordNumber = string.Empty;
-            NomeCampo = string.Empty;
-            ValoreCorrente = string.Empty;
-            TipoErrore = string.Empty;
+            TipoErrori = string.Empty;
         }
 
-        public ErrorRecord(string record, string nome, string valore, string tipo)
+        public ErrorRecord(string record, string err)
         {
             RecordNumber = record;
-            NomeCampo = nome;
-            ValoreCorrente = valore;
-            TipoErrore = tipo;
+            TipoErrori = err;
         }
 
         public override string ToString()
         {
-            return string.Format("{0}\t{1}\t{2}\t\t{3}", this.RecordNumber, this.NomeCampo, this.ValoreCorrente, this.TipoErrore);
+            return string.Format("{0}\t{1}", this.RecordNumber, this.TipoErrori);
         }
     }
 }

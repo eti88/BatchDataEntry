@@ -69,12 +69,10 @@
         <ListView Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Background="#FFF3F3F3" MaxHeight="650" HorizontalContentAlignment="Stretch" ItemsSource="{Binding Path=ErrorRecordList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Background="#FFEEEEEE" Height="30">
-                        <Label Content="{Binding RecordNumber}" Width="200" HorizontalContentAlignment="Center"/>
-                        <Label Content="{Binding NomeCampo}" HorizontalContentAlignment="Center" Width="170"/>
-                        <Label Content="{Binding ValoreCorrente}" HorizontalContentAlignment="Center" Width="180"/>
-                        <Label Content="{Binding TipoErrore}" HorizontalContentAlignment="Center" Width="120" Foreground="#FFE43D3D" FontWeight="Bold"/>
-                    </StackPanel>
+                    <DockPanel Background="#FFEEEEEE" LastChildFill="True" Height="30">
+                        <Label DockPanel.Dock="Left" Content="{Binding RecordNumber}" Width="200" HorizontalContentAlignment="Center"/>
+                        <Label DockPanel.Dock="Left" Content="{Binding TipoErrori}" HorizontalContentAlignment="Center"/>
+                    </DockPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
