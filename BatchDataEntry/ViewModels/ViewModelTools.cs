@@ -803,7 +803,6 @@ namespace BatchDataEntry.ViewModels
                 if (!Utility.IsNotVoid(this.Civico)) errors.Add(new ErrorRecord(this.FileName, "Civico", this.Civico, TAGEmpty));
                 if (!Utility.IsNotVoid(this.Localita)) errors.Add(new ErrorRecord(this.FileName, "Localita", this.Localita, TAGEmpty));
                 if (!Utility.IsNotVoid(this.Provincia)) errors.Add(new ErrorRecord(this.FileName, "Provincia", this.Provincia, TAGEmpty));
-                if (!Utility.IsNotVoid(this.Cap)) errors.Add(new ErrorRecord(this.FileName, "Cap", this.Cap, TAGEmpty));
             }
 
             if (Utility.IsNotVoid(this.Cellulare)) {
