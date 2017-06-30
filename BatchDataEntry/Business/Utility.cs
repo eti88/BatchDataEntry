@@ -237,7 +237,7 @@ namespace BatchDataEntry.Business
                 #if DEBUG
                 Console.WriteLine(string.Format("D1: {0}, D2: {1} -> Years: {2}", startDate.ToString("dd-MM-yyyy"), nowDate.ToString("dd-MM-yyyy"), years));
                 #endif
-                return (years < 18 || years > 80) ? false : true;
+                return (years < 18 || years > 90) ? false : true;
             }
             catch (Exception)
             {
