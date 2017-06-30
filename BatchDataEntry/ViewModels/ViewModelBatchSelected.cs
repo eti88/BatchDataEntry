@@ -723,20 +723,14 @@ namespace BatchDataEntry.ViewModels
 
         public void ChangePhatsIntoCacheDb()
         {
-            string oldPartialPath = string.Empty;
-            string newPartialPath = string.Empty;
+            string oldPath = string.Empty;
+            string newPath = string.Empty;
 
             DialogText dlgTxt = new DialogText();
-            dlgTxt.ShowDialog();
-            oldPartialPath = dlgTxt.FullPathOld;
-            if (string.IsNullOrEmpty(oldPartialPath)) {
-                MessageBox.Show(string.Format("Path: {0} vuoto", oldPartialPath));
-                return;
-            }
-            newPartialPath = dlgTxt.FullPathNew;
-            if (string.IsNullOrEmpty(newPartialPath) || !Directory.Exists(newPartialPath))
+            newPath = dlgTxt.FullPathNew;
+            if (string.IsNullOrEmpty(newPath) || !Directory.Exists(newPath))
             {
-                MessageBox.Show(string.Format("Path: {0} non trovato o vuoto", newPartialPath));
+                MessageBox.Show(string.Format("Path: {0} non trovato o vuoto", newPath));
                 return;
             }
  
@@ -747,7 +741,9 @@ namespace BatchDataEntry.ViewModels
                 documents = dbcache.GetDocumentsListPartial();           
                 foreach (var doc in documents)
                 {
-                    doc.Path = doc.Path.Replace(oldPartialPath, newPartialPath);
+                    oldPath = Path.GetDirectoryName(doc.Path);
+                    string file = Path.GetFileName(doc.Path);
+                    doc.Path = Path.Combine(newPath, file);
                     dbcache.UpdateRecordDocumento(doc);
                 }
                 MessageBox.Show("Percorsi aggiornati");
