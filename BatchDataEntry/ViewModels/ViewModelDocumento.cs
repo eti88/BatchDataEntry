@@ -664,6 +664,36 @@ namespace BatchDataEntry.ViewModels
                 Image = Images.Current; 
             }
         }
+        
+        private void NonSoloCapSearch()
+        {
+            // non solo cap
+            string localita = DocFile.Voci.FirstOrDefault(x => x.Nome.ToLower().Equals("localita")).Valore;
+            string cap = DocFile.Voci.FirstOrDefault(x => x.Nome.ToLower().Equals("cap")).Valore;
+
+            string valToSearch = (localita.Length > 0) ? localita : cap;
+           
+            if (valToSearch.Length > 0)
+            {
+                string url = string.Format("http://www.nonsolocap.it/cap?k={0}&b=+Cerca+&c=", valToSearch);
+                
+                try
+                {
+                    System.Diagnostics.Process.Start(url);
+                }
+                catch
+                    (
+                     System.ComponentModel.Win32Exception noBrowser)
+                {
+                    if (noBrowser.ErrorCode == -2147467259)
+                        MessageBox.Show(noBrowser.Message);
+                }
+                catch (System.Exception other)
+                {
+                    MessageBox.Show(other.Message);
+                }
+            }
+        }
 
         #region Command
         private RelayCommand _cmdPrev;
@@ -821,6 +851,19 @@ namespace BatchDataEntry.ViewModels
                     _imgPagePrev = new RelayCommand(param => ImagePrevPage());
                 }
                 return _imgPagePrev;
+            }
+        }
+
+        private RelayCommand _cmdOnlineSearch;
+        public ICommand CmdOnlineSeach
+        {
+            get
+            {
+                if (_cmdOnlineSearch == null)
+                {
+                    _cmdOnlineSearch = new RelayCommand(param => NonSoloCapSearch());
+                }
+                return _cmdOnlineSearch;
             }
         }
 

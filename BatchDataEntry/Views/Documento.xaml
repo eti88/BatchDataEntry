@@ -76,6 +76,14 @@
         <DataTemplate x:Key="AutocompleteDbLocalitaDataTemplate">
             <DockPanel Margin="5,0,5,0" LastChildFill="True">
                 <Label DockPanel.Dock="Left" Content="{Binding Nome, Mode=OneTime}" FontSize="12" Margin="0,0,5,0"/>
+                <Button Width="30" Height="30" DockPanel.Dock="Right" 
+                        Margin="3,0,0,0" 
+                        Command="{ Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.CmdOnlineSeach }"
+                        ToolTip="Cerca la Località o il Cap su nonsolocap.it">
+                    <StackPanel>
+                        <Image Source="../Img/ico-search.png" Margin="1"></Image>
+                    </StackPanel>
+                </Button>
                 <!-- autocompletetextbox -->
                 <editors:AutoCompleteTextBox
                     IsEnabled="{Binding Path=IsDisabilitato}"
