@@ -169,7 +169,7 @@ namespace BatchDataEntry.Models
         public Modello(Modello m)
         {
             if(m == null) return;
-            Id = m.Id;
+            //Id = m.Id;
             Nome = m.Nome;
             OrigineCsv = m.OrigineCsv;
             Campi = m.Campi;

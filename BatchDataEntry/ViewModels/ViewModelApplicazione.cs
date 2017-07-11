@@ -5,6 +5,7 @@ using BatchDataEntry.Helpers;
 using BatchDataEntry.Models;
 using BatchDataEntry.Views;
 using BatchDataEntry.Abstracts;
+using System.Linq;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -186,18 +187,12 @@ namespace BatchDataEntry.ViewModels
 
         public void CopyModel()
         {
-            if(SelectedModel == null)
-                return;
-            
-            if(SelectedModel.Id == 0)
+            if(SelectedModel == null || SelectedModel.Id == 0)
                 return;
 
             var copy = new Modello(SelectedModel);
-            copy.Id = 0;
-            var db = new DatabaseHelper();
             copy.Nome = String.Format("{0} - Copia", copy.Nome);
-            int newId;
-            newId = db.Insert(copy);
+            int newId = db.Insert(copy);
             var _campi = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + SelectedModel.Id);
 
             if (_campi == null) throw new Exception("Retrive Data (_campi) for copy model failed!");
