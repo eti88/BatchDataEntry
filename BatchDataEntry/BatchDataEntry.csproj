@@ -261,6 +261,7 @@
     <Compile Include="ViewModels\ViewModelCampi.cs" />
     <Compile Include="ViewModels\ViewModelConcatenations.cs" />
     <Compile Include="ViewModels\ViewModelDocumento.cs" />
+    <Compile Include="ViewModels\ViewModelErrors.cs" />
     <Compile Include="ViewModels\ViewModelExport.cs" />
     <Compile Include="ViewModels\ViewModelMain.cs" />
     <Compile Include="ViewModels\ViewModelNewBatch.cs" />
@@ -287,6 +288,9 @@
     </Compile>
     <Compile Include="Views\Documento.xaml.cs">
       <DependentUpon>Documento.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ErrorWindow.xaml.cs">
+      <DependentUpon>ErrorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Export.xaml.cs">
       <DependentUpon>Export.xaml</DependentUpon>
@@ -344,6 +348,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Documento.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ErrorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

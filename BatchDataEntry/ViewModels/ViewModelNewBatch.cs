@@ -14,6 +14,7 @@ using BatchDataEntry.Business;
 using NLog;
 using Batch = BatchDataEntry.Models.Batch;
 using BatchDataEntry.Abstracts;
+using BatchDataEntry.Views;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -297,12 +298,15 @@ namespace BatchDataEntry.ViewModels
                 List<string> missingFiles = new List<string>();
 
                 // Check corrispondenza file 
-                //missingFIles = CheckMissingFile(lines, indexColumn, CurrentBatch.DirectoryInput);
+                missingFiles = CheckMissingFile(lines, indexColumn, CurrentBatch.DirectoryInput);
 
                 if (missingFiles.Count > 0)
                 {
                     // Mostra lista file mancanti
-
+                    Thread workerThread = new Thread(() => ShowMyWindow(missingFiles));
+                    workerThread.SetApartmentState(ApartmentState.STA);
+                    workerThread.Start();
+                    workerThread.Join();
 
                     // Chiedere all'utente se continuare oppure no
                     if (MessageBox.Show("Alcuni file non sono stati trovati nella directory di input, Continuare?", "File mancanti", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
@@ -335,16 +339,16 @@ namespace BatchDataEntry.ViewModels
                         if (!string.IsNullOrEmpty(CurrentBatch.PatternNome))
                         {
                             if (b.TipoFile == TipoFileProcessato.Pdf)
-                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, (doc.FileName.Contains(".pdf")) ? doc.FileName : string.Format("{0}.pdf", doc.FileName)));
                             else
-                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".tif"));
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, (doc.FileName.Contains(".tif")) ? doc.FileName : string.Format("{0}.tif", doc.FileName)));
                         }
                         else
                         {
                             if (b.TipoFile == TipoFileProcessato.Pdf)
-                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, (doc.FileName.Contains(".pdf")) ? doc.FileName : string.Format("{0}.pdf", doc.FileName));
                             else
-                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".tif");
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, (doc.FileName.Contains(".tif")) ? doc.FileName : string.Format("{0}.tif", doc.FileName));
                         }
                     }
                     catch (Exception e)
@@ -533,14 +537,35 @@ namespace BatchDataEntry.ViewModels
             return true;
         }
 
+        private void ShowMyWindow(List<string> missingFiles)
+        {
+            ErrorWindow errw = new ErrorWindow();
+            errw.DataContext = new ViewModelErrors(missingFiles);
+            errw.ShowDialog();
+        }
+
         private List<string> CheckMissingFile(List<string> lines, int indexColumn, string directoryInput)
         {
+            List<string> missing = new List<string>();
+            
+            foreach (string record in lines)
+            {
+                try
+                {
 
+                    string file = record.Split(CurrentBatch.Applicazione.Separatore.ToCharArray()[0])[indexColumn];
+                    if (!File.Exists(Path.Combine(directoryInput, file)))
+                    {
+                        missing.Add(file);
+                    }
+                }
+                catch (Exception)
+                {
 
+                }
+            }
 
-
-
-            throw new NotImplementedException();
+            return missing;
         }
 
         /// <summary>
@@ -619,7 +644,16 @@ namespace BatchDataEntry.ViewModels
                 doc.FileName = cleanValue;
 
                 doc.FileName = cells[indexColumn];
-                string absPath = Path.Combine(CurrentBatch.DirectoryInput, cleanValue.Contains(".pdf") ? cleanValue : String.Format("{0}.pdf", cleanValue));
+
+                if(!(cleanValue.Contains(".pdf") || cleanValue.Contains(".tif")))
+                {
+                    if (CurrentBatch.TipoFile == TipoFileProcessato.Pdf)
+                        cleanValue = String.Format("{0}.pdf", cleanValue);
+                    else
+                        cleanValue = String.Format("{0}.tif", cleanValue);
+                }
+
+                string absPath = Path.Combine(CurrentBatch.DirectoryInput, cleanValue);
                 doc.Path = absPath;
                 doc.IsIndexed = true;
 
