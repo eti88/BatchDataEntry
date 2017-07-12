@@ -726,6 +726,8 @@ namespace BatchDataEntry.ViewModels
             string newPath = string.Empty;
 
             DialogText dlgTxt = new DialogText();
+            dlgTxt.ShowDialog();
+            
             newPath = dlgTxt.FullPathNew;
             if (string.IsNullOrEmpty(newPath) || !Directory.Exists(newPath))
             {

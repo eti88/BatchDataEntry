@@ -282,6 +282,7 @@ namespace BatchDataEntry.ViewModels
 
                 for (int i = 0; i < CurrentBatch.Applicazione.Campi.Count; i++)
                 {
+                    // In base all'indice primario imposta in quale colonna trovare il nome del file
                     if (CurrentBatch.Applicazione.Campi[i].IndicePrimario)
                     {
                         indexColumn = CurrentBatch.Applicazione.Campi[i].Posizione;
@@ -291,6 +292,28 @@ namespace BatchDataEntry.ViewModels
                 
                 List<string> lines = Csv.ReadRows(CurrentBatch.Applicazione.PathFileCsv, Convert.ToChar(_currentBatch.Applicazione.Separatore));
                 MaxValue = lines.Count;
+
+                bool canCountinue = true;
+                List<string> missingFiles = new List<string>();
+
+                // Check corrispondenza file 
+                //missingFIles = CheckMissingFile(lines, indexColumn, CurrentBatch.DirectoryInput);
+
+                if (missingFiles.Count > 0)
+                {
+                    // Mostra lista file mancanti
+
+
+                    // Chiedere all'utente se continuare oppure no
+                    if (MessageBox.Show("Alcuni file non sono stati trovati nella directory di input, Continuare?", "File mancanti", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    {
+                        canCountinue = false;
+                    }
+                }
+                              
+                // Interrompe nel caso l'utente non voglia continuare
+                if (!canCountinue)
+                    return false;
 
                 for (int i = 0; i < lines.Count; i++)
                 {
@@ -305,22 +328,33 @@ namespace BatchDataEntry.ViewModels
                     {
                         logger.Warn("Il documento " + i + " risulta un documento vuoto");
                     }
-                                    
-                    // Copia del pdf corrispondente nella cartella di output
-                    if (!string.IsNullOrEmpty(CurrentBatch.PatternNome))
+
+                    try
                     {
-                        if(b.TipoFile == TipoFileProcessato.Pdf)
-                            Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
+                        // Copia del pdf corrispondente nella cartella di output
+                        if (!string.IsNullOrEmpty(CurrentBatch.PatternNome))
+                        {
+                            if (b.TipoFile == TipoFileProcessato.Pdf)
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".pdf"));
+                            else
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".tif"));
+                        }
                         else
-                            Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, string.Format("{0}{1}", CurrentBatch.PatternNome, doc.FileName + ".tif"));
+                        {
+                            if (b.TipoFile == TipoFileProcessato.Pdf)
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
+                            else
+                                Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".tif");
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        if(b.TipoFile == TipoFileProcessato.Pdf)
-                            Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".pdf");
-                        else
-                            Utility.CopiaFile(doc.Path, CurrentBatch.DirectoryOutput, doc.FileName + ".tif");
+                        // In caso di eccezione annotare il file non trovato
+                        logger.Error(string.Format("[{0}] File: {1} non trovato!", e.GetType().ToString(), doc.Path));
                     }
+                    
+
+                    
                         
                     dbcache.InsertRecordDocumento(b, doc);
                     backgroundWorker.ReportProgress(i);
@@ -497,6 +531,16 @@ namespace BatchDataEntry.ViewModels
                 return false;
             }
             return true;
+        }
+
+        private List<string> CheckMissingFile(List<string> lines, int indexColumn, string directoryInput)
+        {
+
+
+
+
+
+            throw new NotImplementedException();
         }
 
         /// <summary>
