@@ -175,7 +175,7 @@ namespace BatchDataEntry.ViewModels
 
             if (SubDocList == null || SubDocList.Count == 0) return;
             DocFiles = SubDocList;
-            
+            DocFiles.CurrentIndex = 0;
             DocFile = new Document(db, Batch, DocFiles.Current);
             DocFile.AddInputsToPanel(Batch, db, _db, DocFiles.Current);
             // Inverte il valore per l'abilitazione del campo
