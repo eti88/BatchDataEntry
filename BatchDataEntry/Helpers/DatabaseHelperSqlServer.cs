@@ -984,7 +984,7 @@ namespace BatchDataEntry.Helpers
                 string sql = string.Format("SELECT * FROM {0} WHERE {1} = '{2}'", 
                     table , 
                     columns.FirstOrDefault(x => x.Value == selectedCol).Key, 
-                    val);
+                    val.Replace("'", "''"));
                 SqlCommand cmd = new SqlCommand(sql, cnn);
                 var reader = cmd.ExecuteReader();
                 reader.Read();
@@ -1024,7 +1024,8 @@ namespace BatchDataEntry.Helpers
                 {
                     if (selectedCols.Contains(col.Value))
                     {
-                        sb.Append(col.Key + " = '" + vals.ElementAt(selectedCols.IndexOf(col.Value)) + "'");
+                        string v = vals.ElementAt(selectedCols.IndexOf(col.Value)).Replace("'","''");
+                        sb.Append(col.Key + " = '" + v + "'");
                         z++;
                         if (z <= selectedCols.Count() - 1)
                         {

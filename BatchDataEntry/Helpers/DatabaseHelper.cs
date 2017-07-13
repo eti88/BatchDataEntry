@@ -136,6 +136,8 @@ namespace BatchDataEntry.Helpers
             if (string.IsNullOrEmpty(sqlcmd))
                 return null;
 
+            sqlcmd = convertQuotes(sqlcmd);
+
             try
             {
                 cnn.Open();
@@ -199,6 +201,7 @@ namespace BatchDataEntry.Helpers
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             int rowsUpdated = 0;
+            sql = convertQuotes(sql);
             try
             {
                 cnn.Open();
@@ -227,7 +230,7 @@ namespace BatchDataEntry.Helpers
         public string ExecuteScalar(string sql)
         {
             SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-
+            sql = convertQuotes(sql);
             try
             {
                 cnn.Open();
