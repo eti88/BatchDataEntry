@@ -176,7 +176,7 @@ namespace BatchDataEntry.Business
 
         public static bool IsValidTelephone(string num)
         {
-            return IsNumeric(num) && num.Length == 10;
+            return IsNumeric(num) && (num.Length == 9 || num.Length == 10);
         }
 
         public static bool IsValidEmail(string email)

@@ -790,7 +790,7 @@ namespace BatchDataEntry.ViewModels
                 if (!Utility.IsNotVoid(this.Card))  errors.Add(string.Format("FidelityCard {0}", TAGEmpty));
                 if (!Utility.IsNotVoid(this.Cognome)) errors.Add(string.Format("Cognome {0}", TAGEmpty));
                 if (!Utility.IsNotVoid(this.Indirizzo)) errors.Add(string.Format("Indirizzo {0}", TAGEmpty));
-                if (!Utility.IsNotVoid(this.Civico)) errors.Add(string.Format("Civico {0}", TAGEmpty));
+                //if (!Utility.IsNotVoid(this.Civico)) errors.Add(string.Format("Civico {0}", TAGEmpty));
                 if (!Utility.IsNotVoid(this.Localita)) errors.Add(string.Format("Localita {0}", TAGEmpty));
                 if (!Utility.IsNotVoid(this.Provincia)) errors.Add(string.Format("Provincia {0}", TAGEmpty));
             }
