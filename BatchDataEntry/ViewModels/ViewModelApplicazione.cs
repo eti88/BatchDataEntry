@@ -191,6 +191,7 @@ namespace BatchDataEntry.ViewModels
                 return;
 
             var copy = new Modello(SelectedModel);
+            copy.Id = 0;
             copy.Nome = String.Format("{0} - Copia", copy.Nome);
             int newId = db.Insert(copy);
             var _campi = db.CampoQuery("SELECT * FROM Campo WHERE IdModello = " + SelectedModel.Id);
