@@ -18,6 +18,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Data;
 
 namespace BatchDataEntry.ViewModels
 {

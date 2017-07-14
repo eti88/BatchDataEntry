@@ -446,6 +446,7 @@
     <Resource Include="Img\arrowRight.png" />
     <Resource Include="Img\chain-icon.png" />
     <Resource Include="Img\ico-search.png" />
+    <Resource Include="Img\selectedRow.png" />
     <Content Include="x64\SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

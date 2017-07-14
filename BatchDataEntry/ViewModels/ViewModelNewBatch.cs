@@ -554,7 +554,13 @@ namespace BatchDataEntry.ViewModels
                 {
 
                     string file = record.Split(CurrentBatch.Applicazione.Separatore.ToCharArray()[0])[indexColumn];
-                    if (!File.Exists(Path.Combine(directoryInput, file)))
+                    string filepath = Path.Combine(directoryInput, file);
+                    if (Path.GetExtension(filepath) == "")
+                    {
+                        filepath = string.Format("{0}.{1}", filepath, (CurrentBatch.TipoFile == TipoFileProcessato.Pdf) ? "pdf" : "tif");
+                    }
+
+                    if (!File.Exists(filepath))
                     {
                         missing.Add(file);
                     }

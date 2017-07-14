@@ -19,6 +19,11 @@ namespace BatchDataEntry.Views
 
         private void dataGridRecords_Loaded(object sender, RoutedEventArgs e)
         {
+            FindSelectedRowAndSelect();
+        }
+
+        private void FindSelectedRowAndSelect()
+        {
             Batch b;
             AbsDbHelper db = null;
             if (Properties.Settings.Default.CurrentBatch == 0) return;
@@ -59,7 +64,20 @@ namespace BatchDataEntry.Views
 
         public void SetSelectedGridRow(int index)
         {
-            Dispatcher.Invoke(new Action(() => { dataGridRecords.SelectedIndex = index; }));
+            Dispatcher.Invoke(new Action(() => {
+          
+                dataGridRecords.SelectedIndex = index;
+                if(dataGridRecords.SelectedItem != null)
+                {
+                    dataGridRecords.ScrollIntoView(dataGridRecords.SelectedItem);
+                }
+            }));
+        }
+
+        private void BtnSelectRow_Click(object sender, RoutedEventArgs e)
+        {
+            // dataGridRecords
+            FindSelectedRowAndSelect();
         }
     }
 }

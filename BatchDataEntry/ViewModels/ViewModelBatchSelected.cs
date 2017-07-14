@@ -391,7 +391,8 @@ namespace BatchDataEntry.ViewModels
                 var indexFile = (SelectedRowIndex > 0) ? SelectedRowIndex - 1 : SelectedRowIndex;
                 continua.DataContext = new ViewModelDocumento(_currentBatch, indexFile, db);
                 continua.ShowDialog();
-                LoadGrid();
+                //LoadGrid();
+                IncrementalDatatableUpdate();
                 RaisePropertyChanged("DataSource");
                 
                 UpdateValues();
@@ -422,7 +423,8 @@ namespace BatchDataEntry.ViewModels
                     logger.Error("[ERRORE CONTINUA INSERIMENTO]" + e.ToString());
                 }
 
-                LoadGrid();
+                //LoadGrid();
+                IncrementalDatatableUpdate();
                 RaisePropertyChanged("DataSource");
                 UpdateValues();
             }
@@ -627,6 +629,26 @@ namespace BatchDataEntry.ViewModels
             DataSource = dbcache.GetDataTableDocumenti();
         }
         
+        private void IncrementalDatatableUpdate()
+        {
+            if (DataSource == null) return;
+
+            var dbcache = new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput);
+            var newtable = dbcache.GetDataTableDocumenti();
+            
+            for(int i=0; i < DataSource.Rows.Count;i++)
+            {
+                // Se le righe non coindidono aggiorna quelle di origne
+                if(DataSource.Rows[i] != newtable.Rows[i])
+                {
+                    for(int z=0; z < DataSource.Columns.Count; z++)
+                    {
+                        DataSource.Rows[i][z] = newtable.Rows[i][z];
+                    }
+                }
+            }
+        }
+
         public async void ConvertTiffRecord(Batch b)
         {
             if (b.TipoFile != TipoFileProcessato.Tiff)
