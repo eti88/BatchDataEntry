@@ -185,7 +185,7 @@ namespace BatchDataEntry.ViewModels
             get
             {
                 if (SelectedRowIndex <= 0)
-                    return false;           
+                    return false;
                 return true;
             }
         }
@@ -393,6 +393,7 @@ namespace BatchDataEntry.ViewModels
                 continua.ShowDialog();
                 LoadGrid();
                 RaisePropertyChanged("DataSource");
+                
                 UpdateValues();
             }
         }

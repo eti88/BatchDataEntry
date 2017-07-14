@@ -36,12 +36,14 @@
                   SelectionMode="Single"
                   AlternatingRowBackground="#FFF1F1F1"
                   ColumnHeaderHeight="29" 
-                  ItemsSource="{Binding Path=DataSource, IsAsync=True, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
+                  ItemsSource="{Binding Path=DataSource, IsAsync=True, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                   IsReadOnly="True" 
                   CanUserDeleteRows="True"
                   CanUserSortColumns="False"
                   IsSynchronizedWithCurrentItem="True"
-                  SelectedIndex="{Binding Path=SelectedRowIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="White" Loaded="dataGridRecords_Loaded">
+                  SelectedIndex="{Binding Path=SelectedRowIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                  Background="White" 
+                  Loaded="dataGridRecords_Loaded">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
                     <Style.Triggers>

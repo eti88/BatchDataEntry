@@ -31,7 +31,7 @@ namespace BatchDataEntry.Views
                         Properties.Settings.Default.SqlUser,
                         Properties.Settings.Default.SqlPassword,
                         Properties.Settings.Default.SqlServerAddress,
-                        Properties.Settings.Default.SqlDbName);                  
+                        Properties.Settings.Default.SqlDbName);
                 }
                 else
                     db = new DatabaseHelper();
@@ -40,7 +40,8 @@ namespace BatchDataEntry.Views
                 if (b == null) return;
                 if (b.Applicazione == null || b.Applicazione.Id == 0) b.LoadModel(db);
                 if (b.Applicazione.Campi == null || b.Applicazione.Campi.Count == 0) b.Applicazione.LoadCampi(db);
-                Thread td = new Thread(() => {
+                Thread td = new Thread(() =>
+                {
                     Thread.Sleep(500);
                     SetSelectedGridRow((b.UltimoIndicizzato == 0) ? 0 : (b.UltimoIndicizzato - 1));
                 });
@@ -56,7 +57,8 @@ namespace BatchDataEntry.Views
             }
         }
 
-        public void SetSelectedGridRow(int index) {
+        public void SetSelectedGridRow(int index)
+        {
             Dispatcher.Invoke(new Action(() => { dataGridRecords.SelectedIndex = index; }));
         }
     }
