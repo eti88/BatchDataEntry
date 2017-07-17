@@ -624,8 +624,8 @@ namespace BatchDataEntry.Helpers
         public override int Insert(Modello m)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
-            if(m.Id > 0)
-                values.Add("Id", m.Id.ToString());
+            //if(m.Id > 0)
+            //    values.Add("Id", m.Id.ToString());
             values.Add("Nome", m.Nome);
 
             int getBool = Convert.ToInt32(m.OrigineCsv);
@@ -645,7 +645,7 @@ namespace BatchDataEntry.Helpers
         public int InsertRecordDocumento(Batch b, Document d)
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
-            values.Add("Id", d.Id.ToString());
+            //values.Add("Id", d.Id.ToString());
             values.Add("FileName", d.FileName);
             values.Add("Path", d.Path);
             int tmp = Convert.ToInt32(d.IsIndexed);

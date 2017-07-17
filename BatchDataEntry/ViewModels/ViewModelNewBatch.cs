@@ -316,8 +316,7 @@ namespace BatchDataEntry.ViewModels
                 }
                               
                 // Interrompe nel caso l'utente non voglia continuare
-                if (!canCountinue)
-                    return false;
+                if (!canCountinue) return false;
 
                 for (int i = 0; i < lines.Count; i++)
                 {
@@ -357,9 +356,6 @@ namespace BatchDataEntry.ViewModels
                         logger.Error(string.Format("[{0}] File: {1} non trovato!", e.GetType().ToString(), doc.Path));
                     }
                     
-
-                    
-                        
                     dbcache.InsertRecordDocumento(b, doc);
                     backgroundWorker.ReportProgress(i);
                 }
@@ -631,7 +627,7 @@ namespace BatchDataEntry.ViewModels
         public Document GenerateDocument(string linerow, int i, Batch b, DatabaseHelper dbcache, int indexColumn)
         {
             Document doc = new Document();
-            doc.Id = i + 1;
+            //doc.Id = i + 1;
             try
             {
                 string[] cells = linerow.Split(b.Applicazione.Separatore[0]);
