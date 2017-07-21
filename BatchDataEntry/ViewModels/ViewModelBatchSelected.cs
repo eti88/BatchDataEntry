@@ -721,10 +721,13 @@ namespace BatchDataEntry.ViewModels
 
         public void GenerateListTxt()
         {
-            List<string> files =
-                Directory.GetFiles(CurrentBatch.DirectoryOutput, "*.*")
-                    .Where(x => x.ToLower().EndsWith(".pdf"))
-                    .ToList();
+            List<string> files = new List<string>();
+
+            if(CurrentBatch.TipoFile == TipoFileProcessato.Pdf)
+                files = Directory.GetFiles(CurrentBatch.DirectoryOutput, "*.*").Where(x => x.ToLower().EndsWith(".pdf")).ToList();
+            else if(CurrentBatch.TipoFile == TipoFileProcessato.Tiff)
+                files = Directory.GetFiles(CurrentBatch.DirectoryOutput, "*.*").Where(x => x.ToLower().EndsWith(".tif")).ToList();
+
 
             if (files == null || files.Count == 0)
             {
