@@ -73,7 +73,7 @@
                         </Trigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridRow}}}" Value="True"/>
+                                <Condition Binding="{Binding IsSelected, FallbackValue=false, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridRow}}}" Value="True"/>
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Background" Value="DeepSkyBlue" />
                             <Setter Property="BorderBrush" Value="DeepSkyBlue" />
@@ -129,12 +129,12 @@
             </StackPanel>
             <!-- info batch -->
             <StackPanel Grid.Row="1" Grid.Column="0" >
-                <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="{Binding Path=NumeroDocumenti, StringFormat='Numero documenti:    {0}'}" Margin="5,0"/>
-                <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="{Binding Path=Dimensioni,StringFormat='Dimensione:    {0} MB'}" Margin="5,0"/>
+                <TextBlock x:Name="textBlockNumDoc" TextWrapping="Wrap" Text="{Binding Path=NumeroDocumenti, FallbackValue=0, StringFormat='Numero documenti:    {0}'}" Margin="5,0"/>
+                <TextBlock x:Name="textBlockDim" TextWrapping="Wrap" Text="{Binding Path=Dimensioni, FallbackValue=0,StringFormat='Dimensione:    {0} MB'}" Margin="5,0"/>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="1">
-                <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.DocCorrente, StringFormat='Documento corrente:    {0}'}" Margin="5,0"/>
-                <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.UltimoIndicizzato,StringFormat='Ultimo inserimento:    {0}'}" Margin="5,0"/>
+                <TextBlock x:Name="textBlockDocCorrente" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.DocCorrente, FallbackValue=0,StringFormat='Documento corrente:    {0}'}" Margin="5,0"/>
+                <TextBlock x:Name="textBlockUltimo" TextWrapping="Wrap" Text="{Binding Path=CurrentBatch.UltimoIndicizzato, FallbackValue=0,StringFormat='Ultimo inserimento:    {0}'}" Margin="5,0"/>
             </StackPanel>
         </Grid>
         <StatusBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Height="22" VerticalContentAlignment="Center">

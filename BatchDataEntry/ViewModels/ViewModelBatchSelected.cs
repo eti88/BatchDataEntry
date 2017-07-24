@@ -17,6 +17,7 @@ using NLog;
 using Document = BatchDataEntry.Models.Document;
 using MessageBox = System.Windows.MessageBox;
 using BatchDataEntry.Abstracts;
+using System.Data.SQLite;
 
 namespace BatchDataEntry.ViewModels
 {
@@ -25,6 +26,7 @@ namespace BatchDataEntry.ViewModels
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
         private AbsDbHelper db;
+        private string bkdbname = "_backup.db3";
 
         #region Members
 
@@ -371,6 +373,48 @@ namespace BatchDataEntry.ViewModels
                 CurrentBatch.UltimoIndicizzato = tmp.UltimoIndicizzato;
                 CurrentBatch.DocCorrente = tmp.DocCorrente;
                 RaisePropertyChanged("CurrentBatch");
+            }
+
+            // Effettuo backup del database di cache
+            string cnn_bk = string.Format("Data Source={0}", DatabaseHelper.UNCPathFormat(Path.Combine(CurrentBatch.DirectoryOutput, bkdbname)));
+
+            try
+            {
+                if (!File.Exists(Path.Combine(CurrentBatch.DirectoryOutput, bkdbname)))
+                {
+                    BackupSqliteDb(new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput).dbConnection, cnn_bk);
+                }
+                else
+                {
+                    FileInfo orin = new FileInfo(Path.Combine(_currentBatch.DirectoryOutput, ConfigurationManager.AppSettings["cache_db_name"]));
+                    FileInfo bk = new FileInfo(Path.Combine(CurrentBatch.DirectoryOutput, bkdbname));
+
+                    int t = (int)bk.LastWriteTime.Subtract(orin.LastWriteTime).TotalMinutes;
+
+                    if (t > 120)
+                    {
+                        BackupSqliteDb(new DatabaseHelper(ConfigurationManager.AppSettings["cache_db_name"], _currentBatch.DirectoryOutput).dbConnection, cnn_bk);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                logger.Error("[BACKUP]" + e);
+            }
+
+            
+        }
+
+        public void BackupSqliteDb(string dssrc, string dsdest)
+        {
+            using (var source = new SQLiteConnection(dssrc))
+            {
+                using (var destination = new SQLiteConnection(dsdest))
+                {
+                    source.Open();
+                    destination.Open();
+                    source.BackupDatabase(destination, "main", "main", -1, null, 0);
+                }
             }
         }
 

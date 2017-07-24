@@ -55,7 +55,7 @@ namespace BatchDataEntry.Helpers
             #endif
         }
 
-        private string UNCPathFormat(string intxt)
+        public static string UNCPathFormat(string intxt)
         {
             if (intxt.StartsWith("\\"))
             {
